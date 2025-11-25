@@ -2,488 +2,705 @@
 
 ## 문서 정보
 - **프로젝트**: Startup Community Platform
-- **API 스타일**: RESTful
-- **버전**: v1
-- **응답 형식**: JSON
+- **API 스타일**: RESTful + Hotwire (Turbo)
+- **버전**: v1 (MVP)
+- **응답 형식**: HTML (Turbo) / JSON (API)
+- **업데이트**: 2025-11-26
 
 ---
 
-## 1. API 설계 원칙
+## 1. 아키텍처 개요
 
-### 1.1 RESTful 규칙
-- **리소스 기반**: URL은 명사형 (동사 지양)
-- **HTTP 메서드**: GET, POST, PATCH, DELETE
-- **복수형 사용**: `/users` (not `/user`)
-- **중첩 제한**: 최대 2레벨 (`/users/:id/posts`)
+### 1.1 Hotwire 우선 접근
+이 프로젝트는 **Hotwire (Turbo + Stimulus)**를 사용한 **Modern Rails** 애플리케이션입니다.
+- **기본 응답**: HTML (Turbo Drive, Turbo Frames, Turbo Streams)
+- **API 응답**: JSON (필요 시)
 
-### 1.2 네이밍 컨벤션
-- **URL**: kebab-case (`/user-profiles`)
-- **JSON 키**: snake_case (`user_name`)
-- **쿼리 파라미터**: snake_case (`?sort_by=created_at`)
-
-### 1.3 버전 관리
-```
-# 네임스페이스로 버전 관리
-/api/v1/users
-/api/v2/users  # 향후 추가
-```
+### 1.2 라우팅 전략
+- **RESTful 리소스 기반** 라우팅
+- **중첩 라우팅** 최소화 (최대 1레벨)
+- **커스텀 액션** 최소화
 
 ---
 
-## 2. 인증 (Authentication)
+## 2. 라우팅 설계
 
-### 2.1 세션 기반 인증 (기본)
+### 2.1 인증 (Authentication)
+
 ```ruby
-# 회원가입
-POST /signup
-Request:
-{
-  "user": {
-    "email": "user@example.com",
-    "password": "password123",
-    "name": "John Doe"
-  }
-}
+# config/routes.rb
 
-Response: 201 Created
-{
-  "status": "success",
-  "data": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe",
-    "created_at": "2025-11-25T12:00:00Z"
-  }
-}
-
-# 로그인
-POST /login
-Request:
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": {
-    "user": { ... },
-    "session_token": "abc123..."  # Cookie로 전달
-  }
-}
-
-# 로그아웃
-DELETE /logout
-Response: 204 No Content
+# 회원가입/로그인
+get    'signup',  to: 'users#new'
+post   'signup',  to: 'users#create'
+get    'login',   to: 'sessions#new'
+post   'login',   to: 'sessions#create'
+delete 'logout',  to: 'sessions#destroy'
 ```
 
-### 2.2 JWT 인증 (API 전용 시)
+**엔드포인트**:
+- `GET /signup` - 회원가입 폼
+- `POST /signup` - 회원가입 처리
+- `GET /login` - 로그인 폼
+- `POST /login` - 로그인 처리
+- `DELETE /logout` - 로그아웃
+
+---
+
+### 2.2 커뮤니티 게시판 (Posts)
+
 ```ruby
-# Authorization 헤더
-Authorization: Bearer <jwt_token>
+resources :posts do
+  member do
+    post :increment_view  # 조회수 증가
+  end
 
-# 토큰 갱신
-POST /api/v1/auth/refresh
-Response:
-{
-  "access_token": "new_token...",
-  "expires_in": 3600
-}
+  resources :comments, only: [:create, :destroy], shallow: true
+  resources :likes, only: [:create, :destroy], shallow: true
+end
 ```
+
+**엔드포인트**:
+
+#### Posts
+- `GET /posts` - 게시글 목록
+- `GET /posts/:id` - 게시글 상세
+- `GET /posts/new` - 게시글 작성 폼
+- `POST /posts` - 게시글 생성
+- `GET /posts/:id/edit` - 게시글 수정 폼
+- `PATCH /posts/:id` - 게시글 수정
+- `DELETE /posts/:id` - 게시글 삭제
+- `POST /posts/:id/increment_view` - 조회수 증가
+
+#### Comments (nested)
+- `POST /posts/:post_id/comments` - 댓글 작성
+- `DELETE /comments/:id` - 댓글 삭제
+
+#### Likes (nested)
+- `POST /posts/:post_id/likes` - 좋아요 추가
+- `DELETE /likes/:id` - 좋아요 취소
 
 ---
 
-## 3. 에러 핸들링
+### 2.3 프로필 (Profiles)
 
-### 3.1 에러 응답 형식
-```json
-{
-  "status": "error",
-  "message": "User-friendly error message",
-  "errors": [
-    {
-      "field": "email",
-      "code": "taken",
-      "message": "Email has already been taken"
-    }
-  ],
-  "request_id": "req_abc123"
-}
-```
-
-### 3.2 HTTP 상태 코드
-| 코드 | 의미 | 사용 예시 |
-|------|------|-----------|
-| 200 | OK | 조회 성공 |
-| 201 | Created | 생성 성공 |
-| 204 | No Content | 삭제 성공 |
-| 400 | Bad Request | 잘못된 요청 |
-| 401 | Unauthorized | 인증 필요 |
-| 403 | Forbidden | 권한 없음 |
-| 404 | Not Found | 리소스 없음 |
-| 422 | Unprocessable Entity | 유효성 검증 실패 |
-| 500 | Internal Server Error | 서버 오류 |
-
----
-
-## 4. API 엔드포인트
-
-### 4.1 Users
-
-#### 목록 조회
-```
-GET /api/v1/users
-
-Query Parameters:
-- page: 페이지 번호 (default: 1)
-- per_page: 페이지당 개수 (default: 20)
-- sort_by: 정렬 기준 (name|created_at)
-- order: 정렬 순서 (asc|desc)
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "email": "user@example.com",
-      "name": "John Doe",
-      "role": "user",
-      "created_at": "2025-11-25T12:00:00Z"
-    }
-  ],
-  "meta": {
-    "current_page": 1,
-    "total_pages": 5,
-    "total_count": 100,
-    "per_page": 20
-  }
-}
-```
-
-#### 상세 조회
-```
-GET /api/v1/users/:id
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe",
-    "role": "user",
-    "created_at": "2025-11-25T12:00:00Z",
-    "updated_at": "2025-11-25T12:00:00Z"
-  }
-}
-```
-
-#### 생성
-```
-POST /api/v1/users
-
-Request:
-{
-  "user": {
-    "email": "newuser@example.com",
-    "password": "password123",
-    "name": "Jane Doe"
-  }
-}
-
-Response: 201 Created
-{
-  "status": "success",
-  "data": { ... }
-}
-```
-
-#### 수정
-```
-PATCH /api/v1/users/:id
-
-Request:
-{
-  "user": {
-    "name": "Updated Name"
-  }
-}
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": { ... }
-}
-```
-
-#### 삭제
-```
-DELETE /api/v1/users/:id
-
-Response: 204 No Content
-```
-
----
-
-### 4.2 Posts
-
-#### 목록 조회
-```
-GET /api/v1/posts
-
-Query Parameters:
-- status: 상태 필터 (draft|published|archived)
-- user_id: 작성자 필터
-- page, per_page, sort_by, order
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "title": "Post Title",
-      "content": "Post content...",
-      "status": "published",
-      "views_count": 42,
-      "user": {
-        "id": 1,
-        "name": "John Doe"
-      },
-      "created_at": "2025-11-25T12:00:00Z"
-    }
-  ],
-  "meta": { ... }
-}
-```
-
-#### 사용자별 게시글 조회
-```
-GET /api/v1/users/:user_id/posts
-
-Response: 200 OK (위와 동일)
-```
-
-#### 생성
-```
-POST /api/v1/posts
-
-Request:
-{
-  "post": {
-    "title": "New Post",
-    "content": "Content here...",
-    "status": "draft"
-  }
-}
-
-Response: 201 Created
-```
-
-#### 조회수 증가
-```
-POST /api/v1/posts/:id/views
-
-Response: 200 OK
-{
-  "status": "success",
-  "data": {
-    "views_count": 43
-  }
-}
-```
-
----
-
-### 4.3 [추가 리소스]
-
-[프로젝트에 맞게 추가]
-
----
-
-## 5. 페이지네이션
-
-### 5.1 요청
-```
-GET /api/v1/posts?page=2&per_page=20
-```
-
-### 5.2 응답 메타데이터
-```json
-{
-  "data": [ ... ],
-  "meta": {
-    "current_page": 2,
-    "total_pages": 10,
-    "total_count": 200,
-    "per_page": 20,
-    "next_page": 3,
-    "prev_page": 1
-  },
-  "links": {
-    "first": "/api/v1/posts?page=1",
-    "last": "/api/v1/posts?page=10",
-    "next": "/api/v1/posts?page=3",
-    "prev": "/api/v1/posts?page=1"
-  }
-}
-```
-
----
-
-## 6. 필터링 & 정렬
-
-### 6.1 필터링
-```
-# 단일 조건
-GET /api/v1/posts?status=published
-
-# 다중 조건
-GET /api/v1/posts?status=published&user_id=1
-
-# 범위 검색
-GET /api/v1/posts?created_after=2025-01-01&created_before=2025-12-31
-```
-
-### 6.2 정렬
-```
-# 단일 정렬
-GET /api/v1/posts?sort_by=created_at&order=desc
-
-# 다중 정렬 (선택)
-GET /api/v1/posts?sort=created_at:desc,title:asc
-```
-
-### 6.3 검색
-```
-GET /api/v1/posts?q=keyword
-
-# 특정 필드 검색
-GET /api/v1/posts?title_cont=keyword
-```
-
----
-
-## 7. Rate Limiting
-
-### 7.1 제한 정책
-```
-- 인증된 사용자: 1000 requests/hour
-- 미인증 사용자: 60 requests/hour
-```
-
-### 7.2 응답 헤더
-```
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 999
-X-RateLimit-Reset: 1640000000
-```
-
-### 7.3 초과 시
-```
-HTTP 429 Too Many Requests
-{
-  "status": "error",
-  "message": "Rate limit exceeded",
-  "retry_after": 3600
-}
-```
-
----
-
-## 8. 보안
-
-### 8.1 CORS
 ```ruby
-# config/initializers/cors.rb
-Rails.application.config.middleware.insert_before 0, Rack::Cors do
-  allow do
-    origins 'example.com', 'localhost:3000'
-    resource '/api/*',
-      headers: :any,
-      methods: [:get, :post, :patch, :delete, :options]
+resources :users, only: [:show, :edit, :update], path: 'profiles', as: 'profiles' do
+  member do
+    get :posts           # 사용자의 게시글
+    get :job_posts       # 사용자의 구인 글
+    get :talent_listings # 사용자의 구직 글
   end
 end
 ```
 
-### 8.2 CSRF 보호
+**엔드포인트**:
+- `GET /profiles/:id` - 프로필 페이지 (기본: Posts 탭)
+- `GET /profiles/:id/posts` - Posts 탭
+- `GET /profiles/:id/job_posts` - Job Posts 탭
+- `GET /profiles/:id/talent_listings` - Talent Listings 탭
+- `GET /profiles/:id/edit` - 프로필 수정 폼
+- `PATCH /profiles/:id` - 프로필 수정
+
+---
+
+### 2.4 외주 - 구인 (Job Posts)
+
 ```ruby
-# API는 CSRF 토큰 비활성화
-class Api::V1::BaseController < ActionController::API
-  skip_before_action :verify_authenticity_token
+resources :job_posts do
+  member do
+    post :increment_view
+  end
+  resources :bookmarks, only: [:create, :destroy], shallow: true
 end
 ```
 
-### 8.3 Strong Parameters
+**엔드포인트**:
+- `GET /job_posts` - 구인 공고 목록
+- `GET /job_posts/:id` - 구인 공고 상세
+- `GET /job_posts/new` - 구인 공고 작성 폼
+- `POST /job_posts` - 구인 공고 생성
+- `GET /job_posts/:id/edit` - 구인 공고 수정 폼
+- `PATCH /job_posts/:id` - 구인 공고 수정
+- `DELETE /job_posts/:id` - 구인 공고 삭제
+- `POST /job_posts/:id/increment_view` - 조회수 증가
+
+---
+
+### 2.5 외주 - 구직 (Talent Listings)
+
+```ruby
+resources :talent_listings do
+  member do
+    post :increment_view
+  end
+  resources :bookmarks, only: [:create, :destroy], shallow: true
+end
+```
+
+**엔드포인트**:
+- `GET /talent_listings` - 구직 정보 목록
+- `GET /talent_listings/:id` - 구직 정보 상세
+- `GET /talent_listings/new` - 구직 정보 작성 폼
+- `POST /talent_listings` - 구직 정보 생성
+- `GET /talent_listings/:id/edit` - 구직 정보 수정 폼
+- `PATCH /talent_listings/:id` - 구직 정보 수정
+- `DELETE /talent_listings/:id` - 구직 정보 삭제
+- `POST /talent_listings/:id/increment_view` - 조회수 증가
+
+---
+
+### 2.6 마이페이지 (My Page)
+
+```ruby
+namespace :my do
+  resource :profile, only: [:edit, :update]
+  resources :bookmarks, only: [:index, :destroy]
+  resources :posts, only: [:index]
+  resources :job_posts, only: [:index]
+  resources :talent_listings, only: [:index]
+end
+```
+
+**엔드포인트**:
+- `GET /my/profile/edit` - 내 프로필 수정
+- `PATCH /my/profile` - 내 프로필 업데이트
+- `GET /my/bookmarks` - 내 스크랩 목록
+- `DELETE /my/bookmarks/:id` - 스크랩 삭제
+- `GET /my/posts` - 내가 쓴 게시글
+- `GET /my/job_posts` - 내가 올린 구인 글
+- `GET /my/talent_listings` - 내가 올린 구직 글
+
+---
+
+### 2.7 홈페이지 & 기타
+
+```ruby
+root 'posts#index'  # 커뮤니티 홈이 메인
+
+# Static pages (선택)
+get 'about', to: 'pages#about'
+get 'terms', to: 'pages#terms'
+get 'privacy', to: 'pages#privacy'
+```
+
+---
+
+## 3. 컨트롤러 설계
+
+### 3.1 PostsController
+
+```ruby
+class PostsController < ApplicationController
+  before_action :require_login, except: [:index, :show]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :increment_view]
+  before_action :authorize_user, only: [:edit, :update, :destroy]
+
+  def index
+    @pagy, @posts = pagy(Post.published.includes(:user).recent, items: 20)
+  end
+
+  def show
+    @post
+    @comments = @post.comments.includes(:user).recent
+  end
+
+  def new
+    @post = Post.new
+  end
+
+  def create
+    @post = current_user.posts.build(post_params)
+    if @post.save
+      redirect_to @post, notice: '게시글이 작성되었습니다.'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+    @post
+  end
+
+  def update
+    if @post.update(post_params)
+      redirect_to @post, notice: '게시글이 수정되었습니다.'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @post.destroy
+    redirect_to posts_path, notice: '게시글이 삭제되었습니다.'
+  end
+
+  def increment_view
+    @post.increment!(:views_count)
+    head :ok
+  end
+
+  private
+
+  def set_post
+    @post = Post.find(params[:id])
+  end
+
+  def post_params
+    params.require(:post).permit(:title, :content, :status)
+  end
+
+  def authorize_user
+    redirect_to posts_path, alert: '권한이 없습니다.' unless @post.user == current_user
+  end
+end
+```
+
+---
+
+### 3.2 CommentsController
+
+```ruby
+class CommentsController < ApplicationController
+  before_action :require_login
+
+  def create
+    @post = Post.find(params[:post_id])
+    @comment = @post.comments.build(comment_params.merge(user: current_user))
+
+    if @comment.save
+      # Turbo Stream 응답
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @post }
+      end
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @comment = Comment.find(params[:id])
+    if @comment.user == current_user
+      @comment.destroy
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @comment.post }
+      end
+    end
+  end
+
+  private
+
+  def comment_params
+    params.require(:comment).permit(:content)
+  end
+end
+```
+
+---
+
+### 3.3 LikesController
+
+```ruby
+class LikesController < ApplicationController
+  before_action :require_login
+
+  def create
+    @post = Post.find(params[:post_id])
+    @like = @post.likes.build(user: current_user)
+
+    if @like.save
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @post }
+      end
+    end
+  end
+
+  def destroy
+    @like = Like.find(params[:id])
+    if @like.user == current_user
+      @like.destroy
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @like.likeable }
+      end
+    end
+  end
+end
+```
+
+---
+
+### 3.4 ProfilesController (UsersController)
+
+```ruby
+class ProfilesController < ApplicationController
+  before_action :set_user
+
+  def show
+    @posts = @user.posts.published.recent.limit(10)
+    @job_posts = @user.job_posts.open_positions.recent.limit(5)
+    @talent_listings = @user.talent_listings.available.recent.limit(5)
+  end
+
+  def posts
+    @pagy, @posts = pagy(@user.posts.published.recent)
+    render :show
+  end
+
+  def job_posts
+    @pagy, @job_posts = pagy(@user.job_posts.recent)
+    render :show
+  end
+
+  def talent_listings
+    @pagy, @talent_listings = pagy(@user.talent_listings.recent)
+    render :show
+  end
+
+  def edit
+    authorize_user
+    @user
+  end
+
+  def update
+    authorize_user
+    if @user.update(user_params)
+      redirect_to profile_path(@user), notice: '프로필이 업데이트되었습니다.'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def set_user
+    @user = User.find(params[:id])
+  end
+
+  def user_params
+    params.require(:user).permit(:name, :role_title, :bio, :avatar_url)
+  end
+
+  def authorize_user
+    redirect_to root_path, alert: '권한이 없습니다.' unless @user == current_user
+  end
+end
+```
+
+---
+
+### 3.5 JobPostsController & TalentListingsController
+
+구조는 PostsController와 유사하며, 다음 차이점만 있습니다:
+- 카테고리 필터링 (`params[:category]`)
+- 프로젝트 타입 필터링 (`params[:project_type]`)
+- 상태 필터링 (`params[:status]`)
+
+```ruby
+class JobPostsController < ApplicationController
+  before_action :require_login, except: [:index, :show]
+
+  def index
+    @job_posts = JobPost.open_positions.includes(:user)
+    @job_posts = @job_posts.where(category: params[:category]) if params[:category].present?
+    @job_posts = @job_posts.where(project_type: params[:project_type]) if params[:project_type].present?
+
+    @pagy, @job_posts = pagy(@job_posts.recent, items: 20)
+  end
+
+  # 나머지는 PostsController와 유사
+end
+```
+
+---
+
+## 4. 쿼리 파라미터
+
+### 4.1 Posts Index
+```
+GET /posts?page=1&sort=recent
+GET /posts?page=1&sort=popular
+```
+
+**파라미터**:
+- `page`: 페이지 번호 (default: 1)
+- `sort`: 정렬 (recent|popular) (default: recent)
+
+---
+
+### 4.2 Job Posts / Talent Listings Index
+```
+GET /job_posts?category=development&project_type=short_term&page=1
+GET /talent_listings?category=design&status=available
+```
+
+**파라미터**:
+- `category`: development|design|pm|marketing
+- `project_type`: short_term|long_term|one_time
+- `status`: (JobPost) open|closed|filled / (TalentListing) available|unavailable
+- `page`: 페이지 번호
+
+---
+
+### 4.3 Profile Tabs
+```
+GET /profiles/:id/posts?page=1
+GET /profiles/:id/job_posts?page=1
+GET /profiles/:id/talent_listings?page=1
+```
+
+---
+
+## 5. Turbo Streams (실시간 업데이트)
+
+### 5.1 댓글 추가 (Turbo Stream)
+
+**app/views/comments/create.turbo_stream.erb**:
+```erb
+<%= turbo_stream.append "comments" do %>
+  <%= render @comment %>
+<% end %>
+
+<%= turbo_stream.update "comment-form" do %>
+  <%= render "comments/form", post: @post, comment: Comment.new %>
+<% end %>
+```
+
+### 5.2 좋아요 토글 (Turbo Stream)
+
+**app/views/likes/create.turbo_stream.erb**:
+```erb
+<%= turbo_stream.replace "like-button-#{@post.id}" do %>
+  <%= render "posts/like_button", post: @post %>
+<% end %>
+
+<%= turbo_stream.update "likes-count-#{@post.id}" do %>
+  <%= @post.likes_count %>
+<% end %>
+```
+
+---
+
+## 6. JSON API (선택적)
+
+필요 시 JSON API를 추가할 수 있습니다.
+
+### 6.1 API 네임스페이스
+
+```ruby
+namespace :api do
+  namespace :v1 do
+    resources :posts, only: [:index, :show, :create, :update, :destroy]
+    resources :job_posts, only: [:index, :show]
+    resources :talent_listings, only: [:index, :show]
+  end
+end
+```
+
+### 6.2 JSON 응답 형식
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "title": "게시글 제목",
+    "content": "게시글 내용",
+    "user": {
+      "id": 1,
+      "name": "사용자",
+      "role_title": "Developer"
+    },
+    "created_at": "2025-11-26T10:00:00Z"
+  }
+}
+```
+
+### 6.3 에러 응답
+
+```json
+{
+  "status": "error",
+  "message": "Validation failed",
+  "errors": {
+    "title": ["can't be blank"],
+    "content": ["can't be blank"]
+  }
+}
+```
+
+---
+
+## 7. 보안
+
+### 7.1 Strong Parameters
+
+모든 컨트롤러에서 Strong Parameters 사용:
 ```ruby
 def post_params
   params.require(:post).permit(:title, :content, :status)
 end
 ```
 
----
+### 7.2 인증 헬퍼
 
-## 9. 캐싱
-
-### 9.1 HTTP 캐싱
 ```ruby
-# Controller
-def show
-  @post = Post.find(params[:id])
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::Base
+  helper_method :current_user, :logged_in?
 
-  if stale?(@post)
-    render json: @post
+  private
+
+  def current_user
+    @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+  end
+
+  def logged_in?
+    !!current_user
+  end
+
+  def require_login
+    unless logged_in?
+      redirect_to login_path, alert: '로그인이 필요합니다.'
+    end
   end
 end
+```
 
-# Response Headers
-ETag: "abc123"
-Last-Modified: Wed, 25 Nov 2025 12:00:00 GMT
-Cache-Control: max-age=3600
+### 7.3 CSRF 보호
+
+Rails 기본 CSRF 보호 활성화 (자동):
+```ruby
+protect_from_forgery with: :exception
 ```
 
 ---
 
-## 10. API 문서화
+## 8. 페이지네이션
 
-### 10.1 Swagger/OpenAPI (선택)
+### 8.1 Pagy 사용 (권장)
+
 ```ruby
 # Gemfile
-gem 'rswag'
+gem 'pagy'
 
-# 자동 문서 생성
-GET /api-docs
+# app/controllers/application_controller.rb
+include Pagy::Backend
+
+# app/helpers/application_helper.rb
+include Pagy::Frontend
+
+# Controller
+@pagy, @posts = pagy(Post.all, items: 20)
+
+# View
+<%== pagy_nav(@pagy) %>
 ```
-
-### 10.2 Postman Collection
-- 엔드포인트별 예시 요청
-- 환경 변수 설정
-- 테스트 케이스 포함
 
 ---
 
-## 11. 테스트
+## 9. 라우팅 요약
 
-### 11.1 Controller Test
 ```ruby
-# test/controllers/api/v1/users_controller_test.rb
-class Api::V1::UsersControllerTest < ActionDispatch::IntegrationTest
-  test "should get index" do
-    get api_v1_users_url, as: :json
-    assert_response :success
+# config/routes.rb
+Rails.application.routes.draw do
+  root 'posts#index'
 
-    json = JSON.parse(response.body)
-    assert_equal "success", json["status"]
+  # Auth
+  get    'signup',  to: 'users#new'
+  post   'signup',  to: 'users#create'
+  get    'login',   to: 'sessions#new'
+  post   'login',   to: 'sessions#create'
+  delete 'logout',  to: 'sessions#destroy'
+
+  # Posts (Community)
+  resources :posts do
+    post :increment_view, on: :member
+    resources :comments, only: [:create, :destroy], shallow: true
+    resources :likes, only: [:create, :destroy], shallow: true
+  end
+
+  # Profiles
+  resources :users, only: [:show, :edit, :update], path: 'profiles', as: 'profiles' do
+    member do
+      get :posts
+      get :job_posts
+      get :talent_listings
+    end
+  end
+
+  # Job Posts
+  resources :job_posts do
+    post :increment_view, on: :member
+  end
+
+  # Talent Listings
+  resources :talent_listings do
+    post :increment_view, on: :member
+  end
+
+  # Bookmarks (polymorphic)
+  resources :bookmarks, only: [:create, :destroy]
+
+  # My Page
+  namespace :my do
+    resource :profile, only: [:edit, :update]
+    resources :bookmarks, only: [:index, :destroy]
+    resources :posts, only: [:index]
+    resources :job_posts, only: [:index]
+    resources :talent_listings, only: [:index]
   end
 end
 ```
 
 ---
 
-## 참고자료
+## 10. 테스트 예시
 
-- Rails API Guides: https://guides.rubyonrails.org/api_app.html
-- REST API Best Practices: https://restfulapi.net
-- HTTP Status Codes: https://httpstatuses.com
+### 10.1 Controller Test
+
+```ruby
+# test/controllers/posts_controller_test.rb
+require "test_helper"
+
+class PostsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = users(:one)
+    @post = posts(:one)
+  end
+
+  test "should get index" do
+    get posts_url
+    assert_response :success
+  end
+
+  test "should create post when logged in" do
+    log_in_as(@user)
+
+    assert_difference('Post.count') do
+      post posts_url, params: { post: { title: "Test", content: "Content" } }
+    end
+
+    assert_redirected_to post_path(Post.last)
+  end
+
+  test "should not create post when not logged in" do
+    assert_no_difference('Post.count') do
+      post posts_url, params: { post: { title: "Test", content: "Content" } }
+    end
+
+    assert_redirected_to login_path
+  end
+end
+```
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경사항 | 작성자 |
+|------|----------|--------|
+| 2025-11-26 | One-pager 기반 API 설계 (Hotwire 중심) | Claude |

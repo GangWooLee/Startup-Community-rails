@@ -62,37 +62,52 @@
 ## 2. 데이터베이스 설계
 
 ### 2.1 ERD (Entity Relationship Diagram)
+
+프로젝트의 상세 ERD는 `DATABASE.md` 참조.
+
+**핵심 테이블**:
+- `users` - 사용자 계정
+- `posts` - 커뮤니티 게시글
+- `comments` - 댓글
+- `job_posts` - 구인 공고
+- `talent_listings` - 구직 정보
+- `likes` - 좋아요 (polymorphic)
+- `bookmarks` - 스크랩 (polymorphic)
+
+**주요 관계**:
 ```
-[여기에 ERD 다이어그램 또는 설명 추가]
-
-예시:
-┌─────────────┐         ┌─────────────┐
-│   Users     │────────<│   Posts     │
-├─────────────┤         ├─────────────┤
-│ id          │         │ id          │
-│ email       │         │ user_id     │
-│ password    │         │ title       │
-│ created_at  │         │ content     │
-└─────────────┘         │ created_at  │
-                        └─────────────┘
-```
-
-### 2.2 주요 테이블
-
-#### users
-```ruby
-# 사용자 계정
-- id: bigint (PK)
-- email: string (unique, indexed)
-- password_digest: string
-- name: string
-- role: enum (user, admin)
-- created_at: datetime
-- updated_at: datetime
+User (1) ─── (N) Posts
+User (1) ─── (N) JobPosts
+User (1) ─── (N) TalentListings
+User (1) ─── (N) Comments
+Post (1) ─── (N) Comments
+Post (1) ─── (N) Likes (polymorphic)
+Post/JobPost/TalentListing (1) ─── (N) Bookmarks (polymorphic)
 ```
 
-#### [기타 도메인 테이블]
-[프로젝트에 맞게 추가]
+### 2.2 주요 도메인 모델
+
+#### User (사용자)
+- 인증 정보 (email, password_digest)
+- 프로필 정보 (name, role_title, bio, avatar)
+- 커뮤니티 활동 (posts, comments, likes)
+- 외주 관련 (job_posts, talent_listings)
+- 스크랩 (bookmarks)
+
+#### Post (커뮤니티 게시글)
+- 제목, 내용, 상태 (draft/published/archived)
+- 조회수, 좋아요 수, 댓글 수 (counter_cache)
+- 작성자 연결 (belongs_to :user)
+
+#### JobPost (구인 공고)
+- 제목, 설명, 카테고리, 프로젝트 타입, 예산
+- 상태 (open/closed/filled)
+- 조회수
+
+#### TalentListing (구직 정보)
+- 제목, 설명, 카테고리, 프로젝트 타입, 희망 시급
+- 상태 (available/unavailable)
+- 조회수
 
 ### 2.3 인덱스 전략
 ```ruby
@@ -108,24 +123,32 @@ add_index :posts, [:user_id, :created_at]
 
 ### 3.1 RESTful 리소스
 
-#### Users
+상세 라우팅 설계는 `API.md` 참조.
+
+**핵심 리소스**:
+- **Posts** (커뮤니티) - CRUD + 댓글, 좋아요
+- **Profiles** (프로필) - 사용자별 Posts/JobPosts/TalentListings 탭
+- **JobPosts** (구인) - CRUD + 필터링 (카테고리, 타입, 상태)
+- **TalentListings** (구직) - CRUD + 필터링
+- **My Page** (마이페이지) - 프로필 관리, 스크랩 관리
+
+**인증**:
 ```
-GET    /users          # 목록
-GET    /users/:id      # 상세
-POST   /users          # 생성
-PATCH  /users/:id      # 수정
-DELETE /users/:id      # 삭제
+GET/POST  /signup    # 회원가입
+GET/POST  /login     # 로그인
+DELETE    /logout    # 로그아웃
 ```
 
-#### Authentication
+**URL 구조 예시**:
 ```
-POST   /signup         # 회원가입
-POST   /login          # 로그인
-DELETE /logout         # 로그아웃
+/posts                        # 커뮤니티 홈
+/posts/:id                    # 게시글 상세
+/profiles/:id                 # 프로필 (기본: Posts 탭)
+/profiles/:id/job_posts       # 프로필 - Job Posts 탭
+/job_posts                    # 구인 공고 목록
+/talent_listings              # 구직 정보 목록
+/my/bookmarks                 # 내 스크랩
 ```
-
-#### [추가 리소스]
-[프로젝트에 맞게 추가]
 
 ### 3.2 응답 형식
 ```json
