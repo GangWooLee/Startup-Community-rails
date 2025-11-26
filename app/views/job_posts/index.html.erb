@@ -1,0 +1,100 @@
+<div class="min-h-screen bg-neutral-50 pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4">
+      <h1 class="text-2xl font-bold text-balance">외주 마켓플레이스</h1>
+      <p class="text-sm text-muted-foreground">구인/구직 매칭 플랫폼</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6">
+    <div class="w-full">
+      <!-- Tab Headers -->
+      <div class="inline-flex h-9 items-center justify-center rounded-lg bg-white p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
+        <button data-tab="jobs" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+          구인 (<%= @job_postings.length %>)
+        </button>
+        <button data-tab="talents" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+          구직 (<%= @talent_postings.length %>)
+        </button>
+      </div>
+
+      <!-- Jobs Tab -->
+      <div id="tab-jobs" class="tab-content-freelance space-y-4">
+        <% @job_postings.each do |job| %>
+          <%= link_to job_post_path(job[:id]) do %>
+            <article class="bg-white rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+              <h3 class="text-lg font-bold mb-2"><%= job[:title] %></h3>
+              <p class="text-sm text-muted-foreground mb-3"><%= job[:description] %></p>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <% job[:skills].each do |skill| %>
+                  <span class="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-0.5 text-xs font-semibold">
+                    <%= skill %>
+                  </span>
+                <% end %>
+              </div>
+              <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                <span><%= job[:budget] %></span>
+                <span><%= job[:duration] %></span>
+                <span class="ml-auto"><%= job[:posted_at] %></span>
+              </div>
+            </article>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Talents Tab -->
+      <div id="tab-talents" class="tab-content-freelance space-y-4 hidden">
+        <% @talent_postings.each do |talent| %>
+          <%= link_to job_post_path(talent[:id]) do %>
+            <article class="bg-white rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+              <h3 class="text-lg font-bold mb-2"><%= talent[:title] %></h3>
+              <p class="text-sm text-muted-foreground mb-3"><%= talent[:description] %></p>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <% talent[:skills].each do |skill| %>
+                  <span class="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-0.5 text-xs font-semibold">
+                    <%= skill %>
+                  </span>
+                <% end %>
+              </div>
+              <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                <span><%= talent[:rate] %></span>
+                <span>경력 <%= talent[:experience] %></span>
+                <span class="ml-auto"><%= talent[:posted_at] %></span>
+              </div>
+            </article>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>
+
+<script>
+  // Tab switching for freelance page
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabTriggers = document.querySelectorAll('.tab-trigger-freelance');
+    const tabContents = document.querySelectorAll('.tab-content-freelance');
+
+    tabTriggers.forEach(trigger => {
+      trigger.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+
+        // Remove active class from all triggers
+        tabTriggers.forEach(t => t.classList.remove('active', 'bg-background', 'text-foreground', 'shadow'));
+
+        // Add active class to clicked trigger
+        this.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
+
+        // Hide all tab contents
+        tabContents.forEach(content => content.classList.add('hidden'));
+
+        // Show selected tab content
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+      });
+    });
+  });
+</script>

@@ -1,0 +1,225 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
+      <button onclick="history.back()" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-md">
+        <%= render partial: "shared/icons/arrow_left", locals: { css_class: "h-5 w-5" } %>
+      </button>
+      <h1 class="text-xl font-bold">프로필</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto">
+    <!-- Profile Header -->
+    <div class="px-4 py-6 border-b border-border">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="h-20 w-20 rounded-full ring-4 ring-background overflow-hidden bg-secondary flex items-center justify-center">
+          <% if @user_profile[:avatar] %>
+            <%= image_tag @user_profile[:avatar], alt: @user_profile[:name], class: "h-full w-full object-cover" %>
+          <% else %>
+            <span class="text-2xl font-semibold"><%= @user_profile[:name][0] %></span>
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <h2 class="text-2xl font-bold"><%= @user_profile[:name] %></h2>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+              <%= @user_profile[:role] %>
+            </span>
+            <% if @user_profile[:company] %>
+              <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                <%= @user_profile[:company] %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      <p class="text-foreground leading-relaxed mb-4"><%= @user_profile[:bio] %></p>
+
+      <!-- Contact Info -->
+      <div class="space-y-2 text-sm text-muted-foreground mb-4">
+        <% if @user_profile[:location] %>
+          <div class="flex items-center gap-2">
+            <%= render partial: "shared/icons/map_pin", locals: { css_class: "h-4 w-4" } %>
+            <span><%= @user_profile[:location] %></span>
+          </div>
+        <% end %>
+        <% if @user_profile[:email] %>
+          <div class="flex items-center gap-2">
+            <%= render partial: "shared/icons/mail", locals: { css_class: "h-4 w-4" } %>
+            <span><%= @user_profile[:email] %></span>
+          </div>
+        <% end %>
+        <% if @user_profile[:website] %>
+          <div class="flex items-center gap-2">
+            <%= render partial: "shared/icons/globe", locals: { css_class: "h-4 w-4" } %>
+            <%= link_to @user_profile[:website], @user_profile[:website], target: "_blank", rel: "noopener noreferrer", class: "hover:text-primary transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Skills -->
+      <% if @user_profile[:skills].any? %>
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold mb-2">스킬</h3>
+          <div class="flex flex-wrap gap-2">
+            <% @user_profile[:skills].each do |skill| %>
+              <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                <%= skill %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Action Buttons -->
+      <% unless @is_own_profile %>
+        <div class="flex gap-2">
+          <button class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
+            <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+            메시지 보내기
+          </button>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="px-4 py-6">
+      <div class="w-full">
+        <!-- Tab Headers -->
+        <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
+          <button data-tab="posts" class="tab-trigger active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2">
+            <%= render partial: "shared/icons/file_text", locals: { css_class: "h-4 w-4" } %>
+            커뮤니티 글
+          </button>
+          <button data-tab="freelance" class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2">
+            <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4" } %>
+            외주 공고
+          </button>
+        </div>
+
+        <!-- Community Posts Tab -->
+        <div id="tab-posts" class="tab-content space-y-4">
+          <% if @user_profile[:posts].any? %>
+            <% @user_profile[:posts].each do |post| %>
+              <%= link_to community_path(post[:id]) do %>
+                <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                  <p class="text-foreground mb-3 leading-relaxed"><%= post[:content] %></p>
+                  <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold mb-3">
+                    <%= post[:category] %>
+                  </span>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><%= post[:likes] %> 좋아요</span>
+                    <span><%= post[:comments] %> 댓글</span>
+                    <span class="ml-auto"><%= post[:created_at] %></span>
+                  </div>
+                </article>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="text-center py-12 text-muted-foreground">
+              <%= render partial: "shared/icons/file_text", locals: { css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
+              <p>아직 작성한 글이 없습니다</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Freelance Postings Tab -->
+        <div id="tab-freelance" class="tab-content space-y-4 hidden">
+          <% if @user_profile[:job_postings].any? || @user_profile[:talent_postings].any? %>
+            <!-- Job Postings -->
+            <% @user_profile[:job_postings].each do |job| %>
+              <%= link_to freelance_job_path(job[:id]) do %>
+                <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                  <div class="flex items-center gap-2 mb-3">
+                    <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-5 w-5 text-primary" } %>
+                    <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                      구인
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-bold mb-2"><%= job[:title] %></h3>
+                  <div class="flex flex-wrap gap-2 mb-3">
+                    <% job[:skills].each do |skill| %>
+                      <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                        <%= skill %>
+                      </span>
+                    <% end %>
+                  </div>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><%= job[:budget] %></span>
+                    <span><%= job[:duration] %></span>
+                    <span class="ml-auto"><%= job[:posted_at] %></span>
+                  </div>
+                </article>
+              <% end %>
+            <% end %>
+
+            <!-- Talent Postings -->
+            <% @user_profile[:talent_postings].each do |talent| %>
+              <%= link_to freelance_talent_path(talent[:id]) do %>
+                <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                  <div class="flex items-center gap-2 mb-3">
+                    <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-5 w-5 text-primary" } %>
+                    <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                      구직
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-bold mb-2"><%= talent[:title] %></h3>
+                  <div class="flex flex-wrap gap-2 mb-3">
+                    <% talent[:skills].each do |skill| %>
+                      <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                        <%= skill %>
+                      </span>
+                    <% end %>
+                  </div>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><%= talent[:rate] %></span>
+                    <span class="ml-auto"><%= talent[:posted_at] %></span>
+                  </div>
+                </article>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="text-center py-12 text-muted-foreground">
+              <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
+              <p>아직 등록한 외주 공고가 없습니다</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>
+
+<script>
+  // Simple tab switching
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabTriggers = document.querySelectorAll('.tab-trigger');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabTriggers.forEach(trigger => {
+      trigger.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+
+        // Remove active class from all triggers
+        tabTriggers.forEach(t => t.classList.remove('active', 'bg-background', 'text-foreground', 'shadow'));
+
+        // Add active class to clicked trigger
+        this.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
+
+        // Hide all tab contents
+        tabContents.forEach(content => content.classList.add('hidden'));
+
+        // Show selected tab content
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+      });
+    });
+  });
+</script>

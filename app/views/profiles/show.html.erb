@@ -1,0 +1,193 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
+      <button onclick="history.back()" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-md">
+        <%= render partial: "shared/icons/arrow_left", locals: { css_class: "h-5 w-5" } %>
+      </button>
+      <h1 class="text-xl font-bold">프로필</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto">
+    <!-- Profile Header -->
+    <div class="px-4 py-6 border-b border-border">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="h-20 w-20 rounded-full ring-4 ring-background overflow-hidden bg-secondary flex items-center justify-center">
+          <% if @user.avatar_url %>
+            <%= image_tag @user.avatar_url, alt: @user.name, class: "h-full w-full object-cover" %>
+          <% else %>
+            <span class="text-2xl font-semibold"><%= @user.name[0] %></span>
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <h2 class="text-2xl font-bold"><%= @user.name %></h2>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <% if @user.role_title.present? %>
+              <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                <%= @user.role_title %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      <% if @user.bio.present? %>
+        <p class="text-foreground leading-relaxed mb-4"><%= @user.bio %></p>
+      <% end %>
+
+      <!-- Contact Info -->
+      <div class="space-y-2 text-sm text-muted-foreground mb-4">
+        <div class="flex items-center gap-2">
+          <%= render partial: "shared/icons/mail", locals: { css_class: "h-4 w-4" } %>
+          <span><%= @user.email %></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <%= render partial: "shared/icons/calendar", locals: { css_class: "h-4 w-4" } %>
+          <span>가입일: <%= @user.created_at.strftime("%Y년 %m월") %></span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <% unless @is_own_profile %>
+        <div class="flex gap-2">
+          <button class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
+            <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+            메시지 보내기
+          </button>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="px-4 py-6">
+      <div class="w-full">
+        <!-- Tab Headers -->
+        <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
+          <button data-tab="posts" class="tab-trigger active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2">
+            <%= render partial: "shared/icons/file_text", locals: { css_class: "h-4 w-4" } %>
+            커뮤니티 글
+          </button>
+          <button data-tab="freelance" class="tab-trigger inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow gap-2">
+            <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4" } %>
+            외주 공고
+          </button>
+        </div>
+
+        <!-- Community Posts Tab -->
+        <div id="tab-posts" class="tab-content space-y-4">
+          <% if @posts.any? %>
+            <% @posts.each do |post| %>
+              <%= link_to post_path(post.id) do %>
+                <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                  <h3 class="text-lg font-bold mb-2"><%= post.title %></h3>
+                  <p class="text-foreground mb-3 leading-relaxed line-clamp-3"><%= post.content %></p>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span><%= post.likes_count %> 좋아요</span>
+                    <span><%= post.comments_count %> 댓글</span>
+                    <span class="ml-auto"><%= time_ago_in_words(post.created_at) %> 전</span>
+                  </div>
+                </article>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="text-center py-12 text-muted-foreground">
+              <%= render partial: "shared/icons/file_text", locals: { css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
+              <p>아직 작성한 글이 없습니다</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Freelance Postings Tab -->
+        <div id="tab-freelance" class="tab-content space-y-4 hidden">
+          <% if @job_posts.any? || @talent_listings.any? %>
+            <!-- Job Postings (구인) -->
+            <% @job_posts.each do |job| %>
+              <%= link_to job_post_path(job.id) do %>
+                <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                  <div class="flex items-center gap-2 mb-3">
+                    <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-5 w-5 text-primary" } %>
+                    <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                      구인 · <%= job.category_i18n %>
+                    </span>
+                    <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                      <%= job.project_type_i18n %>
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-bold mb-2"><%= job.title %></h3>
+                  <p class="text-muted-foreground mb-3 line-clamp-2"><%= job.description %></p>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    <% if job.budget.present? %>
+                      <span><%= job.budget %></span>
+                    <% end %>
+                    <span class="ml-auto"><%= time_ago_in_words(job.created_at) %> 전</span>
+                  </div>
+                </article>
+              <% end %>
+            <% end %>
+
+            <!-- Talent Listings (구직) -->
+            <% @talent_listings.each do |talent| %>
+              <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
+                <div class="flex items-center gap-2 mb-3">
+                  <%= render partial: "shared/icons/user", locals: { css_class: "h-5 w-5 text-primary" } %>
+                  <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                    구직 · <%= talent.category_i18n %>
+                  </span>
+                  <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
+                    <%= talent.project_type_i18n %>
+                  </span>
+                </div>
+                <h3 class="text-lg font-bold mb-2"><%= talent.title %></h3>
+                <p class="text-muted-foreground mb-3 line-clamp-2"><%= talent.description %></p>
+                <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                  <% if talent.rate.present? %>
+                    <span><%= talent.rate %></span>
+                  <% end %>
+                  <span class="ml-auto"><%= time_ago_in_words(talent.created_at) %> 전</span>
+                </div>
+              </article>
+            <% end %>
+          <% else %>
+            <div class="text-center py-12 text-muted-foreground">
+              <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
+              <p>아직 등록한 외주 공고가 없습니다</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>
+
+<script>
+  // Simple tab switching
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabTriggers = document.querySelectorAll('.tab-trigger');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabTriggers.forEach(trigger => {
+      trigger.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+
+        // Remove active class from all triggers
+        tabTriggers.forEach(t => t.classList.remove('active', 'bg-background', 'text-foreground', 'shadow'));
+
+        // Add active class to clicked trigger
+        this.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
+
+        // Hide all tab contents
+        tabContents.forEach(content => content.classList.add('hidden'));
+
+        // Show selected tab content
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+      });
+    });
+  });
+</script>

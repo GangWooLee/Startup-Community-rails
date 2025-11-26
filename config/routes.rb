@@ -9,6 +9,25 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Root path - Community Home
+  root "posts#index"
+
+  # Authentication
+  get    "/login",  to: "sessions#new",     as: :login
+  post   "/login",  to: "sessions#create"
+  delete "/logout", to: "sessions#destroy", as: :logout
+  get    "/signup", to: "users#new",        as: :signup
+  post   "/signup", to: "users#create"
+
+  # Posts (Community)
+  resources :posts, only: [:index, :show, :new, :create]
+
+  # Profiles
+  resources :profiles, only: [:show]
+
+  # Job Posts (Freelance/Outsourcing)
+  resources :job_posts, only: [:index, :show]
+
+  # My Page
+  get "my_page", to: "my_page#show", as: :my_page
 end

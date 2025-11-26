@@ -1,0 +1,34 @@
+<nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+  <div class="max-w-screen-xl mx-auto px-4">
+    <div class="flex items-center justify-around h-16">
+      <!-- Home/Community -->
+      <% is_active_home = current_page?(root_path) %>
+      <%= link_to root_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_home ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+        <%= render partial: "shared/icons/home", locals: { css_class: "h-5 w-5" } %>
+        <span class="text-xs font-medium">커뮤니티</span>
+      <% end %>
+
+      <!-- Freelance/Jobs -->
+      <% is_active_jobs = current_page?(job_posts_path) %>
+      <%= link_to job_posts_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_jobs ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+        <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-5 w-5" } %>
+        <span class="text-xs font-medium">외주</span>
+      <% end %>
+
+      <!-- My Page or Login -->
+      <% if logged_in? %>
+        <% is_active_mypage = current_page?(my_page_path) %>
+        <%= link_to my_page_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_mypage ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+          <%= render partial: "shared/icons/user", locals: { css_class: "h-5 w-5" } %>
+          <span class="text-xs font-medium">마이페이지</span>
+        <% end %>
+      <% else %>
+        <% is_active_login = current_page?(login_path) %>
+        <%= link_to login_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_login ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+          <%= render partial: "shared/icons/user", locals: { css_class: "h-5 w-5" } %>
+          <span class="text-xs font-medium">로그인</span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</nav>

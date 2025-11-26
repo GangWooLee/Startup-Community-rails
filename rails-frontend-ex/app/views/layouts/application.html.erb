@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grounded - 창업자 커뮤니티</title>
+    <meta name="description" content="크몽과 같은 외주 기능과 창업 커뮤니티를 결합한 최초의 Grounded 창업 플랫폼">
+    <meta name="generator" content="v0.app">
+
+    <!-- Favicon -->
+    <%= favicon_link_tag 'icon-light-32x32.png', rel: 'icon', media: '(prefers-color-scheme: light)' %>
+    <%= favicon_link_tag 'icon-dark-32x32.png', rel: 'icon', media: '(prefers-color-scheme: dark)' %>
+    <%= favicon_link_tag 'icon.svg', rel: 'icon', type: 'image/svg+xml' %>
+    <%= favicon_link_tag 'apple-icon.png', rel: 'apple-touch-icon' %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="font-sans antialiased">
+    <%= yield %>
+  </body>
+</html>

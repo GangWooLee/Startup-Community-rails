@@ -1,29 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
   <head>
-    <title><%= content_for(:title) || "Startup Community" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= content_for(:title) || "Grounded - 창업자 커뮤니티" %></title>
+    <meta name="description" content="아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Startup Community">
+    <meta name="application-name" content="Grounded">
     <meta name="mobile-web-app-capable" content="yes">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
+    <%# Favicon %>
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%# Tailwind CSS CDN (개발/테스트용) %>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <%# Tailwind Config %>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            borderRadius: {
+              lg: 'var(--radius)',
+              md: 'calc(var(--radius) - 2px)',
+              sm: 'calc(var(--radius) - 4px)',
+            },
+            colors: {
+              background: 'hsl(var(--background))',
+              foreground: 'hsl(var(--foreground))',
+              card: {
+                DEFAULT: 'hsl(var(--card))',
+                foreground: 'hsl(var(--card-foreground))',
+              },
+              popover: {
+                DEFAULT: 'hsl(var(--popover))',
+                foreground: 'hsl(var(--popover-foreground))',
+              },
+              primary: {
+                DEFAULT: 'hsl(var(--primary))',
+                foreground: 'hsl(var(--primary-foreground))',
+              },
+              secondary: {
+                DEFAULT: 'hsl(var(--secondary))',
+                foreground: 'hsl(var(--secondary-foreground))',
+              },
+              muted: {
+                DEFAULT: 'hsl(var(--muted))',
+                foreground: 'hsl(var(--muted-foreground))',
+              },
+              accent: {
+                DEFAULT: 'hsl(var(--accent))',
+                foreground: 'hsl(var(--accent-foreground))',
+              },
+              destructive: {
+                DEFAULT: 'hsl(var(--destructive))',
+                foreground: 'hsl(var(--destructive-foreground))',
+              },
+              border: 'hsl(var(--border))',
+              input: 'hsl(var(--input))',
+              ring: 'hsl(var(--ring))',
+            },
+          },
+        },
+      }
+    </script>
+
+    <%# CSS Variables and Base Styles %>
+    <style>
+      :root {
+        --background: 0 0% 100%;
+        --foreground: 0 0% 14.5%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 14.5%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 14.5%;
+        --primary: 0 0% 20.5%;
+        --primary-foreground: 0 0% 98.5%;
+        --secondary: 0 0% 97%;
+        --secondary-foreground: 0 0% 20.5%;
+        --muted: 0 0% 97%;
+        --muted-foreground: 0 0% 55.6%;
+        --accent: 0 0% 97%;
+        --accent-foreground: 0 0% 20.5%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 92.2%;
+        --input: 0 0% 92.2%;
+        --ring: 0 0% 70.8%;
+        --radius: 0.625rem;
+      }
+
+      .dark {
+        --background: 0 0% 14.5%;
+        --foreground: 0 0% 98.5%;
+        --card: 0 0% 14.5%;
+        --card-foreground: 0 0% 98.5%;
+        --popover: 0 0% 14.5%;
+        --popover-foreground: 0 0% 98.5%;
+        --primary: 0 0% 98.5%;
+        --primary-foreground: 0 0% 20.5%;
+        --secondary: 0 0% 26.9%;
+        --secondary-foreground: 0 0% 98.5%;
+        --muted: 0 0% 26.9%;
+        --muted-foreground: 0 0% 70.8%;
+        --accent: 0 0% 26.9%;
+        --accent-foreground: 0 0% 98.5%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98.5%;
+        --border: 0 0% 26.9%;
+        --input: 0 0% 26.9%;
+        --ring: 0 0% 43.9%;
+      }
+
+      * {
+        border-color: hsl(var(--border));
+      }
+
+      body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+      }
+    </style>
+
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="font-sans antialiased">
+    <!-- Flash Messages -->
+    <% if flash.any? %>
+      <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 pointer-events-none">
+        <div class="w-full max-w-md space-y-2 pointer-events-auto">
+          <% flash.each do |type, message| %>
+            <%
+              alert_class = case type.to_sym
+              when :notice
+                "bg-primary text-primary-foreground"
+              when :alert
+                "bg-destructive text-destructive-foreground"
+              when :success
+                "bg-green-600 text-white"
+              else
+                "bg-card text-foreground border border-border"
+              end
+            %>
+            <div class="<%= alert_class %> rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-down">
+              <% if type.to_sym == :notice || type.to_sym == :success %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              <% elsif type.to_sym == :alert %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              <% else %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              <% end %>
+              <div class="flex-1">
+                <p class="text-sm font-medium"><%= message %></p>
+              </div>
+              <button onclick="this.parentElement.remove()" class="flex-shrink-0 hover:opacity-70 transition-opacity">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <style>
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            transform: translateY(-1rem);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out;
+        }
+      </style>
+
+      <script>
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+          const flashMessages = document.querySelectorAll('.animate-slide-down');
+          flashMessages.forEach(msg => {
+            msg.style.transition = 'opacity 0.3s, transform 0.3s';
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateY(-1rem)';
+            setTimeout(() => msg.remove(), 300);
+          });
+        }, 5000);
+      </script>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

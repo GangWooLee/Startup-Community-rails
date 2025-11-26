@@ -1,7 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(tree:*)",
+      "Bash(bundle install:*)",
+      "Bash(gem install:*)",
+      "Bash(bundle update:*)",
+      "Bash(ruby -v:*)",
+      "Bash(rails server:*)",
+      "Bash(bundle exec rails server:*)",
+      "Bash(rbenv:*)",
+      "Bash(asdf:*)",
+      "Bash(brew install:*)",
+      "Bash(rails db:schema:dump:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
