@@ -1,5 +1,5 @@
 class JobPostsController < ApplicationController
-  before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
+  before_action :require_login, only: [:new, :create]
 
   def index
     # N+1 쿼리 방지를 위해 includes 사용

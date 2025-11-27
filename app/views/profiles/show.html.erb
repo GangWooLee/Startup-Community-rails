@@ -167,10 +167,29 @@
 </div>
 
 <script>
-  // Simple tab switching
-  document.addEventListener('DOMContentLoaded', function() {
+  // Tab switching for profile page
+  function setupProfileTabs() {
     const tabTriggers = document.querySelectorAll('.tab-trigger');
     const tabContents = document.querySelectorAll('.tab-content');
+
+    // Initialize: ensure posts tab is visible and button is selected by default
+    const postsTab = document.getElementById('tab-posts');
+    const freelanceTab = document.getElementById('tab-freelance');
+    const postsButton = document.querySelector('[data-tab="posts"]');
+    const freelanceButton = document.querySelector('[data-tab="freelance"]');
+
+    if (postsTab && freelanceTab) {
+      // Show posts content, hide freelance content
+      postsTab.classList.remove('hidden');
+      freelanceTab.classList.add('hidden');
+    }
+
+    if (postsButton && freelanceButton) {
+      // Set posts button as active
+      postsButton.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
+      // Ensure freelance button is not active
+      freelanceButton.classList.remove('active', 'bg-background', 'text-foreground', 'shadow');
+    }
 
     tabTriggers.forEach(trigger => {
       trigger.addEventListener('click', function() {
@@ -189,5 +208,10 @@
         document.getElementById('tab-' + tabId).classList.remove('hidden');
       });
     });
-  });
+  }
+
+  // Support both initial load and Turbo navigation
+  document.addEventListener('DOMContentLoaded', setupProfileTabs);
+  document.addEventListener('turbo:load', setupProfileTabs);
+  document.addEventListener('turbo:render', setupProfileTabs);
 </script>
