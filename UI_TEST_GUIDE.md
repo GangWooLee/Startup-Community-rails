@@ -99,26 +99,111 @@ rails db:seed
 ## 현재 구현된 페이지
 
 ### 1. 커뮤니티 홈 (/)
-- 게시글 카드 리스트
-- 작성자 프로필 링크
-- 좋아요, 댓글, 공유, 북마크 버튼
-- 플로팅 액션 버튼
-- 하단 내비게이션
+- **URL**: `http://localhost:3000/`
+- **파일**: `app/views/posts/index.html.erb`
+- **기능**:
+  - 게시글 카드 리스트
+  - 작성자 프로필 링크
+  - 좋아요, 댓글, 공유, 북마크 버튼
+  - 플로팅 액션 버튼
+  - 하단 내비게이션
 
-### 2. 프로필 페이지 (/profiles/:id)
-- 프로필 정보
-- 연락처 정보
-- 스킬 태그
-- 탭 UI (커뮤니티 글 / 외주 공고)
+### 2. 게시글 상세 (/posts/:id)
+- **URL**: `http://localhost:3000/posts/1`
+- **파일**: `app/views/posts/show.html.erb`
+- **기능**:
+  - 게시글 상세 내용
+  - 작성자 정보
+  - 댓글 목록
 
-### 3. 외주 마켓플레이스 (/job_posts)
-- 구인/구직 탭
-- 공고 카드 리스트
+### 3. 프로필 페이지 (/profiles/:id)
+- **URL**: `http://localhost:3000/profiles/1`
+- **파일**: `app/views/profiles/show.html.erb`
+- **기능**:
+  - 프로필 정보
+  - 연락처 정보
+  - 스킬 태그
+  - 탭 UI (커뮤니티 글 / 외주 공고)
 
-### 4. 마이페이지 (/my_page)
-- 프로필 카드
-- 내가 쓴 글
-- 스크랩한 글
+### 4. 외주 마켓플레이스 (/job_posts)
+- **URL**: `http://localhost:3000/job_posts`
+- **파일**: `app/views/job_posts/index.html.erb`
+- **기능**:
+  - 구인/구직 탭
+  - 공고 카드 리스트
+
+### 5. 외주 공고 상세 (/job_posts/:id)
+- **URL**: `http://localhost:3000/job_posts/1`
+- **파일**: `app/views/job_posts/show.html.erb`
+- **기능**:
+  - 공고 상세 정보
+  - 지원 버튼
+  - 공유 기능
+
+### 6. 마이페이지 (/my_page)
+- **URL**: `http://localhost:3000/my_page`
+- **파일**: `app/views/my_page/show.html.erb`
+- **기능**:
+  - 프로필 카드
+  - 내가 쓴 글
+  - 스크랩한 글
+
+### 7. 로그인/회원가입
+- **로그인**: `http://localhost:3000/login` → `app/views/sessions/new.html.erb`
+- **회원가입**: `http://localhost:3000/signup` → `app/views/users/new.html.erb`
+
+---
+
+## 프로젝트 파일 구조
+
+### 화면(View) 파일 위치
+```
+app/views/
+├── layouts/
+│   └── application.html.erb       # 모든 페이지의 기본 레이아웃
+├── posts/
+│   ├── index.html.erb             # 커뮤니티 홈 (루트 페이지)
+│   └── show.html.erb              # 게시글 상세
+├── job_posts/
+│   ├── index.html.erb             # 외주 마켓플레이스
+│   └── show.html.erb              # 외주 공고 상세
+├── profiles/
+│   └── show.html.erb              # 프로필 페이지
+├── my_page/
+│   └── show.html.erb              # 마이페이지
+├── sessions/
+│   └── new.html.erb               # 로그인 페이지
+├── users/
+│   └── new.html.erb               # 회원가입 페이지
+└── shared/
+    ├── _bottom_nav.html.erb       # 하단 네비게이션 바
+    └── icons/                     # 아이콘 SVG 파일들
+```
+
+### 비즈니스 로직(Controller) 파일 위치
+```
+app/controllers/
+├── posts_controller.rb            # 게시글 관련
+├── job_posts_controller.rb        # 외주 공고 관련
+├── profiles_controller.rb         # 프로필 관련
+├── my_page_controller.rb          # 마이페이지 관련
+├── sessions_controller.rb         # 로그인/로그아웃
+└── users_controller.rb            # 회원가입
+```
+
+### 데이터 모델(Model) 파일 위치
+```
+app/models/
+├── user.rb                        # 사용자
+├── post.rb                        # 게시글
+├── job_post.rb                    # 외주 공고
+├── comment.rb                     # 댓글
+└── profile.rb                     # 프로필
+```
+
+### 라우팅 설정
+- **파일**: `config/routes.rb`
+- URL과 컨트롤러를 연결하는 설정 파일
 
 ---
 
