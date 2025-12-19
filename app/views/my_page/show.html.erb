@@ -3,7 +3,7 @@
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4">
       <h1 class="text-2xl font-bold">마이페이지</h1>
-      <p class="text-sm text-muted-foreground">내 활동 관리</p>
+      <p class="text-sm text-muted-foreground">내 프로필 및 활동 관리</p>
     </div>
   </header>
 
@@ -11,49 +11,153 @@
   <main class="max-w-screen-xl mx-auto px-4 py-6">
     <!-- Profile Card -->
     <div class="bg-card rounded-xl p-6 border border-border mb-6">
-      <div class="flex items-center gap-4 mb-4">
-        <div class="h-16 w-16 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
-          <% if @user.avatar_url %>
+      <div class="flex items-start gap-4 mb-4">
+        <!-- Profile Image -->
+        <div class="h-20 w-20 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar, alt: @user.name, class: "h-full w-full object-cover" %>
+          <% elsif @user.avatar_url.present? %>
             <%= image_tag @user.avatar_url, alt: @user.name, class: "h-full w-full object-cover" %>
           <% else %>
-            <span class="text-2xl font-semibold"><%= @user.name[0] %></span>
+            <span class="text-3xl font-semibold text-muted-foreground"><%= @user.name[0] %></span>
           <% end %>
         </div>
-        <div class="flex-1">
-          <h2 class="text-xl font-bold"><%= @user.name %></h2>
-          <p class="text-sm text-muted-foreground"><%= @user.email %></p>
+
+        <!-- Profile Info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-xl font-bold"><%= @user.name %></h2>
+            <% @user.availability_badges.each do |badge| %>
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-white <%= badge[:color] %>">
+                <%= badge[:label] %>
+              </span>
+            <% end %>
+          </div>
+
           <% if @user.role_title.present? %>
-            <span class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground mt-1">
-              <%= @user.role_title %>
-            </span>
+            <p class="text-sm text-muted-foreground mt-1"><%= @user.role_title %></p>
           <% end %>
+
+          <% if @user.affiliation.present? %>
+            <p class="text-sm text-muted-foreground">
+              <svg class="inline-block h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <%= @user.affiliation %>
+            </p>
+          <% end %>
+
+          <p class="text-xs text-muted-foreground mt-1"><%= @user.email %></p>
         </div>
       </div>
-      <button class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+
+      <!-- Bio -->
+      <% if @user.bio.present? %>
+        <div class="mb-4">
+          <p class="text-sm text-foreground whitespace-pre-wrap"><%= @user.bio %></p>
+        </div>
+      <% end %>
+
+      <!-- Skills -->
+      <% if @user.skills_array.any? %>
+        <div class="mb-4">
+          <h3 class="text-sm font-medium text-muted-foreground mb-2">기술 스택</h3>
+          <div class="flex flex-wrap gap-2">
+            <% @user.skills_array.each do |skill| %>
+              <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                <%= skill %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Contact Links -->
+      <% if @user.open_chat_url.present? || @user.github_url.present? || @user.portfolio_url.present? %>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <% if @user.open_chat_url.present? %>
+            <%= link_to @user.open_chat_url, target: "_blank", rel: "noopener noreferrer",
+                class: "inline-flex items-center gap-1.5 rounded-md bg-yellow-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-yellow-600 transition-colors" do %>
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3c5.514 0 10 3.592 10 8.007 0 4.917-5.145 7.961-9.91 7.961-1.937 0-3.383-.397-4.394-.644-1 .613-2.518 1.592-4.51 1.592-.347 0-.594-.116-.668-.285-.074-.17-.029-.37.074-.537.166-.27 1.452-1.735 1.675-2.415C2.135 15.425 2 13.962 2 11.007 2 6.592 6.486 3 12 3z"/>
+              </svg>
+              오픈채팅
+            <% end %>
+          <% end %>
+
+          <% if @user.github_url.present? %>
+            <%= link_to @user.github_url, target: "_blank", rel: "noopener noreferrer",
+                class: "inline-flex items-center gap-1.5 rounded-md bg-gray-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 transition-colors" do %>
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+              </svg>
+              GitHub
+            <% end %>
+          <% end %>
+
+          <% if @user.portfolio_url.present? %>
+            <%= link_to @user.portfolio_url, target: "_blank", rel: "noopener noreferrer",
+                class: "inline-flex items-center gap-1.5 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors" do %>
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+              </svg>
+              포트폴리오
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Edit Profile Button -->
+      <%= link_to edit_my_page_path, class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2" do %>
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
         프로필 수정
-      </button>
+      <% end %>
     </div>
 
     <!-- My Posts -->
     <div class="mb-6">
-      <h3 class="text-lg font-bold mb-4">내가 쓴 글</h3>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">내가 쓴 글</h3>
+        <span class="text-sm text-muted-foreground"><%= @my_posts.size %>개</span>
+      </div>
       <div class="space-y-3">
         <% if @my_posts.any? %>
           <% @my_posts.each do |post| %>
             <%= link_to post_path(post.id) do %>
               <div class="bg-card rounded-lg p-4 border border-border hover:border-primary/50 transition-all cursor-pointer">
-                <p class="font-medium mb-1"><%= post.title %></p>
+                <p class="font-medium mb-1 line-clamp-2"><%= post.title %></p>
                 <div class="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span><%= post.likes_count %> 좋아요</span>
-                  <span><%= post.comments_count %> 댓글</span>
+                  <span class="inline-flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                    <%= post.likes_count %>
+                  </span>
+                  <span class="inline-flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <%= post.comments_count %>
+                  </span>
                   <span class="ml-auto"><%= time_ago_in_words(post.created_at) %> 전</span>
                 </div>
               </div>
             <% end %>
           <% end %>
         <% else %>
-          <div class="text-center py-12 text-muted-foreground">
+          <div class="text-center py-12 text-muted-foreground bg-card rounded-lg border border-border">
+            <svg class="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
             <p>아직 작성한 글이 없습니다</p>
+            <%= link_to new_post_path, class: "inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2" do %>
+              첫 글 작성하기
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
           </div>
         <% end %>
       </div>
@@ -61,17 +165,30 @@
 
     <!-- Bookmarked Posts -->
     <div class="mb-6">
-      <h3 class="text-lg font-bold mb-4">스크랩한 글</h3>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">스크랩한 글</h3>
+        <span class="text-sm text-muted-foreground"><%= @bookmarked_posts.size %>개</span>
+      </div>
       <div class="space-y-3">
         <% if @bookmarked_posts.any? %>
           <% @bookmarked_posts.each do |post| %>
             <% if post.is_a?(Post) %>
               <%= link_to post_path(post.id) do %>
                 <div class="bg-card rounded-lg p-4 border border-border hover:border-primary/50 transition-all cursor-pointer">
-                  <p class="font-medium mb-1"><%= post.title %></p>
+                  <p class="font-medium mb-1 line-clamp-2"><%= post.title %></p>
                   <div class="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span><%= post.likes_count %> 좋아요</span>
-                    <span><%= post.comments_count %> 댓글</span>
+                    <span class="inline-flex items-center gap-1">
+                      <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      <%= post.likes_count %>
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                      <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                      </svg>
+                      <%= post.comments_count %>
+                    </span>
                     <span class="ml-auto"><%= time_ago_in_words(post.created_at) %> 전</span>
                   </div>
                 </div>
@@ -79,8 +196,17 @@
             <% end %>
           <% end %>
         <% else %>
-          <div class="text-center py-12 text-muted-foreground">
+          <div class="text-center py-12 text-muted-foreground bg-card rounded-lg border border-border">
+            <svg class="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+            </svg>
             <p>아직 스크랩한 글이 없습니다</p>
+            <%= link_to root_path, class: "inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2" do %>
+              글 둘러보기
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
           </div>
         <% end %>
       </div>
@@ -88,12 +214,17 @@
 
     <!-- Actions -->
     <div class="space-y-3">
-      <button class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-        설정
-      </button>
+      <!-- View Public Profile -->
+      <%= link_to profile_path(@user), class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2" do %>
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        공개 프로필 보기
+      <% end %>
 
       <!-- Logout Button -->
-      <%= button_to logout_path, method: :delete, class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground h-10 px-4 py-2", form: { data: { turbo_confirm: "로그아웃 하시겠습니까?" } } do %>
+      <%= button_to logout_path, method: :delete, class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground h-10 px-4 py-2", form: { data: { turbo_confirm: "로그아웃 하시겠습니까?" } } do %>
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>

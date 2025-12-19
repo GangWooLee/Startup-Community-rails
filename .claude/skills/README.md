@@ -68,9 +68,9 @@ Fat Controller/Model을 Service Object로 리팩토링합니다.
 - **Use cases**: Advanced search, Multi-filter queries, Analytics, Reporting
 - **Features**: Eager loading, Counter caches, Batch processing
 
-### DevOps Skills
+### DevOps & Maintenance Skills
 
-#### 7. logging-setup ✨ **NEW!**
+#### 7. logging-setup
 **프로덕션급 로그 시스템 구축**
 
 구조화된 로깅, 성능 모니터링, 에러 추적을 위한 완전한 로깅 시스템을 자동으로 설정합니다.
@@ -81,9 +81,42 @@ Fat Controller/Model을 Service Object로 리팩토링합니다.
 - **Scripts**: `setup_logging.rb` - Full automated setup (9 steps)
 - **Features**: Log rotation, Custom loggers, Request/Job tracking, Structured JSON output
 
+#### 8. database-maintenance 🆕 **NEW!**
+**데이터베이스 유지보수 및 헬스 체크**
+
+마이그레이션 안전성, 데이터 정합성, 인덱스 최적화 등 데이터베이스 유지보수 작업을 수행합니다.
+
+- **Trigger keywords**: "check database", "optimize DB", "migration rollback", "data consistency", "database health"
+- **Includes**: Migration safety, Data integrity checks, Index optimization, Health monitoring
+- **Use cases**: Pre-deployment checks, Data validation, Performance optimization, Database recovery
+- **Scripts**: `health_check.rb` - Comprehensive database health check
+- **Features**: Orphaned records detection, Counter cache validation, Missing index identification
+
+#### 9. security-audit 🆕 **NEW!**
+**보안 취약점 스캔 및 감사**
+
+보안 취약점 자동 감지, 의존성 검사, 환경 변수 관리 등 애플리케이션 보안 감사를 수행합니다.
+
+- **Trigger keywords**: "check security", "audit code", "security vulnerabilities", "update gems", "CVE check"
+- **Includes**: Brakeman scan, Bundler-audit, Secret exposure check, Security headers
+- **Use cases**: Pre-deployment security, Vulnerability scanning, Dependency updates, Compliance
+- **Scripts**: `security_audit.rb` - Full security audit runner
+- **Features**: SQL injection detection, XSS prevention, CSRF protection, Mass assignment checks
+
+#### 10. performance-check 🆕 **NEW!**
+**성능 모니터링 및 최적화**
+
+N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 최적화 작업을 수행합니다.
+
+- **Trigger keywords**: "performance issue", "slow queries", "N+1 problem", "optimize performance", "memory leak"
+- **Includes**: N+1 detection, Missing indexes, Query optimization, Caching strategies
+- **Use cases**: Performance bottleneck identification, Query optimization, Memory profiling
+- **Scripts**: `performance_check.rb` - Performance analysis and recommendations
+- **Features**: Bullet integration, Index analysis, Counter cache detection, Eager loading suggestions
+
 ### Frontend Skills
 
-#### 8. ui-component
+#### 11. ui-component
 **Tailwind UI 컴포넌트 생성 (프로젝트 디자인 시스템 준수)**
 
 프로젝트의 Tailwind 테마를 사용한 재사용 가능한 UI 컴포넌트를 생성합니다.
@@ -93,7 +126,7 @@ Fat Controller/Model을 Service Object로 리팩토링합니다.
 - **Includes**: Responsive design, Accessibility, Tailwind patterns
 - **Project patterns**: Color variables, Spacing, Typography
 
-#### 9. stimulus-controller
+#### 12. stimulus-controller
 **Stimulus 컨트롤러 생성 (Turbo 통합)**
 
 인터랙티브 UI를 위한 Stimulus 컨트롤러를 빠르게 생성합니다.
@@ -104,7 +137,7 @@ Fat Controller/Model을 Service Object로 리팩토링합니다.
 
 ### Documentation Skills
 
-#### 10. doc-sync
+#### 13. doc-sync
 **코드 변경사항으로 문서 자동 동기화**
 
 코드베이스 변경사항을 `.claude/` 문서에 자동으로 반영합니다.
@@ -148,6 +181,15 @@ bash .claude/skills/doc-sync/scripts/sync_api_docs.sh
 
 # Setup logging system
 ruby .claude/skills/logging-setup/scripts/setup_logging.rb
+
+# Database health check
+ruby .claude/skills/database-maintenance/scripts/health_check.rb
+
+# Security audit
+ruby .claude/skills/security-audit/scripts/security_audit.rb
+
+# Performance check
+ruby .claude/skills/performance-check/scripts/performance_check.rb
 ```
 
 ## 📁 Structure
@@ -202,14 +244,17 @@ skill-name/
 | service-object | Backend | ~280 | - | - |
 | query-object | Backend | ~260 | - | - |
 | logging-setup | DevOps | ~260 | - | 1 automation |
+| database-maintenance | Maintenance | ~310 | - | 1 health check |
+| security-audit | Maintenance | ~390 | - | 1 audit runner |
+| performance-check | Maintenance | ~420 | - | 1 analyzer |
 | ui-component | Frontend | ~200 | 5 reference docs + 2 examples | - |
 | stimulus-controller | Frontend | ~180 | 2 examples | - |
 | doc-sync | Documentation | 226 | - | 2 sync scripts |
-| **Total** | **10 skills** | **~2,207** | **16 docs** | **6 scripts** |
+| **Total** | **13 skills** | **~3,327** | **16 docs** | **9 scripts** |
 
 ## 🎯 Skill Coverage
 
-### Backend (60%)
+### Backend (46%)
 - ✅ Resource generation (rails-resource)
 - ✅ Testing (test-gen)
 - ✅ API development (api-endpoint)
@@ -217,51 +262,89 @@ skill-name/
 - ✅ Business logic (service-object)
 - ✅ Complex queries (query-object)
 
-### DevOps (10%) 🆕
-- ✅ Logging system (logging-setup) **NEW!**
-- ⏳ Deployment automation (future)
-- ⏳ Performance monitoring (future)
+### DevOps (8%)
+- ✅ Logging system (logging-setup)
 
-### Frontend (20%)
+### Maintenance (23%) 🆕 **NEW CATEGORY!**
+- ✅ Database maintenance (database-maintenance) **NEW!**
+- ✅ Security audit (security-audit) **NEW!**
+- ✅ Performance check (performance-check) **NEW!**
+
+### Frontend (15%)
 - ✅ UI components (ui-component)
 - ✅ Interactivity (stimulus-controller)
 
-### Documentation (10%)
+### Documentation (8%)
 - ✅ Doc synchronization (doc-sync)
 
 ---
 
 **Last Updated**: 2025-12-19
 **Project**: Startup Community Rails
-**Claude Skills Version**: 4.0.0
-**Total Skills**: 10 (6 Backend + 1 DevOps + 2 Frontend + 1 Documentation)
+**Claude Skills Version**: 5.0.0
+**Total Skills**: 13 (6 Backend + 1 DevOps + 3 Maintenance + 2 Frontend + 1 Documentation)
 
 ## 🚀 Recent Updates
 
-### v4.0.0 - DevOps Category Launch 🆕
+### v5.0.0 - Maintenance Suite Launch 🆕 **MAJOR UPDATE**
+
+**New Category: Maintenance (3 skills)**
+
+Complete maintenance toolkit for production Rails applications:
+
+#### 1. database-maintenance
+**데이터베이스 유지보수 및 헬스 체크**
+- Migration safety checks
+- Orphaned records detection
+- Counter cache validation
+- Missing index identification
+- Data integrity verification
+- Health check automation
+
+#### 2. security-audit
+**보안 취약점 스캔 및 감사**
+- Brakeman security scanning
+- Bundler-audit dependency checks
+- Secret exposure detection
+- SQL injection prevention
+- XSS & CSRF protection
+- Security best practices enforcement
+
+#### 3. performance-check
+**성능 모니터링 및 최적화**
+- N+1 query detection (Bullet integration)
+- Missing index analysis
+- Query optimization recommendations
+- Memory profiling guidance
+- Caching strategy suggestions
+- Performance bottleneck identification
+
+**Impact**:
+- 🛡️ **Production-ready**: Enterprise-grade maintenance tools
+- 🔍 **Proactive monitoring**: Catch issues before deployment
+- ⚡ **Performance optimization**: Automated analysis and recommendations
+- 🔒 **Security compliance**: Automated vulnerability scanning
+- 📊 **Data integrity**: Database health monitoring
+- 🚀 **Deployment confidence**: Pre-release checks
+
+**Maintenance Workflow**:
+```bash
+# Before each deployment
+ruby .claude/skills/database-maintenance/scripts/health_check.rb
+ruby .claude/skills/security-audit/scripts/security_audit.rb
+ruby .claude/skills/performance-check/scripts/performance_check.rb
+```
+
+### v4.0.0 - DevOps Category Launch
 **New Skill**:
 - **logging-setup**: Production-grade logging system
   - Structured JSON logging with Lograge
   - Custom business event loggers
   - Performance tracking (requests, jobs)
   - Error tracking with Sentry integration
-  - Automated setup script (9 steps)
-  - Log rotation and management
-
-**Impact**:
-- Full observability in production environments
-- Easy debugging with structured logs
-- Performance monitoring out of the box
-- Audit trail for business events
 
 ### v3.0.0 - Backend Efficiency Skills
 **Skills Added**:
 - **background-job**: Async task processing with Solid Queue
 - **service-object**: Extract complex business logic
 - **query-object**: Manage complex database queries
-
-**Impact**:
-- Clean, maintainable code architecture
-- Better separation of concerns
-- Improved performance and scalability
-- Easier testing and debugging

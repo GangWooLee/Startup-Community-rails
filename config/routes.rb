@@ -19,6 +19,10 @@ Rails.application.routes.draw do
   get    "/signup", to: "users#new",        as: :signup
   post   "/signup", to: "users#create"
 
+  # OAuth Authentication
+  match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [:get, :post]
+  get "/auth/failure", to: "omniauth_callbacks#failure"
+
   # Posts (Community)
   resources :posts, only: [:index, :show, :new, :create]
 
@@ -30,4 +34,6 @@ Rails.application.routes.draw do
 
   # My Page
   get "my_page", to: "my_page#show", as: :my_page
+  get "my_page/edit", to: "my_page#edit", as: :edit_my_page
+  patch "my_page", to: "my_page#update"
 end
