@@ -4,14 +4,14 @@ class MyPageController < ApplicationController
   def show
     @user = User.includes(:posts, :bookmarks).find(current_user.id)
 
-    # 내가 작성한 글 (최근 10개)
-    @my_posts = @user.posts.published.recent.limit(10)
+    # 내가 작성한 글
+    @my_posts = @user.posts.published.recent.limit(PROFILE_POSTS_LIMIT)
 
-    # 내가 북마크한 글 (최근 10개)
+    # 내가 북마크한 글
     @bookmarked_posts = @user.bookmarks
                              .includes(:bookmarkable)
                              .recent
-                             .limit(10)
+                             .limit(PROFILE_POSTS_LIMIT)
                              .map(&:bookmarkable)
   end
 
@@ -35,7 +35,7 @@ class MyPageController < ApplicationController
     params.require(:user).permit(
       :name, :role_title, :bio, :avatar,
       :affiliation, :skills, :custom_status,
-      :open_chat_url, :github_url, :portfolio_url,
+      :linkedin_url, :github_url, :portfolio_url,
       availability_statuses: []
     )
   end

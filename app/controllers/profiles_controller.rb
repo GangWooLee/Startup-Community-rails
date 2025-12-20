@@ -1,15 +1,17 @@
 class ProfilesController < ApplicationController
   def show
     # N+1 쿼리 방지를 위해 includes 사용
-    @user = User.includes(:posts, :job_posts, :talent_listings)
+    @user = User.includes(:posts)
                 .find(params[:id])
 
     # 각 탭별 데이터 (최신순, 제한)
-    @posts = @user.posts.published.recent.limit(10)
-    @job_posts = @user.job_posts.recent.limit(10)
-    @talent_listings = @user.talent_listings.recent.limit(10)
+    # 커뮤니티 글 (free, question, promotion)
+    @posts = @user.posts.published.where(category: [:free, :question, :promotion]).recent.limit(PROFILE_POSTS_LIMIT)
 
-    # TODO: 로그인 기능 구현 후 current_user로 변경
-    @is_own_profile = false
+    # 외주 글 (hiring, seeking)
+    @outsourcing_posts = @user.posts.published.where(category: [:hiring, :seeking]).recent.limit(PROFILE_POSTS_LIMIT)
+
+    # 현재 사용자가 본인 프로필인지 확인
+    @is_own_profile = logged_in? && current_user.id == @user.id
   end
 end

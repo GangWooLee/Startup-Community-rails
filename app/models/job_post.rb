@@ -1,3 +1,7 @@
+# DEPRECATED: 이 모델은 더 이상 사용되지 않습니다.
+# Post 모델의 category: :hiring으로 대체되었습니다.
+# 데이터 마이그레이션 완료 후 삭제 예정입니다.
+# @see Post model for current implementation
 class JobPost < ApplicationRecord
   # Associations
   belongs_to :user

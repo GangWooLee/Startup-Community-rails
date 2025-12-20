@@ -24,16 +24,19 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "omniauth_callbacks#failure"
 
   # Posts (Community)
-  resources :posts, only: [:index, :show, :new, :create]
+  resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy]
 
   # Profiles
   resources :profiles, only: [:show]
 
-  # Job Posts (Freelance/Outsourcing)
-  resources :job_posts, only: [:index, :show]
+  # Job Posts (Freelance/Outsourcing) - 외주 마켓플레이스 인덱스
+  resources :job_posts, only: [:index]
 
   # My Page
   get "my_page", to: "my_page#show", as: :my_page
   get "my_page/edit", to: "my_page#edit", as: :edit_my_page
   patch "my_page", to: "my_page#update"
+
+  # Settings
+  get "settings", to: "settings#show", as: :settings
 end

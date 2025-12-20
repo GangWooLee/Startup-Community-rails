@@ -1,0 +1,38 @@
+<%# 사용자 아바타 - 재사용 가능한 컴포넌트 %>
+<%# 사용법: render partial: "shared/avatar", locals: { user: @user } %>
+<%# 옵션: %>
+<%#   size: "sm" | "md" | "lg" | "xl" (기본값: "md") %>
+<%#   class_name: 추가 CSS 클래스 %>
+
+<% user = local_assigns[:user] %>
+<% size = local_assigns.fetch(:size, "md") %>
+<% additional_class = local_assigns.fetch(:class_name, "") %>
+
+<%
+  size_classes = {
+    "sm" => "h-8 w-8",
+    "md" => "h-10 w-10",
+    "lg" => "h-12 w-12",
+    "xl" => "h-24 w-24"
+  }
+
+  text_size_classes = {
+    "sm" => "text-sm",
+    "md" => "text-lg",
+    "lg" => "text-xl",
+    "xl" => "text-3xl"
+  }
+
+  container_class = size_classes[size] || size_classes["md"]
+  text_class = text_size_classes[size] || text_size_classes["md"]
+%>
+
+<div class="<%= container_class %> rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0 <%= additional_class %>">
+  <% if user.avatar.attached? %>
+    <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+  <% elsif user.avatar_url.present? %>
+    <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
+  <% else %>
+    <span class="<%= text_class %> font-semibold text-muted-foreground"><%= user.name[0] %></span>
+  <% end %>
+</div>

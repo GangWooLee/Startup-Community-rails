@@ -1,0 +1,149 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
+      <%= link_to my_page_path, class: "text-muted-foreground hover:text-foreground" do %>
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-xl font-bold">설정</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- 1. Notifications -->
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 border-b border-border bg-muted/30">
+        <h3 class="font-semibold text-sm text-muted-foreground">알림</h3>
+      </div>
+      <div class="divide-y divide-border">
+        <div class="px-4 py-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium">푸시 알림 받기</p>
+            <p class="text-xs text-muted-foreground">커뮤니티 활동 및 외주 알림</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked class="sr-only peer" disabled>
+            <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all opacity-50"></div>
+          </label>
+        </div>
+      </div>
+      <div class="px-4 py-2 bg-muted/20">
+        <p class="text-xs text-muted-foreground">알림 기능은 준비 중입니다</p>
+      </div>
+    </div>
+
+    <!-- 2. Support -->
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 border-b border-border bg-muted/30">
+        <h3 class="font-semibold text-sm text-muted-foreground">고객 지원</h3>
+      </div>
+      <div class="divide-y divide-border">
+        <!-- Contact / Report -->
+        <a href="mailto:support@example.com" class="px-4 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-sm font-medium">문의하기 / 신고하기</span>
+          </div>
+          <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+
+        <!-- Terms of Service -->
+        <a href="#" class="px-4 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-sm font-medium">서비스 이용약관</span>
+          </div>
+          <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+
+        <!-- Privacy Policy -->
+        <a href="#" class="px-4 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span class="text-sm font-medium">개인정보 처리방침</span>
+          </div>
+          <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- 3. Account -->
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-4 py-3 border-b border-border bg-muted/30">
+        <h3 class="font-semibold text-sm text-muted-foreground">계정</h3>
+      </div>
+      <div class="divide-y divide-border">
+        <!-- Account Info -->
+        <div class="px-4 py-4">
+          <p class="text-xs text-muted-foreground mb-1">로그인 계정</p>
+          <p class="text-sm font-medium"><%= @user.email %></p>
+          <% if @user.oauth_identities.any? %>
+            <div class="flex items-center gap-2 mt-2">
+              <% @user.oauth_identities.each do |identity| %>
+                <% if identity.provider == "google_oauth2" %>
+                  <span class="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                    </svg>
+                    Google 연결됨
+                  </span>
+                <% elsif identity.provider == "github" %>
+                  <span class="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub 연결됨
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Logout -->
+        <%= button_to logout_path, method: :delete, class: "w-full px-4 py-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left", form: { data: { turbo_confirm: "로그아웃 하시겠습니까?" } } do %>
+          <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          <span class="text-sm font-medium">로그아웃</span>
+        <% end %>
+
+        <!-- Delete Account -->
+        <button type="button" disabled class="w-full px-4 py-4 flex items-center gap-3 hover:bg-destructive/10 transition-colors text-left opacity-50 cursor-not-allowed">
+          <svg class="h-5 w-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          <div>
+            <span class="text-sm font-medium text-destructive">회원 탈퇴</span>
+            <p class="text-xs text-muted-foreground">준비 중</p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Version Info -->
+    <div class="text-center py-4">
+      <p class="text-xs text-muted-foreground">버전 1.0.0 (MVP)</p>
+      <p class="text-xs text-muted-foreground mt-1">가입일: <%= @user.created_at.strftime("%Y년 %m월 %d일") %></p>
+    </div>
+
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>

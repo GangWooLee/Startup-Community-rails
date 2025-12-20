@@ -12,67 +12,21 @@
     <div class="w-full">
       <!-- Tab Headers -->
       <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
-        <button data-tab="jobs" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
+        <button data-tab="hiring" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
           <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 mr-2" } %>
-          구인 (<%= @job_postings.count %>)
+          구인 (<%= @hiring_posts.count %>)
         </button>
-        <button data-tab="talents" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
+        <button data-tab="seeking" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
           <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 mr-2" } %>
-          구직 (<%= @talent_postings.count %>)
+          구직 (<%= @seeking_posts.count %>)
         </button>
       </div>
 
-      <!-- Jobs Tab (구인 공고) -->
-      <div id="tab-jobs" class="tab-content-freelance space-y-4">
-        <% if @job_postings.any? %>
-          <% @job_postings.each do |job| %>
-            <%= link_to job_post_path(job.id) do %>
-              <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
-                <!-- Author Info -->
-                <%= link_to profile_path(job.user_id), class: "flex items-center gap-3 mb-4 group", onclick: "event.stopPropagation()" do %>
-                  <div class="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                    <% if job.user.avatar_url %>
-                      <%= image_tag job.user.avatar_url, alt: job.user.name, class: "h-full w-full object-cover" %>
-                    <% else %>
-                      <span class="text-lg font-semibold"><%= job.user.name[0] %></span>
-                    <% end %>
-                  </div>
-                  <div class="flex-1">
-                    <p class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors"><%= job.user.name %></p>
-                    <% if job.user.role_title.present? %>
-                      <p class="text-xs text-muted-foreground"><%= job.user.role_title %></p>
-                    <% end %>
-                  </div>
-                <% end %>
-
-                <!-- Category & Type Badges -->
-                <div class="flex items-center gap-2 mb-3">
-                  <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 text-primary" } %>
-                  <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                    구인 · <%= job.category_i18n %>
-                  </span>
-                  <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
-                    <%= job.project_type_i18n %>
-                  </span>
-                  <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
-                    <%= job.status_i18n %>
-                  </span>
-                </div>
-
-                <!-- Title & Description -->
-                <h3 class="text-lg font-bold mb-2 text-foreground"><%= job.title %></h3>
-                <p class="text-sm text-muted-foreground mb-4 line-clamp-2"><%= job.description %></p>
-
-                <!-- Meta Info -->
-                <div class="flex items-center gap-4 text-sm text-muted-foreground">
-                  <% if job.budget.present? %>
-                    <span class="font-medium text-primary"><%= job.budget %></span>
-                  <% end %>
-                  <span>조회 <%= job.views_count %></span>
-                  <span class="ml-auto"><%= time_ago_in_words(job.created_at) %> 전</span>
-                </div>
-              </article>
-            <% end %>
+      <!-- Hiring Tab (구인 공고) -->
+      <div id="tab-hiring" class="tab-content-freelance space-y-4">
+        <% if @hiring_posts.any? %>
+          <% @hiring_posts.each do |post| %>
+            <%= render partial: "posts/outsourcing_post_card", locals: { post: post } %>
           <% end %>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
@@ -83,55 +37,11 @@
         <% end %>
       </div>
 
-      <!-- Talents Tab (구직 정보) -->
-      <div id="tab-talents" class="tab-content-freelance space-y-4 hidden">
-        <% if @talent_postings.any? %>
-          <% @talent_postings.each do |talent| %>
-            <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer">
-              <!-- Author Info -->
-              <%= link_to profile_path(talent.user_id), class: "flex items-center gap-3 mb-4 group" do %>
-                <div class="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <% if talent.user.avatar_url %>
-                    <%= image_tag talent.user.avatar_url, alt: talent.user.name, class: "h-full w-full object-cover" %>
-                  <% else %>
-                    <span class="text-lg font-semibold"><%= talent.user.name[0] %></span>
-                  <% end %>
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors"><%= talent.user.name %></p>
-                  <% if talent.user.role_title.present? %>
-                    <p class="text-xs text-muted-foreground"><%= talent.user.role_title %></p>
-                  <% end %>
-                </div>
-              <% end %>
-
-              <!-- Category & Type Badges -->
-              <div class="flex items-center gap-2 mb-3">
-                <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 text-primary" } %>
-                <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                  구직 · <%= talent.category_i18n %>
-                </span>
-                <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
-                  <%= talent.project_type_i18n %>
-                </span>
-                <span class="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold">
-                  <%= talent.status_i18n %>
-                </span>
-              </div>
-
-              <!-- Title & Description -->
-              <h3 class="text-lg font-bold mb-2 text-foreground"><%= talent.title %></h3>
-              <p class="text-sm text-muted-foreground mb-4 line-clamp-2"><%= talent.description %></p>
-
-              <!-- Meta Info -->
-              <div class="flex items-center gap-4 text-sm text-muted-foreground">
-                <% if talent.rate.present? %>
-                  <span class="font-medium text-primary"><%= talent.rate %></span>
-                <% end %>
-                <span>조회 <%= talent.views_count %></span>
-                <span class="ml-auto"><%= time_ago_in_words(talent.created_at) %> 전</span>
-              </div>
-            </article>
+      <!-- Seeking Tab (구직 정보) -->
+      <div id="tab-seeking" class="tab-content-freelance space-y-4 hidden">
+        <% if @seeking_posts.any? %>
+          <% @seeking_posts.each do |post| %>
+            <%= render partial: "posts/outsourcing_post_card", locals: { post: post } %>
           <% end %>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
@@ -153,23 +63,23 @@
     const tabTriggers = document.querySelectorAll('.tab-trigger-freelance');
     const tabContents = document.querySelectorAll('.tab-content-freelance');
 
-    // Initialize: ensure jobs tab is visible and button is selected by default
-    const jobsTab = document.getElementById('tab-jobs');
-    const talentsTab = document.getElementById('tab-talents');
-    const jobsButton = document.querySelector('[data-tab="jobs"]');
-    const talentsButton = document.querySelector('[data-tab="talents"]');
+    // Initialize: ensure hiring tab is visible and button is selected by default
+    const hiringTab = document.getElementById('tab-hiring');
+    const seekingTab = document.getElementById('tab-seeking');
+    const hiringButton = document.querySelector('[data-tab="hiring"]');
+    const seekingButton = document.querySelector('[data-tab="seeking"]');
 
-    if (jobsTab && talentsTab) {
-      // Show jobs content, hide talents content
-      jobsTab.classList.remove('hidden');
-      talentsTab.classList.add('hidden');
+    if (hiringTab && seekingTab) {
+      // Show hiring content, hide seeking content
+      hiringTab.classList.remove('hidden');
+      seekingTab.classList.add('hidden');
     }
 
-    if (jobsButton && talentsButton) {
-      // Set jobs button as active
-      jobsButton.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
-      // Ensure talents button is not active
-      talentsButton.classList.remove('active', 'bg-background', 'text-foreground', 'shadow');
+    if (hiringButton && seekingButton) {
+      // Set hiring button as active
+      hiringButton.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
+      // Ensure seeking button is not active
+      seekingButton.classList.remove('active', 'bg-background', 'text-foreground', 'shadow');
     }
 
     tabTriggers.forEach(trigger => {

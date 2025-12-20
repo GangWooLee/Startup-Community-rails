@@ -8,11 +8,7 @@ class User < ApplicationRecord
   # 활동 상태 옵션 (다중 선택 가능)
   AVAILABILITY_OPTIONS = {
     "available_for_work" => { label: "외주 가능", color: "bg-green-500" },
-    "looking_for_team" => { label: "팀 구하는 중", color: "bg-blue-500" },
-    "hiring" => { label: "팀원 모집 중", color: "bg-purple-500" },
-    "open_to_collaborate" => { label: "협업 환영", color: "bg-teal-500" },
-    "employed" => { label: "재직 중", color: "bg-gray-500" },
-    "student" => { label: "학생", color: "bg-orange-500" }
+    "hiring" => { label: "팀원 모집 중", color: "bg-purple-500" }
   }.freeze
 
   # Associations
@@ -33,7 +29,7 @@ class User < ApplicationRecord
   validates :role_title, length: { maximum: 50 }, allow_blank: true
   validates :affiliation, length: { maximum: 50 }, allow_blank: true
   validates :skills, length: { maximum: 200 }, allow_blank: true
-  validates :custom_status, length: { maximum: 30 }, allow_blank: true
+  validates :custom_status, length: { maximum: 10 }, allow_blank: true
 
   # Callbacks
   before_save :downcase_email

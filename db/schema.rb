@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_19_154825) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_20_135128) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -105,15 +105,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_154825) do
   end
 
   create_table "posts", force: :cascade do |t|
+    t.integer "category", default: 0, null: false
     t.integer "comments_count", default: 0
     t.text "content", null: false
     t.datetime "created_at", null: false
     t.integer "likes_count", default: 0
+    t.integer "price"
+    t.boolean "price_negotiable", default: false
+    t.string "service_type"
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.integer "views_count", default: 0
+    t.string "work_period"
+    t.index ["category"], name: "index_posts_on_category"
     t.index ["created_at"], name: "index_posts_on_created_at"
     t.index ["status"], name: "index_posts_on_status"
     t.index ["user_id", "created_at"], name: "index_posts_on_user_id_and_created_at"
@@ -148,8 +154,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_19_154825) do
     t.string "email", null: false
     t.string "github_url"
     t.datetime "last_sign_in_at"
+    t.string "linkedin_url"
     t.string "name", null: false
-    t.string "open_chat_url"
     t.string "password_digest", null: false
     t.string "portfolio_url"
     t.string "provider"

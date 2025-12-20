@@ -1,0 +1,64 @@
+<%# 외주 글 카드 (구인/구직) - 재사용 가능한 컴포넌트 %>
+<%# 사용법: render partial: "posts/outsourcing_post_card", locals: { post: @post } %>
+<%# 옵션: show_author: true/false (기본값: true) - 작성자 정보 표시 여부 %>
+
+<% show_author = local_assigns.fetch(:show_author, true) %>
+
+<%= link_to post_path(post) do %>
+  <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/50 transition-all cursor-pointer mb-4">
+    <% if show_author %>
+      <!-- Author Info -->
+      <%= link_to profile_path(post.user_id), class: "flex items-center gap-3 mb-4 group", onclick: "event.stopPropagation()" do %>
+        <div class="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+          <% if post.user.avatar.attached? %>
+            <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
+          <% elsif post.user.avatar_url.present? %>
+            <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
+          <% else %>
+            <span class="text-lg font-semibold"><%= post.user.name[0] %></span>
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <p class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors"><%= post.user.name %></p>
+          <% if post.user.role_title.present? %>
+            <p class="text-xs text-muted-foreground"><%= post.user.role_title %></p>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <!-- Category & Service Type Badges -->
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <% if post.hiring? %>
+        <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 text-blue-500" } %>
+        <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-2.5 py-0.5 text-xs font-semibold">
+          구인
+        </span>
+      <% else %>
+        <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 text-green-500" } %>
+        <span class="inline-flex items-center rounded-md bg-green-500/10 text-green-600 px-2.5 py-0.5 text-xs font-semibold">
+          구직
+        </span>
+      <% end %>
+      <% if post.service_type.present? %>
+        <span class="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+          <%= Post::SERVICE_TYPES[post.service_type] %>
+        </span>
+      <% end %>
+    </div>
+
+    <!-- Title & Content -->
+    <h3 class="text-lg font-bold mb-2 text-foreground"><%= post.title %></h3>
+    <p class="text-sm text-muted-foreground mb-4 line-clamp-2"><%= post.content %></p>
+
+    <!-- Meta Info -->
+    <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+      <span class="font-medium text-primary"><%= post.price_display %></span>
+      <% if post.work_period.present? %>
+        <span>기간: <%= post.work_period %></span>
+      <% end %>
+      <span>조회 <%= post.views_count %></span>
+      <span class="ml-auto"><%= time_ago_in_words(post.created_at) %> 전</span>
+    </div>
+  </article>
+<% end %>

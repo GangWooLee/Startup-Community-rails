@@ -38,7 +38,10 @@
       "Bash(rails generate:*)",
       "Bash(rails db:migrate:*)",
       "Bash(rails active_storage:install:*)",
-      "Bash(rails db:rollback:*)"
+      "Bash(rails db:rollback:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n[feat] OAuth 소셜 로그인 및 프로필 시스템 구현\n\n## OAuth 소셜 로그인\n- Google OAuth2, GitHub OAuth 로그인 지원\n- 같은 이메일은 같은 계정으로 통합 \\(oauth_identities 테이블\\)\n- 회원가입/로그인 페이지에 소셜 로그인 버튼 추가\n- CSRF, Turbo 호환 문제 해결\n\n## 프로필 시스템 개선\n- Active Storage 기반 프로필 이미지 업로드\n- 프로필 수정 페이지 \\(edit_my_page_path\\)\n- 3탭 구조 프로필 페이지 \\(소개/커뮤니티 글/외주공고\\)\n\n## 활동 상태 \\(다중 선택\\)\n- 6가지 기본 상태: 외주 가능, 팀 구하는 중, 팀원 모집 중, 협업 환영, 재직 중, 학생\n- 기타 상태 직접 입력 가능 \\(custom_status\\)\n- 체크박스 UI로 여러 상태 동시 선택\n\n## 새 필드\n- affiliation: 소속\n- skills: 기술 스택 \\(쉼표 구분\\)\n- open_chat_url, github_url, portfolio_url: 연락처 링크\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(bin/rails runner:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
