@@ -8,44 +8,29 @@
 
 <article class="bg-card rounded-xl p-6 border border-border hover:border-muted-foreground/20 transition-colors">
   <% if show_author %>
-    <!-- Author Info & Category Badge -->
-    <div class="flex items-start justify-between mb-4">
-      <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 group flex-1" do %>
-        <div class="h-10 w-10 rounded-full ring-2 ring-background group-hover:ring-primary/20 transition-all overflow-hidden bg-secondary flex items-center justify-center">
-          <% if post.user.avatar.attached? %>
-            <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
-          <% elsif post.user.avatar_url.present? %>
-            <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
-          <% else %>
-            <span class="text-lg font-semibold"><%= post.user.name[0] %></span>
+    <!-- Author Info -->
+    <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 group mb-4" do %>
+      <div class="h-10 w-10 rounded-full ring-2 ring-background group-hover:ring-primary/20 transition-all overflow-hidden bg-secondary flex items-center justify-center">
+        <% if post.user.avatar.attached? %>
+          <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
+        <% elsif post.user.avatar_url.present? %>
+          <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
+        <% else %>
+          <span class="text-lg font-semibold"><%= post.user.name[0] %></span>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2">
+          <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.name %></h3>
+          <% if post.user.role_title.present? %>
+            <span class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+              <%= post.user.role_title %>
+            </span>
           <% end %>
         </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.name %></h3>
-            <% if post.user.role_title.present? %>
-              <span class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                <%= post.user.role_title %>
-              </span>
-            <% end %>
-          </div>
-          <p class="text-xs text-muted-foreground"><%= time_ago_in_words(post.created_at) %> 전</p>
-        </div>
-      <% end %>
-
-      <!-- Category Badge (커뮤니티 카테고리만) -->
-      <%
-        badge_class = case post.category
-        when 'free' then 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-        when 'question' then 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-        when 'promotion' then 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-        else 'bg-secondary text-secondary-foreground'
-        end
-      %>
-      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= badge_class %>">
-        <%= post.category_label %>
-      </span>
-    </div>
+        <p class="text-xs text-muted-foreground"><%= time_ago_in_words(post.created_at) %> 전</p>
+      </div>
+    <% end %>
   <% end %>
 
   <!-- Post Content -->
