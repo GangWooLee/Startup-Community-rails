@@ -101,9 +101,9 @@
             <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
             문의하기
           </button>
-          <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2">
-            <%= render partial: "shared/icons/bookmark", locals: { css_class: "h-4 w-4" } %>
-          </button>
+          <div class="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm h-11 px-2">
+            <%= render partial: "shared/bookmark_button", locals: { post: @post, bookmarked: logged_in? ? @post.bookmarked_by?(current_user) : false, size: "sm" } %>
+          </div>
           <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2">
             <%= render partial: "shared/icons/share", locals: { css_class: "h-4 w-4" } %>
           </button>
@@ -120,9 +120,7 @@
         <button class="inline-flex items-center gap-2 px-4 py-2 rounded-md hover:bg-secondary transition-colors text-foreground ml-auto">
           <%= render partial: "shared/icons/share", locals: { css_class: "h-5 w-5" } %>
         </button>
-        <button class="inline-flex items-center gap-2 px-4 py-2 rounded-md hover:bg-secondary transition-colors text-foreground">
-          <%= render partial: "shared/icons/bookmark", locals: { css_class: "h-5 w-5" } %>
-        </button>
+        <%= render partial: "shared/bookmark_button", locals: { post: @post, bookmarked: logged_in? ? @post.bookmarked_by?(current_user) : false } %>
       </div>
     </article>
 

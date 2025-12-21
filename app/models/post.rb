@@ -103,4 +103,29 @@ class Post < ApplicationRecord
       true # 좋아요 추가됨
     end
   end
+
+  # 특정 사용자가 이 글을 스크랩했는지 확인
+  def bookmarked_by?(user)
+    return false unless user
+    bookmarks.exists?(user_id: user.id)
+  end
+
+  # 스크랩 토글 (스크랩 추가/취소)
+  def toggle_bookmark!(user)
+    return nil unless user
+
+    existing_bookmark = bookmarks.find_by(user_id: user.id)
+    if existing_bookmark
+      existing_bookmark.destroy
+      false # 스크랩 취소됨
+    else
+      bookmarks.create!(user_id: user.id)
+      true # 스크랩 추가됨
+    end
+  end
+
+  # 스크랩 수
+  def bookmarks_count
+    bookmarks.count
+  end
 end

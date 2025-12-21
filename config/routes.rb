@@ -25,8 +25,10 @@ Rails.application.routes.draw do
 
   # Posts (Community)
   resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
-    # 좋아요 토글
-    post :like, to: "likes#toggle", on: :member
+    member do
+      post :like, to: "likes#toggle"
+      post :bookmark, to: "bookmarks#toggle"
+    end
   end
 
   # Profiles
