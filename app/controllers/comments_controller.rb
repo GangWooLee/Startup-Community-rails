@@ -115,7 +115,8 @@ class CommentsController < ApplicationController
             locals: { comment: @comment, post: @post, current_user: current_user }
           ),
           turbo_stream.update("comments-count", @post.reload.comments_count.to_s),
-          turbo_stream.replace("comment-form", partial: "comments/form", locals: { post: @post, comment: Comment.new })
+          turbo_stream.replace("comment-form", partial: "comments/form", locals: { post: @post, comment: Comment.new }),
+          turbo_stream.remove("comments-empty")
         ]
       end
     when :destroy
