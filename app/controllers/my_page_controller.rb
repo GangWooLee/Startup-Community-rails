@@ -5,15 +5,20 @@ class MyPageController < ApplicationController
   def show
     @user = User.includes(:posts, :bookmarks).find(current_user.id)
 
-    # 내가 작성한 글
-    @my_posts = @user.posts.published.recent.limit(PROFILE_POSTS_LIMIT)
+    # 내가 작성한 글 (커뮤니티 / 외주 분리)
+    my_posts = @user.posts.published.recent.limit(PROFILE_POSTS_LIMIT)
+    @my_community_posts = my_posts.select(&:community?)
+    @my_outsourcing_posts = my_posts.select(&:outsourcing?)
 
-    # 내가 북마크한 글
-    @bookmarked_posts = @user.bookmarks
-                             .includes(:bookmarkable)
-                             .recent
-                             .limit(PROFILE_POSTS_LIMIT)
-                             .map(&:bookmarkable)
+    # 내가 북마크한 글 (커뮤니티 / 외주 분리)
+    bookmarked_posts = @user.bookmarks
+                            .includes(:bookmarkable)
+                            .recent
+                            .limit(PROFILE_POSTS_LIMIT)
+                            .map(&:bookmarkable)
+                            .compact
+    @bookmarked_community_posts = bookmarked_posts.select { |p| p.is_a?(Post) && p.community? }
+    @bookmarked_outsourcing_posts = bookmarked_posts.select { |p| p.is_a?(Post) && p.outsourcing? }
   end
 
   def edit
