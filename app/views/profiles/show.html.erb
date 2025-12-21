@@ -1,3 +1,7 @@
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
 <div class="min-h-screen bg-background pb-20">
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
@@ -186,7 +190,7 @@
       <div id="tab-posts" class="tab-content space-y-4 hidden">
         <% if @posts.any? %>
           <% @posts.each do |post| %>
-            <%= render partial: "posts/community_post_card", locals: { post: post, show_author: false, show_actions: false } %>
+            <%= render partial: "posts/community_post_card", locals: { post: post, show_author: false, show_actions: true } %>
           <% end %>
         <% else %>
           <div class="text-center py-12 text-muted-foreground">
