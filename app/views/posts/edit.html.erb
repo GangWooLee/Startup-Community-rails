@@ -72,7 +72,7 @@
               </svg>
               첨부 이미지
             </label>
-            <span class="text-xs text-muted-foreground" data-image-upload-target="counter"><%= @post.images.attached? ? @post.images.count : 0 %>/5</span>
+            <span id="image-counter" class="text-xs text-muted-foreground" data-image-upload-target="counter"><%= @post.images.attached? ? @post.images.count : 0 %>/5</span>
           </div>
 
           <!-- Image Preview Area (기존 + 새 이미지) -->
@@ -82,17 +82,20 @@
           >
             <!-- 기존 이미지 -->
             <% if @post.images.attached? %>
-              <% @post.images.each do |image| %>
-                <div id="image-<%= image.id %>" class="relative aspect-square rounded-lg overflow-hidden bg-secondary" data-image-upload-target="existingImage">
-                  <%= image_tag image, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
-                  <%= button_to remove_image_post_path(@post, image_id: image.id),
-                      method: :delete,
-                      form: { data: { turbo_confirm: "이 이미지를 삭제하시겠습니까?" } },
-                      class: "absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors" do %>
+              <% @post.images.attachments.each do |attachment| %>
+                <div id="image-<%= attachment.id %>"
+                     class="relative aspect-square rounded-lg overflow-hidden bg-secondary"
+                     data-image-upload-target="existingImage"
+                     data-controller="image-delete"
+                     data-image-delete-url-value="<%= remove_image_post_path(@post, image_id: attachment.id) %>">
+                  <%= image_tag attachment, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
+                  <button type="button"
+                          class="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
+                          data-action="click->image-delete#delete">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                  <% end %>
+                  </button>
                 </div>
               <% end %>
             <% end %>

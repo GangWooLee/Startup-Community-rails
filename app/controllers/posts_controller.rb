@@ -71,6 +71,14 @@ class PostsController < ApplicationController
       permitted_params[:price_negotiable] = false
     end
 
+    # 새 이미지가 업로드된 경우에만 추가 (기존 이미지 유지)
+    if permitted_params[:images].present?
+      @post.images.attach(permitted_params[:images])
+      permitted_params.delete(:images)
+    else
+      permitted_params.delete(:images)
+    end
+
     if @post.update(permitted_params)
       redirect_to post_path(@post), notice: '게시글이 수정되었습니다.'
     else
@@ -85,15 +93,25 @@ class PostsController < ApplicationController
   end
 
   def remove_image
-    image = @post.images.find_by(id: params[:image_id])
-    if image
-      image.purge
+    # Active Storage attachment를 ID로 찾기
+    attachment = @post.images.attachments.find_by(id: params[:image_id])
+    if attachment
+      attachment.purge
+      @post.reload # 이미지 카운트 갱신
       respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.remove("image-#{params[:image_id]}") }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.remove("image-#{params[:image_id]}"),
+            turbo_stream.update("image-counter", "#{@post.images.count}/5")
+          ]
+        end
         format.html { redirect_to edit_post_path(@post), notice: '이미지가 삭제되었습니다.' }
       end
     else
-      redirect_to edit_post_path(@post), alert: '이미지를 찾을 수 없습니다.'
+      respond_to do |format|
+        format.turbo_stream { head :not_found }
+        format.html { redirect_to edit_post_path(@post), alert: '이미지를 찾을 수 없습니다.' }
+      end
     end
   end
 
