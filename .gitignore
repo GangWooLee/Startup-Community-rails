@@ -34,3 +34,8 @@
 /config/*.key
 
 /.env
+
+# ClaudeOnRails
+.claude-on-rails/sessions/
+.claude-swarm/
+claude-swarm.log

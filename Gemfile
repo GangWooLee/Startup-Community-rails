@@ -68,6 +68,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Claude AI integration for Rails development [https://github.com/obie/claude-on-rails]
+  gem "claude-on-rails"
 end
 
 group :test do
