@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ["input", "results", "loading", "clearButton"]
   static values = {
     url: String,
-    debounceMs: { type: Number, default: 300 }
+    debounceMs: { type: Number, default: 150 }
   }
 
   connect() {
