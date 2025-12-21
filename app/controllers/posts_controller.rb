@@ -49,7 +49,12 @@ class PostsController < ApplicationController
     end
 
     if @post.save
-      redirect_to posts_path, notice: '게시글이 작성되었습니다.'
+      # 카테고리에 따라 적절한 페이지로 리다이렉트
+      if @post.outsourcing?
+        redirect_to job_posts_path, notice: '게시글이 작성되었습니다.'
+      else
+        redirect_to community_path, notice: '게시글이 작성되었습니다.'
+      end
     else
       @initial_type = @post.outsourcing? ? 'outsourcing' : 'community'
       render :new, status: :unprocessable_entity
