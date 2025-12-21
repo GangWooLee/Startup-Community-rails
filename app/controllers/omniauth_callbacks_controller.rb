@@ -15,7 +15,7 @@ class OmniauthCallbacksController < ApplicationController
 
       # origin 파라미터 또는 쿠키에서 리디렉션 URL 가져오기
       origin_url = request.env["omniauth.origin"] || cookies.delete(:return_to)
-      redirect_url = origin_url.presence || root_path
+      redirect_url = origin_url.presence || community_path
 
       Rails.logger.info "OAuth login successful: #{provider_name} - User #{@user.id} - Redirecting to: #{redirect_url}"
       redirect_to redirect_url

@@ -9,13 +9,16 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Onboarding Flow (비로그인 사용자용)
-  get "welcome", to: "onboarding#landing", as: :onboarding_landing
+  # Root path - Onboarding Landing (메인 진입점)
+  root "onboarding#landing"
+
+  # Onboarding Flow (별도 named route도 제공)
+  get "onboarding", to: "onboarding#landing", as: :onboarding_landing
   get "ai/input", to: "onboarding#ai_input", as: :onboarding_ai_input
   get "ai/result", to: "onboarding#ai_result", as: :onboarding_ai_result
 
-  # Root path - Community Home
-  root "posts#index"
+  # Community (커뮤니티)
+  get "community", to: "posts#index", as: :community
 
   # Authentication
   get    "/login",  to: "sessions#new",     as: :login

@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     if @user.save
       log_in(@user)
       flash[:notice] = "회원가입이 완료되었습니다. 환영합니다!"
-      redirect_back_or(root_path)
+      redirect_back_or(community_path)
     else
       flash.now[:alert] = "회원가입에 실패했습니다. 입력 내용을 확인해주세요."
       render :new, status: :unprocessable_entity

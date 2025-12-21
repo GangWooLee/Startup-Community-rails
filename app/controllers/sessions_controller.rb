@@ -20,7 +20,7 @@ class SessionsController < ApplicationController
     if user&.authenticate(params[:password])
       log_in(user)
       flash[:notice] = "로그인되었습니다. 환영합니다, #{user.name}님!"
-      redirect_back_or(root_path)
+      redirect_back_or(community_path)
     else
       flash.now[:alert] = "이메일 또는 비밀번호가 올바르지 않습니다."
       render :new, status: :unprocessable_entity

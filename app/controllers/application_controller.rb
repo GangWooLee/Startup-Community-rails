@@ -68,7 +68,7 @@ class ApplicationController < ActionController::Base
   def require_no_login
     if logged_in?
       flash[:notice] = "이미 로그인되어 있습니다."
-      redirect_back_or(root_path)
+      redirect_back_or(community_path)
     end
   end
 

@@ -2,8 +2,8 @@
   <div class="max-w-screen-xl mx-auto px-4">
     <div class="flex items-center justify-around h-16">
       <!-- Home/Community -->
-      <% is_active_home = current_page?(root_path) %>
-      <%= link_to root_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_home ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+      <% is_active_home = current_page?(community_path) || current_page?(posts_path) %>
+      <%= link_to community_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_home ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
         <%= render partial: "shared/icons/home", locals: { css_class: "h-5 w-5" } %>
         <span class="text-xs font-medium">커뮤니티</span>
       <% end %>
