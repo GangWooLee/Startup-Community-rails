@@ -2,8 +2,8 @@ class OnboardingController < ApplicationController
   # 온보딩은 비로그인 상태에서도 접근 가능 (require_login 사용 안함)
 
   def landing
-    # 이미 로그인한 사용자는 커뮤니티로 리디렉션
-    redirect_to root_path if logged_in?
+    # 로그인한 사용자도 온보딩 플로우 사용 가능 (AI 분석 기능)
+    # 별도 리디렉션 없음
   end
 
   def ai_input

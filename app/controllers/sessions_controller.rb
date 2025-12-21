@@ -3,7 +3,14 @@ class SessionsController < ApplicationController
 
   # GET /login
   def new
-    # Renders the login form
+    # URL 파라미터로 return_to가 전달된 경우 쿠키에 저장
+    if params[:return_to].present?
+      cookies[:return_to] = {
+        value: params[:return_to],
+        expires: 10.minutes.from_now,
+        path: "/"
+      }
+    end
   end
 
   # POST /login

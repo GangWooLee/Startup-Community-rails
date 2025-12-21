@@ -13,8 +13,12 @@ class OmniauthCallbacksController < ApplicationController
       # 세션에 사용자 ID 저장
       session[:user_id] = @user.id
 
-      Rails.logger.info "OAuth login successful: #{provider_name} - User #{@user.id}"
-      redirect_back_or(root_path)
+      # origin 파라미터 또는 쿠키에서 리디렉션 URL 가져오기
+      origin_url = request.env["omniauth.origin"] || cookies.delete(:return_to)
+      redirect_url = origin_url.presence || root_path
+
+      Rails.logger.info "OAuth login successful: #{provider_name} - User #{@user.id} - Redirecting to: #{redirect_url}"
+      redirect_to redirect_url
       flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다!"
     else
       # 사용자 저장 실패 (이메일 중복 등)
