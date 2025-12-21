@@ -45,9 +45,9 @@ export default class extends Controller {
     this.slideTargets.forEach((slide, index) => {
       if (index === this.indexValue) {
         slide.classList.remove('hidden')
-        slide.classList.add('flex')
+        slide.classList.add('block')
       } else {
-        slide.classList.remove('flex')
+        slide.classList.remove('block')
         slide.classList.add('hidden')
       }
     })

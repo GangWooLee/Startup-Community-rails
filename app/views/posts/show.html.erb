@@ -113,11 +113,11 @@
             <!-- 다중 이미지: 캐러셀 -->
             <div class="flex justify-center">
               <div class="relative w-1/2" data-controller="image-carousel">
-                <!-- 이미지 슬라이드 (4:3 고정 비율) -->
-                <div class="relative overflow-hidden rounded-lg bg-secondary aspect-[4/3]">
+                <!-- 이미지 슬라이드 -->
+                <div class="relative overflow-hidden rounded-lg bg-secondary">
                   <% images.each_with_index do |image, index| %>
-                    <div class="<%= index == 0 ? 'flex' : 'hidden' %> absolute inset-0 items-center justify-center" data-image-carousel-target="slide">
-                      <%= image_tag image, class: "max-w-full max-h-full object-contain cursor-pointer hover:opacity-90 transition-opacity", alt: "첨부 이미지 #{index + 1}", data: { action: "click->image-lightbox#open", index: index } %>
+                    <div class="<%= index == 0 ? 'block' : 'hidden' %>" data-image-carousel-target="slide">
+                      <%= image_tag image, class: "w-full cursor-pointer hover:opacity-90 transition-opacity", alt: "첨부 이미지 #{index + 1}", data: { action: "click->image-lightbox#open", index: index } %>
                     </div>
                   <% end %>
 
