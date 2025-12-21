@@ -39,23 +39,32 @@ class ApplicationController < ActionController::Base
   # Before action to require login for protected routes
   def require_login
     unless logged_in?
-      # 로그인 후 원래 목적지로 돌아가기 위해 URL 저장
-      session[:return_to] = request.original_url if request.get?
+      # 로그인 후 원래 목적지로 돌아가기 위해 URL 저장 (쿠키 사용 - OAuth에서도 유지됨)
+      store_location if request.get?
       flash[:alert] = "로그인이 필요합니다."
       redirect_to login_path
     end
   end
 
+  # 현재 URL을 쿠키에 저장
+  def store_location
+    cookies[:return_to] = {
+      value: request.original_url,
+      expires: 10.minutes.from_now
+    }
+  end
+
   # 저장된 URL로 리디렉션하거나 기본 경로로 이동
   def redirect_back_or(default)
-    redirect_to(session.delete(:return_to) || default)
+    return_url = cookies.delete(:return_to)
+    redirect_to(return_url || default)
   end
 
   # Before action to redirect logged-in users (for login/signup pages)
   def require_no_login
     if logged_in?
       flash[:notice] = "이미 로그인되어 있습니다."
-      redirect_to root_path
+      redirect_back_or(root_path)
     end
   end
 
