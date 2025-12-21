@@ -79,17 +79,19 @@
 
       <!-- Outsourcing Info (구인/구직일 때만 표시) -->
       <% if @post.outsourcing? %>
-        <div class="bg-secondary/50 rounded-lg p-4 mb-6 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">예산/금액</span>
-            <span class="text-lg font-bold text-primary"><%= @post.price_display %></span>
-          </div>
-          <% if @post.work_period.present? %>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-muted-foreground">예상 기간</span>
-              <span class="font-medium text-foreground"><%= @post.work_period %></span>
+        <div class="bg-secondary/50 rounded-lg p-4 mb-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-xs text-muted-foreground block mb-1">예산/금액</span>
+              <span class="text-base font-bold text-primary"><%= @post.price_display %></span>
             </div>
-          <% end %>
+            <% if @post.work_period.present? %>
+              <div>
+                <span class="text-xs text-muted-foreground block mb-1">예상 기간</span>
+                <span class="text-base font-medium text-foreground"><%= @post.work_period %></span>
+              </div>
+            <% end %>
+          </div>
         </div>
       <% end %>
 
@@ -100,16 +102,10 @@
 
       <!-- Outsourcing Contact Button -->
       <% if @post.outsourcing? %>
-        <div class="flex gap-3 mb-6">
-          <button class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8">
+        <div class="mb-6">
+          <button class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8">
             <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
             문의하기
-          </button>
-          <div class="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm h-11 px-2">
-            <%= render partial: "shared/bookmark_button", locals: { post: @post, bookmarked: logged_in? ? @post.bookmarked_by?(current_user) : false, size: "sm" } %>
-          </div>
-          <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2">
-            <%= render partial: "shared/icons/share", locals: { css_class: "h-4 w-4" } %>
           </button>
         </div>
       <% end %>
