@@ -48,15 +48,19 @@ class ApplicationController < ActionController::Base
 
   # 현재 URL을 쿠키에 저장
   def store_location
+    url = request.original_url
+    Rails.logger.info "[AUTH] Storing return_to: #{url}"
     cookies[:return_to] = {
-      value: request.original_url,
-      expires: 10.minutes.from_now
+      value: url,
+      expires: 10.minutes.from_now,
+      path: "/"  # 전체 경로에서 유효
     }
   end
 
   # 저장된 URL로 리디렉션하거나 기본 경로로 이동
   def redirect_back_or(default)
     return_url = cookies.delete(:return_to)
+    Rails.logger.info "[AUTH] Redirecting to: #{return_url || default} (cookie was: #{return_url.inspect})"
     redirect_to(return_url || default)
   end
 
