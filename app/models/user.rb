@@ -5,6 +5,20 @@ class User < ApplicationRecord
   # Active Storage - 프로필 이미지
   has_one_attached :avatar
 
+  # 아바타 파일 검증 (보안: 악성 파일 업로드 방지)
+  MAX_AVATAR_SIZE = 2.megabytes
+  ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"].freeze
+
+  validates :avatar,
+    content_type: {
+      in: ALLOWED_AVATAR_TYPES,
+      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
+    },
+    size: {
+      less_than: MAX_AVATAR_SIZE,
+      message: "는 2MB 이하만 허용됩니다"
+    }
+
   # 활동 상태 옵션 (다중 선택 가능)
   AVAILABILITY_OPTIONS = {
     "available_for_work" => { label: "외주 가능", color: "bg-green-500" },
@@ -21,16 +35,28 @@ class User < ApplicationRecord
   has_many :bookmarks, dependent: :destroy
   has_many :bookmarked_posts, through: :bookmarks, source: :bookmarkable, source_type: "Post"
 
+  # 비밀번호 정책 상수
+  MIN_PASSWORD_LENGTH = 8
+
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true, length: { minimum: 1, maximum: 50 }
-  # 일반 로그인 사용자만 비밀번호 필수
-  validates :password, length: { minimum: 6 }, if: -> { password.present? && provider.blank? }
+  # 일반 로그인 사용자만 비밀번호 필수 (최소 8자, 영문+숫자 조합 권장)
+  validates :password,
+    length: { minimum: MIN_PASSWORD_LENGTH, message: "는 최소 #{MIN_PASSWORD_LENGTH}자 이상이어야 합니다" },
+    if: -> { password.present? && provider.blank? }
+  validate :password_complexity, if: -> { password.present? && provider.blank? }
   validates :bio, length: { maximum: 500 }, allow_blank: true
   validates :role_title, length: { maximum: 50 }, allow_blank: true
   validates :affiliation, length: { maximum: 50 }, allow_blank: true
   validates :skills, length: { maximum: 200 }, allow_blank: true
   validates :custom_status, length: { maximum: 10 }, allow_blank: true
+
+  # URL 형식 검증 (빈 값 허용)
+  validates :linkedin_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
+  validates :github_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
+  validates :portfolio_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
+  validates :open_chat_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
 
   # Callbacks
   before_save :downcase_email
@@ -44,38 +70,42 @@ class User < ApplicationRecord
   # 1. oauth_identities에서 provider + uid로 기존 연결 찾기
   # 2. 없으면 이메일로 기존 사용자 찾고, OAuth 연결 추가
   # 3. 없으면 새 사용자 생성 + OAuth 연결 추가
+  # 보안: 트랜잭션으로 데이터 무결성 보장
   def self.from_omniauth(auth)
     email = auth.info.email&.downcase
     provider = auth.provider
     uid = auth.uid
 
-    # 1. oauth_identities에서 찾기
+    # 1. oauth_identities에서 찾기 (트랜잭션 외부 - 읽기만)
     identity = OauthIdentity.find_by(provider: provider, uid: uid)
     if identity
       # 기존 사용자는 프로필 사진 덮어쓰지 않음 (사용자가 직접 관리)
       return identity.user
     end
 
-    # 2. 이메일로 기존 사용자 찾기
-    user = find_by(email: email)
+    # 2, 3단계는 트랜잭션으로 묶어서 원자성 보장
+    transaction do
+      # 2. 이메일로 기존 사용자 찾기
+      user = find_by(email: email)
 
-    if user
-      # 기존 사용자에게 새 OAuth 연결 추가
+      if user
+        # 기존 사용자에게 새 OAuth 연결 추가
+        user.oauth_identities.create!(provider: provider, uid: uid)
+        # 프로필 사진이 없을 때만 OAuth 사진 사용
+        user.update(avatar_url: auth.info.image) if user.avatar_url.blank? && auth.info.image.present?
+        return user
+      end
+
+      # 3. 새 사용자 생성 + OAuth 연결 (최초 가입 시에만 OAuth 사진 사용)
+      user = create!(
+        email: email,
+        name: auth.info.name || auth.info.nickname || "User",
+        password: SecureRandom.hex(20),
+        avatar_url: auth.info.image
+      )
       user.oauth_identities.create!(provider: provider, uid: uid)
-      # 프로필 사진이 없을 때만 OAuth 사진 사용
-      user.update(avatar_url: auth.info.image) if user.avatar_url.blank? && auth.info.image.present?
-      return user
+      user
     end
-
-    # 3. 새 사용자 생성 + OAuth 연결 (최초 가입 시에만 OAuth 사진 사용)
-    user = create!(
-      email: email,
-      name: auth.info.name || auth.info.nickname || "User",
-      password: SecureRandom.hex(20),
-      avatar_url: auth.info.image
-    )
-    user.oauth_identities.create!(provider: provider, uid: uid)
-    user
   end
 
   # OAuth 사용자인지 확인
@@ -162,5 +192,19 @@ class User < ApplicationRecord
 
   def downcase_email
     self.email = email.downcase if email.present?
+  end
+
+  # 비밀번호 복잡성 검증 (영문+숫자 조합 필수)
+  def password_complexity
+    return if password.blank?
+
+    unless password.match?(/[a-zA-Z]/) && password.match?(/\d/)
+      errors.add(:password, "는 영문과 숫자를 모두 포함해야 합니다")
+    end
+
+    # 너무 단순한 패턴 방지 (같은 문자 연속 4개 이상)
+    if password.match?(/(.)\1{3,}/)
+      errors.add(:password, "에 같은 문자를 4개 이상 연속 사용할 수 없습니다")
+    end
   end
 end

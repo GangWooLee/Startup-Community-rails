@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -45,7 +45,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["bookmarkable_type", "bookmarkable_id"], name: "index_bookmarks_on_bookmarkable"
     t.index ["bookmarkable_type", "bookmarkable_id"], name: "index_bookmarks_on_bookmarkable_type_and_bookmarkable_id"
     t.index ["user_id", "bookmarkable_type", "bookmarkable_id"], name: "index_bookmarks_on_user_and_bookmarkable", unique: true
     t.index ["user_id", "created_at"], name: "index_bookmarks_on_user_id_and_created_at"
@@ -58,8 +57,10 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
     t.integer "likes_count", default: 0
     t.integer "parent_id"
     t.integer "post_id", null: false
+    t.integer "replies_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["parent_id", "created_at"], name: "index_comments_on_parent_id_and_created_at"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
@@ -90,7 +91,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
     t.string "likeable_type", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["likeable_type", "likeable_id"], name: "index_likes_on_likeable"
     t.index ["likeable_type", "likeable_id"], name: "index_likes_on_likeable_type_and_likeable_id"
     t.index ["user_id", "likeable_type", "likeable_id"], name: "index_likes_on_user_and_likeable", unique: true
     t.index ["user_id"], name: "index_likes_on_user_id"
@@ -124,6 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
     t.string "work_period"
     t.index ["category"], name: "index_posts_on_category"
     t.index ["created_at"], name: "index_posts_on_created_at"
+    t.index ["status", "category", "created_at"], name: "index_posts_on_status_category_created_at"
     t.index ["status"], name: "index_posts_on_status"
     t.index ["title"], name: "index_posts_on_title_for_search"
     t.index ["user_id", "created_at"], name: "index_posts_on_user_id_and_created_at"

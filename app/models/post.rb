@@ -1,12 +1,38 @@
 class Post < ApplicationRecord
+  # Concerns
+  include Likeable
+  include Bookmarkable
+
   # Associations
   belongs_to :user
   has_many :comments, dependent: :destroy
-  has_many :likes, as: :likeable, dependent: :destroy
-  has_many :bookmarks, as: :bookmarkable, dependent: :destroy
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images
+
+  # 이미지 파일 검증 (보안: 악성 파일 업로드 방지)
+  MAX_IMAGES = 5
+  MAX_IMAGE_SIZE = 5.megabytes
+  ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"].freeze
+
+  validates :images,
+    content_type: {
+      in: ALLOWED_IMAGE_TYPES,
+      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
+    },
+    size: {
+      less_than: MAX_IMAGE_SIZE,
+      message: "는 5MB 이하만 허용됩니다"
+    }
+  validate :images_count_within_limit
+
+  # 이미지 개수 제한 검증
+  def images_count_within_limit
+    return unless images.attached?
+    if images.count > MAX_IMAGES
+      errors.add(:images, "는 최대 #{MAX_IMAGES}개까지만 첨부할 수 있습니다")
+    end
+  end
 
   # Enums
   enum :status, { draft: 0, published: 1, archived: 2 }, default: :draft
@@ -85,51 +111,6 @@ class Post < ApplicationRecord
   def price_display
     return "협의" if price_negotiable? || price.nil? || price.zero?
     "#{price.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}원"
-  end
-
-  # 특정 사용자가 이 글에 좋아요를 눌렀는지 확인
-  def liked_by?(user)
-    return false unless user
-    likes.exists?(user_id: user.id)
-  end
-
-  # 좋아요 토글 (좋아요 추가/취소)
-  def toggle_like!(user)
-    return nil unless user
-
-    existing_like = likes.find_by(user_id: user.id)
-    if existing_like
-      existing_like.destroy
-      false # 좋아요 취소됨
-    else
-      likes.create!(user_id: user.id)
-      true # 좋아요 추가됨
-    end
-  end
-
-  # 특정 사용자가 이 글을 스크랩했는지 확인
-  def bookmarked_by?(user)
-    return false unless user
-    bookmarks.exists?(user_id: user.id)
-  end
-
-  # 스크랩 토글 (스크랩 추가/취소)
-  def toggle_bookmark!(user)
-    return nil unless user
-
-    existing_bookmark = bookmarks.find_by(user_id: user.id)
-    if existing_bookmark
-      existing_bookmark.destroy
-      false # 스크랩 취소됨
-    else
-      bookmarks.create!(user_id: user.id)
-      true # 스크랩 추가됨
-    end
-  end
-
-  # 스크랩 수
-  def bookmarks_count
-    bookmarks.count
   end
 
   # 검색용 본문 스니펫 생성 (검색어 주변 텍스트 추출)

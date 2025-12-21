@@ -211,7 +211,7 @@
           </div>
 
           <p class="text-center text-xs text-muted-foreground mt-2">
-            <%= users_total_count %>명 중 <%= (users_page - 1) * SearchController::USERS_PER_PAGE + 1 %>-<%= [users_page * SearchController::USERS_PER_PAGE, users_total_count].min %>명 표시
+            <%= (users_page - 1) * SearchController::USERS_PER_PAGE + 1 %>-<%= [users_page * SearchController::USERS_PER_PAGE, users_total_count].min %> of <%= users_total_count %>
           </p>
         <% end %>
       </section>
@@ -289,7 +289,7 @@
           </div>
 
           <p class="text-center text-xs text-muted-foreground mt-2">
-            <%= posts_total_count %>개 중 <%= (posts_page - 1) * SearchController::POSTS_PER_PAGE + 1 %>-<%= [posts_page * SearchController::POSTS_PER_PAGE, posts_total_count].min %>개 표시
+            <%= (posts_page - 1) * SearchController::POSTS_PER_PAGE + 1 %>-<%= [posts_page * SearchController::POSTS_PER_PAGE, posts_total_count].min %> of <%= posts_total_count %>
           </p>
         <% end %>
       </section>

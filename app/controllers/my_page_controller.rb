@@ -3,22 +3,28 @@ class MyPageController < ApplicationController
   before_action :hide_floating_button, only: [:edit]
 
   def show
-    @user = User.includes(:posts, :bookmarks).find(current_user.id)
+    @user = current_user
 
-    # 내가 작성한 글 (커뮤니티 / 외주 분리)
-    my_posts = @user.posts.published.recent.limit(PROFILE_POSTS_LIMIT)
+    # 내가 작성한 글 (커뮤니티 / 외주 분리) - N+1 방지
+    my_posts = @user.posts.published
+                    .includes(:user, images_attachments: :blob)
+                    .recent.limit(PROFILE_POSTS_LIMIT)
     @my_community_posts = my_posts.select(&:community?)
     @my_outsourcing_posts = my_posts.select(&:outsourcing?)
 
-    # 내가 북마크한 글 (커뮤니티 / 외주 분리)
-    bookmarked_posts = @user.bookmarks
-                            .includes(:bookmarkable)
-                            .recent
-                            .limit(PROFILE_POSTS_LIMIT)
-                            .map(&:bookmarkable)
-                            .compact
-    @bookmarked_community_posts = bookmarked_posts.select { |p| p.is_a?(Post) && p.community? }
-    @bookmarked_outsourcing_posts = bookmarked_posts.select { |p| p.is_a?(Post) && p.outsourcing? }
+    # 내가 북마크한 글 (커뮤니티 / 외주 분리) - N+1 방지
+    # bookmarkable의 user와 images를 함께 로드
+    bookmarked_post_ids = @user.bookmarks
+                               .where(bookmarkable_type: "Post")
+                               .recent
+                               .limit(PROFILE_POSTS_LIMIT)
+                               .pluck(:bookmarkable_id)
+
+    bookmarked_posts = Post.where(id: bookmarked_post_ids)
+                           .includes(:user, images_attachments: :blob)
+
+    @bookmarked_community_posts = bookmarked_posts.select(&:community?)
+    @bookmarked_outsourcing_posts = bookmarked_posts.select(&:outsourcing?)
   end
 
   def edit

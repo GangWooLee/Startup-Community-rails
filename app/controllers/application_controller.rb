@@ -9,10 +9,35 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
+  # 에러 핸들링 (프로덕션에서만)
+  unless Rails.env.development?
+    rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
+    rescue_from ActionController::RoutingError, with: :handle_not_found
+    rescue_from ActionController::InvalidAuthenticityToken, with: :handle_invalid_token
+  end
+
   # Authentication helpers
   helper_method :current_user, :logged_in?
 
   private
+
+  # 404 에러 핸들러
+  def handle_not_found(exception = nil)
+    Rails.logger.warn "[404] #{exception&.message} - #{request.path}"
+    respond_to do |format|
+      format.html { render file: Rails.public_path.join("404.html"), status: :not_found, layout: false }
+      format.json { render json: { error: "Not found" }, status: :not_found }
+    end
+  end
+
+  # CSRF 토큰 에러 핸들러
+  def handle_invalid_token(exception = nil)
+    Rails.logger.warn "[CSRF] Invalid token - #{request.path}"
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: "세션이 만료되었습니다. 다시 시도해주세요." }
+      format.json { render json: { error: "Invalid authenticity token" }, status: :unprocessable_entity }
+    end
+  end
 
   # Returns the currently logged-in user (if any)
   def current_user
@@ -25,14 +50,26 @@ class ApplicationController < ActionController::Base
   end
 
   # Logs in the given user by storing their id in the session
+  # 보안: 로그인 시 세션 ID 재생성 (Session Fixation 방지)
   def log_in(user)
+    # 기존 세션의 return_to 값 보존
+    return_to = session[:return_to]
+
+    # 세션 ID 재생성 (Session Fixation Attack 방지)
+    reset_session
+
+    # 보존된 값 복원
+    session[:return_to] = return_to if return_to.present?
+
+    # 새 세션에 사용자 ID 저장
     session[:user_id] = user.id
     user.update(last_sign_in_at: Time.current)
   end
 
   # Logs out the current user by clearing the session
+  # 보안: 로그아웃 시 전체 세션 삭제
   def log_out
-    session.delete(:user_id)
+    reset_session  # 세션 완전 삭제 (session.delete보다 안전)
     @current_user = nil
   end
 
@@ -51,14 +88,18 @@ class ApplicationController < ActionController::Base
   # 쿠키는 일반 로그인용 백업
   def store_location
     url = request.original_url
-    Rails.logger.info "[AUTH] Storing return_to: #{url}"
+    # 상대 경로로 변환하여 저장 (보안상 안전)
+    safe_url = safe_redirect_path(url)
+    return unless safe_url
+
+    Rails.logger.info "[AUTH] Storing return_to: #{safe_url}"
 
     # 세션에 저장 (OAuth 플로우에서 더 안정적)
-    session[:return_to] = url
+    session[:return_to] = safe_url
 
     # 쿠키에도 저장 (일반 로그인용 백업)
     cookies[:return_to] = {
-      value: url,
+      value: safe_url,
       expires: 10.minutes.from_now,
       path: "/"  # 전체 경로에서 유효
     }
@@ -69,7 +110,8 @@ class ApplicationController < ActionController::Base
     # 세션 우선, 쿠키 백업
     session_return_to = session.delete(:return_to)
     cookie_return_to = cookies.delete(:return_to)
-    return_url = session_return_to.presence || cookie_return_to.presence
+    return_url = validate_redirect_url(session_return_to) ||
+                 validate_redirect_url(cookie_return_to)
 
     Rails.logger.info "[AUTH] Redirecting to: #{return_url || default} (session: #{session_return_to.inspect}, cookie: #{cookie_return_to.inspect})"
     redirect_to(return_url || default)
@@ -86,5 +128,40 @@ class ApplicationController < ActionController::Base
   # 플로팅 글쓰기 버튼 숨김 (글 작성/수정 등 특정 페이지에서 사용)
   def hide_floating_button
     @hide_floating_button = true
+  end
+
+  # URL 검증: 같은 호스트의 상대 경로만 허용 (Open Redirect 방지)
+  def validate_redirect_url(url)
+    return nil if url.blank?
+
+    # 상대 경로는 허용 (단, // 로 시작하는 프로토콜 상대 URL은 제외)
+    return url if url.start_with?("/") && !url.start_with?("//")
+
+    # 절대 URL은 같은 호스트만 허용
+    begin
+      uri = URI.parse(url)
+      if uri.host.nil? || uri.host == request.host
+        uri.path.presence || "/"
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
+  end
+
+  # URL에서 경로만 추출 (안전한 저장용)
+  def safe_redirect_path(url)
+    return nil if url.blank?
+
+    begin
+      uri = URI.parse(url)
+      # 같은 호스트인 경우에만 경로 추출
+      if uri.host.nil? || uri.host == request.host
+        path = uri.path.presence || "/"
+        path += "?#{uri.query}" if uri.query.present?
+        path
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
   end
 end
