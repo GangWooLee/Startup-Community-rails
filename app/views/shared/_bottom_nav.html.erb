@@ -15,19 +15,13 @@
         <span class="text-xs font-medium">외주</span>
       <% end %>
 
-      <!-- My Page or Login -->
-      <% if logged_in? %>
-        <% is_active_mypage = current_page?(my_page_path) %>
-        <%= link_to my_page_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_mypage ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
-          <%= render partial: "shared/icons/user", locals: { css_class: "h-5 w-5" } %>
-          <span class="text-xs font-medium">마이페이지</span>
-        <% end %>
-      <% else %>
-        <% is_active_login = current_page?(login_path) %>
-        <%= link_to login_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_login ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
-          <%= render partial: "shared/icons/user", locals: { css_class: "h-5 w-5" } %>
-          <span class="text-xs font-medium">로그인</span>
-        <% end %>
+      <!-- AI 아이디어 분석 -->
+      <% is_active_ai = current_page?(onboarding_ai_input_path) || current_page?(onboarding_ai_result_path) %>
+      <%= link_to onboarding_ai_input_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors #{is_active_ai ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}" do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <span class="text-xs font-medium">AI 분석</span>
       <% end %>
     </div>
   </div>
