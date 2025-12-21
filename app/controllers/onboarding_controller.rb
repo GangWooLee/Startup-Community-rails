@@ -1,6 +1,7 @@
 class OnboardingController < ApplicationController
   # AI 분석 기능은 로그인 필수 (계정당 무료 체험 3회)
   before_action :require_login, only: [:ai_input, :ai_result]
+  before_action :hide_floating_button, only: [:ai_input, :ai_result]
 
   def landing
     # 온보딩 랜딩은 누구나 접근 가능
