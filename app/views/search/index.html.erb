@@ -6,7 +6,7 @@
   }
 </style>
 
-<div class="min-h-screen bg-background pb-20" data-controller="live-search" data-live-search-url-value="<%= search_path %>">
+<div class="min-h-screen bg-background pb-20" data-controller="live-search" data-live-search-url-value="<%= search_path %>" data-live-search-tab-value="<%= @tab %>" data-live-search-category-value="<%= @category %>" data-live-search-page-value="<%= @users_page || 1 %>">
   <!-- Search Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3">
@@ -61,12 +61,76 @@
           </div>
         </form>
       </div>
+
+      <!-- 탭 버튼 (전체/유저/게시글) -->
+      <div class="flex gap-2 mt-3" data-live-search-target="tabs">
+        <button
+          type="button"
+          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'all' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          data-tab="all"
+          data-action="click->live-search#switchTab"
+        >
+          전체
+        </button>
+        <button
+          type="button"
+          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'users' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          data-tab="users"
+          data-action="click->live-search#switchTab"
+        >
+          유저
+        </button>
+        <button
+          type="button"
+          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'posts' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          data-tab="posts"
+          data-action="click->live-search#switchTab"
+        >
+          게시글
+        </button>
+      </div>
+
+      <!-- 카테고리 필터 (게시글 탭일 때만 표시) -->
+      <div class="flex gap-2 mt-2 <%= @tab == 'posts' ? '' : 'hidden' %>" data-live-search-target="categoryFilters">
+        <button
+          type="button"
+          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'all' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          data-category="all"
+          data-action="click->live-search#switchCategory"
+        >
+          전체
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'community' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          data-category="community"
+          data-action="click->live-search#switchCategory"
+        >
+          커뮤니티
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'hiring' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          data-category="hiring"
+          data-action="click->live-search#switchCategory"
+        >
+          구인
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'seeking' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          data-category="seeking"
+          data-action="click->live-search#switchCategory"
+        >
+          구직
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Main Content (검색 결과 영역) -->
   <main class="max-w-screen-xl mx-auto px-4 py-6" data-live-search-target="results">
-    <%= render partial: "search/results", locals: { query: @query, users: @users, posts: @posts, users_total_count: @users_total_count, posts_total_count: @posts_total_count, recent_searches: @recent_searches } %>
+    <%= render partial: "search/results", locals: { query: @query, tab: @tab, category: @category, users: @users, posts: @posts, users_total_count: @users_total_count, posts_total_count: @posts_total_count, users_page: @users_page, users_total_pages: @users_total_pages, recent_searches: @recent_searches } %>
   </main>
 
   <%= render "shared/bottom_nav" %>
