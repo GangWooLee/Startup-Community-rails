@@ -46,10 +46,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # 현재 URL을 쿠키에 저장
+  # 현재 URL을 세션과 쿠키에 저장
+  # 세션은 OAuth 외부 리디렉션 후에도 유지됨 (더 안정적)
+  # 쿠키는 일반 로그인용 백업
   def store_location
     url = request.original_url
     Rails.logger.info "[AUTH] Storing return_to: #{url}"
+
+    # 세션에 저장 (OAuth 플로우에서 더 안정적)
+    session[:return_to] = url
+
+    # 쿠키에도 저장 (일반 로그인용 백업)
     cookies[:return_to] = {
       value: url,
       expires: 10.minutes.from_now,
@@ -59,8 +66,12 @@ class ApplicationController < ActionController::Base
 
   # 저장된 URL로 리디렉션하거나 기본 경로로 이동
   def redirect_back_or(default)
-    return_url = cookies.delete(:return_to)
-    Rails.logger.info "[AUTH] Redirecting to: #{return_url || default} (cookie was: #{return_url.inspect})"
+    # 세션 우선, 쿠키 백업
+    session_return_to = session.delete(:return_to)
+    cookie_return_to = cookies.delete(:return_to)
+    return_url = session_return_to.presence || cookie_return_to.presence
+
+    Rails.logger.info "[AUTH] Redirecting to: #{return_url || default} (session: #{session_return_to.inspect}, cookie: #{cookie_return_to.inspect})"
     redirect_to(return_url || default)
   end
 

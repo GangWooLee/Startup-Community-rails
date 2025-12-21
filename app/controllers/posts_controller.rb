@@ -118,6 +118,6 @@ class PostsController < ApplicationController
     return if params[:browse] == "true"
     return if cookies[:onboarding_completed].present?
 
-    redirect_to onboarding_landing_path
+    redirect_to root_path
   end
 end

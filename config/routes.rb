@@ -10,10 +10,10 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Root path - Onboarding Landing (메인 진입점)
+  # 첫 접속 시 온보딩 화면으로 시작
   root "onboarding#landing"
 
-  # Onboarding Flow (별도 named route도 제공)
-  get "onboarding", to: "onboarding#landing", as: :onboarding_landing
+  # Onboarding Flow
   get "ai/input", to: "onboarding#ai_input", as: :onboarding_ai_input
   get "ai/result", to: "onboarding#ai_result", as: :onboarding_ai_result
 
@@ -28,6 +28,8 @@ Rails.application.routes.draw do
   post   "/signup", to: "users#create"
 
   # OAuth Authentication
+  # OAuth 요청 전 return_to 저장을 위한 중간 경로
+  post "/oauth/:provider", to: "oauth#passthru", as: :oauth_passthru
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [:get, :post]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 

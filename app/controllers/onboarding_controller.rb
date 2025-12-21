@@ -1,13 +1,16 @@
 class OnboardingController < ApplicationController
-  # 온보딩은 비로그인 상태에서도 접근 가능 (require_login 사용 안함)
+  # AI 분석 기능은 로그인 필수 (계정당 무료 체험 3회)
+  before_action :require_login, only: [:ai_input, :ai_result]
 
   def landing
-    # 로그인한 사용자도 온보딩 플로우 사용 가능 (AI 분석 기능)
-    # 별도 리디렉션 없음
+    # 온보딩 랜딩은 누구나 접근 가능
+    # 로그인한 사용자도 AI 분석 기능 사용 가능
   end
 
   def ai_input
-    # AI 아이디어 입력 화면
+    # AI 아이디어 입력 화면 (로그인 필수)
+    # 뒤로가기 경로 설정: 로그인한 사용자는 커뮤니티로, 비로그인은 온보딩으로
+    @back_path = logged_in? ? community_path : root_path
   end
 
   def ai_result

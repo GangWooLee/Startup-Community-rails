@@ -11,6 +11,9 @@ class SessionsController < ApplicationController
         path: "/"
       }
     end
+
+    # OAuth 폼에 전달할 return_to 값 (세션 > 쿠키 > 파라미터 순으로 확인)
+    @return_to = session[:return_to] || cookies[:return_to] || params[:return_to]
   end
 
   # POST /login

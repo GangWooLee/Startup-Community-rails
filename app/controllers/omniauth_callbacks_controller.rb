@@ -13,13 +13,25 @@ class OmniauthCallbacksController < ApplicationController
       # 세션에 사용자 ID 저장
       session[:user_id] = @user.id
 
-      # origin 파라미터 또는 쿠키에서 리디렉션 URL 가져오기
-      origin_url = request.env["omniauth.origin"] || cookies.delete(:return_to)
-      redirect_url = origin_url.presence || community_path
+      # 리디렉션 URL 결정
+      # 1. OmniAuth origin (폼에서 전달된 origin 파라미터)
+      # 2. 세션에 저장된 return_to (더 안정적인 저장 방식)
+      # 3. 쿠키에 저장된 return_to
+      # 4. 기본값 (커뮤니티)
+      omniauth_origin = request.env["omniauth.origin"]
+      session_return_to = session.delete(:return_to)
+      cookie_return_to = cookies.delete(:return_to)
+
+      Rails.logger.info "[OAuth] omniauth.origin: #{omniauth_origin.inspect}"
+      Rails.logger.info "[OAuth] session return_to: #{session_return_to.inspect}"
+      Rails.logger.info "[OAuth] cookie return_to: #{cookie_return_to.inspect}"
+
+      # origin이 빈 문자열이거나 nil인 경우 세션, 쿠키 순서로 확인
+      redirect_url = omniauth_origin.presence || session_return_to.presence || cookie_return_to.presence || community_path
 
       Rails.logger.info "OAuth login successful: #{provider_name} - User #{@user.id} - Redirecting to: #{redirect_url}"
-      redirect_to redirect_url
       flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다!"
+      redirect_to redirect_url
     else
       # 사용자 저장 실패 (이메일 중복 등)
       Rails.logger.error "OAuth user creation failed: #{@user.errors.full_messages.join(', ')}"
