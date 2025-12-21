@@ -24,7 +24,10 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "omniauth_callbacks#failure"
 
   # Posts (Community)
-  resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+  resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+    # 좋아요 토글
+    post :like, to: "likes#toggle", on: :member
+  end
 
   # Profiles
   resources :profiles, only: [:show]

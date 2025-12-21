@@ -83,4 +83,24 @@ class Post < ApplicationRecord
     return "협의" if price_negotiable? || price.nil? || price.zero?
     "#{price.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}원"
   end
+
+  # 특정 사용자가 이 글에 좋아요를 눌렀는지 확인
+  def liked_by?(user)
+    return false unless user
+    likes.exists?(user_id: user.id)
+  end
+
+  # 좋아요 토글 (좋아요 추가/취소)
+  def toggle_like!(user)
+    return nil unless user
+
+    existing_like = likes.find_by(user_id: user.id)
+    if existing_like
+      existing_like.destroy
+      false # 좋아요 취소됨
+    else
+      likes.create!(user_id: user.id)
+      true # 좋아요 추가됨
+    end
+  end
 end
