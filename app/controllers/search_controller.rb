@@ -18,11 +18,31 @@ class SearchController < ApplicationController
       @posts_total_count = 0
     end
 
-    # 최근 검색어 저장 (로그인 사용자만)
-    save_recent_search if logged_in? && @query.present?
+    # 실시간 검색이 아닐 때만 최근 검색어 저장 (페이지 새로고침/직접 접근 시)
+    # 실시간 검색 중에는 저장하지 않음 (타이핑할 때마다 저장되면 안 됨)
+    save_recent_search if logged_in? && @query.present? && !live_search_request?
 
     # 최근 검색어 로드
     @recent_searches = load_recent_searches
+
+    respond_to do |format|
+      format.html do
+        if live_search_request?
+          # 실시간 검색: 결과 partial만 반환
+          render partial: "search/results", locals: {
+            query: @query,
+            users: @users,
+            posts: @posts,
+            users_total_count: @users_total_count,
+            posts_total_count: @posts_total_count,
+            recent_searches: @recent_searches
+          }, layout: false
+        else
+          # 일반 요청: 전체 페이지 렌더링
+          render :index
+        end
+      end
+    end
   end
 
   # 최근 검색어 삭제
@@ -46,6 +66,11 @@ class SearchController < ApplicationController
   end
 
   private
+
+  # 실시간 검색 요청인지 확인
+  def live_search_request?
+    request.xhr? || params[:live] == "true"
+  end
 
   # 사용자 검색: 이름, 역할, 소개에서 검색
   def search_users

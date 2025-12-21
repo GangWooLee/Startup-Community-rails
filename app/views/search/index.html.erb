@@ -1,172 +1,72 @@
-<div class="min-h-screen bg-background pb-20">
+<%# 브라우저 기본 검색 X 버튼 숨기기 %>
+<style>
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+</style>
+
+<div class="min-h-screen bg-background pb-20" data-controller="live-search" data-live-search-url-value="<%= search_path %>">
   <!-- Search Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
         <!-- 뒤로가기 -->
-        <%= link_to :back, class: "p-2 -ml-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground" do %>
+        <%= link_to community_path, class: "p-2 -ml-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground" do %>
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         <% end %>
 
         <!-- 검색 입력 -->
-        <form action="<%= search_path %>" method="get" class="flex-1">
+        <form action="<%= search_path %>" method="get" class="flex-1" data-action="submit->live-search#preventSubmit">
           <div class="relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 검색 아이콘 -->
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
+
+            <!-- 입력 필드 -->
             <input
               type="search"
               name="q"
               value="<%= @query %>"
               placeholder="사용자, 게시글 검색..."
               autofocus
+              autocomplete="off"
               class="w-full pl-10 pr-10 py-2.5 rounded-full bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              data-live-search-target="input"
+              data-action="input->live-search#search"
             >
-            <% if @query.present? %>
-              <%= link_to search_path, class: "absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors text-muted-foreground" do %>
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              <% end %>
-            <% end %>
+
+            <!-- 로딩 스피너 -->
+            <div class="absolute right-10 top-1/2 -translate-y-1/2 hidden" data-live-search-target="loading">
+              <svg class="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+
+            <!-- X 버튼 (커스텀) -->
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors text-muted-foreground <%= @query.present? ? '' : 'hidden' %>"
+              data-live-search-target="clearButton"
+              data-action="click->live-search#clear"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
         </form>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <% if @query.blank? %>
-      <!-- 검색어 없을 때: 최근 검색어 표시 -->
-      <% if @recent_searches.present? %>
-        <section class="mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-medium text-muted-foreground">최근 검색어</h2>
-            <%= button_to clear_recent_searches_path, method: :delete, class: "text-xs text-muted-foreground hover:text-foreground transition-colors", data: { turbo_confirm: "모든 최근 검색어를 삭제하시겠습니까?" } do %>
-              전체 삭제
-            <% end %>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <% @recent_searches.each do |recent_query| %>
-              <div class="group flex items-center gap-1 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors">
-                <%= link_to recent_query, search_path(q: recent_query), class: "text-sm text-foreground" %>
-                <%= button_to destroy_recent_search_path(query: recent_query), method: :delete, class: "ml-1 p-0.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100" do %>
-                  <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </section>
-      <% end %>
-
-      <!-- 검색 가이드 -->
-      <div class="text-center py-8">
-        <svg class="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <p class="text-muted-foreground">검색어를 입력해주세요</p>
-        <p class="text-sm text-muted-foreground mt-1">사용자 이름, 역할, 게시글 제목/내용으로 검색할 수 있습니다</p>
-      </div>
-
-    <% elsif @users.empty? && @posts.empty? %>
-      <!-- 검색 결과 없을 때 -->
-      <div class="text-center py-12">
-        <svg class="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p class="text-muted-foreground">'<span class="text-foreground font-medium"><%= @query %></span>' 검색 결과가 없습니다</p>
-        <p class="text-sm text-muted-foreground mt-2">다른 검색어를 시도해보세요</p>
-      </div>
-
-    <% else %>
-      <!-- 검색 결과 있을 때 -->
-      <div class="space-y-8">
-
-        <!-- 사용자 검색 결과 (상단) -->
-        <% if @users.any? %>
-          <section>
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                유저
-              </h2>
-              <% if @users_total_count > SearchController::USERS_LIMIT %>
-                <span class="text-xs text-muted-foreground">+<%= @users_total_count - SearchController::USERS_LIMIT %>명 더 있음</span>
-              <% end %>
-            </div>
-            <div class="space-y-2">
-              <% @users.each do |user| %>
-                <%= link_to profile_path(user), class: "flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors" do %>
-                  <!-- Avatar -->
-                  <div class="h-12 w-12 rounded-full overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
-                    <% if user.avatar.attached? %>
-                      <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
-                    <% elsif user.avatar_url.present? %>
-                      <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
-                    <% else %>
-                      <span class="text-lg font-semibold text-muted-foreground"><%= user.name[0] %></span>
-                    <% end %>
-                  </div>
-
-                  <!-- User Info -->
-                  <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-foreground truncate">
-                      <%= highlight_search(user.name, @query) %>
-                    </p>
-                    <% if user.role_title.present? %>
-                      <p class="text-sm text-muted-foreground truncate">
-                        <%= highlight_search(user.role_title, @query) %>
-                      </p>
-                    <% end %>
-                    <% if user.bio.present? && user.bio.downcase.include?(@query.downcase) %>
-                      <p class="text-xs text-muted-foreground mt-1 line-clamp-1">
-                        <%= highlight_snippet(user.bio, @query, max_length: 60) %>
-                      </p>
-                    <% end %>
-                  </div>
-
-                  <!-- Arrow -->
-                  <svg class="h-5 w-5 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                <% end %>
-              <% end %>
-            </div>
-          </section>
-        <% end %>
-
-        <!-- 게시글 검색 결과 (하단) -->
-        <% if @posts.any? %>
-          <section>
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
-                </svg>
-                게시글
-              </h2>
-              <% if @posts_total_count > SearchController::POSTS_LIMIT %>
-                <span class="text-xs text-muted-foreground">총 <%= @posts_total_count %>개</span>
-              <% end %>
-            </div>
-
-            <div class="space-y-4">
-              <% @posts.each do |post| %>
-                <%= render partial: "search/post_result_card", locals: { post: post, query: @query } %>
-              <% end %>
-            </div>
-          </section>
-        <% end %>
-
-      </div>
-    <% end %>
+  <!-- Main Content (검색 결과 영역) -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6" data-live-search-target="results">
+    <%= render partial: "search/results", locals: { query: @query, users: @users, posts: @posts, users_total_count: @users_total_count, posts_total_count: @posts_total_count, recent_searches: @recent_searches } %>
   </main>
 
   <%= render "shared/bottom_nav" %>
