@@ -1,5 +1,5 @@
 <%# 검색 결과 partial - 실시간 검색에서 동적으로 교체됨 %>
-<%# locals: query, tab, category, users, posts, users_total_count, posts_total_count, users_page, users_total_pages, recent_searches %>
+<%# locals: query, tab, category, users, posts, users_total_count, posts_total_count, users_page, users_total_pages, posts_page, posts_total_pages, recent_searches %>
 
 <% query ||= "" %>
 <% tab ||= "all" %>
@@ -10,6 +10,8 @@
 <% posts_total_count ||= 0 %>
 <% users_page ||= 1 %>
 <% users_total_pages ||= 0 %>
+<% posts_page ||= 1 %>
+<% posts_total_pages ||= 0 %>
 <% recent_searches ||= [] %>
 
 <% if query.blank? %>
@@ -238,6 +240,58 @@
             <%= render partial: "search/post_result_card", locals: { post: post, query: query } %>
           <% end %>
         </div>
+
+        <%# 게시글 탭일 때 페이지네이션 표시 %>
+        <% if tab == "posts" && posts_total_pages > 1 %>
+          <div class="flex items-center justify-center gap-2 mt-6">
+            <%# 이전 페이지 버튼 %>
+            <button
+              type="button"
+              class="p-2 rounded-lg <%= posts_page > 1 ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              data-action="click->live-search#prevPage"
+              <%= 'disabled' if posts_page <= 1 %>
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+
+            <%# 페이지 번호 %>
+            <div class="flex items-center gap-1">
+              <% page_range = pagination_range(posts_page, posts_total_pages) %>
+              <% page_range.each do |page_num| %>
+                <% if page_num == :ellipsis %>
+                  <span class="px-2 text-muted-foreground">...</span>
+                <% else %>
+                  <button
+                    type="button"
+                    class="min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors <%= page_num == posts_page ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-foreground' %>"
+                    data-action="click->live-search#goToPage"
+                    data-page="<%= page_num %>"
+                  >
+                    <%= page_num %>
+                  </button>
+                <% end %>
+              <% end %>
+            </div>
+
+            <%# 다음 페이지 버튼 %>
+            <button
+              type="button"
+              class="p-2 rounded-lg <%= posts_page < posts_total_pages ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              data-action="click->live-search#nextPage"
+              <%= 'disabled' if posts_page >= posts_total_pages %>
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+
+          <p class="text-center text-xs text-muted-foreground mt-2">
+            <%= posts_total_count %>개 중 <%= (posts_page - 1) * SearchController::POSTS_PER_PAGE + 1 %>-<%= [posts_page * SearchController::POSTS_PER_PAGE, posts_total_count].min %>개 표시
+          </p>
+        <% end %>
       </section>
     <% end %>
 

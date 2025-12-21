@@ -4,7 +4,8 @@ class SearchController < ApplicationController
   # 검색 결과 제한
   USERS_LIMIT = 5        # 전체 탭에서 유저 표시 제한
   USERS_PER_PAGE = 10    # 유저 탭에서 페이지당 유저 수
-  POSTS_LIMIT = 20
+  POSTS_LIMIT = 5        # 전체 탭에서 게시글 표시 제한
+  POSTS_PER_PAGE = 10    # 게시글 탭에서 페이지당 게시글 수
 
   # 탭 종류
   TABS = %w[all users posts].freeze
@@ -25,17 +26,21 @@ class SearchController < ApplicationController
         search_users_paginated
         @posts = []
         @posts_total_count = 0
+        @posts_page = 1
+        @posts_total_pages = 0
       when "posts"
-        search_posts
+        search_posts_paginated
         @users = []
         @users_total_count = 0
         @users_page = 1
         @users_total_pages = 0
       else # "all"
         search_users(limit: USERS_LIMIT)
-        search_posts
+        search_posts(limit: POSTS_LIMIT)
         @users_page = 1
         @users_total_pages = 0
+        @posts_page = 1
+        @posts_total_pages = 0
       end
     else
       @users = []
@@ -44,6 +49,8 @@ class SearchController < ApplicationController
       @posts_total_count = 0
       @users_page = 1
       @users_total_pages = 0
+      @posts_page = 1
+      @posts_total_pages = 0
     end
 
     # 실시간 검색이 아닐 때만 최근 검색어 저장
@@ -96,6 +103,8 @@ class SearchController < ApplicationController
       posts_total_count: @posts_total_count,
       users_page: @users_page,
       users_total_pages: @users_total_pages,
+      posts_page: @posts_page,
+      posts_total_pages: @posts_total_pages,
       recent_searches: @recent_searches
     }
   end
@@ -137,8 +146,8 @@ class SearchController < ApplicationController
     @users = base_query.order(created_at: :desc).offset(offset).limit(USERS_PER_PAGE)
   end
 
-  # 게시글 검색 (카테고리 필터 적용)
-  def search_posts
+  # 게시글 검색 (전체 탭용 - 제한된 수만 표시)
+  def search_posts(limit: POSTS_LIMIT)
     query_pattern = "%#{sanitize_like(@query)}%"
 
     base_query = Post.published
@@ -148,12 +157,31 @@ class SearchController < ApplicationController
     # 카테고리 필터 적용
     base_query = apply_category_filter(base_query)
 
-    @posts = base_query.order(created_at: :desc).limit(POSTS_LIMIT)
+    @posts = base_query.order(created_at: :desc).limit(limit)
 
     # 총 개수도 같은 필터 적용
     count_query = Post.published.where("title LIKE :q OR content LIKE :q", q: query_pattern)
     count_query = apply_category_filter(count_query)
     @posts_total_count = count_query.count
+  end
+
+  # 게시글 검색 (게시글 탭용 - 페이지네이션)
+  def search_posts_paginated
+    query_pattern = "%#{sanitize_like(@query)}%"
+
+    base_query = Post.published
+                     .includes(:user, images_attachments: :blob)
+                     .where("title LIKE :q OR content LIKE :q", q: query_pattern)
+
+    # 카테고리 필터 적용
+    base_query = apply_category_filter(base_query)
+
+    @posts_total_count = base_query.count
+    @posts_total_pages = (@posts_total_count.to_f / POSTS_PER_PAGE).ceil
+    @posts_page = [[@page, 1].max, [@posts_total_pages, 1].max].min
+
+    offset = (@posts_page - 1) * POSTS_PER_PAGE
+    @posts = base_query.order(created_at: :desc).offset(offset).limit(POSTS_PER_PAGE)
   end
 
   # 카테고리 필터 적용

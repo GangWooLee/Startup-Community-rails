@@ -9,7 +9,8 @@ export default class extends Controller {
     debounceMs: { type: Number, default: 150 },
     tab: { type: String, default: "all" },
     category: { type: String, default: "all" },
-    page: { type: Number, default: 1 }
+    usersPage: { type: Number, default: 1 },
+    postsPage: { type: Number, default: 1 }
   }
 
   connect() {
@@ -22,6 +23,25 @@ export default class extends Controller {
     this.clearDebounce()
   }
 
+  // 현재 탭에 해당하는 페이지 값 가져오기
+  get currentPage() {
+    if (this.tabValue === 'users') {
+      return this.usersPageValue
+    } else if (this.tabValue === 'posts') {
+      return this.postsPageValue
+    }
+    return 1
+  }
+
+  // 현재 탭에 해당하는 페이지 값 설정하기
+  set currentPage(value) {
+    if (this.tabValue === 'users') {
+      this.usersPageValue = value
+    } else if (this.tabValue === 'posts') {
+      this.postsPageValue = value
+    }
+  }
+
   // 입력 이벤트 핸들러 (debounce 적용)
   search() {
     this.clearDebounce()
@@ -32,7 +52,8 @@ export default class extends Controller {
     this.toggleClearButton(query.length > 0)
 
     // 검색어 변경 시 페이지 초기화
-    this.pageValue = 1
+    this.usersPageValue = 1
+    this.postsPageValue = 1
 
     // 빈 검색어면 결과 초기화
     if (query.length === 0) {
@@ -59,7 +80,7 @@ export default class extends Controller {
       url.searchParams.set('live', 'true') // 실시간 검색 표시
       url.searchParams.set('tab', this.tabValue)
       url.searchParams.set('category', this.categoryValue)
-      url.searchParams.set('page', this.pageValue)
+      url.searchParams.set('page', this.currentPage)
 
       const response = await fetch(url, {
         headers: {
@@ -165,13 +186,12 @@ export default class extends Controller {
     // 카테고리 필터 표시/숨김
     this.toggleCategoryFilters(newTab === 'posts')
 
-    // 탭 변경 시 카테고리 및 페이지 초기화
+    // 탭 변경 시 카테고리 초기화 (게시글 탭이 아닐 때)
     if (newTab !== 'posts') {
       this.categoryValue = 'all'
     }
-    this.pageValue = 1
 
-    // 검색 재실행
+    // 검색 재실행 (각 탭의 저장된 페이지 사용)
     const query = this.inputTarget.value.trim()
     this.performSearch(query)
 
@@ -183,7 +203,7 @@ export default class extends Controller {
   switchCategory(event) {
     const newCategory = event.currentTarget.dataset.category
     this.categoryValue = newCategory
-    this.pageValue = 1  // 카테고리 변경 시 페이지 초기화
+    this.postsPageValue = 1  // 카테고리 변경 시 게시글 페이지 초기화
 
     // 카테고리 버튼 스타일 업데이트
     this.updateCategoryStyles(newCategory)
@@ -198,8 +218,8 @@ export default class extends Controller {
 
   // 이전 페이지
   prevPage() {
-    if (this.pageValue > 1) {
-      this.pageValue--
+    if (this.currentPage > 1) {
+      this.currentPage = this.currentPage - 1
       this.performSearch(this.inputTarget.value.trim())
       this.updateUrl()
     }
@@ -207,7 +227,7 @@ export default class extends Controller {
 
   // 다음 페이지
   nextPage() {
-    this.pageValue++
+    this.currentPage = this.currentPage + 1
     this.performSearch(this.inputTarget.value.trim())
     this.updateUrl()
   }
@@ -215,8 +235,8 @@ export default class extends Controller {
   // 특정 페이지로 이동
   goToPage(event) {
     const page = parseInt(event.currentTarget.dataset.page, 10)
-    if (page && page !== this.pageValue) {
-      this.pageValue = page
+    if (page && page !== this.currentPage) {
+      this.currentPage = page
       this.performSearch(this.inputTarget.value.trim())
       this.updateUrl()
     }
@@ -272,8 +292,10 @@ export default class extends Controller {
       url.searchParams.delete('category')
     }
 
-    if (this.tabValue === 'users' && this.pageValue > 1) {
-      url.searchParams.set('page', this.pageValue)
+    // 페이지 파라미터 (유저 또는 게시글 탭에서 1페이지가 아닐 때)
+    if ((this.tabValue === 'users' && this.usersPageValue > 1) ||
+        (this.tabValue === 'posts' && this.postsPageValue > 1)) {
+      url.searchParams.set('page', this.currentPage)
     } else {
       url.searchParams.delete('page')
     }

@@ -6,7 +6,7 @@
   }
 </style>
 
-<div class="min-h-screen bg-background pb-20" data-controller="live-search" data-live-search-url-value="<%= search_path %>" data-live-search-tab-value="<%= @tab %>" data-live-search-category-value="<%= @category %>" data-live-search-page-value="<%= @users_page || 1 %>">
+<div class="min-h-screen bg-background pb-20" data-controller="live-search" data-live-search-url-value="<%= search_path %>" data-live-search-tab-value="<%= @tab %>" data-live-search-category-value="<%= @category %>" data-live-search-users-page-value="<%= @users_page || 1 %>" data-live-search-posts-page-value="<%= @posts_page || 1 %>">
   <!-- Search Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3">
@@ -130,7 +130,7 @@
 
   <!-- Main Content (검색 결과 영역) -->
   <main class="max-w-screen-xl mx-auto px-4 py-6" data-live-search-target="results">
-    <%= render partial: "search/results", locals: { query: @query, tab: @tab, category: @category, users: @users, posts: @posts, users_total_count: @users_total_count, posts_total_count: @posts_total_count, users_page: @users_page, users_total_pages: @users_total_pages, recent_searches: @recent_searches } %>
+    <%= render partial: "search/results", locals: { query: @query, tab: @tab, category: @category, users: @users, posts: @posts, users_total_count: @users_total_count, posts_total_count: @posts_total_count, users_page: @users_page, users_total_pages: @users_total_pages, posts_page: @posts_page, posts_total_pages: @posts_total_pages, recent_searches: @recent_searches } %>
   </main>
 
   <%= render "shared/bottom_nav" %>
