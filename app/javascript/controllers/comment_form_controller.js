@@ -14,6 +14,16 @@ export default class extends Controller {
     this.updateSubmitState()
   }
 
+  // Ctrl+Enter 또는 Cmd+Enter로 제출
+  submitOnEnter(event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault()
+      if (this.hasSubmitTarget && !this.submitTarget.disabled) {
+        this.submit(event)
+      }
+    }
+  }
+
   updateCounter() {
     if (this.hasCounterTarget && this.hasInputTarget) {
       const length = this.inputTarget.value.length
@@ -60,7 +70,7 @@ export default class extends Controller {
 
     try {
       this.submitTarget.disabled = true
-      this.submitTarget.textContent = "작성 중..."
+      this.submitTarget.textContent = parentId ? "답글 중..." : "작성 중..."
 
       const response = await fetch(this.urlValue, {
         method: "POST",
@@ -84,9 +94,19 @@ export default class extends Controller {
         this.updateCounter()
         this.updateSubmitState()
 
-        // 대댓글 폼이면 숨기기
+        // 대댓글 폼이면 폼 컨테이너 숨기기
         if (parentId) {
-          this.element.classList.add("hidden")
+          // reply-toggle-target="form" 인 부모 요소를 찾아서 숨김
+          const formContainer = this.element.closest('[data-reply-toggle-target="form"]')
+          if (formContainer) {
+            formContainer.classList.add("hidden")
+          }
+
+          // 답글 목록이 숨겨져 있으면 보이게 함
+          const repliesContainer = document.getElementById(`replies-${parentId}`)
+          if (repliesContainer && repliesContainer.classList.contains("hidden")) {
+            repliesContainer.classList.remove("hidden")
+          }
         }
       } else if (response.status === 401) {
         window.location.href = "/login"
@@ -99,7 +119,9 @@ export default class extends Controller {
       alert("댓글 작성에 실패했습니다.")
     } finally {
       this.submitTarget.disabled = false
-      this.submitTarget.textContent = "작성"
+      // 대댓글이면 "답글", 일반 댓글이면 "작성"
+      const parentId = this.element.dataset.parentId
+      this.submitTarget.textContent = parentId ? "답글" : "작성"
       this.updateSubmitState()
     }
   }
