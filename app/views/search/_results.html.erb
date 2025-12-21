@@ -122,7 +122,7 @@
                 <div class="flex-1 min-w-0 border-l border-border pl-4">
                   <% if user.bio.present? %>
                     <p class="text-sm text-foreground/80 line-clamp-1">
-                      <%= highlight_snippet(user.bio, query, max_length: 80) %>
+                      <%= highlight_snippet(user.bio, query, max_length: 96) %>
                     </p>
                   <% else %>
                     <p class="text-sm text-muted-foreground/50 italic">소개가 없습니다</p>

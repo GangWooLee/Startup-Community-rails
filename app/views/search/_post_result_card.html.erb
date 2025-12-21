@@ -1,12 +1,12 @@
 <%# 검색 결과용 게시글 카드 - 하이라이팅 적용 %>
 <%# 사용법: render partial: "search/post_result_card", locals: { post: @post, query: "검색어" } %>
 
-<%= link_to post_path(post), class: "block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors" do %>
-  <div class="flex gap-4">
+<%= link_to post_path(post), class: "block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px]" do %>
+  <div class="flex gap-4 h-full">
     <!-- Content -->
-    <div class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0 flex flex-col">
       <!-- Category Badge -->
-      <div class="flex items-center gap-2 mb-2">
+      <div class="flex items-center gap-2 mb-1.5 h-5">
         <% if post.outsourcing? %>
           <% if post.hiring? %>
             <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-2 py-0.5 text-xs font-semibold">
@@ -24,14 +24,14 @@
         <% end %>
       </div>
 
-      <!-- Title with highlight -->
-      <h3 class="font-semibold text-foreground mb-1 line-clamp-2">
+      <!-- Title with highlight (고정 1줄) -->
+      <h3 class="font-semibold text-foreground mb-1 line-clamp-1">
         <%= highlight_search(post.title, query) %>
       </h3>
 
-      <!-- Content snippet with highlight -->
-      <p class="text-sm text-muted-foreground line-clamp-2 mb-3">
-        <%= highlight_snippet(post.content, query, max_length: 100) %>
+      <!-- Content snippet with highlight (고정 2줄) -->
+      <p class="text-sm text-muted-foreground line-clamp-2 mb-auto flex-1">
+        <%= highlight_snippet(post.content, query, max_length: 120) %>
       </p>
 
       <!-- Meta -->
