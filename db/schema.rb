@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_21_015057) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_21_124230) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -125,6 +125,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_015057) do
     t.index ["category"], name: "index_posts_on_category"
     t.index ["created_at"], name: "index_posts_on_created_at"
     t.index ["status"], name: "index_posts_on_status"
+    t.index ["title"], name: "index_posts_on_title_for_search"
     t.index ["user_id", "created_at"], name: "index_posts_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
@@ -167,7 +168,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_015057) do
     t.string "uid"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["name"], name: "index_users_on_name_for_search"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["role_title"], name: "index_users_on_role_title_for_search"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

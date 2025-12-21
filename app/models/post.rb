@@ -131,4 +131,25 @@ class Post < ApplicationRecord
   def bookmarks_count
     bookmarks.count
   end
+
+  # 검색용 본문 스니펫 생성 (검색어 주변 텍스트 추출)
+  def content_snippet(query = nil, max_length: 100)
+    return content.truncate(max_length) if query.blank?
+
+    # 검색어가 포함된 위치 찾기
+    query_pos = content.downcase.index(query.downcase)
+
+    if query_pos
+      # 검색어 앞뒤로 텍스트 추출
+      start_pos = [query_pos - 30, 0].max
+      end_pos = [query_pos + query.length + 70, content.length].min
+
+      snippet = content[start_pos...end_pos]
+      snippet = "..." + snippet if start_pos > 0
+      snippet = snippet + "..." if end_pos < content.length
+      snippet
+    else
+      content.truncate(max_length)
+    end
+  end
 end

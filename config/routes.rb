@@ -63,4 +63,6 @@ Rails.application.routes.draw do
 
   # Search
   get "search", to: "search#index", as: :search
+  delete "search/recent", to: "search#destroy_recent", as: :destroy_recent_search
+  delete "search/recent/all", to: "search#clear_recent", as: :clear_recent_searches
 end
