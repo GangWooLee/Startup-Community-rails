@@ -9,7 +9,7 @@ class PostsController < ApplicationController
     # 커뮤니티 섹션: 커뮤니티 글만 표시 (free, question, promotion)
     # 구인/구직은 외주 섹션(/job_posts)에서 표시
     @posts = Post.published
-                 .includes(:user)
+                 .includes(:user, images_attachments: :blob)
                  .where(category: [:free, :question, :promotion])
                  .recent
                  .limit(POSTS_PER_PAGE)

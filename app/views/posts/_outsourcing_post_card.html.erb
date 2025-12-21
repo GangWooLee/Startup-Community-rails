@@ -49,8 +49,24 @@
     </div>
 
     <!-- Title & Content -->
-    <h3 class="text-lg font-bold mb-2 text-foreground"><%= post.title %></h3>
-    <p class="text-sm text-muted-foreground mb-4 line-clamp-2"><%= post.content %></p>
+    <div class="flex gap-4">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-lg font-bold mb-2 text-foreground"><%= post.title %></h3>
+        <p class="text-sm text-muted-foreground mb-4 line-clamp-2"><%= post.content %></p>
+      </div>
+      <% if post.images.attached? %>
+        <div class="flex-shrink-0">
+          <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
+            <%= image_tag post.images.first, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
+            <% if post.images.count > 1 %>
+              <div class="absolute bottom-0.5 right-0.5 px-1 py-0.5 bg-black/60 rounded text-white text-[10px] font-medium">
+                +<%= post.images.count - 1 %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
 
     <!-- Meta Info -->
     <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
