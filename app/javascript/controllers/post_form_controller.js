@@ -43,13 +43,28 @@ export default class extends Controller {
 
     const title = this.hasTitleTarget ? this.titleTarget.value.trim() : ''
     const content = this.hasContentTarget ? this.contentTarget.value.trim() : ''
-    const categorySelected = this.categoryTargets.some(input => input.checked)
+
+    // 카테고리 확인: radio button 또는 hidden field
+    let categorySelected = false
+    let selectedCategory = null
+
+    // radio button으로 선택된 경우
+    if (this.categoryTargets.length > 0) {
+      categorySelected = this.categoryTargets.some(input => input.checked)
+      selectedCategory = this.categoryTargets.find(input => input.checked)?.value
+    } else {
+      // hidden field로 설정된 경우 (폼 내 hidden input 확인)
+      const hiddenCategory = this.element.querySelector('input[name="post[category]"][type="hidden"]')
+      if (hiddenCategory && hiddenCategory.value) {
+        categorySelected = true
+        selectedCategory = hiddenCategory.value
+      }
+    }
 
     // 기본 유효성 검사
     let isValid = title.length > 0 && content.length > 0 && categorySelected
 
     // 외주 글인 경우 추가 검증
-    const selectedCategory = this.categoryTargets.find(input => input.checked)?.value
     const isOutsourcing = selectedCategory === 'hiring' || selectedCategory === 'seeking'
 
     if (isOutsourcing && this.hasServiceTypeTarget) {
