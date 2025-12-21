@@ -79,19 +79,17 @@
 
       <!-- Outsourcing Info (구인/구직일 때만 표시) -->
       <% if @post.outsourcing? %>
-        <div class="bg-secondary/50 rounded-lg p-4 mb-6">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <span class="text-xs text-muted-foreground block mb-1">예산/금액</span>
-              <span class="text-base font-bold text-primary"><%= @post.price_display %></span>
-            </div>
-            <% if @post.work_period.present? %>
-              <div>
-                <span class="text-xs text-muted-foreground block mb-1">예상 기간</span>
-                <span class="text-base font-medium text-foreground"><%= @post.work_period %></span>
-              </div>
-            <% end %>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="bg-secondary/50 rounded-lg p-4">
+            <span class="text-xs text-muted-foreground block mb-1">예산/금액</span>
+            <span class="text-base font-bold text-primary"><%= @post.price_display %></span>
           </div>
+          <% if @post.work_period.present? %>
+            <div class="bg-secondary/50 rounded-lg p-4">
+              <span class="text-xs text-muted-foreground block mb-1">예상 기간</span>
+              <span class="text-base font-medium text-foreground"><%= @post.work_period %></span>
+            </div>
+          <% end %>
         </div>
       <% end %>
 
