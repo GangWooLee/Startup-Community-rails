@@ -66,10 +66,10 @@
   <!-- Actions -->
   <div class="flex items-center gap-4 pt-3 border-t border-border">
     <%= render partial: "shared/like_button", locals: { post: post, liked: defined?(current_user) && current_user ? post.liked_by?(current_user) : false, size: "sm" } %>
-    <div class="inline-flex items-center gap-2 text-sm text-muted-foreground">
+    <%= link_to post_path(post), class: "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" do %>
       <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
       <span><%= post.comments_count %></span>
-    </div>
+    <% end %>
     <div class="ml-auto">
       <%= render partial: "shared/bookmark_button", locals: { post: post, bookmarked: defined?(current_user) && current_user ? post.bookmarked_by?(current_user) : false, size: "sm" } %>
     </div>

@@ -47,10 +47,10 @@
     <!-- Actions -->
     <div class="flex items-center gap-4 pt-3 border-t border-border">
       <%= render partial: "shared/like_button", locals: { post: post, liked: defined?(current_user) && current_user ? post.liked_by?(current_user) : false, size: "sm" } %>
-      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+      <%= link_to post_path(post), class: "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3" do %>
         <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
         <span><%= post.comments_count %></span>
-      </button>
+      <% end %>
       <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
         <%= render partial: "shared/icons/share", locals: { css_class: "h-4 w-4" } %>
       </button>

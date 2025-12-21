@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_20_135128) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_21_015057) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -55,9 +55,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_20_135128) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.integer "likes_count", default: 0
+    t.integer "parent_id"
     t.integer "post_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
@@ -170,6 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_20_135128) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "bookmarks", "users"
+  add_foreign_key "comments", "comments", column: "parent_id", on_delete: :cascade
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "job_posts", "users"

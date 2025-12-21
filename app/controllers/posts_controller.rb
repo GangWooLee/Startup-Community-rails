@@ -16,7 +16,10 @@ class PostsController < ApplicationController
 
   def show
     @post.increment_views!
-    @comments = @post.comments.includes(:user).order(created_at: :asc)
+    # 최상위 댓글만 가져오고, 대댓글은 댓글 안에서 로드
+    @comments = @post.comments.root_comments
+                     .includes(:user, :likes, replies: [:user, :likes])
+                     .oldest
   end
 
   def new

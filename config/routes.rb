@@ -29,6 +29,11 @@ Rails.application.routes.draw do
       post :like, to: "likes#toggle"
       post :bookmark, to: "bookmarks#toggle"
     end
+    resources :comments, only: [:create, :destroy] do
+      member do
+        post :like
+      end
+    end
   end
 
   # Profiles
