@@ -100,24 +100,9 @@
 
       <!-- Post Images -->
       <% if @post.images.attached? %>
-        <div class="mb-6">
-          <% if @post.images.count == 1 %>
-            <!-- 1장: 전체 너비 -->
-            <%= image_tag @post.images.first, class: "w-full rounded-lg object-cover max-h-96", alt: "첨부 이미지" %>
-          <% elsif @post.images.count == 2 %>
-            <!-- 2장: 2열 그리드 -->
-            <div class="grid grid-cols-2 gap-2">
-              <% @post.images.each do |image| %>
-                <%= image_tag image, class: "w-full aspect-square rounded-lg object-cover", alt: "첨부 이미지" %>
-              <% end %>
-            </div>
-          <% else %>
-            <!-- 3장 이상: 3열 그리드 -->
-            <div class="grid grid-cols-3 gap-2">
-              <% @post.images.each do |image| %>
-                <%= image_tag image, class: "w-full aspect-square rounded-lg object-cover", alt: "첨부 이미지" %>
-              <% end %>
-            </div>
+        <div class="mb-6 space-y-2">
+          <% @post.images.each do |image| %>
+            <%= image_tag image, class: "w-full rounded-lg", alt: "첨부 이미지" %>
           <% end %>
         </div>
       <% end %>
