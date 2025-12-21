@@ -60,4 +60,7 @@ Rails.application.routes.draw do
 
   # Settings
   get "settings", to: "settings#show", as: :settings
+
+  # Search
+  get "search", to: "search#index", as: :search
 end
