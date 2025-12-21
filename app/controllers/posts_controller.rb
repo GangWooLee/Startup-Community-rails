@@ -2,6 +2,7 @@ class PostsController < ApplicationController
   before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
   before_action :set_post, only: [:show, :edit, :update, :destroy]
   before_action :authorize_post, only: [:edit, :update, :destroy]
+  before_action :hide_floating_button, only: [:new, :edit, :show]
 
   def index
     # 커뮤니티 섹션: 커뮤니티 글만 표시 (free, question, promotion)

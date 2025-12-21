@@ -51,4 +51,9 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
     end
   end
+
+  # 플로팅 글쓰기 버튼 숨김 (글 작성/수정 등 특정 페이지에서 사용)
+  def hide_floating_button
+    @hide_floating_button = true
+  end
 end

@@ -1,5 +1,6 @@
 class MyPageController < ApplicationController
   before_action :require_login
+  before_action :hide_floating_button, only: [:edit]
 
   def show
     @user = User.includes(:posts, :bookmarks).find(current_user.id)
