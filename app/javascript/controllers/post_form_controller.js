@@ -4,7 +4,25 @@ export default class extends Controller {
   static targets = ["category", "outsourcingFields", "title", "content", "serviceType"]
 
   connect() {
+    this.prefillFromOnboarding()
     this.validateForm()
+  }
+
+  prefillFromOnboarding() {
+    // Check if we should prefill from onboarding
+    const urlParams = new URLSearchParams(window.location.search)
+    const shouldPrefill = urlParams.get('prefill') === 'idea'
+
+    if (shouldPrefill && this.hasContentTarget) {
+      const savedIdea = sessionStorage.getItem('onboarding_idea')
+      if (savedIdea) {
+        this.contentTarget.value = savedIdea
+        // Clear after use
+        sessionStorage.removeItem('onboarding_idea')
+        // Trigger validation
+        this.validateForm()
+      }
+    }
   }
 
   toggleOutsourcingFields() {

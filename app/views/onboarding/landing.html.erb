@@ -1,0 +1,62 @@
+<div class="min-h-screen bg-background flex flex-col">
+  <!-- Hero Section -->
+  <main class="flex-1 flex flex-col items-center justify-center px-6 py-12">
+    <!-- Logo / Brand -->
+    <div class="mb-8">
+      <div class="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 mx-auto">
+        <svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Main Headline -->
+    <div class="text-center max-w-md mb-12">
+      <h1 class="text-3xl font-bold text-foreground mb-4 leading-tight">
+        Make your Startup<br/>
+        <span class="text-primary">just by AI</span>
+      </h1>
+      <p class="text-lg text-muted-foreground leading-relaxed">
+        아이디어 검증부터 사람 연결까지<br/>
+        한번에
+      </p>
+    </div>
+
+    <!-- Token Display (Dummy) -->
+    <div class="mb-8">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
+        <svg class="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span class="text-sm font-medium text-foreground">무료 체험 3회</span>
+      </div>
+    </div>
+
+    <!-- CTA Buttons -->
+    <div class="w-full max-w-sm space-y-3">
+      <!-- Primary CTA -->
+      <%= link_to onboarding_ai_input_path, class: "w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-lg shadow-lg hover:bg-primary/90 transition-all hover:scale-[1.02]" do %>
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        내 아이디어 AI한테 물어보기
+      <% end %>
+
+      <!-- Secondary CTA -->
+      <%= link_to root_path, class: "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-border bg-card text-foreground font-medium hover:bg-secondary/50 transition-colors" do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        커뮤니티 둘러보기
+      <% end %>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-6 px-6 text-center">
+    <p class="text-xs text-muted-foreground">
+      이미 계정이 있으신가요?
+      <%= link_to "로그인", login_path, class: "text-primary font-medium hover:underline ml-1" %>
+    </p>
+  </footer>
+</div>
