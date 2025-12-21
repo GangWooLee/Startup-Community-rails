@@ -24,7 +24,7 @@
 
   <!-- Main Content -->
   <main class="max-w-screen-xl mx-auto px-4 py-6" data-controller="post-form">
-    <%= form_with model: @post, id: "post-form", local: true, data: { action: "input->post-form#validateForm" } do |f| %>
+    <%= form_with model: @post, id: "post-form", local: true, html: { multipart: true }, data: { action: "input->post-form#validateForm" } do |f| %>
       <% if @post.errors.any? %>
         <div class="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
           <div class="flex items-start gap-3">
@@ -43,68 +43,80 @@
         </div>
       <% end %>
 
-      <div class="space-y-6">
-        <!-- Category Selection -->
-        <div class="bg-card rounded-xl p-4 border border-border">
-          <label class="block text-sm font-medium text-foreground mb-3">카테고리</label>
-          <div class="flex flex-wrap gap-2" data-post-form-target="categoryContainer">
-            <% if @initial_type == 'community' %>
-              <% [['free', '자유'], ['question', '질문'], ['promotion', '홍보']].each_with_index do |(value, label), index| %>
-                <label class="relative cursor-pointer">
-                  <%= f.radio_button :category, value,
-                      checked: (index == 0 && @post.category.nil?) || @post.category == value,
-                      class: "peer sr-only",
-                      data: { post_form_target: "category", action: "change->post-form#toggleOutsourcingFields" } %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-full border border-border text-sm font-medium transition-colors peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:border-primary hover:bg-secondary/50">
-                    <%= label %>
-                  </span>
-                </label>
-              <% end %>
-            <% else %>
-              <% [['hiring', '구인 (사람 찾아요)'], ['seeking', '구직 (일 해드려요)']].each_with_index do |(value, label), index| %>
-                <label class="relative cursor-pointer">
-                  <%= f.radio_button :category, value,
-                      checked: (index == 0 && @post.category.nil?) || @post.category == value,
-                      class: "peer sr-only",
-                      data: { post_form_target: "category", action: "change->post-form#toggleOutsourcingFields" } %>
-                  <span class="inline-flex items-center px-4 py-2 rounded-full border border-border text-sm font-medium transition-colors peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:border-primary hover:bg-secondary/50">
-                    <%= label %>
-                  </span>
-                </label>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
+      <!-- Hidden category field (기본값: free) -->
+      <%= f.hidden_field :category, value: @initial_type == 'outsourcing' ? 'hiring' : 'free' %>
 
+      <div class="space-y-4">
         <!-- Title -->
         <div class="bg-card rounded-xl p-4 border border-border">
-          <%= f.label :title, "제목", class: "block text-sm font-medium text-foreground mb-2" %>
           <%= f.text_field :title,
-              placeholder: "매력적인 제목을 지어주세요",
+              placeholder: "제목을 입력하세요",
               data: { post_form_target: "title" },
-              class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-base" %>
+              class: "w-full bg-transparent text-foreground text-lg font-medium placeholder:text-muted-foreground focus:outline-none border-none" %>
         </div>
 
-        <!-- Outsourcing Fields (Dynamic) -->
-        <div
-          data-post-form-target="outsourcingFields"
-          class="<%= @initial_type == 'outsourcing' ? '' : 'hidden' %> space-y-4"
-        >
+        <!-- Content -->
+        <div class="bg-card rounded-xl p-4 border border-border">
+          <%= f.text_area :content,
+              placeholder: "창업 아이디어, 개발 고민, 팀 빌딩 등 자유롭게 이야기해보세요.",
+              rows: 12,
+              data: { post_form_target: "content" },
+              class: "w-full bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none resize-none border-none" %>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="bg-card rounded-xl p-4 border border-border" data-controller="image-upload">
+          <div class="flex items-center justify-between mb-3">
+            <label class="flex items-center text-sm font-medium text-foreground">
+              <svg class="h-5 w-5 mr-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              사진 첨부
+            </label>
+            <span class="text-xs text-muted-foreground" data-image-upload-target="counter">0/5</span>
+          </div>
+
+          <!-- Image Preview Area -->
+          <div
+            data-image-upload-target="preview"
+            class="grid grid-cols-3 gap-2 mb-3 empty:hidden"
+          >
+            <!-- Images will be inserted here by JavaScript -->
+          </div>
+
+          <!-- Upload Button -->
+          <label class="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-colors" data-image-upload-target="dropzone">
+            <svg class="h-6 w-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            <span class="text-sm text-muted-foreground">사진 추가</span>
+            <%= f.file_field :images,
+                multiple: true,
+                accept: "image/*",
+                class: "hidden",
+                data: { image_upload_target: "input", action: "change->image-upload#handleFiles" } %>
+          </label>
+
+          <p class="mt-2 text-xs text-muted-foreground text-center">JPG, PNG, GIF (각 10MB 이하)</p>
+        </div>
+
+        <!-- Outsourcing Fields (외주용) -->
+        <% if @initial_type == 'outsourcing' %>
           <div class="bg-card rounded-xl p-4 border border-border space-y-4">
             <h3 class="text-sm font-medium text-foreground">외주 정보</h3>
 
             <!-- Service Type -->
             <div>
-              <%= f.label :service_type, "서비스 분야", class: "block text-sm font-medium text-muted-foreground mb-2" %>
+              <%= f.label :service_type, "서비스 분야", class: "block text-sm text-muted-foreground mb-2" %>
               <%= f.select :service_type,
                   options_for_select(Post::SERVICE_TYPES.map { |k, v| [v, k] }, @post.service_type),
                   { include_blank: "분야 선택" },
-                  { class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring", data: { post_form_target: "serviceType", action: "change->post-form#validateForm" } } %>
+                  { class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring" } %>
             </div>
 
             <!-- Price -->
             <div>
-              <%= f.label :price, "예산/금액", class: "block text-sm font-medium text-muted-foreground mb-2" %>
+              <%= f.label :price, "예산/금액", class: "block text-sm text-muted-foreground mb-2" %>
               <div class="flex items-center gap-3">
                 <div class="relative flex-1">
                   <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
@@ -122,23 +134,13 @@
 
             <!-- Work Period -->
             <div>
-              <%= f.label :work_period, "예상 기간/마감일", class: "block text-sm font-medium text-muted-foreground mb-2" %>
+              <%= f.label :work_period, "예상 기간", class: "block text-sm text-muted-foreground mb-2" %>
               <%= f.text_field :work_period,
                   placeholder: "예: 1주일, 2025년 1월까지",
                   class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
             </div>
           </div>
-        </div>
-
-        <!-- Content -->
-        <div class="bg-card rounded-xl p-4 border border-border">
-          <%= f.label :content, "내용", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_area :content,
-              placeholder: @initial_type == 'outsourcing' ? "어떤 작업이 필요한지 구체적으로 적어주세요.\n\n예시:\n- 현재 상황\n- 필요한 작업\n- 요구사항\n- 참고 자료" : "창업 아이디어, 개발 고민, 팀 빌딩 등 자유롭게 이야기해보세요.",
-              rows: 10,
-              data: { post_form_target: "content" },
-              class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" %>
-        </div>
+        <% end %>
       </div>
     <% end %>
   </main>

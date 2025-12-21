@@ -99,7 +99,8 @@ class PostsController < ApplicationController
   def post_params
     params.require(:post).permit(
       :title, :content, :category,
-      :service_type, :price, :work_period, :price_negotiable
+      :service_type, :price, :work_period, :price_negotiable,
+      images: []
     )
   end
 

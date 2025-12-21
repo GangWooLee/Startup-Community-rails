@@ -5,6 +5,9 @@ class Post < ApplicationRecord
   has_many :likes, as: :likeable, dependent: :destroy
   has_many :bookmarks, as: :bookmarkable, dependent: :destroy
 
+  # Active Storage - 이미지 첨부 (최대 5개)
+  has_many_attached :images
+
   # Enums
   enum :status, { draft: 0, published: 1, archived: 2 }, default: :draft
 
