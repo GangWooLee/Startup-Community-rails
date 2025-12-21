@@ -9,19 +9,16 @@ export default class extends Controller {
   }
 
   prefillFromOnboarding() {
-    // Check if we should prefill from onboarding
-    const urlParams = new URLSearchParams(window.location.search)
-    const shouldPrefill = urlParams.get('prefill') === 'idea'
+    // sessionStorage에 저장된 아이디어가 있으면 자동으로 채움
+    // (로그인 후 리디렉션된 경우에도 작동)
+    const savedIdea = sessionStorage.getItem('onboarding_idea')
 
-    if (shouldPrefill && this.hasContentTarget) {
-      const savedIdea = sessionStorage.getItem('onboarding_idea')
-      if (savedIdea) {
-        this.contentTarget.value = savedIdea
-        // Clear after use
-        sessionStorage.removeItem('onboarding_idea')
-        // Trigger validation
-        this.validateForm()
-      }
+    if (savedIdea && this.hasContentTarget) {
+      this.contentTarget.value = savedIdea
+      // 사용 후 삭제
+      sessionStorage.removeItem('onboarding_idea')
+      // 유효성 검사 트리거
+      this.validateForm()
     }
   }
 

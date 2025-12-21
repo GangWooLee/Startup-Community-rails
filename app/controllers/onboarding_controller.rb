@@ -1,6 +1,5 @@
 class OnboardingController < ApplicationController
-  # 온보딩 플로우는 비로그인 상태에서 접근 가능
-  skip_before_action :require_login, only: [:landing, :ai_input, :ai_result], if: -> { respond_to?(:require_login, true) }
+  # 온보딩은 비로그인 상태에서도 접근 가능 (require_login 사용 안함)
 
   def landing
     # 이미 로그인한 사용자는 커뮤니티로 리디렉션

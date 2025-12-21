@@ -14,7 +14,8 @@ class OmniauthCallbacksController < ApplicationController
       session[:user_id] = @user.id
 
       Rails.logger.info "OAuth login successful: #{provider_name} - User #{@user.id}"
-      redirect_to root_path, notice: "#{provider_name} 계정으로 로그인되었습니다!"
+      redirect_back_or(root_path)
+      flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다!"
     else
       # 사용자 저장 실패 (이메일 중복 등)
       Rails.logger.error "OAuth user creation failed: #{@user.errors.full_messages.join(', ')}"

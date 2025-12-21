@@ -38,7 +38,10 @@ export default class extends Controller {
   }
 
   goToPost(event) {
-    // Idea is already stored in sessionStorage by ai_input_controller
-    // The post form will read from sessionStorage on load
+    // 아이디어를 sessionStorage에 저장 (로그인 후에도 유지됨)
+    // ai_input에서 이미 저장했지만, 혹시 없을 경우를 대비해 다시 저장
+    if (this.ideaValue) {
+      sessionStorage.setItem('onboarding_idea', this.ideaValue)
+    }
   }
 }
