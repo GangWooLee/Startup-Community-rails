@@ -88,39 +88,75 @@
         </div>
         <div class="space-y-2">
           <% users.each do |user| %>
-            <%= link_to profile_path(user), class: "flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors", data: { turbo: false } do %>
-              <!-- Avatar -->
-              <div class="h-12 w-12 rounded-full overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
-                <% if user.avatar.attached? %>
-                  <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
-                <% elsif user.avatar_url.present? %>
-                  <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
-                <% else %>
-                  <span class="text-lg font-semibold text-muted-foreground"><%= user.name[0] %></span>
-                <% end %>
-              </div>
+            <%= link_to profile_path(user), class: "block p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors h-[88px]", data: { turbo: false } do %>
+              <div class="flex items-center gap-4 h-full">
+                <!-- 좌측: 아바타 -->
+                <div class="h-14 w-14 rounded-full overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+                  <% elsif user.avatar_url.present? %>
+                    <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
+                  <% else %>
+                    <span class="text-xl font-semibold text-muted-foreground"><%= user.name[0] %></span>
+                  <% end %>
+                </div>
 
-              <!-- User Info -->
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-foreground truncate">
-                  <%= highlight_search(user.name, query) %>
-                </p>
-                <% if user.role_title.present? %>
-                  <p class="text-sm text-muted-foreground truncate">
-                    <%= highlight_search(user.role_title, query) %>
+                <!-- 중앙: 이름 + 직군/소속 -->
+                <div class="flex-shrink-0 w-28 min-w-0">
+                  <p class="font-semibold text-foreground truncate">
+                    <%= highlight_search(user.name, query) %>
                   </p>
-                <% end %>
-                <% if user.bio.present? && query.present? && user.bio.downcase.include?(query.downcase) %>
-                  <p class="text-xs text-muted-foreground mt-1 line-clamp-1">
-                    <%= highlight_snippet(user.bio, query, max_length: 60) %>
-                  </p>
-                <% end %>
-              </div>
+                  <% if user.role_title.present? %>
+                    <p class="text-sm text-muted-foreground truncate">
+                      <%= highlight_search(user.role_title, query) %>
+                    </p>
+                  <% end %>
+                  <% if user.affiliation.present? %>
+                    <p class="text-xs text-muted-foreground/70 truncate">
+                      <%= highlight_search(user.affiliation, query) %>
+                    </p>
+                  <% end %>
+                </div>
 
-              <!-- Arrow -->
-              <svg class="h-5 w-5 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
+                <!-- 우측: 한줄소개 + 기술스택 -->
+                <div class="flex-1 min-w-0 border-l border-border pl-4">
+                  <% if user.bio.present? %>
+                    <p class="text-sm text-foreground/80 line-clamp-1">
+                      <%= highlight_snippet(user.bio, query, max_length: 80) %>
+                    </p>
+                  <% else %>
+                    <p class="text-sm text-muted-foreground/50 italic">소개가 없습니다</p>
+                  <% end %>
+                  <% skills = user.skills_array.take(3) %>
+                  <% if skills.any? %>
+                    <div class="flex flex-wrap gap-1 mt-1.5">
+                      <% skills.each do |skill| %>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary truncate max-w-[80px]">
+                          <%= skill %>
+                        </span>
+                      <% end %>
+                      <% if user.skills_array.length > 3 %>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground">
+                          +<%= user.skills_array.length - 3 %>
+                        </span>
+                      <% end %>
+                    </div>
+                  <% elsif user.availability_badges.any? %>
+                    <div class="flex flex-wrap gap-1 mt-1.5">
+                      <% user.availability_badges.take(2).each do |badge| %>
+                        <span class="px-2 py-0.5 text-xs rounded-full <%= badge[:color] %> text-white">
+                          <%= badge[:label] %>
+                        </span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+
+                <!-- 화살표 -->
+                <svg class="h-5 w-5 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
             <% end %>
           <% end %>
         </div>
