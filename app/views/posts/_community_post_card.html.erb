@@ -49,8 +49,8 @@
           <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
             <%= image_tag post.images.first, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
             <% if post.images.count > 1 %>
-              <div class="absolute bottom-0.5 right-0.5 px-1 py-0.5 bg-black/60 rounded text-white text-[10px] font-medium">
-                +<%= post.images.count - 1 %>
+              <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span class="text-white text-sm font-bold">+<%= post.images.count - 1 %></span>
               </div>
             <% end %>
           </div>
