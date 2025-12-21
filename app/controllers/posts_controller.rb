@@ -1,5 +1,6 @@
 class PostsController < ApplicationController
   before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
+  before_action :redirect_to_onboarding, only: [:index]
   before_action :set_post, only: [:show, :edit, :update, :destroy]
   before_action :authorize_post, only: [:edit, :update, :destroy]
   before_action :hide_floating_button, only: [:new, :edit, :show]
@@ -105,5 +106,18 @@ class PostsController < ApplicationController
   # 커뮤니티 카테고리인지 확인 (free, question, promotion)
   def community_category?(category)
     %w[free question promotion].include?(category.to_s)
+  end
+
+  # 비로그인 사용자를 온보딩으로 리디렉션
+  # - 로그인 사용자: 커뮤니티 접근 허용
+  # - 비로그인 + browse=true 파라미터: 둘러보기 모드 허용
+  # - 비로그인 + 쿠키 있음: 이미 온보딩 경험함, 허용
+  # - 비로그인 + 첫 방문: 온보딩으로 리디렉션
+  def redirect_to_onboarding
+    return if logged_in?
+    return if params[:browse] == "true"
+    return if cookies[:onboarding_completed].present?
+
+    redirect_to onboarding_landing_path
   end
 end

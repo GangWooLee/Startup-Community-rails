@@ -16,6 +16,14 @@ class OnboardingController < ApplicationController
     @idea = params[:idea]
 
     # 아이디어가 없으면 입력 화면으로 리디렉션
-    redirect_to onboarding_ai_input_path if @idea.blank?
+    if @idea.blank?
+      redirect_to onboarding_ai_input_path
+    else
+      # 온보딩 경험 완료 표시 (다음 방문 시 커뮤니티 직접 접근 허용)
+      cookies[:onboarding_completed] = {
+        value: "true",
+        expires: 1.year.from_now
+      }
+    end
   end
 end
