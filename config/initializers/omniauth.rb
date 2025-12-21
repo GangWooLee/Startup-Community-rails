@@ -20,8 +20,10 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 end
 
 # OmniAuth 보안 설정
-# POST 요청만 허용 (OAuth 2.0 보안 표준)
-OmniAuth.config.allowed_request_methods = [:post]
+# GET과 POST 모두 허용
+# 참고: CSRF 보호는 oauth_controller#passthru에서 Rails의 CSRF 토큰 검증으로 처리됨
+# 외부에서 직접 /auth/:provider로 GET 요청 시에도 OmniAuth가 처리하도록 허용
+OmniAuth.config.allowed_request_methods = [:get, :post]
 
 # 인증 실패 시 예외 발생 대신 failure 엔드포인트로 리다이렉트
 OmniAuth.config.on_failure = proc { |env|
