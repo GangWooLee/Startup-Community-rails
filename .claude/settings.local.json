@@ -47,7 +47,8 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\n[style] 커뮤니티 글 카테고리 뱃지 제거\n\n## 변경 사항\n- 커뮤니티 인덱스 카드에서 ''자유/질문/홍보'' 뱃지 제거\n- 커뮤니티 글 상세 페이지에서 카테고리 뱃지 제거\n- 외주 글\\(구인/구직\\)은 뱃지 유지\n\n## 수정 파일\n- app/views/posts/_community_post_card.html.erb\n- app/views/posts/show.html.erb\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit -m \"$\\(cat <<''EOF''\n[feat] 플로팅 글쓰기 버튼 선별적 표시\n\n## 변경 사항\n- 글 작성/수정/상세 페이지에서 플로팅 버튼 숨김\n- 프로필 수정 페이지에서 플로팅 버튼 숨김\n- ApplicationController에 hide_floating_button 메서드 추가\n\n## 버튼 표시 페이지\n- 커뮤니티 인덱스 \\(/\\)\n- 외주 인덱스 \\(/job_posts\\)\n- 프로필 페이지 \\(/profiles/:id\\)\n- 마이페이지 \\(/my_page\\)\n\n## 버튼 숨김 페이지\n- 글 작성 \\(/posts/new\\)\n- 글 수정 \\(/posts/:id/edit\\)\n- 글 상세 \\(/posts/:id\\)\n- 프로필 수정 \\(/my_page/edit\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit:*)",
-      "Bash(bin/rails routes:*)"
+      "Bash(bin/rails routes:*)",
+      "Bash(git revert:*)"
     ],
     "deny": [],
     "ask": []

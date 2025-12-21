@@ -63,43 +63,40 @@
               class: "w-full bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none resize-none border-none" %>
         </div>
 
-        <!-- Existing Images -->
-        <% if @post.images.attached? %>
-          <div class="bg-card rounded-xl p-4 border border-border">
-            <label class="flex items-center text-sm font-medium text-foreground mb-3">
-              <svg class="h-5 w-5 mr-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              기존 첨부 사진
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-              <% @post.images.each do |image| %>
-                <div class="relative aspect-square rounded-lg overflow-hidden bg-secondary">
-                  <%= image_tag image, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
-                </div>
-              <% end %>
-            </div>
-            <p class="mt-2 text-xs text-muted-foreground">새 사진을 업로드하면 기존 사진이 교체됩니다</p>
-          </div>
-        <% end %>
-
-        <!-- Image Upload -->
-        <div class="bg-card rounded-xl p-4 border border-border" data-controller="image-upload">
+        <!-- Image Upload (기존 이미지 + 새 이미지 통합) -->
+        <div class="bg-card rounded-xl p-4 border border-border" data-controller="image-upload" data-image-upload-existing-count-value="<%= @post.images.attached? ? @post.images.count : 0 %>">
           <div class="flex items-center justify-between mb-3">
             <label class="flex items-center text-sm font-medium text-foreground">
               <svg class="h-5 w-5 mr-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
-              새 사진 추가
+              첨부 이미지
             </label>
-            <span class="text-xs text-muted-foreground" data-image-upload-target="counter">0/5</span>
+            <span class="text-xs text-muted-foreground" data-image-upload-target="counter"><%= @post.images.attached? ? @post.images.count : 0 %>/5</span>
           </div>
 
-          <!-- Image Preview Area -->
+          <!-- Image Preview Area (기존 + 새 이미지) -->
           <div
             data-image-upload-target="preview"
-            class="grid grid-cols-3 gap-2 mb-3 empty:hidden"
+            class="grid grid-cols-3 gap-2 mb-3 <%= @post.images.attached? ? '' : 'empty:hidden' %>"
           >
+            <!-- 기존 이미지 -->
+            <% if @post.images.attached? %>
+              <% @post.images.each do |image| %>
+                <div id="image-<%= image.id %>" class="relative aspect-square rounded-lg overflow-hidden bg-secondary" data-image-upload-target="existingImage">
+                  <%= image_tag image, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
+                  <%= button_to remove_image_post_path(@post, image_id: image.id),
+                      method: :delete,
+                      form: { data: { turbo_confirm: "이 이미지를 삭제하시겠습니까?" } },
+                      class: "absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors" do %>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+            <!-- 새 이미지는 JavaScript로 추가됨 -->
           </div>
 
           <!-- Upload Button -->
@@ -115,7 +112,7 @@
                 data: { image_upload_target: "input", action: "change->image-upload#handleFiles" } %>
           </label>
 
-          <p class="mt-2 text-xs text-muted-foreground text-center">JPG, PNG, GIF (각 10MB 이하)</p>
+          <p class="mt-2 text-xs text-muted-foreground text-center">JPG, PNG, GIF (각 10MB 이하, 최대 5장)</p>
         </div>
 
         <!-- Outsourcing Fields (외주용) -->

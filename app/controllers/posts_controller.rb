@@ -1,8 +1,8 @@
 class PostsController < ApplicationController
-  before_action :require_login, only: [:new, :create, :edit, :update, :destroy]
+  before_action :require_login, only: [:new, :create, :edit, :update, :destroy, :remove_image]
   before_action :redirect_to_onboarding, only: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy]
-  before_action :authorize_post, only: [:edit, :update, :destroy]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :remove_image]
+  before_action :authorize_post, only: [:edit, :update, :destroy, :remove_image]
   before_action :hide_floating_button, only: [:new, :edit, :show]
 
   def index
@@ -82,6 +82,19 @@ class PostsController < ApplicationController
   def destroy
     @post.destroy
     redirect_to posts_path, notice: '게시글이 삭제되었습니다.'
+  end
+
+  def remove_image
+    image = @post.images.find_by(id: params[:image_id])
+    if image
+      image.purge
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.remove("image-#{params[:image_id]}") }
+        format.html { redirect_to edit_post_path(@post), notice: '이미지가 삭제되었습니다.' }
+      end
+    else
+      redirect_to edit_post_path(@post), alert: '이미지를 찾을 수 없습니다.'
+    end
   end
 
   private

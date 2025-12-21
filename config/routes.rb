@@ -38,6 +38,7 @@ Rails.application.routes.draw do
     member do
       post :like, to: "likes#toggle"
       post :bookmark, to: "bookmarks#toggle"
+      delete :remove_image
     end
     resources :comments, only: [:create, :destroy] do
       member do
