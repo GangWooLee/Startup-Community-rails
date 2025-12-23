@@ -1,0 +1,25 @@
+<%# 일반 텍스트 메시지 %>
+<%
+  # current_user가 없을 수 있음 (브로드캐스트 시)
+  viewing_user_id = defined?(current_user) && current_user ? current_user.id : nil
+  is_mine = viewing_user_id && message.sender_id == viewing_user_id
+  bubble_class = is_mine ? "bg-primary text-white" : "bg-gray-100 text-gray-900"
+  container_class = is_mine ? "justify-end" : "justify-start"
+%>
+
+<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in">
+  <% unless is_mine %>
+    <%= link_to profile_path(message.sender), class: "flex-shrink-0 mr-2 self-end" do %>
+      <%= render "shared/avatar", user: message.sender, size: "sm" %>
+    <% end %>
+  <% end %>
+
+  <div class="max-w-[75%] <%= is_mine ? 'order-1' : '' %>">
+    <div class="<%= bubble_class %> px-4 py-2 rounded-2xl <%= is_mine ? 'rounded-br-md' : 'rounded-bl-md' %>">
+      <p class="whitespace-pre-wrap break-words text-sm"><%= message.content %></p>
+    </div>
+    <p class="text-xs text-gray-500 mt-1 <%= is_mine ? 'text-right' : 'text-left' %>">
+      <%= message.created_at.strftime("%H:%M") %>
+    </p>
+  </div>
+</div>

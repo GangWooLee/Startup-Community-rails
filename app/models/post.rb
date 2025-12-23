@@ -157,6 +157,16 @@ class Post < ApplicationRecord
     available_now? ? "text-green-600 bg-green-100" : "text-gray-500 bg-gray-100"
   end
 
+  # 예산 표시 (채팅 컨텍스트 카드용)
+  def budget
+    price_display
+  end
+
+  # 기간 표시 (채팅 컨텍스트 카드용)
+  def duration
+    work_period.presence
+  end
+
   # 검색용 본문 스니펫 생성 (검색어 주변 텍스트 추출)
   def content_snippet(query = nil, max_length: 100)
     return content.truncate(max_length) if query.blank?

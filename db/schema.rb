@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_23_051109) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_23_073404) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -49,6 +49,31 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_23_051109) do
     t.index ["user_id", "bookmarkable_type", "bookmarkable_id"], name: "index_bookmarks_on_user_and_bookmarkable", unique: true
     t.index ["user_id", "created_at"], name: "index_bookmarks_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_bookmarks_on_user_id"
+  end
+
+  create_table "chat_room_participants", force: :cascade do |t|
+    t.integer "chat_room_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_read_at"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["chat_room_id", "user_id"], name: "index_chat_room_participants_on_chat_room_id_and_user_id", unique: true
+    t.index ["chat_room_id"], name: "index_chat_room_participants_on_chat_room_id"
+    t.index ["user_id", "chat_room_id"], name: "index_chat_room_participants_on_user_id_and_chat_room_id"
+    t.index ["user_id"], name: "index_chat_room_participants_on_user_id"
+  end
+
+  create_table "chat_rooms", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "deal_status", default: "pending"
+    t.integer "initiator_id"
+    t.datetime "last_message_at"
+    t.integer "messages_count", default: 0, null: false
+    t.integer "source_post_id"
+    t.datetime "updated_at", null: false
+    t.index ["initiator_id"], name: "index_chat_rooms_on_initiator_id"
+    t.index ["last_message_at"], name: "index_chat_rooms_on_last_message_at"
+    t.index ["source_post_id"], name: "index_chat_rooms_on_source_post_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -94,6 +119,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_23_051109) do
     t.index ["likeable_type", "likeable_id"], name: "index_likes_on_likeable_type_and_likeable_id"
     t.index ["user_id", "likeable_type", "likeable_id"], name: "index_likes_on_user_and_likeable", unique: true
     t.index ["user_id"], name: "index_likes_on_user_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer "chat_room_id", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.string "message_type", default: "text"
+    t.json "metadata"
+    t.integer "sender_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_room_id", "created_at"], name: "index_messages_on_chat_room_id_and_created_at"
+    t.index ["chat_room_id"], name: "index_messages_on_chat_room_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -198,11 +236,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_23_051109) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "bookmarks", "users"
+  add_foreign_key "chat_room_participants", "chat_rooms"
+  add_foreign_key "chat_room_participants", "users"
+  add_foreign_key "chat_rooms", "posts", column: "source_post_id"
+  add_foreign_key "chat_rooms", "users", column: "initiator_id"
   add_foreign_key "comments", "comments", column: "parent_id", on_delete: :cascade
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "job_posts", "users"
   add_foreign_key "likes", "users"
+  add_foreign_key "messages", "chat_rooms"
+  add_foreign_key "messages", "users", column: "sender_id"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "oauth_identities", "users"

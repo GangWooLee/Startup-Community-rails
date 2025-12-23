@@ -1,0 +1,10 @@
+<%# 메시지 타입에 따라 다른 렌더링 %>
+<% if message.system? || message.deal_confirm? %>
+  <%= render "messages/system_message", message: message %>
+<% elsif message.profile_card? %>
+  <%= render "messages/profile_card_message", message: message %>
+<% elsif message.contact_card? %>
+  <%= render "messages/contact_card_message", message: message %>
+<% else %>
+  <%= render "messages/text_message", message: message %>
+<% end %>

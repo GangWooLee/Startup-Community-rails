@@ -39,6 +39,11 @@ class User < ApplicationRecord
   has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
   has_many :sent_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :destroy
 
+  # 채팅
+  has_many :chat_room_participants, dependent: :destroy
+  has_many :chat_rooms, through: :chat_room_participants
+  has_many :sent_messages, class_name: "Message", foreign_key: :sender_id, dependent: :destroy
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
 
@@ -200,6 +205,16 @@ class User < ApplicationRecord
   # 읽지 않은 알림이 있는지 확인
   def has_unread_notifications?
     notifications.unread.exists?
+  end
+
+  # 읽지 않은 메시지 총 수
+  def total_unread_messages
+    chat_room_participants.sum(&:unread_count)
+  end
+
+  # 읽지 않은 메시지가 있는지 확인
+  def has_unread_messages?
+    total_unread_messages > 0
   end
 
   private

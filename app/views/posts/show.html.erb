@@ -277,12 +277,22 @@
       <% end %>
 
       <!-- Outsourcing Contact Button -->
-      <% if @post.outsourcing? %>
+      <% if @post.outsourcing? && logged_in? && @post.user != current_user %>
         <div class="mb-6">
-          <button class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8">
+          <%= button_to start_chat_from_post_path(@post),
+                        method: :post,
+                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8" do %>
             <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
             문의하기
-          </button>
+          <% end %>
+        </div>
+      <% elsif @post.outsourcing? && !logged_in? %>
+        <div class="mb-6">
+          <%= link_to login_path(return_to: post_path(@post)),
+                      class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8" do %>
+            <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+            로그인하고 문의하기
+          <% end %>
         </div>
       <% end %>
 

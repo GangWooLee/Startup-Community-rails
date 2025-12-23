@@ -1,0 +1,42 @@
+<%# 거래 상태 변경 버튼 - 게시글 작성자에게만 표시 %>
+<div id="deal-actions" class="px-4 py-2 bg-surface border-b border-divider">
+  <div class="flex gap-2">
+    <% if chat_room.pending? %>
+      <%= button_to confirm_deal_chat_room_path(chat_room),
+                    method: :post,
+                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition",
+                    data: { turbo_stream: true, turbo_confirm: "거래를 확정하시겠습니까?" } do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        거래 확정하기
+      <% end %>
+
+      <%= button_to cancel_deal_chat_room_path(chat_room),
+                    method: :post,
+                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-muted/20 text-foreground hover:bg-muted/30 transition",
+                    data: { turbo_stream: true, turbo_confirm: "거래를 취소하시겠습니까?" } do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        거래 취소
+      <% end %>
+
+    <% elsif chat_room.confirmed? %>
+      <div class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-700">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        거래가 확정되었습니다
+      </div>
+
+    <% elsif chat_room.cancelled? %>
+      <div class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-100 text-red-700">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        거래가 취소되었습니다
+      </div>
+    <% end %>
+  </div>
+</div>

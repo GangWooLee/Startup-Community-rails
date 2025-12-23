@@ -18,3 +18,12 @@ two:
   bio: Test user two bio
   avatar_url:
   last_sign_in_at: 2025-11-26 06:00:54
+
+three:
+  email: user3@test.com
+  password_digest: <%= BCrypt::Password.create('test1234') %>
+  name: User Three
+  role_title: PM
+  bio: Test user three bio
+  avatar_url:
+  last_sign_in_at: 2025-11-26 06:00:54

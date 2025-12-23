@@ -1,0 +1,58 @@
+<%# 프로필 카드 메시지 %>
+<%
+  # current_user가 없을 수 있음 (브로드캐스트 시)
+  viewing_user_id = defined?(current_user) && current_user ? current_user.id : nil
+  is_mine = viewing_user_id && message.sender_id == viewing_user_id
+  container_class = is_mine ? "justify-end" : "justify-start"
+  metadata = message.metadata || {}
+  profile_user_id = metadata["user_id"]
+%>
+
+<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in">
+  <% unless is_mine %>
+    <%= link_to profile_path(message.sender), class: "flex-shrink-0 mr-2 self-end" do %>
+      <%= render "shared/avatar", user: message.sender, size: "sm" %>
+    <% end %>
+  <% end %>
+
+  <div class="max-w-[75%] <%= is_mine ? 'order-1' : '' %>">
+    <%= link_to profile_path(profile_user_id), class: "block" do %>
+      <div class="bg-white border border-gray-200 rounded-xl p-3 hover:bg-gray-50 transition">
+        <!-- 카드 헤더 -->
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="text-xs font-medium text-primary">프로필 공유</span>
+        </div>
+
+        <!-- 프로필 정보 -->
+        <div class="flex items-center gap-3">
+          <% if profile_user_id %>
+            <% profile_user = User.find_by(id: profile_user_id) %>
+            <% if profile_user %>
+              <%= render "shared/avatar", user: profile_user, size: "md" %>
+            <% end %>
+          <% end %>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 truncate"><%= metadata["name"] %></p>
+            <p class="text-xs text-gray-500 truncate">
+              <% if metadata["role_title"].present? %>
+                <%= metadata["role_title"] %>
+                <% if metadata["affiliation"].present? %>
+                  <span class="text-gray-400">@</span><%= metadata["affiliation"] %>
+                <% end %>
+              <% end %>
+            </p>
+          </div>
+          <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    <% end %>
+    <p class="text-xs text-gray-500 mt-1 <%= is_mine ? 'text-right' : 'text-left' %>">
+      <%= message.created_at.strftime("%H:%M") %>
+    </p>
+  </div>
+</div>

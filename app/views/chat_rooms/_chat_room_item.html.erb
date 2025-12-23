@@ -1,0 +1,75 @@
+<%
+  other_user = room.other_participant(current_user)
+  last_message = room.last_message
+  unread_count = room.unread_count_for(current_user)
+  source_post = room.source_post
+%>
+
+<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors" do %>
+  <!-- 프로필 이미지 -->
+  <div class="relative flex-shrink-0">
+    <%= render "shared/avatar", user: other_user, size: "lg" %>
+    <% if unread_count > 0 %>
+      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+        <%= unread_count > 99 ? "99+" : unread_count %>
+      </span>
+    <% end %>
+  </div>
+
+  <!-- 채팅방 정보 -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <p class="font-medium text-foreground truncate <%= 'font-bold' if unread_count > 0 %>">
+          <%= other_user&.name || "알 수 없음" %>
+        </p>
+        <% if room.confirmed? %>
+          <span class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">
+            거래 확정
+          </span>
+        <% end %>
+      </div>
+      <% if last_message %>
+        <span class="text-xs text-gray-500 flex-shrink-0">
+          <%= time_ago_in_words(last_message.created_at) %> 전
+        </span>
+      <% end %>
+    </div>
+
+    <!-- 게시글 컨텍스트 표시 -->
+    <% if source_post.present? %>
+      <div class="flex items-center gap-1 mt-0.5">
+        <% if source_post.hiring? %>
+          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">구인</span>
+        <% elsif source_post.seeking? %>
+          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">구직</span>
+        <% end %>
+        <p class="text-xs text-gray-500 truncate"><%= source_post.title.truncate(25) %></p>
+      </div>
+    <% end %>
+
+    <% if last_message %>
+      <p class="text-sm text-gray-600 truncate mt-0.5 <%= 'text-gray-900 font-medium' if unread_count > 0 %>">
+        <% if last_message.sender_id == current_user.id %>
+          <span class="text-gray-500">나: </span>
+        <% end %>
+        <% if last_message.system_message? %>
+          <span class="text-gray-500 italic"><%= truncate(last_message.content, length: 35) %></span>
+        <% elsif last_message.profile_card? %>
+          <span class="text-gray-500">프로필을 공유했습니다</span>
+        <% elsif last_message.contact_card? %>
+          <span class="text-gray-500">연락처를 공유했습니다</span>
+        <% else %>
+          <%= truncate(last_message.content, length: 35) %>
+        <% end %>
+      </p>
+    <% else %>
+      <p class="text-sm text-gray-500 mt-0.5">대화를 시작해보세요</p>
+    <% end %>
+  </div>
+
+  <!-- 화살표 -->
+  <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+  </svg>
+<% end %>

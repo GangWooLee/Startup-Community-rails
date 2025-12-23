@@ -73,4 +73,24 @@ Rails.application.routes.draw do
       post :mark_all_read
     end
   end
+
+  # Chat (채팅)
+  resources :chat_rooms, only: [ :index, :show, :create ] do
+    member do
+      post :confirm_deal
+      post :cancel_deal
+    end
+    resources :messages, only: [ :create ] do
+      collection do
+        post :send_profile
+        post :send_contact
+      end
+    end
+  end
+
+  # 프로필에서 채팅 시작
+  post "profiles/:id/start_chat", to: "chat_rooms#create", as: :start_chat
+
+  # 게시글에서 채팅 시작 (컨텍스트 포함)
+  post "posts/:id/start_chat", to: "chat_rooms#create_from_post", as: :start_chat_from_post
 end
