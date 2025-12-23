@@ -2,164 +2,32 @@
 <div class="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-background">
 
   <!-- 좌측: 채팅 목록 패널 (모바일: 전체, PC: 360px 고정) -->
-  <div class="w-full md:w-[360px] md:min-w-[360px] md:max-w-[360px] flex flex-col h-full md:border-r border-gray-200 bg-white">
+  <%= render "chat_rooms/chat_list_panel",
+             filter: @filter,
+             search: @search,
+             total_unread: @total_unread,
+             received_unread: @received_unread,
+             sent_unread: @sent_unread,
+             chat_rooms: @chat_rooms %>
 
-    <!-- 헤더 -->
-    <header class="sticky top-0 z-10 bg-white border-b border-gray-200">
-      <div class="px-4 pt-4 pb-3">
-        <div class="flex items-center justify-between">
-          <h1 class="text-xl font-bold text-foreground">
-            메시지
-            <% if @total_unread > 0 %>
-              <span class="ml-1 text-sm font-medium text-primary">(<%= @total_unread %>)</span>
-            <% end %>
-          </h1>
-
-          <!-- 우측 아이콘: 알림, 마이페이지 -->
-          <div class="flex items-center gap-2">
-            <!-- 알림 아이콘 (추후 알림 기능 연결) -->
-            <button type="button" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-            </button>
-
-            <!-- 마이페이지 아이콘 -->
-            <%= link_to my_page_path, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors" do %>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-            <% end %>
-          </div>
+  <!-- 우측: 채팅방 영역 (PC에서만 표시) - Turbo Frame으로 업데이트 -->
+  <%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-gray-50" do %>
+    <!-- 채팅방 미선택 상태 -->
+    <div class="flex-1 flex flex-col items-center justify-center">
+      <div class="text-center px-8">
+        <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-6">
+          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
         </div>
+        <h2 class="text-xl font-semibold text-gray-700 mb-2">대화를 선택해주세요</h2>
+        <p class="text-gray-500 max-w-sm">
+          좌측 목록에서 대화를 선택하면<br>
+          이곳에서 메시지를 주고받을 수 있습니다
+        </p>
       </div>
-
-      <!-- 탭 필터 -->
-      <div class="px-4 pb-3">
-        <div class="flex gap-2 overflow-x-auto scrollbar-hide">
-          <%= link_to chat_rooms_path(filter: "all"),
-                      class: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap #{@filter == 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" do %>
-            전체
-            <% if @total_unread > 0 %>
-              <span class="<%= @filter == 'all' ? 'bg-white/20' : 'bg-red-500 text-white' %> text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                <%= @total_unread %>
-              </span>
-            <% end %>
-          <% end %>
-
-          <%= link_to chat_rooms_path(filter: "received"),
-                      class: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap #{@filter == 'received' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-            </svg>
-            받은 문의
-            <% if @received_unread > 0 %>
-              <span class="<%= @filter == 'received' ? 'bg-white/20' : 'bg-red-500 text-white' %> text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                <%= @received_unread %>
-              </span>
-            <% end %>
-          <% end %>
-
-          <%= link_to chat_rooms_path(filter: "sent"),
-                      class: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap #{@filter == 'sent' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-            </svg>
-            보낸 문의
-            <% if @sent_unread > 0 %>
-              <span class="<%= @filter == 'sent' ? 'bg-white/20' : 'bg-red-500 text-white' %> text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                <%= @sent_unread %>
-              </span>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-
-      <!-- 검색창 -->
-      <div class="px-4 pb-3">
-        <%= form_with url: chat_rooms_path, method: :get, local: true, class: "relative", data: { controller: "search-debounce" } do |f| %>
-          <%= f.hidden_field :filter, value: @filter %>
-          <div class="relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <%= f.text_field :search,
-                            value: @search,
-                            placeholder: "이름 또는 프로젝트명 검색...",
-                            class: "w-full pl-10 pr-4 py-2.5 bg-gray-100 border-0 rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-colors",
-                            data: { action: "input->search-debounce#search" } %>
-            <% if @search.present? %>
-              <%= link_to chat_rooms_path(filter: @filter),
-                          class: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" do %>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              <% end %>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    </header>
-
-    <!-- 채팅방 목록 (하단 네비게이션 공간 확보) -->
-    <div class="flex-1 overflow-y-auto pb-16 md:pb-0">
-      <% if @chat_rooms.any? %>
-        <div class="divide-y divide-gray-100">
-          <% @chat_rooms.each do |room| %>
-            <%= render "chat_rooms/chat_room_item", room: room %>
-          <% end %>
-        </div>
-      <% else %>
-        <div class="flex flex-col items-center justify-center h-64 text-gray-500 px-4">
-          <% if @search.present? %>
-            <!-- 검색 결과 없음 -->
-            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <p class="font-medium text-gray-700">'<%= @search %>' 검색 결과가 없습니다</p>
-            <p class="text-sm mt-1 text-center">다른 검색어를 입력해보세요</p>
-          <% elsif @filter == "received" %>
-            <!-- 받은 문의 없음 -->
-            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-            </svg>
-            <p class="font-medium text-gray-700">받은 문의가 없습니다</p>
-            <p class="text-sm mt-1 text-center">구인/구직 글을 작성하면<br>문의가 들어옵니다</p>
-          <% elsif @filter == "sent" %>
-            <!-- 보낸 문의 없음 -->
-            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-            </svg>
-            <p class="font-medium text-gray-700">보낸 문의가 없습니다</p>
-            <p class="text-sm mt-1 text-center">관심있는 구인/구직 글에서<br>대화를 시작해보세요</p>
-          <% else %>
-            <!-- 전체 대화 없음 -->
-            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            <p class="font-medium text-gray-700">아직 대화가 없습니다</p>
-            <p class="text-sm mt-1 text-center">구인/구직 글이나 프로필에서<br>대화를 시작해보세요</p>
-          <% end %>
-        </div>
-      <% end %>
     </div>
-  </div>
-
-  <!-- 우측: 채팅방 영역 (PC에서만 표시) -->
-  <div class="hidden md:flex flex-1 flex-col items-center justify-center bg-gray-50">
-    <div class="text-center px-8">
-      <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-6">
-        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-        </svg>
-      </div>
-      <h2 class="text-xl font-semibold text-gray-700 mb-2">대화를 선택해주세요</h2>
-      <p class="text-gray-500 max-w-sm">
-        좌측 목록에서 대화를 선택하면<br>
-        이곳에서 메시지를 주고받을 수 있습니다
-      </p>
-    </div>
-  </div>
+  <% end %>
 </div>
 
 <!-- 하단 네비게이션 바 (모바일에서만 표시) -->
