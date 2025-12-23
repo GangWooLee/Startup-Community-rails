@@ -14,13 +14,16 @@
       </svg>
     <% end %>
 
-    <%= link_to profile_path(other_user), class: "flex items-center gap-3 flex-1 min-w-0 group" do %>
+    <%# 프로필 이미지 + 사용자명 클릭 시 프로필 오버레이 표시 %>
+    <%= link_to profile_overlay_chat_room_path(chat_room),
+                class: "flex items-center gap-3 flex-1 min-w-0 group cursor-pointer",
+                data: { turbo_stream: true } do %>
       <!-- 프로필 이미지 (이니셜 폴백 포함) -->
       <div class="relative flex-shrink-0">
         <% if other_user.avatar&.attached? %>
-          <%= image_tag other_user.avatar, class: "w-10 h-10 rounded-full object-cover border border-gray-200" %>
+          <%= image_tag other_user.avatar, class: "w-10 h-10 rounded-full object-cover border border-gray-200 group-hover:ring-2 group-hover:ring-primary/30 transition-all" %>
         <% else %>
-          <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold <%= avatar_bg_color(other_user.name) %>">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold group-hover:ring-2 group-hover:ring-primary/30 transition-all <%= avatar_bg_color(other_user.name) %>">
             <%= other_user.name&.first&.upcase || "?" %>
           </div>
         <% end %>
