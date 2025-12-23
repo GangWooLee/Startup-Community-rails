@@ -2,6 +2,10 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
+<% content_for :og_meta do %>
+  <%= post_og_meta_tags(@post) %>
+<% end %>
+
 <div class="min-h-screen bg-background pb-20">
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
@@ -90,7 +94,52 @@
               <span class="text-base font-medium text-foreground"><%= @post.work_period %></span>
             </div>
           <% end %>
+          <% if @post.work_type.present? %>
+            <div class="bg-secondary/50 rounded-lg p-4">
+              <span class="text-xs text-muted-foreground block mb-1">진행 방식</span>
+              <span class="text-base font-medium text-foreground"><%= @post.work_type_label %></span>
+            </div>
+          <% end %>
+          <% if @post.seeking? && @post.available_now != nil %>
+            <div class="bg-secondary/50 rounded-lg p-4">
+              <span class="text-xs text-muted-foreground block mb-1">작업 가능 상태</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= @post.availability_color_class %>">
+                <%= @post.availability_label %>
+              </span>
+            </div>
+          <% end %>
         </div>
+
+        <!-- 기술 스택 -->
+        <% if @post.skills.present? %>
+          <div class="mb-6">
+            <span class="text-xs text-muted-foreground block mb-2"><%= @post.hiring? ? '필요 기술' : '보유 기술' %></span>
+            <div class="flex flex-wrap gap-2">
+              <% @post.skills_array.each do |skill| %>
+                <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium">
+                  <%= skill %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- 구직자 추가 정보 -->
+        <% if @post.seeking? %>
+          <% if @post.portfolio_url.present? %>
+            <div class="mb-6">
+              <span class="text-xs text-muted-foreground block mb-2">포트폴리오</span>
+              <%= link_to @post.portfolio_url, @post.portfolio_url, target: "_blank", rel: "noopener noreferrer", class: "text-sm text-primary hover:underline break-all" %>
+            </div>
+          <% end %>
+
+          <% if @post.experience.present? %>
+            <div class="mb-6">
+              <span class="text-xs text-muted-foreground block mb-2">관련 경험/이력</span>
+              <p class="text-sm text-foreground whitespace-pre-wrap bg-secondary/30 rounded-lg p-3"><%= @post.experience %></p>
+            </div>
+          <% end %>
+        <% end %>
       <% end %>
 
       <!-- Post Content -->
@@ -244,9 +293,13 @@
           <%= render partial: "shared/icons/message_square", locals: { css_class: "h-5 w-5" } %>
           <span class="text-sm font-medium"><%= @post.comments_count %></span>
         </div>
-        <button class="inline-flex items-center gap-2 px-4 py-2 rounded-md hover:bg-secondary transition-colors text-foreground ml-auto">
-          <%= render partial: "shared/icons/share", locals: { css_class: "h-5 w-5" } %>
-        </button>
+        <div class="ml-auto">
+          <%= render partial: "shared/share_bottomsheet", locals: {
+            url: post_url(@post),
+            title: @post.title,
+            description: @post.content.truncate(100)
+          } %>
+        </div>
         <%= render partial: "shared/bookmark_button", locals: { post: @post, bookmarked: logged_in? ? @post.bookmarked_by?(current_user) : false } %>
       </div>
     </article>

@@ -1,4 +1,57 @@
 module ApplicationHelper
+  # Open Graph 메타 태그 생성 헬퍼
+  # 소셜 미디어 공유 시 링크 미리보기에 사용됨
+  def og_meta_tags(options = {})
+    # 기본값 설정
+    defaults = {
+      title: "Grounded - 창업자 커뮤니티",
+      description: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티",
+      type: "website",
+      image: nil,
+      url: request.original_url
+    }
+
+    opts = defaults.merge(options)
+
+    tags = []
+    tags << tag.meta(property: "og:title", content: opts[:title])
+    tags << tag.meta(property: "og:description", content: opts[:description])
+    tags << tag.meta(property: "og:type", content: opts[:type])
+    tags << tag.meta(property: "og:url", content: opts[:url])
+    tags << tag.meta(property: "og:site_name", content: "Grounded")
+    tags << tag.meta(property: "og:locale", content: "ko_KR")
+
+    if opts[:image].present?
+      tags << tag.meta(property: "og:image", content: opts[:image])
+      tags << tag.meta(property: "og:image:width", content: "1200")
+      tags << tag.meta(property: "og:image:height", content: "630")
+    end
+
+    # Twitter Card 태그
+    tags << tag.meta(name: "twitter:card", content: opts[:image].present? ? "summary_large_image" : "summary")
+    tags << tag.meta(name: "twitter:title", content: opts[:title])
+    tags << tag.meta(name: "twitter:description", content: opts[:description])
+    tags << tag.meta(name: "twitter:image", content: opts[:image]) if opts[:image].present?
+
+    safe_join(tags, "\n    ")
+  end
+
+  # 게시글용 OG 메타 태그 생성
+  def post_og_meta_tags(post)
+    image_url = nil
+    if post.images.attached?
+      # 첫 번째 이미지 사용
+      image_url = url_for(post.images.first)
+    end
+
+    og_meta_tags(
+      title: post.title,
+      description: post.content.truncate(100),
+      type: "article",
+      image: image_url
+    )
+  end
+
   # 검색어를 하이라이팅하여 표시
   # text: 원본 텍스트
   # query: 검색어

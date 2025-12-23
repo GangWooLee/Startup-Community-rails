@@ -86,6 +86,12 @@
       <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
       <span><%= post.comments_count %></span>
     <% end %>
+    <%= render partial: "shared/share_button", locals: {
+      url: post_url(post),
+      title: post.title,
+      description: post.content.truncate(80),
+      size: "sm"
+    } %>
     <div class="ml-auto">
       <%= render partial: "shared/bookmark_button", locals: { post: post, bookmarked: defined?(current_user) && current_user ? post.bookmarked_by?(current_user) : false, size: "sm" } %>
     </div>
