@@ -3,14 +3,21 @@
   last_message = room.last_message
   unread_count = room.unread_count_for(current_user)
   source_post = room.source_post
+  is_post_author = room.post_author?(current_user)
 %>
 
-<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors" do %>
-  <!-- 프로필 이미지 -->
+<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors #{unread_count > 0 ? 'bg-primary/5' : ''}" do %>
+  <!-- 프로필 이미지 (이니셜 폴백 포함) -->
   <div class="relative flex-shrink-0">
-    <%= render "shared/avatar", user: other_user, size: "lg" %>
+    <% if other_user&.avatar&.attached? %>
+      <%= image_tag other_user.avatar, class: "w-12 h-12 rounded-full object-cover border border-gray-200" %>
+    <% else %>
+      <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg <%= avatar_bg_color(other_user&.name) %>">
+        <%= other_user&.name&.first&.upcase || "?" %>
+      </div>
+    <% end %>
     <% if unread_count > 0 %>
-      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 font-medium shadow-sm">
         <%= unread_count > 99 ? "99+" : unread_count %>
       </span>
     <% end %>
@@ -18,58 +25,84 @@
 
   <!-- 채팅방 정보 -->
   <div class="flex-1 min-w-0">
+    <!-- 상단: 이름 + 직군 + 시간 -->
     <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 min-w-0">
-        <p class="font-medium text-foreground truncate <%= 'font-bold' if unread_count > 0 %>">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <p class="font-semibold text-gray-900 truncate <%= 'font-bold' if unread_count > 0 %>">
           <%= other_user&.name || "알 수 없음" %>
         </p>
-        <% if room.confirmed? %>
-          <span class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">
-            거래 확정
-          </span>
+        <% if other_user&.role_title.present? %>
+          <span class="text-gray-400">•</span>
+          <p class="text-xs text-gray-500 truncate"><%= other_user.role_title %></p>
         <% end %>
       </div>
       <% if last_message %>
-        <span class="text-xs text-gray-500 flex-shrink-0">
+        <span class="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">
           <%= time_ago_in_words(last_message.created_at) %> 전
         </span>
       <% end %>
     </div>
 
-    <!-- 게시글 컨텍스트 표시 -->
+    <!-- 컨텍스트 뱃지: 게시글 정보 -->
     <% if source_post.present? %>
-      <div class="flex items-center gap-1 mt-0.5">
+      <div class="flex items-center gap-1.5 mt-1">
         <% if source_post.hiring? %>
-          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">구인</span>
+          <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            구인
+          </span>
         <% elsif source_post.seeking? %>
-          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">구직</span>
+          <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            구직
+          </span>
         <% end %>
-        <p class="text-xs text-gray-500 truncate"><%= source_post.title.truncate(25) %></p>
+        <p class="text-xs text-gray-500 truncate flex-1"><%= source_post.title.truncate(30) %></p>
       </div>
     <% end %>
 
-    <% if last_message %>
-      <p class="text-sm text-gray-600 truncate mt-0.5 <%= 'text-gray-900 font-medium' if unread_count > 0 %>">
-        <% if last_message.sender_id == current_user.id %>
-          <span class="text-gray-500">나: </span>
+    <!-- 마지막 메시지 + 상태 뱃지 -->
+    <div class="flex items-center gap-2 mt-1">
+      <% if last_message %>
+        <p class="text-sm truncate flex-1 <%= unread_count > 0 ? 'text-gray-900 font-medium' : 'text-gray-600' %>">
+          <% if last_message.sender_id == current_user.id %>
+            <span class="text-gray-400">나: </span>
+          <% end %>
+          <% if last_message.system_message? || last_message.deal_confirm? %>
+            <span class="text-gray-500 italic"><%= message_preview(last_message) %></span>
+          <% elsif last_message.profile_card? %>
+            <span class="text-gray-500">📋 프로필을 공유했습니다</span>
+          <% elsif last_message.contact_card? %>
+            <span class="text-gray-500">📧 연락처를 공유했습니다</span>
+          <% else %>
+            <%= truncate(last_message.content, length: 30) %>
+          <% end %>
+        </p>
+      <% else %>
+        <p class="text-sm text-gray-400 truncate flex-1">대화를 시작해보세요</p>
+      <% end %>
+
+      <!-- 상태 뱃지들 -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <% if room.confirmed? %>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">
+            ✓ 확정
+          </span>
+        <% elsif room.cancelled? %>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-500">
+            취소됨
+          </span>
         <% end %>
-        <% if last_message.system_message? %>
-          <span class="text-gray-500 italic"><%= truncate(last_message.content, length: 35) %></span>
-        <% elsif last_message.profile_card? %>
-          <span class="text-gray-500">프로필을 공유했습니다</span>
-        <% elsif last_message.contact_card? %>
-          <span class="text-gray-500">연락처를 공유했습니다</span>
-        <% else %>
-          <%= truncate(last_message.content, length: 35) %>
-        <% end %>
-      </p>
-    <% else %>
-      <p class="text-sm text-gray-500 mt-0.5">대화를 시작해보세요</p>
-    <% end %>
+      </div>
+    </div>
   </div>
 
   <!-- 화살표 -->
-  <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg class="w-5 h-5 text-gray-300 flex-shrink-0 self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
   </svg>
 <% end %>

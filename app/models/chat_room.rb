@@ -13,6 +13,30 @@ class ChatRoom < ApplicationRecord
 
   scope :recent, -> { order(last_message_at: :desc) }
 
+  # 필터링 스코프: 받은 문의 (내 게시글에 대한 문의)
+  scope :received_inquiries, ->(user) {
+    joins(:source_post)
+      .where(posts: { user_id: user.id })
+      .where.not(initiator_id: user.id)
+  }
+
+  # 필터링 스코프: 보낸 문의 (내가 시작한 대화)
+  scope :sent_inquiries, ->(user) {
+    where(initiator_id: user.id)
+  }
+
+  # 검색 스코프: 상대방 이름 또는 게시글 제목으로 검색
+  scope :search_by_keyword, ->(keyword, current_user) {
+    return all if keyword.blank?
+
+    joins("LEFT JOIN posts ON posts.id = chat_rooms.source_post_id")
+      .joins(:users)
+      .where.not(users: { id: current_user.id })
+      .where("users.name LIKE :keyword OR posts.title LIKE :keyword",
+             keyword: "%#{keyword}%")
+      .distinct
+  }
+
   # 게시글 컨텍스트가 있는 채팅방 찾기 또는 생성
   def self.find_or_create_for_post(post:, initiator:, post_author:)
     return nil if post.nil? || initiator.nil? || post_author.nil?

@@ -140,4 +140,37 @@ module ApplicationHelper
       pages.uniq
     end
   end
+
+  # 아바타 배경색 생성 (이름 기반)
+  # 이름의 첫 글자를 기반으로 일관된 색상 반환
+  def avatar_bg_color(name)
+    return "bg-gray-400" if name.blank?
+
+    colors = %w[
+      bg-red-500 bg-orange-500 bg-amber-500 bg-yellow-500
+      bg-lime-500 bg-green-500 bg-emerald-500 bg-teal-500
+      bg-cyan-500 bg-sky-500 bg-blue-500 bg-indigo-500
+      bg-violet-500 bg-purple-500 bg-fuchsia-500 bg-pink-500
+    ]
+
+    # 이름의 첫 글자 코드값으로 색상 선택
+    index = name.chars.first.ord % colors.length
+    colors[index]
+  end
+
+  # 메시지 미리보기 텍스트 생성
+  def message_preview(message)
+    case message.message_type
+    when "system"
+      truncate(message.content, length: 30)
+    when "deal_confirm"
+      "거래가 확정되었습니다"
+    when "profile_card"
+      "프로필을 공유했습니다"
+    when "contact_card"
+      "연락처를 공유했습니다"
+    else
+      truncate(message.content, length: 30)
+    end
+  end
 end

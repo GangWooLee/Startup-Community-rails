@@ -1,12 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["messages"]
+  static targets = ["messages", "messageInput", "form"]
   static values = { roomId: Number }
 
   connect() {
     this.scrollToBottom()
     this.observeNewMessages()
+  }
+
+  // 제안 메시지 삽입
+  insertSuggestion(event) {
+    const message = event.currentTarget.dataset.message
+    if (this.hasMessageInputTarget && message) {
+      this.messageInputTarget.value = message
+      this.messageInputTarget.focus()
+      // 자동 리사이즈 트리거
+      this.messageInputTarget.dispatchEvent(new Event('input', { bubbles: true }))
+    }
   }
 
   scrollToBottom() {

@@ -4,9 +4,34 @@ class ChatRoomsController < ApplicationController
   before_action :hide_floating_button
 
   def index
-    @chat_rooms = current_user.chat_rooms
-                              .includes(:users, :source_post, messages: :sender)
-                              .order(last_message_at: :desc)
+    @filter = params[:filter] || "all"
+    @search = params[:search]
+
+    base_query = current_user.chat_rooms
+                             .includes(:users, :source_post, :participants, messages: :sender)
+
+    # 필터 적용
+    @chat_rooms = case @filter
+    when "received"
+      base_query.received_inquiries(current_user)
+    when "sent"
+      base_query.sent_inquiries(current_user)
+    else
+      base_query
+    end
+
+    # 검색 적용
+    if @search.present?
+      @chat_rooms = @chat_rooms.search_by_keyword(@search, current_user)
+    end
+
+    @chat_rooms = @chat_rooms.order(last_message_at: :desc)
+
+    # 읽지 않은 메시지 수 카운트 (탭별) - 메모리에서 계산
+    all_rooms = current_user.chat_rooms.includes(:participants, :source_post, messages: :sender)
+    @total_unread = all_rooms.sum { |room| room.unread_count_for(current_user) }
+    @received_unread = all_rooms.select { |room| room.source_post&.user_id == current_user.id && room.initiator_id != current_user.id }.sum { |room| room.unread_count_for(current_user) }
+    @sent_unread = all_rooms.select { |room| room.initiator_id == current_user.id }.sum { |room| room.unread_count_for(current_user) }
   end
 
   def show
