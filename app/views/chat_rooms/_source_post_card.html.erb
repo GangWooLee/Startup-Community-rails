@@ -1,6 +1,6 @@
 <%# 게시글 컨텍스트 카드 - 어떤 글을 통해 대화가 시작되었는지 표시 %>
 <div class="mx-4 mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-  <%= link_to post_path(post), class: "block hover:opacity-80 transition" do %>
+  <%= link_to post_path(post), class: "block hover:opacity-80 transition", data: { turbo_frame: "_top" } do %>
     <div class="flex items-start gap-3">
       <!-- 카테고리 아이콘 -->
       <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center <%= post_category_bg_class(post) %>">
