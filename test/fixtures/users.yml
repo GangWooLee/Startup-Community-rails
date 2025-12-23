@@ -1,19 +1,20 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# 비밀번호: test1234 (영문+숫자 8자 이상)
 
 one:
-  email: MyString
-  password_digest: MyString
-  name: MyString
-  role_title: MyString
-  bio: MyText
-  avatar_url: MyString
+  email: user1@test.com
+  password_digest: <%= BCrypt::Password.create('test1234') %>
+  name: User One
+  role_title: Developer
+  bio: Test user one bio
+  avatar_url:
   last_sign_in_at: 2025-11-26 06:00:54
 
 two:
-  email: MyString
-  password_digest: MyString
-  name: MyString
-  role_title: MyString
-  bio: MyText
-  avatar_url: MyString
+  email: user2@test.com
+  password_digest: <%= BCrypt::Password.create('test1234') %>
+  name: User Two
+  role_title: Designer
+  bio: Test user two bio
+  avatar_url:
   last_sign_in_at: 2025-11-26 06:00:54

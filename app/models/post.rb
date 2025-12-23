@@ -6,6 +6,7 @@ class Post < ApplicationRecord
   # Associations
   belongs_to :user
   has_many :comments, dependent: :destroy
+  has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images
@@ -52,7 +53,15 @@ class Post < ApplicationRecord
     "design" => "디자인",
     "development" => "개발",
     "marketing" => "마케팅",
+    "video" => "영상",
     "other" => "기타"
+  }.freeze
+
+  # 진행 방식 상수
+  WORK_TYPES = {
+    "remote" => "재택(원격)",
+    "onsite" => "오프라인(상주)",
+    "hybrid" => "혼합(협의)"
   }.freeze
 
   # 카테고리 라벨 (한글)
@@ -70,9 +79,24 @@ class Post < ApplicationRecord
   validates :status, presence: true
   validates :category, presence: true
 
-  # 외주 글일 때 추가 검증
-  validates :service_type, presence: true, if: :outsourcing?
+  # 외주 글 공통 검증
+  validates :service_type, presence: { message: "를 선택해주세요" }, if: :outsourcing?
   validates :price, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
+
+  # 구인(Hiring) 글일 때 추가 검증
+  with_options if: :hiring? do |post|
+    post.validates :work_type, presence: { message: "을 선택해주세요" }
+  end
+
+  # 구직(Seeking) 글일 때 추가 검증 (포트폴리오는 선택사항으로 유지)
+  with_options if: :seeking? do |post|
+    # portfolio_url은 권장하지만 필수는 아님 (신규 유저 진입장벽 낮춤)
+    post.validates :portfolio_url, format: {
+      with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
+      message: "은 유효한 URL 형식이어야 합니다",
+      allow_blank: true
+    }
+  end
 
   # Scopes
   scope :published, -> { where(status: :published) }
@@ -111,6 +135,26 @@ class Post < ApplicationRecord
   def price_display
     return "협의" if price_negotiable? || price.nil? || price.zero?
     "#{price.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}원"
+  end
+
+  # 진행 방식 한글 라벨
+  def work_type_label
+    WORK_TYPES[work_type] || work_type
+  end
+
+  # 기술 스택 배열로 변환
+  def skills_array
+    skills.to_s.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  # 작업 가능 상태 라벨
+  def availability_label
+    available_now? ? "작업 가능" : "작업 불가"
+  end
+
+  # 작업 가능 상태 색상 클래스
+  def availability_color_class
+    available_now? ? "text-green-600 bg-green-100" : "text-gray-500 bg-gray-100"
   end
 
   # 검색용 본문 스니펫 생성 (검색어 주변 텍스트 추출)

@@ -42,10 +42,41 @@
         </div>
       <% end %>
 
-      <!-- Hidden category field -->
-      <%= f.hidden_field :category %>
-
       <div class="space-y-4">
+        <% if @initial_type == 'outsourcing' %>
+          <!-- 외주: 구인/구직 선택 (컴팩트 버전) -->
+          <div class="flex gap-2">
+            <label class="flex-1 relative cursor-pointer">
+              <%= f.radio_button :category, 'hiring',
+                  checked: @post.hiring?,
+                  class: "peer sr-only",
+                  data: { post_form_target: "category", action: "change->post-form#toggleCategoryFields" } %>
+              <div class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border-2 border-border transition-all peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="text-sm font-medium text-foreground">구인</span>
+                <span class="text-xs text-muted-foreground hidden sm:inline">사람을 찾아요</span>
+              </div>
+            </label>
+            <label class="flex-1 relative cursor-pointer">
+              <%= f.radio_button :category, 'seeking',
+                  checked: @post.seeking?,
+                  class: "peer sr-only",
+                  data: { post_form_target: "category", action: "change->post-form#toggleCategoryFields" } %>
+              <div class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border-2 border-border transition-all peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-sm font-medium text-foreground">구직</span>
+                <span class="text-xs text-muted-foreground hidden sm:inline">일 해드려요</span>
+              </div>
+            </label>
+          </div>
+        <% else %>
+          <!-- 커뮤니티: 기존 카테고리 유지 -->
+          <%= f.hidden_field :category %>
+        <% end %>
         <!-- Title -->
         <div class="bg-card rounded-xl p-4 border border-border">
           <%= f.text_field :title,
@@ -120,7 +151,8 @@
 
         <!-- Outsourcing Fields (외주용) -->
         <% if @initial_type == 'outsourcing' %>
-          <div class="bg-card rounded-xl p-4 border border-border space-y-4">
+          <!-- 공통 필드 -->
+          <div class="bg-card rounded-xl p-4 border border-border space-y-4" data-post-form-target="outsourcingFields">
             <h3 class="text-sm font-medium text-foreground">외주 정보</h3>
 
             <!-- Service Type -->
@@ -129,7 +161,31 @@
               <%= f.select :service_type,
                   options_for_select(Post::SERVICE_TYPES.map { |k, v| [v, k] }, @post.service_type),
                   { include_blank: "분야 선택" },
-                  { class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring" } %>
+                  { class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring",
+                    data: { post_form_target: "serviceType", action: "change->post-form#validateForm" } } %>
+            </div>
+
+            <!-- Skills (공통) -->
+            <div>
+              <%= f.label :skills, "필요 기술 / 보유 기술", class: "block text-sm text-muted-foreground mb-2" %>
+              <%= f.text_field :skills,
+                  placeholder: "예: React, Node.js, Figma (쉼표로 구분)",
+                  class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+            </div>
+
+            <!-- Work Type (공통) -->
+            <div>
+              <span class="block text-sm text-muted-foreground mb-2">진행 방식</span>
+              <div class="flex flex-wrap gap-2">
+                <% Post::WORK_TYPES.each do |key, label| %>
+                  <label class="relative cursor-pointer">
+                    <%= f.radio_button :work_type, key, checked: @post.work_type == key, class: "peer sr-only" %>
+                    <div class="px-4 py-2 rounded-lg border border-border text-sm transition-all peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary hover:border-primary/50">
+                      <%= label %>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
             </div>
 
             <!-- Price -->
@@ -156,6 +212,42 @@
               <%= f.text_field :work_period,
                   placeholder: "예: 1주일, 2025년 1월까지",
                   class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+            </div>
+          </div>
+
+          <!-- 구직(Seeking) 전용 필드 -->
+          <div class="bg-card rounded-xl p-4 border border-border space-y-4 <%= @post.seeking? ? '' : 'hidden' %>" data-post-form-target="seekingFields">
+            <h3 class="text-sm font-medium text-foreground">구직자 정보</h3>
+
+            <!-- Portfolio URL -->
+            <div>
+              <%= f.label :portfolio_url, "포트폴리오 링크", class: "block text-sm text-muted-foreground mb-2" %>
+              <%= f.url_field :portfolio_url,
+                  placeholder: "https://your-portfolio.com",
+                  class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+            </div>
+
+            <!-- Available Now Toggle -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-sm font-medium text-foreground">작업 가능 상태</span>
+                <p class="text-xs text-muted-foreground">현재 새로운 프로젝트를 받을 수 있나요?</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <%= f.check_box :available_now,
+                    class: "sr-only peer",
+                    checked: @post.available_now.nil? ? true : @post.available_now %>
+                <div class="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+
+            <!-- Experience -->
+            <div>
+              <%= f.label :experience, "관련 경험/이력", class: "block text-sm text-muted-foreground mb-2" %>
+              <%= f.text_area :experience,
+                  placeholder: "관련 프로젝트 경험이나 이력을 간단히 적어주세요",
+                  rows: 3,
+                  class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" %>
             </div>
           </div>
         <% end %>

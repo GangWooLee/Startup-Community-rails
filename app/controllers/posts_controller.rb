@@ -136,6 +136,7 @@ class PostsController < ApplicationController
     params.require(:post).permit(
       :title, :content, :category,
       :service_type, :price, :work_period, :price_negotiable,
+      :skills, :work_type, :portfolio_url, :available_now, :experience,
       images: []
     )
   end

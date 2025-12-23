@@ -47,12 +47,29 @@ class OmniauthCallbacksController < ApplicationController
   # OAuth 실패 시
   def failure
     error_type = params[:message] || "unknown_error"
+    error_origin = params[:origin]
+    error_strategy = params[:strategy]
+
     Rails.logger.error "OAuth authentication failed: #{error_type}"
+    Rails.logger.error "OAuth failure details - strategy: #{error_strategy}, origin: #{error_origin}"
+    Rails.logger.error "OAuth failure params: #{params.to_unsafe_h.except(:controller, :action)}"
 
     # 세션/쿠키 정리
     session.delete(:return_to)
     cookies.delete(:return_to)
 
-    redirect_to login_path, alert: "로그인에 실패했습니다. 다시 시도해주세요."
+    # 사용자 친화적 오류 메시지
+    alert_message = case error_type
+    when "access_denied"
+      "로그인이 취소되었습니다."
+    when "invalid_credentials"
+      "인증 정보가 올바르지 않습니다."
+    when "redirect_uri_mismatch"
+      "OAuth 설정 오류입니다. 관리자에게 문의해주세요."
+    else
+      "로그인에 실패했습니다. 다시 시도해주세요."
+    end
+
+    redirect_to login_path, alert: alert_message
   end
 end

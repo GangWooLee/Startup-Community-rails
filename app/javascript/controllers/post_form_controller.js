@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["category", "outsourcingFields", "title", "content", "serviceType"]
+  static targets = ["category", "outsourcingFields", "seekingFields", "title", "content", "serviceType"]
 
   connect() {
     this.prefillFromOnboarding()
+    this.toggleCategoryFields()
     this.validateForm()
   }
 
@@ -31,6 +32,22 @@ export default class extends Controller {
         this.outsourcingFieldsTarget.classList.remove('hidden')
       } else {
         this.outsourcingFieldsTarget.classList.add('hidden')
+      }
+    }
+
+    this.validateForm()
+  }
+
+  toggleCategoryFields() {
+    const selectedCategory = this.categoryTargets.find(input => input.checked)?.value
+    const isSeeking = selectedCategory === 'seeking'
+
+    // 구직 전용 필드 토글
+    if (this.hasSeekingFieldsTarget) {
+      if (isSeeking) {
+        this.seekingFieldsTarget.classList.remove('hidden')
+      } else {
+        this.seekingFieldsTarget.classList.add('hidden')
       }
     }
 

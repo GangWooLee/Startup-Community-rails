@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_23_051109) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -96,6 +96,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
     t.index ["user_id"], name: "index_likes_on_user_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.string "action", null: false
+    t.integer "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "notifiable_id", null: false
+    t.string "notifiable_type", null: false
+    t.datetime "read_at"
+    t.integer "recipient_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["recipient_id", "read_at", "created_at"], name: "index_notifications_on_recipient_and_status"
+    t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
+  end
+
   create_table "oauth_identities", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "provider", null: false
@@ -108,20 +123,25 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
   end
 
   create_table "posts", force: :cascade do |t|
+    t.boolean "available_now", default: true
     t.integer "category", default: 0, null: false
     t.integer "comments_count", default: 0
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.text "experience"
     t.integer "likes_count", default: 0
+    t.string "portfolio_url"
     t.integer "price"
     t.boolean "price_negotiable", default: false
     t.string "service_type"
+    t.string "skills"
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.integer "views_count", default: 0
     t.string "work_period"
+    t.string "work_type"
     t.index ["category"], name: "index_posts_on_category"
     t.index ["created_at"], name: "index_posts_on_created_at"
     t.index ["status", "category", "created_at"], name: "index_posts_on_status_category_created_at"
@@ -161,6 +181,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
     t.datetime "last_sign_in_at"
     t.string "linkedin_url"
     t.string "name", null: false
+    t.string "open_chat_url"
     t.string "password_digest", null: false
     t.string "portfolio_url"
     t.string "provider"
@@ -182,6 +203,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_21_141421) do
   add_foreign_key "comments", "users"
   add_foreign_key "job_posts", "users"
   add_foreign_key "likes", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "oauth_identities", "users"
   add_foreign_key "posts", "users"
   add_foreign_key "talent_listings", "users"

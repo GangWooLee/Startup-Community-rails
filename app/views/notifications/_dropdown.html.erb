@@ -1,0 +1,31 @@
+<%# 알림 드롭다운 (헤더용) %>
+<%# 헤더에서 직접 렌더링될 때는 current_user에서 알림을 가져옴 %>
+
+<% notifications = current_user.notifications.includes(:actor, :notifiable).recent.limit(10) %>
+<% unread_count = current_user.unread_notifications_count %>
+
+<div class="bg-card rounded-lg overflow-hidden">
+  <%# 헤더 %>
+  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+    <h3 class="font-semibold text-foreground text-sm">알림</h3>
+    <% if unread_count > 0 %>
+      <%= button_to mark_all_read_notifications_path, method: :post,
+          class: "text-xs text-primary hover:underline",
+          data: { turbo_method: :post } do %>
+        모두 읽음
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# 알림 목록 %>
+  <div id="notification-dropdown-list" class="max-h-72 overflow-y-auto">
+    <%= render "notifications/dropdown_list", notifications: notifications %>
+  </div>
+
+  <%# 전체보기 링크 %>
+  <div class="px-4 py-2 border-t border-border">
+    <%= link_to notifications_path, class: "block text-center text-sm text-primary hover:underline" do %>
+      전체 알림 보기
+    <% end %>
+  </div>
+</div>

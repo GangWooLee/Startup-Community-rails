@@ -22,14 +22,33 @@
           </svg>
         <% end %>
 
-        <!-- 알림 -->
-        <button type="button" class="p-2 rounded-full hover:bg-secondary transition-colors relative" title="알림">
-          <svg class="h-5 w-5 text-muted-foreground hover:text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
-          <!-- 알림 뱃지 (추후 알림 기능 구현 시 활성화) -->
-          <%# <span class="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full"></span> %>
-        </button>
+        <!-- 알림 (로그인 시에만 표시) -->
+        <% if logged_in? %>
+          <div class="relative" data-controller="notification-dropdown">
+            <button type="button"
+                    class="p-2 rounded-full hover:bg-secondary transition-colors relative"
+                    title="알림"
+                    data-action="click->notification-dropdown#toggle"
+                    data-notification-dropdown-target="button">
+              <svg class="h-5 w-5 text-muted-foreground hover:text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <%# 읽지 않은 알림 뱃지 %>
+              <% unread_count = current_user.unread_notifications_count %>
+              <% if unread_count > 0 %>
+                <span id="notification-badge" class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  <%= unread_count > 99 ? '99+' : unread_count %>
+                </span>
+              <% end %>
+            </button>
+
+            <%# 알림 드롭다운 %>
+            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-background border border-border rounded-lg shadow-lg"
+                 data-notification-dropdown-target="dropdown">
+              <%= render "notifications/dropdown" %>
+            </div>
+          </div>
+        <% end %>
 
         <!-- 마이페이지 / 로그인 -->
         <% if logged_in? %>

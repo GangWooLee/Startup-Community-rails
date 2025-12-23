@@ -1,11 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  provider: MyString
-  uid: MyString
+  provider: google
+  uid: google_user_1
   user: one
 
 two:
-  provider: MyString
-  uid: MyString
+  provider: github
+  uid: github_user_2
   user: two

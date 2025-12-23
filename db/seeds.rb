@@ -9,11 +9,14 @@ if Rails.env.development?
     puts "  ✓ Cleared #{model.name} table"
   end
 
+  # 테스트용 비밀번호 (영문+숫자 8자 이상)
+  test_password = 'test1234'
+
   # 관리자 계정
   admin = User.create!(
     email: 'admin@startup.com',
-    password: 'password',
-    password_confirmation: 'password',
+    password: test_password,
+    password_confirmation: test_password,
     name: 'Admin',
     role_title: 'Platform Admin',
     bio: '스타트업 커뮤니티 관리자입니다.'
@@ -27,8 +30,8 @@ if Rails.env.development?
   10.times do |i|
     user = User.create!(
       email: "user#{i}@startup.com",
-      password: 'password',
-      password_confirmation: 'password',
+      password: test_password,
+      password_confirmation: test_password,
       name: "사용자#{i}",
       role_title: roles.sample,
       bio: "안녕하세요, #{roles.sample}입니다. 스타트업에 관심이 많습니다."
@@ -172,7 +175,7 @@ if Rails.env.development?
   puts "  - Talent Listings: #{TalentListing.count}"
   puts "  - Bookmarks: #{Bookmark.count}"
   puts "\n📧 Test Accounts:"
-  puts "  Admin: admin@startup.com / password"
-  puts "  Users: user0@startup.com ~ user9@startup.com / password"
+  puts "  Admin: admin@startup.com / #{test_password}"
+  puts "  Users: user0@startup.com ~ user9@startup.com / #{test_password}"
   puts "\n✨ You can now start the server and test the application!"
 end

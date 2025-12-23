@@ -35,6 +35,10 @@ class User < ApplicationRecord
   has_many :bookmarks, dependent: :destroy
   has_many :bookmarked_posts, through: :bookmarks, source: :bookmarkable, source_type: "Post"
 
+  # 알림 (받은 알림, 보낸 알림)
+  has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
+  has_many :sent_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :destroy
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
 
@@ -186,6 +190,16 @@ class User < ApplicationRecord
   # 특정 상태가 선택되어 있는지 확인
   def has_status?(status_key)
     availability_statuses_array.include?(status_key)
+  end
+
+  # 읽지 않은 알림 수
+  def unread_notifications_count
+    notifications.unread.count
+  end
+
+  # 읽지 않은 알림이 있는지 확인
+  def has_unread_notifications?
+    notifications.unread.exists?
   end
 
   private

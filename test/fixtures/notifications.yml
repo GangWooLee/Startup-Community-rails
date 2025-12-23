@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+comment_notification:
+  recipient: one
+  actor: two
+  action: comment
+  notifiable_type: Post
+  notifiable_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  read_at:
+
+like_notification:
+  recipient: one
+  actor: two
+  action: like
+  notifiable_type: Post
+  notifiable_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  read_at: 2025-12-23 13:09:50
+
+reply_notification:
+  recipient: two
+  actor: one
+  action: reply
+  notifiable_type: Post
+  notifiable_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  read_at:

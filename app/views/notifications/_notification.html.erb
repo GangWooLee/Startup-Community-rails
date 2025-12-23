@@ -1,0 +1,70 @@
+<%# 알림 아이템 %>
+<%# locals: (notification:) %>
+
+<%# actor가 없는 경우 (삭제된 사용자) 알림 표시하지 않음 %>
+<% return unless notification.actor %>
+
+<div id="notification-<%= notification.id %>"
+     class="<%= notification.unread? ? 'bg-primary/5' : 'bg-background' %> hover:bg-secondary/50 transition-colors">
+  <%= link_to notification_path(notification),
+      class: "flex items-start gap-3 p-4",
+      data: { turbo_method: :get } do %>
+
+    <%# 액터 아바타 %>
+    <div class="flex-shrink-0 relative">
+      <% if notification.actor.has_profile_image? %>
+        <% if notification.actor.avatar.attached? %>
+          <%= image_tag notification.actor.avatar.variant(:thumb),
+              class: "w-10 h-10 rounded-full object-cover",
+              alt: notification.actor.name %>
+        <% else %>
+          <img src="<%= notification.actor.avatar_url %>"
+               class="w-10 h-10 rounded-full object-cover"
+               alt="<%= notification.actor.name %>">
+        <% end %>
+      <% else %>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+          <span class="text-sm font-semibold text-primary-foreground">
+            <%= notification.actor.name&.first&.upcase %>
+          </span>
+        </div>
+      <% end %>
+
+      <%# 액션 아이콘 뱃지 %>
+      <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center
+                  <%= notification_icon_bg(notification.action) %>">
+        <%= notification_icon(notification.action) %>
+      </div>
+    </div>
+
+    <%# 알림 내용 %>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm text-foreground">
+        <span class="font-semibold"><%= notification.actor.name %></span>
+        <span class="text-muted-foreground"><%= notification_action_text(notification.action) %></span>
+      </p>
+
+      <%# 알림 대상 내용 미리보기 (notifiable이 있는 경우만) %>
+      <% if notification.notifiable %>
+        <% preview = notification_preview(notification) %>
+        <% if preview.present? %>
+          <p class="text-sm text-muted-foreground mt-0.5 line-clamp-1">
+            "<%= preview %>"
+          </p>
+        <% end %>
+      <% end %>
+
+      <%# 시간 %>
+      <p class="text-xs text-muted-foreground mt-1">
+        <%= time_ago_in_words(notification.created_at) %> 전
+      </p>
+    </div>
+
+    <%# 읽지 않음 표시 %>
+    <% if notification.unread? %>
+      <div class="flex-shrink-0">
+        <div class="w-2 h-2 rounded-full bg-primary"></div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
