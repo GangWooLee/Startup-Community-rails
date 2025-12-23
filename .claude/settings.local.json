@@ -58,7 +58,8 @@
       "Bash(env)",
       "Bash(lsof:*)",
       "Bash(bin/rails db:migrate:status:*)",
-      "Bash(SKIP_ASSET_BUILD=true bin/rails test:*)"
+      "Bash(SKIP_ASSET_BUILD=true bin/rails test:*)",
+      "Bash(ruby:*)"
     ],
     "deny": [],
     "ask": []

@@ -114,9 +114,21 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 - **Scripts**: `performance_check.rb` - Performance analysis and recommendations
 - **Features**: Bullet integration, Index analysis, Counter cache detection, Eager loading suggestions
 
+#### 11. code-review 🆕 **NEW!**
+**통합 코드 검수 및 프로젝트 건강 상태 확인**
+
+프로젝트 전체에 대한 체계적인 코드 리뷰, 충돌 감지, 안정성 검증을 수행합니다.
+기존 security-audit, performance-check, database-maintenance skills를 통합합니다.
+
+- **Trigger keywords**: "review code", "check project", "audit codebase", "health check", "find issues", "code quality"
+- **Includes**: Model/Controller/Database/Security/Performance 통합 검수
+- **Use cases**: 배포 전 검수, 기능 개발 후 안정성 확인, 정기 코드 리뷰
+- **Scripts**: `full_review.rb` - 통합 코드 검수 자동화
+- **Features**: 심각도별 이슈 분류, 체크리스트 기반 검수, 다른 스킬과 연동
+
 ### Frontend Skills
 
-#### 11. ui-component
+#### 12. ui-component
 **Tailwind UI 컴포넌트 생성 (프로젝트 디자인 시스템 준수)**
 
 프로젝트의 Tailwind 테마를 사용한 재사용 가능한 UI 컴포넌트를 생성합니다.
@@ -126,7 +138,7 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 - **Includes**: Responsive design, Accessibility, Tailwind patterns
 - **Project patterns**: Color variables, Spacing, Typography
 
-#### 12. stimulus-controller
+#### 13. stimulus-controller
 **Stimulus 컨트롤러 생성 (Turbo 통합)**
 
 인터랙티브 UI를 위한 Stimulus 컨트롤러를 빠르게 생성합니다.
@@ -137,7 +149,7 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 
 ### Documentation Skills
 
-#### 13. doc-sync
+#### 14. doc-sync
 **코드 변경사항으로 문서 자동 동기화**
 
 코드베이스 변경사항을 `.claude/` 문서에 자동으로 반영합니다.
@@ -247,10 +259,11 @@ skill-name/
 | database-maintenance | Maintenance | ~310 | - | 1 health check |
 | security-audit | Maintenance | ~390 | - | 1 audit runner |
 | performance-check | Maintenance | ~420 | - | 1 analyzer |
+| code-review | Quality | ~200 | 3 reference docs | 1 full review |
 | ui-component | Frontend | ~200 | 5 reference docs + 2 examples | - |
 | stimulus-controller | Frontend | ~180 | 2 examples | - |
 | doc-sync | Documentation | 226 | - | 2 sync scripts |
-| **Total** | **13 skills** | **~3,327** | **16 docs** | **9 scripts** |
+| **Total** | **14 skills** | **~3,527** | **19 docs** | **10 scripts** |
 
 ## 🎯 Skill Coverage
 
@@ -265,10 +278,13 @@ skill-name/
 ### DevOps (8%)
 - ✅ Logging system (logging-setup)
 
-### Maintenance (23%) 🆕 **NEW CATEGORY!**
-- ✅ Database maintenance (database-maintenance) **NEW!**
-- ✅ Security audit (security-audit) **NEW!**
-- ✅ Performance check (performance-check) **NEW!**
+### Maintenance (23%)
+- ✅ Database maintenance (database-maintenance)
+- ✅ Security audit (security-audit)
+- ✅ Performance check (performance-check)
+
+### Quality (7%) 🆕 **NEW CATEGORY!**
+- ✅ Code review (code-review) **NEW!** - 통합 코드 검수
 
 ### Frontend (15%)
 - ✅ UI components (ui-component)
@@ -279,14 +295,52 @@ skill-name/
 
 ---
 
-**Last Updated**: 2025-12-19
+**Last Updated**: 2025-12-23
 **Project**: Startup Community Rails
-**Claude Skills Version**: 5.0.0
-**Total Skills**: 13 (6 Backend + 1 DevOps + 3 Maintenance + 2 Frontend + 1 Documentation)
+**Claude Skills Version**: 6.0.0
+**Total Skills**: 14 (6 Backend + 1 DevOps + 3 Maintenance + 1 Quality + 2 Frontend + 1 Documentation)
 
 ## 🚀 Recent Updates
 
-### v5.0.0 - Maintenance Suite Launch 🆕 **MAJOR UPDATE**
+### v6.0.0 - Integrated Code Review 🆕 **MAJOR UPDATE**
+
+**New Category: Quality (1 skill)**
+
+#### code-review
+**통합 코드 검수 및 프로젝트 건강 상태 확인**
+
+기존 maintenance skills를 통합하여 일관된 검수 워크플로우를 제공합니다.
+
+- Model/Controller/Database/Security/Performance 통합 검수
+- 심각도별 이슈 분류 (Critical → High → Medium → Low)
+- 자동화 스크립트로 빠른 검수 실행
+- 상세 체크리스트 레퍼런스 문서 포함
+
+**Usage**:
+```bash
+# 전체 검수
+ruby .claude/skills/code-review/scripts/full_review.rb
+
+# 빠른 검수
+ruby .claude/skills/code-review/scripts/full_review.rb --quick
+
+# 심층 검수
+ruby .claude/skills/code-review/scripts/full_review.rb --deep
+
+# 특정 영역만
+ruby .claude/skills/code-review/scripts/full_review.rb --models
+ruby .claude/skills/code-review/scripts/full_review.rb --security
+```
+
+**Impact**:
+- 🔍 **통합 검수**: 여러 스킬을 한 번에 실행
+- 📊 **명확한 보고서**: 심각도별 이슈 분류
+- ✅ **체크리스트**: 놓치기 쉬운 항목 확인
+- 🚀 **배포 준비**: 배포 전 필수 검수
+
+---
+
+### v5.0.0 - Maintenance Suite Launch
 
 **New Category: Maintenance (3 skills)**
 
