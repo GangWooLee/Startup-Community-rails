@@ -125,6 +125,26 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  # 상대방 프로필 오버레이 표시
+  def profile_overlay
+    @chat_room = ChatRoom.find(params[:id])
+
+    unless @chat_room.users.include?(current_user)
+      head :forbidden
+      return
+    end
+
+    @user = @chat_room.other_participant(current_user)
+
+    respond_to do |format|
+      format.turbo_stream {
+        render turbo_stream: turbo_stream.append("profile-overlay-container",
+                                                  partial: "chat_rooms/profile_overlay",
+                                                  locals: { user: @user })
+      }
+    end
+  end
+
   private
 
   def set_chat_room

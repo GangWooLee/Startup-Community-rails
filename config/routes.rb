@@ -79,6 +79,7 @@ Rails.application.routes.draw do
     member do
       post :confirm_deal
       post :cancel_deal
+      get :profile_overlay
     end
     resources :messages, only: [ :create ] do
       collection do
