@@ -54,12 +54,19 @@ class Message < ApplicationRecord
                             show_time: true
                           }
 
-      # 상대방에게 채팅 뱃지 업데이트
+      # 상대방에게만 업데이트 (보낸 사람은 이미 해당 채팅방에 있으므로 업데이트 불필요)
       unless is_sender
+        # 채팅 뱃지 업데이트 (헤더/네비게이션)
         broadcast_replace_to "user_#{participant.user_id}_chat_badge",
                              target: "chat_unread_badge",
                              partial: "shared/chat_unread_badge",
                              locals: { count: participant.user.total_unread_messages }
+
+        # 채팅 목록 아이템 업데이트 (마지막 메시지 + 안읽음 뱃지)
+        broadcast_replace_to "user_#{participant.user_id}_chat_list",
+                             target: "chat_room_#{chat_room.id}",
+                             partial: "chat_rooms/chat_list_item",
+                             locals: { room: chat_room, current_user: participant.user, is_active: false }
       end
     end
   end
