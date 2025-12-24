@@ -1,0 +1,9 @@
+<%# Turbo Stream용 채팅방 컨텐츠 래퍼 %>
+<%# locals: chat_room, messages, other_user %>
+
+<%= turbo_frame_tag "chat_room_content", class: "flex-1 flex flex-col h-full" do %>
+  <%= render "chat_rooms/chat_room_detail",
+             chat_room: chat_room,
+             messages: messages,
+             other_user: other_user %>
+<% end %>

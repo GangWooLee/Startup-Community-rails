@@ -18,6 +18,7 @@ class Message < ApplicationRecord
 
   after_create_commit :broadcast_message
   after_create_commit :notify_recipient, unless: :system_message?
+  after_create_commit :resurrect_hidden_participants
 
   # 시스템 메시지인지 확인
   def system_message?
@@ -61,6 +62,23 @@ class Message < ApplicationRecord
         action: "message",
         notifiable: self
       )
+    end
+  end
+
+  # 채팅방을 나간(숨긴) 참여자가 있으면 다시 보이게 복구
+  def resurrect_hidden_participants
+    hidden_participants = chat_room.participants.where.not(deleted_at: nil)
+    return if hidden_participants.empty?
+
+    # 숨겨진 모든 참여자를 다시 보이게 복구
+    hidden_participants.update_all(deleted_at: nil)
+
+    # 복구된 참여자들에게 채팅 목록 업데이트 알림
+    hidden_participants.each do |participant|
+      broadcast_replace_to "user_#{participant.user_id}_chat_badge",
+                           target: "chat_unread_badge",
+                           partial: "shared/chat_unread_badge",
+                           locals: { count: participant.user.reload.total_unread_messages }
     end
   end
 end

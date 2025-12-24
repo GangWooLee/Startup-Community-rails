@@ -1,0 +1,12 @@
+<%# 날짜 구분선 %>
+<%# locals: date %>
+
+<div class="flex items-center justify-center my-4">
+  <div class="flex items-center gap-3">
+    <div class="h-px bg-gray-200 w-12"></div>
+    <span class="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+      <%= format_message_date(date) %>
+    </span>
+    <div class="h-px bg-gray-200 w-12"></div>
+  </div>
+</div>

@@ -60,7 +60,8 @@
       "Bash(bin/rails db:migrate:status:*)",
       "Bash(SKIP_ASSET_BUILD=true bin/rails test:*)",
       "Bash(ruby:*)",
-      "Bash(bin/rails db:migrate:*)"
+      "Bash(bin/rails db:migrate:*)",
+      "Bash(TZ=Asia/Seoul date:*)"
     ],
     "deny": [],
     "ask": []

@@ -233,6 +233,12 @@
 
     <%= yield %>
 
+    <%# 토스트 알림 컨테이너 %>
+    <div id="toast-container"></div>
+
+    <%# 프로필 오버레이 컨테이너 %>
+    <div id="profile-overlay-container"></div>
+
     <%# 플로팅 글쓰기 버튼 (로그인 시에만) %>
     <%= render "shared/floating_write_button" %>
   </body>

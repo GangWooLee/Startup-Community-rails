@@ -42,6 +42,8 @@ class User < ApplicationRecord
   # 채팅
   has_many :chat_room_participants, dependent: :destroy
   has_many :chat_rooms, through: :chat_room_participants
+  has_many :active_chat_room_participants, -> { active }, class_name: "ChatRoomParticipant"
+  has_many :active_chat_rooms, through: :active_chat_room_participants, source: :chat_room
   has_many :sent_messages, class_name: "Message", foreign_key: :sender_id, dependent: :destroy
 
   # 비밀번호 정책 상수

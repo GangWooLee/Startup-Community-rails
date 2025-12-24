@@ -1,25 +1,51 @@
 <%# 일반 텍스트 메시지 %>
+<%# locals: message, show_profile (optional), show_time (optional), is_read (optional) %>
 <%
   # current_user가 없을 수 있음 (브로드캐스트 시)
   viewing_user_id = defined?(current_user) && current_user ? current_user.id : nil
   is_mine = viewing_user_id && message.sender_id == viewing_user_id
   bubble_class = is_mine ? "bg-primary text-white" : "bg-gray-100 text-gray-900"
   container_class = is_mine ? "justify-end" : "justify-start"
+
+  # 그룹화 옵션 (기본값: 프로필과 시간 모두 표시)
+  show_profile = local_assigns.fetch(:show_profile, true)
+  show_time = local_assigns.fetch(:show_time, true)
+  is_read = local_assigns.fetch(:is_read, true)
 %>
 
-<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in">
+<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in <%= show_profile ? '' : 'mt-0.5' %>">
   <% unless is_mine %>
-    <%= link_to profile_path(message.sender), class: "flex-shrink-0 mr-2 self-end" do %>
-      <%= render "shared/avatar", user: message.sender, size: "sm" %>
-    <% end %>
+    <%# 프로필 영역: 표시하거나 빈 공간 유지 %>
+    <div class="flex-shrink-0 mr-2 self-end w-8">
+      <% if show_profile %>
+        <%= link_to profile_path(message.sender), class: "block" do %>
+          <%= render "shared/avatar", user: message.sender, size: "sm" %>
+        <% end %>
+      <% end %>
+    </div>
   <% end %>
 
   <div class="max-w-[75%] <%= is_mine ? 'order-1' : '' %>">
-    <div class="<%= bubble_class %> px-4 py-2 rounded-2xl <%= is_mine ? 'rounded-br-md' : 'rounded-bl-md' %>">
-      <p class="whitespace-pre-wrap break-words text-sm"><%= message.content %></p>
+    <%# 메시지 버블과 시간/읽음 표시를 같은 줄에 %>
+    <div class="flex items-end gap-1.5 <%= is_mine ? 'flex-row-reverse' : '' %>">
+      <div class="<%= bubble_class %> px-4 py-2 rounded-2xl <%= is_mine ? 'rounded-br-md' : 'rounded-bl-md' %>">
+        <p class="whitespace-pre-wrap break-words text-sm"><%= message.content %></p>
+      </div>
+
+      <%# 시간 또는 읽음 표시가 필요한 경우 %>
+      <% if show_time || (is_mine && !is_read) %>
+        <div class="flex flex-col items-<%= is_mine ? 'end' : 'start' %> gap-0.5 flex-shrink-0">
+          <%# 읽음 표시 (내 메시지이고 상대방이 안 읽었을 때 - 시간과 관계없이 항상 표시) %>
+          <% if is_mine && !is_read %>
+            <span class="text-[11px] text-gray-600 font-medium">-</span>
+          <% end %>
+          <% if show_time %>
+            <span class="text-[11px] text-gray-400">
+              <%= format_message_time(message.created_at) %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
     </div>
-    <p class="text-xs text-gray-500 mt-1 <%= is_mine ? 'text-right' : 'text-left' %>">
-      <%= message.created_at.strftime("%H:%M") %>
-    </p>
   </div>
 </div>

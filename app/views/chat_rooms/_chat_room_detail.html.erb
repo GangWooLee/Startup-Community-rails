@@ -2,8 +2,9 @@
 <%# locals: chat_room, messages, other_user %>
 
 <div class="flex-1 flex flex-col h-full bg-background"
-     data-controller="chat-room"
-     data-chat-room-room-id-value="<%= chat_room.id %>">
+     data-controller="chat-room leave-chat"
+     data-chat-room-room-id-value="<%= chat_room.id %>"
+     data-chat-room-id="<%= chat_room.id %>">
 
   <!-- 헤더: 프로필 강화 -->
   <header class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white sticky top-0 z-20 shadow-sm">
@@ -64,7 +65,7 @@
         </svg>
       </button>
 
-      <div class="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 hidden z-30"
+      <div class="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-1 hidden z-30"
            data-dropdown-target="menu">
         <%= link_to profile_overlay_chat_room_path(chat_room),
                     class: "flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50",
@@ -75,6 +76,17 @@
           프로필 보기
         <% end %>
         <div class="border-t border-gray-100 my-1"></div>
+        <%# 채팅방 나가기 - 확인 모달 표시 %>
+        <button type="button"
+                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
+                data-action="click->dropdown#close click->leave-chat#showModal"
+                data-leave-chat-room-id-param="<%= chat_room.id %>"
+                data-leave-chat-room-name-param="<%= other_user.name %>">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          채팅방 나가기
+        </button>
         <button type="button" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -136,9 +148,37 @@
         </div>
       </div>
 
-      <!-- 메시지 목록 -->
-      <% messages.each do |message| %>
-        <%= render "messages/message", message: message %>
+      <!-- 메시지 목록 (그룹화 및 날짜 구분선 적용) -->
+      <%
+        # 상대방의 참여자 정보 (읽음 확인용)
+        other_participant = chat_room.participants.find_by(user_id: other_user.id)
+        other_last_read = other_participant&.last_read_at || Time.at(0)
+        messages_array = messages.to_a
+      %>
+      <% messages_array.each_with_index do |message, index| %>
+        <%
+          prev_message = index > 0 ? messages_array[index - 1] : nil
+          next_message = index < messages_array.length - 1 ? messages_array[index + 1] : nil
+
+          # 날짜 구분선 필요 여부
+          show_date_divider = needs_date_divider?(prev_message, message)
+
+          # 그룹화 정보
+          show_profile = message_is_first_in_group?(prev_message, message)
+          show_time = message_is_last_in_group?(message, next_message)
+
+          # 읽음 여부 (내 메시지일 때만 확인)
+          is_read = defined?(current_user) && current_user && message.sender_id == current_user.id ?
+                    message.created_at <= other_last_read : true
+        %>
+
+        <%# 날짜 구분선 %>
+        <% if show_date_divider %>
+          <%= render "messages/date_divider", date: message.created_at.to_date %>
+        <% end %>
+
+        <%# 메시지 렌더링 %>
+        <%= render "messages/message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
       <% end %>
     <% end %>
   </div>

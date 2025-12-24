@@ -75,11 +75,15 @@ Rails.application.routes.draw do
   end
 
   # Chat (채팅)
-  resources :chat_rooms, only: [ :index, :show, :create ] do
+  resources :chat_rooms, only: [ :index, :show, :create, :new ] do
+    collection do
+      get :search_users
+    end
     member do
       post :confirm_deal
       post :cancel_deal
       get :profile_overlay
+      delete :leave  # 채팅방 나가기 (소프트 삭제)
     end
     resources :messages, only: [ :create ] do
       collection do

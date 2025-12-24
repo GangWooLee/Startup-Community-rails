@@ -1,10 +1,18 @@
 <%# 메시지 타입에 따라 다른 렌더링 %>
+<%# locals: message, show_profile (optional), show_time (optional), is_read (optional) %>
+<%
+  # 기본값 설정
+  show_profile = local_assigns.fetch(:show_profile, true)
+  show_time = local_assigns.fetch(:show_time, true)
+  is_read = local_assigns.fetch(:is_read, true)
+%>
+
 <% if message.system? || message.deal_confirm? %>
   <%= render "messages/system_message", message: message %>
 <% elsif message.profile_card? %>
-  <%= render "messages/profile_card_message", message: message %>
+  <%= render "messages/profile_card_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% elsif message.contact_card? %>
-  <%= render "messages/contact_card_message", message: message %>
+  <%= render "messages/contact_card_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% else %>
-  <%= render "messages/text_message", message: message %>
+  <%= render "messages/text_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% end %>
