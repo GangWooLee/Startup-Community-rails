@@ -38,20 +38,29 @@ class Message < ApplicationRecord
   private
 
   def broadcast_message
-    # Turbo Stream 브로드캐스트 (채팅방)
-    # 새로 전송된 메시지는 상대방이 아직 읽지 않았으므로 is_read: false
-    broadcast_append_to chat_room,
-                        target: "messages",
-                        partial: "messages/message",
-                        locals: { message: self, current_user: sender, is_read: false }
+    # 각 참여자에게 개별 브로드캐스트 (각자의 관점에 맞게)
+    chat_room.participants.each do |participant|
+      is_sender = participant.user_id == sender_id
 
-    # 상대방에게 채팅방 목록 업데이트 브로드캐스트
-    chat_room.participants.where.not(user_id: sender_id).each do |participant|
-      # 채팅 뱃지 업데이트
-      broadcast_replace_to "user_#{participant.user_id}_chat_badge",
-                           target: "chat_unread_badge",
-                           partial: "shared/chat_unread_badge",
-                           locals: { count: participant.user.total_unread_messages }
+      # 해당 사용자의 채팅방 스트림으로 브로드캐스트
+      broadcast_append_to "chat_room_#{chat_room.id}_user_#{participant.user_id}",
+                          target: "messages",
+                          partial: "messages/message",
+                          locals: {
+                            message: self,
+                            current_user: participant.user,
+                            is_read: is_sender ? false : true,  # 보낸 사람: 상대방이 안 읽음, 받는 사람: 읽음 표시 불필요
+                            show_profile: true,
+                            show_time: true
+                          }
+
+      # 상대방에게 채팅 뱃지 업데이트
+      unless is_sender
+        broadcast_replace_to "user_#{participant.user_id}_chat_badge",
+                             target: "chat_unread_badge",
+                             partial: "shared/chat_unread_badge",
+                             locals: { count: participant.user.total_unread_messages }
+      end
     end
   end
 
