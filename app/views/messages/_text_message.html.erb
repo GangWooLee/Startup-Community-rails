@@ -1,8 +1,8 @@
 <%# 일반 텍스트 메시지 %>
-<%# locals: message, show_profile (optional), show_time (optional), is_read (optional) %>
+<%# locals: message, viewing_user (required), show_profile (optional), show_time (optional), is_read (optional) %>
 <%
-  # current_user가 없을 수 있음 (브로드캐스트 시)
-  viewing_user_id = defined?(current_user) && current_user ? current_user.id : nil
+  # viewing_user는 상위 partial에서 전달됨
+  viewing_user_id = viewing_user&.id
   is_mine = viewing_user_id && message.sender_id == viewing_user_id
   bubble_class = is_mine ? "bg-primary text-white" : "bg-gray-100 text-gray-900"
   container_class = is_mine ? "justify-end" : "justify-start"

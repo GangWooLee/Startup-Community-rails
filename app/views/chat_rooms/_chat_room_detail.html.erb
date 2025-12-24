@@ -178,8 +178,8 @@
           <%= render "messages/date_divider", date: message.created_at.to_date %>
         <% end %>
 
-        <%# 메시지 렌더링 %>
-        <%= render "messages/message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
+        <%# 메시지 렌더링 (current_user 전달하여 좌/우 위치 결정) %>
+        <%= render "messages/message", message: message, current_user: current_user, show_profile: show_profile, show_time: show_time, is_read: is_read %>
       <% end %>
     <% end %>
   </div>

@@ -1,7 +1,9 @@
 <%# 메시지 타입에 따라 다른 렌더링 %>
-<%# locals: message, show_profile (optional), show_time (optional), is_read (optional) %>
+<%# locals: message, current_user (optional), show_profile (optional), show_time (optional), is_read (optional) %>
 <%
   # 기본값 설정
+  # current_user는 브로드캐스트 시 locals로 전달됨, 일반 렌더링 시에는 helper 사용
+  viewing_user = local_assigns.fetch(:current_user, nil) || (defined?(current_user) ? current_user : nil)
   show_profile = local_assigns.fetch(:show_profile, true)
   show_time = local_assigns.fetch(:show_time, true)
   is_read = local_assigns.fetch(:is_read, true)
@@ -10,9 +12,9 @@
 <% if message.system? || message.deal_confirm? %>
   <%= render "messages/system_message", message: message %>
 <% elsif message.profile_card? %>
-  <%= render "messages/profile_card_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
+  <%= render "messages/profile_card_message", message: message, viewing_user: viewing_user, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% elsif message.contact_card? %>
-  <%= render "messages/contact_card_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
+  <%= render "messages/contact_card_message", message: message, viewing_user: viewing_user, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% else %>
-  <%= render "messages/text_message", message: message, show_profile: show_profile, show_time: show_time, is_read: is_read %>
+  <%= render "messages/text_message", message: message, viewing_user: viewing_user, show_profile: show_profile, show_time: show_time, is_read: is_read %>
 <% end %>

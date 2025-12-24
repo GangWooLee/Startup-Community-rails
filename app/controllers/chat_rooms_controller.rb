@@ -121,10 +121,9 @@ class ChatRoomsController < ApplicationController
     if @chat_room.confirm_deal!(current_user)
       respond_to do |format|
         format.turbo_stream {
-          render turbo_stream: [
-            turbo_stream.replace("deal-actions", partial: "chat_rooms/deal_actions", locals: { chat_room: @chat_room }),
-            turbo_stream.append("messages", partial: "messages/message", locals: { message: @chat_room.messages.last })
-          ]
+          # 메시지는 Message 모델의 broadcast_message에서 브로드캐스트됨
+          # 여기서 중복으로 append하면 메시지가 두 번 나타남
+          render turbo_stream: turbo_stream.replace("deal-actions", partial: "chat_rooms/deal_actions", locals: { chat_room: @chat_room })
         }
         format.html { redirect_to @chat_room, notice: "거래가 확정되었습니다." }
       end
@@ -138,10 +137,9 @@ class ChatRoomsController < ApplicationController
     if @chat_room.cancel_deal!(current_user)
       respond_to do |format|
         format.turbo_stream {
-          render turbo_stream: [
-            turbo_stream.replace("deal-actions", partial: "chat_rooms/deal_actions", locals: { chat_room: @chat_room }),
-            turbo_stream.append("messages", partial: "messages/message", locals: { message: @chat_room.messages.last })
-          ]
+          # 메시지는 Message 모델의 broadcast_message에서 브로드캐스트됨
+          # 여기서 중복으로 append하면 메시지가 두 번 나타남
+          render turbo_stream: turbo_stream.replace("deal-actions", partial: "chat_rooms/deal_actions", locals: { chat_room: @chat_room })
         }
         format.html { redirect_to @chat_room, notice: "거래가 취소되었습니다." }
       end
