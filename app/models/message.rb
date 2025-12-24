@@ -39,10 +39,11 @@ class Message < ApplicationRecord
 
   def broadcast_message
     # Turbo Stream 브로드캐스트 (채팅방)
+    # 새로 전송된 메시지는 상대방이 아직 읽지 않았으므로 is_read: false
     broadcast_append_to chat_room,
                         target: "messages",
                         partial: "messages/message",
-                        locals: { message: self, current_user: sender }
+                        locals: { message: self, current_user: sender, is_read: false }
 
     # 상대방에게 채팅방 목록 업데이트 브로드캐스트
     chat_room.participants.where.not(user_id: sender_id).each do |participant|
