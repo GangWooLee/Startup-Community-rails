@@ -69,6 +69,19 @@ class ChatRoom < ApplicationRecord
     end
   end
 
+  # 두 사용자 간 기존 채팅방 찾기 (생성 없이 조회만)
+  # 게시글 컨텍스트가 없는 1:1 채팅방만 검색
+  def self.find_existing_between(user1, user2)
+    return nil if user1.nil? || user2.nil? || user1.id == user2.id
+
+    joins(:participants)
+      .where(source_post_id: nil)
+      .where(chat_room_participants: { user_id: [ user1.id, user2.id ] })
+      .group(:id)
+      .having("COUNT(chat_room_participants.id) = 2")
+      .first
+  end
+
   # 1:1 채팅방 찾기 또는 생성 (게시글 컨텍스트 없이 - 프로필에서 직접 대화)
   def self.find_or_create_between(user1, user2, source_post: nil, initiator: nil)
     return nil if user1.nil? || user2.nil? || user1.id == user2.id

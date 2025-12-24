@@ -1,6 +1,6 @@
 <% content_for :turbo_frame_chat_room_content do %>
   <%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-gray-50" do %>
-    <%= render "chat_rooms/new_message_panel" %>
+    <%= render "chat_rooms/new_message_panel", preselected_recipient: @preselected_recipient %>
   <% end %>
 <% end %>
 
@@ -52,7 +52,7 @@
 
     <!-- 우측/전체: 새 메시지 작성 패널 -->
     <%= turbo_frame_tag "chat_room_content", class: "flex-1 flex flex-col h-full" do %>
-      <%= render "chat_rooms/new_message_panel" %>
+      <%= render "chat_rooms/new_message_panel", preselected_recipient: @preselected_recipient %>
     <% end %>
   </div>
 

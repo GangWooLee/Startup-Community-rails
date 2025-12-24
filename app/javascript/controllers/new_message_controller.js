@@ -16,6 +16,12 @@ export default class extends Controller {
     "form"
   ]
 
+  // Stimulus Values - 프로필에서 대화하기 클릭 시 미리 선택된 수신자 정보
+  static values = {
+    preselectedId: String,
+    preselectedName: String
+  }
+
   connect() {
     this.searchTimeout = null
     this.selectedUserId = null
@@ -27,6 +33,11 @@ export default class extends Controller {
     // 외부 클릭 시 검색 결과 닫기
     this.handleClickOutside = this.handleClickOutside.bind(this)
     document.addEventListener("click", this.handleClickOutside)
+
+    // 미리 선택된 수신자가 있으면 자동 선택
+    if (this.hasPreselectedIdValue && this.preselectedIdValue) {
+      this.preselectRecipient(this.preselectedIdValue, this.preselectedNameValue)
+    }
   }
 
   disconnect() {
@@ -206,6 +217,29 @@ export default class extends Controller {
 
     // 전송 버튼 비활성화
     this.submitButtonTarget.disabled = true
+  }
+
+  // 미리 선택된 수신자 설정 (프로필에서 대화하기 클릭 시)
+  preselectRecipient(userId, userName) {
+    if (!userId || !userName) {
+      return
+    }
+
+    // 선택된 사용자 정보 저장
+    this.selectedUserId = userId
+    this.recipientIdTarget.value = userId
+    this.selectedNameTarget.textContent = userName
+
+    // UI 전환: 검색창 숨기고 선택된 사용자 표시
+    this.searchContainerTarget.classList.add("hidden")
+    this.selectedRecipientTarget.classList.remove("hidden")
+    this.selectPromptTarget.classList.add("hidden")
+    this.composeAreaTarget.classList.remove("hidden")
+
+    // 메시지 입력에 포커스
+    setTimeout(() => {
+      this.messageInputTarget.focus()
+    }, 100)
   }
 
   showSearchResults() {

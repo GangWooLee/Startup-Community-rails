@@ -1,5 +1,15 @@
 <%# 새 메시지 작성 패널 %>
-<div class="flex flex-col h-full bg-white" data-controller="new-message">
+<%# locals: preselected_recipient (optional) - 프로필에서 대화하기 클릭 시 미리 선택된 사용자 %>
+<%
+  recipient = local_assigns[:preselected_recipient]
+  has_preselected = recipient.present?
+%>
+<div class="flex flex-col h-full bg-white"
+     data-controller="new-message"
+     <% if has_preselected %>
+     data-new-message-preselected-id-value="<%= recipient.id %>"
+     data-new-message-preselected-name-value="<%= recipient.name %>"
+     <% end %>>
   <!-- 헤더 -->
   <header class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
     <!-- 모바일: 뒤로가기 버튼 (Turbo Frame 탈출) -->

@@ -5,6 +5,10 @@ class ChatRoomsController < ApplicationController
 
   def new
     # 새 메시지 작성 - 대상 검색 패널
+    # recipient_id가 전달된 경우 미리 선택된 수신자 정보를 전달
+    if params[:recipient_id].present?
+      @preselected_recipient = User.find_by(id: params[:recipient_id])
+    end
   end
 
   def search_users
@@ -44,6 +48,8 @@ class ChatRoomsController < ApplicationController
   end
 
   # 프로필에서 채팅 시작 (컨텍스트 없음)
+  # 시나리오 1: 기존 채팅방이 있으면 해당 채팅방으로 이동
+  # 시나리오 2: 기존 채팅방이 없으면 새 메시지 패널로 이동 (수신자 미리 선택)
   def create
     other_user_id = params[:user_id] || params[:id]
     other_user = User.find_by(id: other_user_id)
@@ -58,38 +64,48 @@ class ChatRoomsController < ApplicationController
       return
     end
 
-    @chat_room = ChatRoom.find_or_create_between(current_user, other_user, initiator: current_user)
-
-    # 초기 메시지가 있으면 전송
+    # 새 메시지 패널에서 사용자 선택 후 메시지 전송하는 경우
     if params[:initial_message].present?
+      @chat_room = ChatRoom.find_or_create_between(current_user, other_user, initiator: current_user)
       @chat_room.messages.create!(
         sender: current_user,
         content: params[:initial_message]
       )
       @chat_room.touch(:last_message_at)
+
+      respond_to do |format|
+        format.turbo_stream {
+          prepare_chat_list_data
+          render turbo_stream: [
+            turbo_stream.replace("chat_list_panel", partial: "chat_rooms/chat_list_panel",
+              locals: {
+                filter: @filter,
+                search: @search,
+                total_unread: @total_unread,
+                received_unread: @received_unread,
+                sent_unread: @sent_unread,
+                chat_rooms: @chat_rooms,
+                current_chat_room: @chat_room
+              }),
+            turbo_stream.replace("chat_room_content", partial: "chat_rooms/chat_room_content",
+              locals: { chat_room: @chat_room, messages: @chat_room.messages.includes(:sender).order(:created_at), other_user: @chat_room.other_participant(current_user) })
+          ]
+        }
+        format.html { redirect_to @chat_room }
+      end
+      return
     end
 
-    respond_to do |format|
-      format.turbo_stream {
-        # 좌측 패널용 데이터 준비
-        prepare_chat_list_data
+    # 프로필 페이지에서 '대화하기' 버튼 클릭 시
+    # 기존 채팅방이 있는지 먼저 확인
+    existing_room = ChatRoom.find_existing_between(current_user, other_user)
 
-        render turbo_stream: [
-          turbo_stream.replace("chat_list_panel", partial: "chat_rooms/chat_list_panel",
-            locals: {
-              filter: @filter,
-              search: @search,
-              total_unread: @total_unread,
-              received_unread: @received_unread,
-              sent_unread: @sent_unread,
-              chat_rooms: @chat_rooms,
-              current_chat_room: @chat_room
-            }),
-          turbo_stream.replace("chat_room_content", partial: "chat_rooms/chat_room_content",
-            locals: { chat_room: @chat_room, messages: @chat_room.messages.includes(:sender).order(:created_at), other_user: @chat_room.other_participant(current_user) })
-        ]
-      }
-      format.html { redirect_to @chat_room }
+    if existing_room
+      # 기존 채팅방이 있으면 바로 해당 채팅방으로 이동
+      redirect_to existing_room
+    else
+      # 기존 채팅방이 없으면 새 메시지 패널로 이동 (수신자 미리 선택)
+      redirect_to new_chat_room_path(recipient_id: other_user.id)
     end
   end
 
