@@ -74,8 +74,18 @@ Rails.application.configure do
   # Annotate rendered view with file names.
   config.action_view.annotate_rendered_view_with_filenames = true
 
-  # Uncomment if you wish to allow Action Cable access from any origin.
-  # config.action_cable.disable_request_forgery_protection = true
+  # localhost와 127.0.0.1 모두 허용
+  config.hosts << "localhost"
+  config.hosts << "127.0.0.1"
+  config.hosts << /.*\.localhost/  # 서브도메인도 허용
+
+  # Action Cable도 localhost와 127.0.0.1 모두 허용
+  config.action_cable.allowed_request_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    %r{http://localhost:\d+},
+    %r{http://127\.0\.0\.1:\d+}
+  ]
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
