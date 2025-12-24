@@ -32,7 +32,9 @@
       <div class="flex items-center justify-between gap-2">
         <p class="<%= unread > 0 ? 'font-bold' : 'font-semibold' %> text-gray-900 truncate text-sm"><%= other_user&.name || "알 수 없음" %></p>
         <% if room.last_message_at.present? %>
-          <span class="text-xs text-gray-400 whitespace-nowrap"><%= time_ago_in_words(room.last_message_at) %> 전</span>
+          <span class="text-xs text-gray-400 whitespace-nowrap"
+                data-controller="relative-time"
+                data-relative-time-timestamp-value="<%= room.last_message_at.iso8601 %>"></span>
         <% end %>
       </div>
       <% if other_user&.role_title.present? %>

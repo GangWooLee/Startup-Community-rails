@@ -37,9 +37,9 @@
         <% end %>
       </div>
       <% if last_message %>
-        <span class="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">
-          <%= time_ago_in_words(last_message.created_at) %> 전
-        </span>
+        <span class="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap"
+              data-controller="relative-time"
+              data-relative-time-timestamp-value="<%= last_message.created_at.iso8601 %>"></span>
       <% end %>
     </div>
 

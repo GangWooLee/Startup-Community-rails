@@ -38,6 +38,9 @@ class Message < ApplicationRecord
   private
 
   def broadcast_message
+    # chat_room을 reload하여 touch로 업데이트된 last_message_at 반영
+    chat_room.reload
+
     # 각 참여자에게 개별 브로드캐스트 (각자의 관점에 맞게)
     chat_room.participants.each do |participant|
       is_sender = participant.user_id == sender_id
@@ -54,19 +57,24 @@ class Message < ApplicationRecord
                             show_time: true
                           }
 
-      # 상대방에게만 업데이트 (보낸 사람은 이미 해당 채팅방에 있으므로 업데이트 불필요)
+      # 채팅 목록 아이템을 맨 위로 이동 (제거 후 맨 앞에 추가)
+      # 1. 기존 아이템 제거
+      broadcast_remove_to "user_#{participant.user_id}_chat_list",
+                          target: "chat_room_#{chat_room.id}"
+
+      # 2. 목록 맨 앞에 추가 (최신 메시지가 위로)
+      broadcast_prepend_to "user_#{participant.user_id}_chat_list",
+                           target: "chat_rooms_list",
+                           partial: "chat_rooms/chat_list_item",
+                           locals: { room: chat_room, current_user: participant.user, is_active: is_sender }
+
+      # 상대방에게만 뱃지 업데이트 (보낸 사람은 이미 해당 채팅방에 있으므로 불필요)
       unless is_sender
         # 채팅 뱃지 업데이트 (헤더/네비게이션)
         broadcast_replace_to "user_#{participant.user_id}_chat_badge",
                              target: "chat_unread_badge",
                              partial: "shared/chat_unread_badge",
                              locals: { count: participant.user.total_unread_messages }
-
-        # 채팅 목록 아이템 업데이트 (마지막 메시지 + 안읽음 뱃지)
-        broadcast_replace_to "user_#{participant.user_id}_chat_list",
-                             target: "chat_room_#{chat_room.id}",
-                             partial: "chat_rooms/chat_list_item",
-                             locals: { room: chat_room, current_user: participant.user, is_active: false }
       end
     end
   end

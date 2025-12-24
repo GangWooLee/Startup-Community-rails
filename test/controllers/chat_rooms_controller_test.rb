@@ -48,15 +48,24 @@ class ChatRoomsControllerTest < ActionDispatch::IntegrationTest
     assert_match /Test message/, response.body
   end
 
-  test "should create new chat room and redirect" do
+  test "should create new chat room with initial message" do
     log_in_as(@user1)
     assert_difference "ChatRoom.count", 1 do
-      post chat_rooms_url, params: { user_id: @user2.id }
+      post chat_rooms_url, params: { user_id: @user2.id, initial_message: "Hello!" }
     end
     assert_redirected_to ChatRoom.last
+    assert_equal "Hello!", ChatRoom.last.messages.last.content
   end
 
-  test "should find existing chat room instead of creating new one" do
+  test "should redirect to new_chat_room_path when no existing room and no initial_message" do
+    log_in_as(@user1)
+    assert_no_difference "ChatRoom.count" do
+      post chat_rooms_url, params: { user_id: @user2.id }
+    end
+    assert_redirected_to new_chat_room_path(recipient_id: @user2.id)
+  end
+
+  test "should find existing chat room and redirect to it" do
     # First create a room
     existing_room = ChatRoom.find_or_create_between(@user1, @user2)
 

@@ -18,7 +18,8 @@
         filter = params[:filter] || "all"
         search = params[:search]
 
-        base_query = current_user.chat_rooms
+        # 삭제되지 않은 채팅방만 조회 (prepare_chat_list_data와 동일하게)
+        base_query = current_user.active_chat_rooms
                                  .includes(:users, :source_post, :participants, messages: :sender)
 
         chat_rooms = case filter
@@ -36,7 +37,8 @@
 
         chat_rooms = chat_rooms.order(last_message_at: :desc)
 
-        all_rooms = current_user.chat_rooms.includes(:participants, :source_post, messages: :sender)
+        # 읽지 않은 메시지 수도 삭제되지 않은 채팅방만 계산
+        all_rooms = current_user.active_chat_rooms.includes(:participants, :source_post, messages: :sender)
         total_unread = all_rooms.sum { |room| room.unread_count_for(current_user) }
         received_unread = all_rooms.select { |room| room.source_post&.user_id == current_user.id && room.initiator_id != current_user.id }.sum { |room| room.unread_count_for(current_user) }
         sent_unread = all_rooms.select { |room| room.initiator_id == current_user.id }.sum { |room| room.unread_count_for(current_user) }
