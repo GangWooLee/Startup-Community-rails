@@ -22,15 +22,15 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal @chat_room.id, message.chat_room_id
   end
 
-  test "should respond with turbo stream when creating message" do
+  test "should respond with success when creating message via turbo stream" do
     log_in_as(@user1)
 
     post chat_room_messages_url(@chat_room), params: {
       message: { content: "Test message" }
     }, as: :turbo_stream
 
+    # 메시지는 브로드캐스트로 추가되므로 빈 응답 반환
     assert_response :success
-    assert_match /turbo-stream/, response.body
   end
 
   test "should not create empty message" do

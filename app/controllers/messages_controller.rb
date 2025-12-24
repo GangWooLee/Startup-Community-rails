@@ -41,9 +41,9 @@ class MessagesController < ApplicationController
     mark_as_read!
 
     respond_to do |format|
-      format.turbo_stream {
-        render turbo_stream: turbo_stream.append("messages", partial: "messages/message", locals: { message: @message })
-      }
+      # 메시지는 Message 모델의 broadcast_message에서 브로드캐스트됨
+      # 여기서 중복으로 append하면 메시지가 두 번 나타남
+      format.turbo_stream { head :ok }
       format.html { redirect_to @chat_room }
     end
   end
@@ -63,9 +63,9 @@ class MessagesController < ApplicationController
     mark_as_read!
 
     respond_to do |format|
-      format.turbo_stream {
-        render turbo_stream: turbo_stream.append("messages", partial: "messages/message", locals: { message: @message })
-      }
+      # 메시지는 Message 모델의 broadcast_message에서 브로드캐스트됨
+      # 여기서 중복으로 append하면 메시지가 두 번 나타남
+      format.turbo_stream { head :ok }
       format.html { redirect_to @chat_room }
     end
   end
