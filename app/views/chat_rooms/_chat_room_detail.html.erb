@@ -8,8 +8,8 @@
 
   <!-- 헤더: 프로필 강화 -->
   <header class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white sticky top-0 z-20 shadow-sm">
-    <!-- 뒤로가기 (모바일에서만) -->
-    <%= link_to chat_rooms_path, class: "md:hidden text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0 -ml-1 p-1" do %>
+    <!-- 뒤로가기 (모바일에서만) - Turbo Frame 탈출 -->
+    <%= link_to chat_rooms_path, class: "md:hidden text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0 -ml-1 p-1", data: { turbo_frame: "_top" } do %>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
