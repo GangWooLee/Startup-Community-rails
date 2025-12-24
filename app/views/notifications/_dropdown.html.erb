@@ -24,7 +24,7 @@
 
   <%# 전체보기 링크 %>
   <div class="px-4 py-2 border-t border-border">
-    <%= link_to notifications_path, class: "block text-center text-sm text-primary hover:underline" do %>
+    <%= link_to notifications_path, class: "block text-center text-sm text-primary hover:underline", data: { turbo_frame: "_top" } do %>
       전체 알림 보기
     <% end %>
   </div>

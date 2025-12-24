@@ -7,7 +7,7 @@
   <% valid_notifications.each do |notification| %>
     <%= link_to notification_path(notification),
         class: "flex items-start gap-3 p-3 hover:bg-secondary/50 transition-colors #{notification.unread? ? 'bg-primary/5' : ''}",
-        data: { turbo_method: :get } do %>
+        data: { turbo_method: :get, turbo_frame: "_top" } do %>
 
       <%# 액터 아바타 %>
       <div class="flex-shrink-0 relative">
