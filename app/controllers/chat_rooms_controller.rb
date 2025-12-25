@@ -22,10 +22,8 @@ class ChatRoomsController < ApplicationController
       @users = []
     end
 
-    respond_to do |format|
-      format.turbo_stream
-      format.json { render json: @users.map { |u| { id: u.id, name: u.name, role_title: u.role_title, avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil } } }
-    end
+    # JSON 응답만 지원 (JavaScript fetch에서 사용)
+    render json: @users.map { |u| { id: u.id, name: u.name, role_title: u.role_title, avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil } }
   end
 
   def index

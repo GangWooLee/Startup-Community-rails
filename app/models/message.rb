@@ -57,14 +57,10 @@ class Message < ApplicationRecord
                             show_time: true
                           }
 
-      # 채팅 목록 아이템을 맨 위로 이동 (제거 후 맨 앞에 추가)
-      # 1. 기존 아이템 제거
-      broadcast_remove_to "user_#{participant.user_id}_chat_list",
-                          target: "chat_room_#{chat_room.id}"
-
-      # 2. 목록 맨 앞에 추가 (최신 메시지가 위로)
-      broadcast_prepend_to "user_#{participant.user_id}_chat_list",
-                           target: "chat_rooms_list",
+      # 채팅 목록 아이템 업데이트 (제자리에서 교체 후 JS로 정렬)
+      # replace를 사용하면 DOM 변경이 한 번만 발생하여 화면이 튀지 않음
+      broadcast_replace_to "user_#{participant.user_id}_chat_list",
+                           target: "chat_room_#{chat_room.id}",
                            partial: "chat_rooms/chat_list_item",
                            locals: { room: chat_room, current_user: participant.user, is_active: is_sender }
 

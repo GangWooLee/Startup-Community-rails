@@ -7,7 +7,10 @@
   last_msg = room.messages.order(created_at: :desc).first
 %>
 
-<div id="chat_room_<%= room.id %>" class="chat-room-item">
+<div id="chat_room_<%= room.id %>"
+     class="chat-room-item"
+     data-chat-list-target="room"
+     data-last-message-at="<%= room.last_message_at&.to_i || 0 %>">
   <%= link_to chat_room_path(room),
               class: "flex items-center gap-3 px-4 py-3 transition-colors #{is_active ? 'bg-primary/10' : (unread > 0 ? 'bg-blue-50/50' : 'hover:bg-gray-50')}",
               data: {
