@@ -90,18 +90,10 @@
         </div>
         <div class="space-y-2">
           <% users.each do |user| %>
-            <%= link_to profile_path(user), class: "block p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors h-[88px]", data: { turbo: false } do %>
+            <a href="<%= profile_path(user) %>" class="block p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors h-[88px]" data-turbo="false" onclick="event.preventDefault(); window.location.href='<%= profile_path(user) %>'">
               <div class="flex items-center gap-4 h-full">
                 <!-- 좌측: 아바타 -->
-                <div class="h-14 w-14 rounded-full overflow-hidden bg-secondary flex items-center justify-center flex-shrink-0">
-                  <% if user.avatar.attached? %>
-                    <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
-                  <% elsif user.avatar_url.present? %>
-                    <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
-                  <% else %>
-                    <span class="text-xl font-semibold text-muted-foreground"><%= user.name[0] %></span>
-                  <% end %>
-                </div>
+                <%= render_avatar(user, size: "xl", class: "!h-14 !w-14") %>
 
                 <!-- 중앙: 이름 + 직군/소속 -->
                 <div class="flex-shrink-0 w-28 min-w-0">
@@ -159,7 +151,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </div>
-            <% end %>
+            </a>
           <% end %>
         </div>
 

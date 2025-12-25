@@ -173,4 +173,64 @@ module ApplicationHelper
       truncate(message.content, length: 30)
     end
   end
+
+  # 사용자 아바타 렌더링 헬퍼
+  # 다양한 컨텍스트에서 일관된 아바타 렌더링을 제공
+  #
+  # @param user [User] 사용자 객체
+  # @param options [Hash] 옵션
+  #   :size - "xs" | "sm" | "md" | "lg" | "xl" | "2xl" (기본: "md")
+  #   :class - 컨테이너에 추가할 CSS 클래스
+  #   :ring - 링 스타일 (예: "ring-2 ring-background")
+  #   :fallback_bg - 폴백 배경색 (기본: "bg-secondary")
+  #   :fallback_text_color - 폴백 텍스트 색상 (기본: "text-muted-foreground")
+  #   :variant - 이미지 variant (예: :thumb)
+  #
+  # 사용 예시:
+  #   <%= render_avatar(@user) %>
+  #   <%= render_avatar(@user, size: "lg", ring: "ring-4 ring-background") %>
+  #   <%= render_avatar(@user, size: "sm", class: "shadow-lg") %>
+  def render_avatar(user, options = {})
+    return "" unless user
+
+    size = options.fetch(:size, "md")
+    extra_class = options.fetch(:class, "")
+    ring_class = options.fetch(:ring, "")
+    fallback_bg = options.fetch(:fallback_bg, "bg-secondary")
+    fallback_text_color = options.fetch(:fallback_text_color, "text-muted-foreground")
+    variant = options[:variant]
+
+    # 사이즈별 클래스 매핑
+    size_classes = {
+      "xs" => { container: "h-5 w-5", text: "text-[10px]" },
+      "sm" => { container: "h-8 w-8", text: "text-sm" },
+      "md" => { container: "h-10 w-10", text: "text-lg" },
+      "lg" => { container: "h-12 w-12", text: "text-xl" },
+      "xl" => { container: "h-16 w-16", text: "text-2xl" },
+      "2xl" => { container: "h-20 w-20", text: "text-2xl" }
+    }
+
+    sizes = size_classes[size] || size_classes["md"]
+    container_class = [
+      sizes[:container],
+      "rounded-full overflow-hidden flex items-center justify-center flex-shrink-0",
+      fallback_bg,
+      ring_class,
+      extra_class
+    ].reject(&:blank?).join(" ")
+
+    # 아바타 이미지 또는 폴백 렌더링
+    content = if user.respond_to?(:avatar) && user.avatar.attached?
+      img_src = variant ? user.avatar.variant(variant) : user.avatar
+      image_tag(img_src, alt: user.name, class: "h-full w-full object-cover")
+    elsif user.respond_to?(:avatar_url) && user.avatar_url.present?
+      image_tag(user.avatar_url, alt: user.name, class: "h-full w-full object-cover")
+    else
+      # 폴백: 이름 첫 글자
+      initial = user.name&.first&.upcase || "?"
+      content_tag(:span, initial, class: "#{sizes[:text]} font-semibold #{fallback_text_color}")
+    end
+
+    content_tag(:div, content, class: container_class)
+  end
 end

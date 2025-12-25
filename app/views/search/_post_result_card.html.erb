@@ -1,7 +1,7 @@
 <%# 검색 결과용 게시글 카드 - 하이라이팅 적용 %>
 <%# 사용법: render partial: "search/post_result_card", locals: { post: @post, query: "검색어" } %>
 
-<%= link_to post_path(post), class: "block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px]" do %>
+<a href="<%= post_path(post) %>" class="block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px]" data-turbo="false" onclick="event.preventDefault(); window.location.href='<%= post_path(post) %>'">
   <div class="flex gap-4 h-full">
     <!-- Content -->
     <div class="flex-1 min-w-0 flex flex-col">
@@ -38,15 +38,7 @@
       <div class="flex items-center gap-3 text-xs text-muted-foreground">
         <!-- Author -->
         <div class="flex items-center gap-1.5">
-          <div class="h-5 w-5 rounded-full overflow-hidden bg-secondary flex items-center justify-center">
-            <% if post.user.avatar.attached? %>
-              <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
-            <% elsif post.user.avatar_url.present? %>
-              <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
-            <% else %>
-              <span class="text-[10px] font-semibold"><%= post.user.name[0] %></span>
-            <% end %>
-          </div>
+          <%= render_avatar(post.user, size: "xs") %>
           <span><%= post.user.name %></span>
         </div>
 
@@ -86,4 +78,4 @@
       </div>
     <% end %>
   </div>
-<% end %>
+</a>
