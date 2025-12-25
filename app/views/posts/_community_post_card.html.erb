@@ -10,7 +10,7 @@
   <% if show_author %>
     <!-- Author Info -->
     <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 group mb-4" do %>
-      <%= render_avatar(post.user, size: "md", ring: "ring-2 ring-background group-hover:ring-primary/20 transition-all") %>
+      <%= render_user_avatar(post.user, size: "md", ring: "ring-2 ring-background group-hover:ring-primary/20 transition-all") %>
       <div class="flex-1">
         <div class="flex items-center gap-2">
           <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.name %></h3>

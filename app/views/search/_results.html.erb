@@ -93,7 +93,7 @@
             <a href="<%= profile_path(user) %>" class="block p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors h-[88px]" data-turbo="false" onclick="event.preventDefault(); window.location.href='<%= profile_path(user) %>'">
               <div class="flex items-center gap-4 h-full">
                 <!-- 좌측: 아바타 -->
-                <%= render_avatar(user, size: "xl", class: "!h-14 !w-14") %>
+                <%= render_user_avatar(user, size: "xl", class: "!h-14 !w-14") %>
 
                 <!-- 중앙: 이름 + 직군/소속 -->
                 <div class="flex-shrink-0 w-28 min-w-0">

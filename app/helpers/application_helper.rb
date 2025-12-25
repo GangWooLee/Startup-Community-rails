@@ -176,6 +176,7 @@ module ApplicationHelper
 
   # 사용자 아바타 렌더링 헬퍼
   # 다양한 컨텍스트에서 일관된 아바타 렌더링을 제공
+  # (shadcn render_avatar와 구분하기 위해 render_user_avatar로 명명)
   #
   # @param user [User] 사용자 객체
   # @param options [Hash] 옵션
@@ -187,10 +188,10 @@ module ApplicationHelper
   #   :variant - 이미지 variant (예: :thumb)
   #
   # 사용 예시:
-  #   <%= render_avatar(@user) %>
-  #   <%= render_avatar(@user, size: "lg", ring: "ring-4 ring-background") %>
-  #   <%= render_avatar(@user, size: "sm", class: "shadow-lg") %>
-  def render_avatar(user, options = {})
+  #   <%= render_user_avatar(@user) %>
+  #   <%= render_user_avatar(@user, size: "lg", ring: "ring-4 ring-background") %>
+  #   <%= render_user_avatar(@user, size: "sm", class: "shadow-lg") %>
+  def render_user_avatar(user, options = {})
     return "" unless user
 
     size = options.fetch(:size, "md")
