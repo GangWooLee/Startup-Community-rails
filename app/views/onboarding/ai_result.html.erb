@@ -33,15 +33,26 @@
 
     <!-- Result Content (Hidden initially) -->
     <div data-ai-result-target="result" class="hidden">
-      <!-- Disclaimer -->
-      <div class="mb-6 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-        <div class="flex items-start gap-2">
-          <svg class="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <p class="text-xs text-yellow-700">현재는 데모 결과입니다. 실제 AI 분석은 곧 제공될 예정입니다.</p>
+      <!-- Status Badge -->
+      <% if @is_real_analysis %>
+        <div class="mb-6 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+          <div class="flex items-start gap-2">
+            <svg class="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-xs text-green-700">AI가 실제로 분석한 결과입니다.</p>
+          </div>
         </div>
-      </div>
+      <% else %>
+        <div class="mb-6 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+          <div class="flex items-start gap-2">
+            <svg class="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-xs text-yellow-700">현재는 데모 결과입니다. API 키 설정 후 실제 AI 분석이 제공됩니다.</p>
+          </div>
+        </div>
+      <% end %>
 
       <!-- User's Idea -->
       <div class="bg-card rounded-xl border border-border p-4 mb-6">
@@ -53,10 +64,34 @@
           </div>
           <div>
             <p class="text-xs text-muted-foreground mb-1">내 아이디어</p>
-            <p class="text-sm text-foreground leading-relaxed"><%= @idea %></p>
+            <p class="text-sm text-foreground leading-relaxed"><%= @analysis[:idea] %></p>
           </div>
         </div>
       </div>
+
+      <!-- Score Card (if available) -->
+      <% if @analysis[:score] && @analysis[:score][:overall].to_i > 0 %>
+        <div class="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-foreground">종합 점수</h3>
+            <span class="text-2xl font-bold text-primary"><%= @analysis[:score][:overall] %>/10</span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="text-center">
+              <p class="text-xs text-muted-foreground mb-1">혁신성</p>
+              <p class="font-semibold text-foreground"><%= @analysis[:score][:innovation] %></p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs text-muted-foreground mb-1">실현 가능성</p>
+              <p class="font-semibold text-foreground"><%= @analysis[:score][:feasibility] %></p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs text-muted-foreground mb-1">시장 적합성</p>
+              <p class="font-semibold text-foreground"><%= @analysis[:score][:market_fit] %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
 
       <!-- AI Analysis Cards -->
       <div class="space-y-4 mb-8">
@@ -71,12 +106,11 @@
             <h3 class="font-semibold text-foreground">요약</h3>
           </div>
           <p class="text-sm text-muted-foreground leading-relaxed">
-            사용자 간 연결과 정보 공유에 초점을 맞춘 커뮤니티 기반 플랫폼입니다.
-            특정 니즈를 가진 사용자들을 연결하여 가치를 창출하는 비즈니스 모델로 보입니다.
+            <%= @analysis[:summary] %>
           </p>
         </div>
 
-        <!-- Target Market Card -->
+        <!-- Target Users Card -->
         <div class="bg-card rounded-xl border border-border p-4">
           <div class="flex items-center gap-2 mb-3">
             <div class="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
@@ -86,14 +120,46 @@
             </div>
             <h3 class="font-semibold text-foreground">타깃 사용자</h3>
           </div>
+          <p class="text-sm text-muted-foreground mb-3"><%= @analysis[:target_users][:primary] %></p>
           <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium">20-30대</span>
-            <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium">대학생/직장인</span>
-            <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium">창업 관심자</span>
+            <% @analysis[:target_users][:characteristics].each do |char| %>
+              <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium"><%= char %></span>
+            <% end %>
           </div>
         </div>
 
-        <!-- Direction Card -->
+        <!-- Market Analysis Card -->
+        <div class="bg-card rounded-xl border border-border p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-foreground">시장 분석</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-muted-foreground">시장 잠재력:</span>
+              <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= @analysis[:market_analysis][:potential] %></span>
+            </div>
+            <% if @analysis[:market_analysis][:competitors].present? %>
+              <div>
+                <p class="text-xs text-muted-foreground mb-2">경쟁 서비스:</p>
+                <div class="flex flex-wrap gap-2">
+                  <% @analysis[:market_analysis][:competitors].each do |competitor| %>
+                    <span class="px-2 py-1 rounded bg-secondary text-xs text-muted-foreground"><%= competitor %></span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+            <p class="text-sm text-muted-foreground">
+              <span class="font-medium text-foreground">차별화 포인트:</span> <%= @analysis[:market_analysis][:differentiation] %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Recommendations Card -->
         <div class="bg-card rounded-xl border border-border p-4">
           <div class="flex items-center gap-2 mb-3">
             <div class="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -103,20 +169,48 @@
             </div>
             <h3 class="font-semibold text-foreground">추천 방향</h3>
           </div>
-          <ul class="space-y-2 text-sm text-muted-foreground">
-            <li class="flex items-start gap-2">
-              <span class="text-primary mt-1">•</span>
-              <span>MVP는 핵심 기능 1-2개로 시작하세요</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-primary mt-1">•</span>
-              <span>초기 사용자 100명을 목표로 커뮤니티를 형성하세요</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-primary mt-1">•</span>
-              <span>비슷한 서비스 분석 후 차별점을 명확히 하세요</span>
-            </li>
-          </ul>
+
+          <% if @analysis[:recommendations][:mvp_features].present? %>
+            <div class="mb-4">
+              <p class="text-xs text-muted-foreground mb-2 font-medium">MVP 핵심 기능</p>
+              <ul class="space-y-1">
+                <% @analysis[:recommendations][:mvp_features].each do |feature| %>
+                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span class="text-primary mt-1">•</span>
+                    <span><%= feature %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <% if @analysis[:recommendations][:challenges].present? %>
+            <div class="mb-4">
+              <p class="text-xs text-muted-foreground mb-2 font-medium">예상 도전과제</p>
+              <ul class="space-y-1">
+                <% @analysis[:recommendations][:challenges].each do |challenge| %>
+                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span class="text-orange-500 mt-1">!</span>
+                    <span><%= challenge %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <% if @analysis[:recommendations][:next_steps].present? %>
+            <div>
+              <p class="text-xs text-muted-foreground mb-2 font-medium">다음 단계</p>
+              <ul class="space-y-1">
+                <% @analysis[:recommendations][:next_steps].each_with_index do |step, index| %>
+                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span class="text-primary font-medium"><%= index + 1 %>.</span>
+                    <span><%= step %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
         </div>
       </div>
 

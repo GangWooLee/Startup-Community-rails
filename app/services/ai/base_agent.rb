@@ -1,0 +1,58 @@
+# frozen_string_literal: true
+
+module Ai
+  # 모든 AI Agent의 기본 클래스
+  # 공통 기능: LLM 초기화, 에러 핸들링, 로깅
+  class BaseAgent
+    attr_reader :llm, :tools
+
+    def initialize(llm: nil, tools: [])
+      @llm = llm || default_llm
+      @tools = tools
+    end
+
+    protected
+
+    # 기본 LLM 인스턴스 가져오기
+    def default_llm
+      LangchainConfig.default_llm
+    end
+
+    # Assistant 생성 (with tools)
+    def create_assistant(instructions:)
+      Langchain::Assistant.new(
+        llm: llm,
+        tools: tools,
+        instructions: instructions
+      )
+    end
+
+    # 에러 핸들링 래퍼
+    def with_error_handling
+      yield
+    rescue Langchain::LLM::ApiError => e
+      Rails.logger.error("[AI Agent] API Error: #{e.message}")
+      { error: true, message: "AI 서비스 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }
+    rescue StandardError => e
+      Rails.logger.error("[AI Agent] Error: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+      { error: true, message: "예기치 않은 오류가 발생했습니다." }
+    end
+
+    # 응답을 구조화된 Hash로 파싱
+    def parse_json_response(response_text)
+      # JSON 블록 추출 (```json ... ``` 형태 처리)
+      json_match = response_text.match(/```json\s*(.*?)\s*```/m)
+      json_str = json_match ? json_match[1] : response_text
+
+      JSON.parse(json_str, symbolize_names: true)
+    rescue JSON::ParserError => e
+      Rails.logger.warn("[AI Agent] JSON Parse Error: #{e.message}")
+      { raw_response: response_text }
+    end
+
+    # 토큰 사용량 로깅
+    def log_usage(user:, action:, tokens: nil)
+      Rails.logger.info("[AI Agent] User: #{user&.id}, Action: #{action}, Tokens: #{tokens || 'N/A'}")
+    end
+  end
+end
