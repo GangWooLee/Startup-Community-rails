@@ -6,30 +6,30 @@
       <p class="text-muted-foreground">아이디어, 사람, 외주가 만나는 곳</p>
     </div>
 
-    <!-- Signup Card -->
-    <div class="bg-card rounded-xl p-8 border border-border shadow-lg">
+    <!-- Signup Card - shadcn Card 스타일 -->
+    <div class="rounded-xl border bg-card text-card-foreground shadow-lg p-8">
       <h2 class="text-2xl font-bold text-foreground mb-6">회원가입</h2>
 
-      <!-- Social Signup Buttons -->
+      <!-- Social Signup Buttons - shadcn Button outline -->
       <div class="space-y-2 mb-6">
-        <%= form_with url: oauth_passthru_path(provider: "google_oauth2"), method: :post, local: true, data: { turbo: false }, class: "" do %>
+        <%= form_with url: oauth_passthru_path(provider: "google_oauth2"), method: :post, local: true, data: { turbo: false } do %>
           <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
-          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-border bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8">
+          <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
             </svg>
             Google로 시작하기
-          </button>
+          <% end %>
         <% end %>
 
-        <%= form_with url: oauth_passthru_path(provider: "github"), method: :post, local: true, data: { turbo: false }, class: "" do %>
+        <%= form_with url: oauth_passthru_path(provider: "github"), method: :post, local: true, data: { turbo: false } do %>
           <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
-          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-border bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8">
+          <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             GitHub로 시작하기
-          </button>
+          <% end %>
         <% end %>
       </div>
 
@@ -65,77 +65,87 @@
           </div>
         <% end %>
 
-        <!-- Name Field -->
-        <div>
-          <%= f.label :name, "이름 *", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :name,
-              placeholder: "홍길동",
-              required: true,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <!-- Name Field - shadcn Input -->
+        <div class="space-y-2">
+          <%= render_label name: "user[name]", label: "이름 *" %>
+          <%= render_input name: "user[name]",
+                          type: :text,
+                          id: "user_name",
+                          value: @user.name,
+                          placeholder: "홍길동",
+                          required: true,
+                          class: "w-full" %>
         </div>
 
-        <!-- Email Field -->
-        <div>
-          <%= f.label :email, "이메일 *", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.email_field :email,
-              placeholder: "example@startup.com",
-              required: true,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <!-- Email Field - shadcn Input -->
+        <div class="space-y-2">
+          <%= render_label name: "user[email]", label: "이메일 *" %>
+          <%= render_input name: "user[email]",
+                          type: :email,
+                          id: "user_email",
+                          value: @user.email,
+                          placeholder: "example@startup.com",
+                          required: true,
+                          class: "w-full" %>
         </div>
 
-        <!-- Password Field -->
-        <div>
-          <%= f.label :password, "비밀번호 * (최소 6자)", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.password_field :password,
-              placeholder: "••••••••",
-              required: true,
-              minlength: 6,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <!-- Password Field - shadcn Input -->
+        <div class="space-y-2">
+          <%= render_label name: "user[password]", label: "비밀번호 * (최소 6자)" %>
+          <%= render_input name: "user[password]",
+                          type: :password,
+                          id: "user_password",
+                          placeholder: "••••••••",
+                          required: true,
+                          class: "w-full" %>
         </div>
 
-        <!-- Password Confirmation Field -->
-        <div>
-          <%= f.label :password_confirmation, "비밀번호 확인 *", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.password_field :password_confirmation,
-              placeholder: "••••••••",
-              required: true,
-              minlength: 6,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <!-- Password Confirmation Field - shadcn Input -->
+        <div class="space-y-2">
+          <%= render_label name: "user[password_confirmation]", label: "비밀번호 확인 *" %>
+          <%= render_input name: "user[password_confirmation]",
+                          type: :password,
+                          id: "user_password_confirmation",
+                          placeholder: "••••••••",
+                          required: true,
+                          class: "w-full" %>
         </div>
 
-        <!-- Role Title Field (Optional) -->
-        <div>
-          <%= f.label :role_title, "직함/역할 (선택)", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :role_title,
-              placeholder: "예: 개발자, 디자이너, 기획자",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
-          <p class="mt-1 text-xs text-muted-foreground">프로필에 표시될 직함을 입력하세요</p>
+        <!-- Role Title Field (Optional) - shadcn Input -->
+        <div class="space-y-2">
+          <%= render_label name: "user[role_title]", label: "직함/역할 (선택)" %>
+          <%= render_input name: "user[role_title]",
+                          type: :text,
+                          id: "user_role_title",
+                          value: @user.role_title,
+                          placeholder: "예: 개발자, 디자이너, 기획자",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">프로필에 표시될 직함을 입력하세요</p>
         </div>
 
-        <!-- Bio Field (Optional) -->
-        <div>
-          <%= f.label :bio, "자기소개 (선택)", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_area :bio,
-              placeholder: "간단한 자기소개를 작성하세요...",
-              rows: 3,
-              maxlength: 500,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" %>
-          <p class="mt-1 text-xs text-muted-foreground">최대 500자</p>
+        <!-- Bio Field (Optional) - shadcn Textarea -->
+        <div class="space-y-2">
+          <%= render_label name: "user[bio]", label: "자기소개 (선택)" %>
+          <%= render_textarea name: "user[bio]",
+                             id: "user_bio",
+                             value: @user.bio,
+                             placeholder: "간단한 자기소개를 작성하세요...",
+                             rows: 3,
+                             class: "w-full resize-none" %>
+          <p class="text-xs text-muted-foreground">최대 500자</p>
         </div>
 
         <!-- Terms Agreement -->
         <div class="flex items-start gap-2">
-          <input type="checkbox" id="terms" required class="mt-1 rounded border-border">
+          <input type="checkbox" id="terms" required class="mt-1 rounded border-input h-4 w-4">
           <label for="terms" class="text-sm text-muted-foreground">
             <a href="#" class="text-primary hover:underline">이용약관</a> 및
             <a href="#" class="text-primary hover:underline">개인정보 처리방침</a>에 동의합니다 *
           </label>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8">
-          회원가입
-        </button>
+        <!-- Submit Button - shadcn Button -->
+        <%= render_button "회원가입", class: "w-full h-11" %>
       <% end %>
 
       <!-- Login Link -->
