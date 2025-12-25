@@ -1,7 +1,12 @@
 <%# 검색 결과용 게시글 카드 - 하이라이팅 적용 %>
 <%# 사용법: render partial: "search/post_result_card", locals: { post: @post, query: "검색어" } %>
 
-<a href="<%= post_path(post) %>" class="block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px]" data-turbo="false" onclick="event.preventDefault(); window.location.href='<%= post_path(post) %>'">
+<div class="block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px] cursor-pointer"
+     role="link"
+     tabindex="0"
+     data-href="<%= post_path(post) %>"
+     onclick="window.location.assign(this.dataset.href)"
+     onkeydown="if(event.key==='Enter') window.location.assign(this.dataset.href)">
   <div class="flex gap-4 h-full">
     <!-- Content -->
     <div class="flex-1 min-w-0 flex flex-col">
@@ -78,4 +83,4 @@
       </div>
     <% end %>
   </div>
-</a>
+</div>
