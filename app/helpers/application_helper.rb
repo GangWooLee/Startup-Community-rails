@@ -3,21 +3,28 @@ module ApplicationHelper
   # 소셜 미디어 공유 시 링크 미리보기에 사용됨
   def og_meta_tags(options = {})
     # 기본값 설정
+    # URL 인코딩 문제 방지를 위해 force_encoding 적용
+    current_url = begin
+      request.original_url.force_encoding("UTF-8")
+    rescue StandardError
+      request.base_url
+    end
+
     defaults = {
       title: "Grounded - 창업자 커뮤니티",
       description: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티",
       type: "website",
       image: nil,
-      url: request.original_url
+      url: current_url
     }
 
     opts = defaults.merge(options)
 
     tags = []
-    tags << tag.meta(property: "og:title", content: opts[:title])
-    tags << tag.meta(property: "og:description", content: opts[:description])
+    tags << tag.meta(property: "og:title", content: opts[:title].to_s.force_encoding("UTF-8"))
+    tags << tag.meta(property: "og:description", content: opts[:description].to_s.force_encoding("UTF-8"))
     tags << tag.meta(property: "og:type", content: opts[:type])
-    tags << tag.meta(property: "og:url", content: opts[:url])
+    tags << tag.meta(property: "og:url", content: opts[:url].to_s.force_encoding("UTF-8"))
     tags << tag.meta(property: "og:site_name", content: "Grounded")
     tags << tag.meta(property: "og:locale", content: "ko_KR")
 
@@ -29,11 +36,11 @@ module ApplicationHelper
 
     # Twitter Card 태그
     tags << tag.meta(name: "twitter:card", content: opts[:image].present? ? "summary_large_image" : "summary")
-    tags << tag.meta(name: "twitter:title", content: opts[:title])
-    tags << tag.meta(name: "twitter:description", content: opts[:description])
+    tags << tag.meta(name: "twitter:title", content: opts[:title].to_s.force_encoding("UTF-8"))
+    tags << tag.meta(name: "twitter:description", content: opts[:description].to_s.force_encoding("UTF-8"))
     tags << tag.meta(name: "twitter:image", content: opts[:image]) if opts[:image].present?
 
-    safe_join(tags, "\n    ")
+    safe_join(tags, "\n    ".dup.force_encoding("UTF-8"))
   end
 
   # 게시글용 OG 메타 태그 생성
