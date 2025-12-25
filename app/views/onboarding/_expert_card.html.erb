@@ -1,0 +1,66 @@
+<%# 추천 전문가 카드 %>
+<%# locals: user %>
+
+<button type="button"
+        class="flex-shrink-0 w-44 bg-card rounded-xl border border-border p-4 text-left hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group"
+        data-action="click->expert-overlay#show"
+        data-expert-overlay-user-id-param="<%= user.id %>">
+
+  <!-- 아바타 -->
+  <div class="flex justify-center mb-3">
+    <div class="h-16 w-16 rounded-full overflow-hidden bg-secondary flex items-center justify-center ring-2 ring-white shadow group-hover:ring-primary/20 transition-all">
+      <% if user.avatar.attached? %>
+        <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+      <% elsif user.avatar_url.present? %>
+        <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+        <span class="text-xl font-semibold text-muted-foreground hidden items-center justify-center"><%= user.name&.first&.upcase || "?" %></span>
+      <% else %>
+        <span class="text-xl font-semibold text-muted-foreground"><%= user.name&.first&.upcase || "?" %></span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 이름 & 역할 -->
+  <div class="text-center mb-2">
+    <p class="font-semibold text-foreground text-sm truncate group-hover:text-primary transition-colors"><%= user.name %></p>
+    <% if user.role_title.present? %>
+      <p class="text-xs text-muted-foreground truncate"><%= user.role_title %></p>
+    <% end %>
+  </div>
+
+  <!-- 한줄소개 -->
+  <% if user.bio.present? %>
+    <p class="text-xs text-muted-foreground/80 line-clamp-2 text-center mb-2 min-h-[2.5rem]">
+      <%= truncate(user.bio, length: 40) %>
+    </p>
+  <% else %>
+    <div class="min-h-[2.5rem]"></div>
+  <% end %>
+
+  <!-- 스킬 태그 (최대 3개) -->
+  <% skills = user.skills_array.first(3) %>
+  <% if skills.any? %>
+    <div class="flex flex-wrap gap-1 justify-center mb-2">
+      <% skills.each do |skill| %>
+        <span class="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary truncate max-w-[60px]" title="<%= skill %>">
+          <%= truncate(skill, length: 8) %>
+        </span>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="min-h-[1.5rem]"></div>
+  <% end %>
+
+  <!-- 활동 상태 뱃지 -->
+  <% if user.has_availability_status? %>
+    <div class="flex justify-center">
+      <% badge = user.availability_badges.first %>
+      <% if badge %>
+        <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-white <%= badge[:color] %>">
+          <span class="h-1 w-1 rounded-full bg-white animate-pulse"></span>
+          <%= badge[:label] %>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+</button>

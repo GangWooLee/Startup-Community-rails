@@ -2,7 +2,7 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
-      <%= link_to @back_path, class: "text-muted-foreground hover:text-foreground p-1" do %>
+<%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -84,17 +84,12 @@
       </div>
 
       <!-- Submit Button -->
-      <button
-        type="submit"
-        data-ai-input-target="submitButton"
-        disabled
-        class="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <%= render_button class: "w-full h-14 gap-2 shadow-lg", data: { ai_input_target: "submitButton" }, disabled: true do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
         AI에게 분석 요청하기
-      </button>
+      <% end %>
     </form>
   </main>
 </div>

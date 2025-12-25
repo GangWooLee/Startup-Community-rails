@@ -84,6 +84,32 @@
       </div>
     </section>
 
+    <!-- Avatar Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Avatar Component</h2>
+      <div class="flex flex-wrap items-end gap-4">
+        <%= render "components/ui/avatar", src: nil, fallback: "김", size: :xs %>
+        <%= render "components/ui/avatar", src: nil, fallback: "이", size: :sm %>
+        <%= render "components/ui/avatar", src: nil, fallback: "박", size: :md %>
+        <%= render "components/ui/avatar", src: nil, fallback: "최", size: :lg %>
+        <%= render "components/ui/avatar", src: nil, fallback: "정", size: :xl %>
+        <%= render "components/ui/avatar", src: nil, fallback: "강", size: :xxl %>
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <%= render "components/ui/avatar", src: nil, fallback: "홍길동", size: :md %>
+          <span class="text-sm">홍길동님</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <%= render "components/ui/avatar", src: nil, fallback: "개발자", size: :md %>
+          <div>
+            <p class="font-medium text-sm">개발자</p>
+            <p class="text-xs text-muted-foreground">Backend Developer</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Color Test -->
     <section class="space-y-4">
       <h2 class="text-xl font-semibold border-b pb-2">Color System Test</h2>

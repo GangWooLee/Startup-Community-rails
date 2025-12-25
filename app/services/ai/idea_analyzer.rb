@@ -32,6 +32,11 @@ module Ai
           "feasibility": 1-10,
           "market_fit": 1-10,
           "overall": 1-10
+        },
+        "required_expertise": {
+          "roles": ["Developer", "Designer", "PM", "Marketer 등 필요한 역할"],
+          "skills": ["React", "Node.js", "UI/UX", "마케팅 등 필요한 기술/스킬"],
+          "description": "이 아이디어를 실현하기 위해 필요한 팀 구성을 한 문장으로 설명"
         }
       }
       ```
@@ -41,6 +46,7 @@ module Ai
       - 실현 가능한 MVP 중심으로 조언
       - 초기 창업자가 이해하기 쉬운 언어 사용
       - 긍정적이면서도 현실적인 피드백 제공
+      - required_expertise에는 아이디어를 실현하기 위해 필요한 구체적인 역할과 기술을 명시
     PROMPT
 
     def initialize(idea)
@@ -51,12 +57,14 @@ module Ai
     # 아이디어 분석 실행
     def analyze
       with_error_handling do
-        response = llm.chat(
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: build_user_prompt }
-          ]
-        )
+        messages = build_chat_messages
+        response = llm.chat(messages: messages)
+
+        # 빈 응답 체크
+        raise "Empty response from AI" if response.chat_completion.blank?
+
+        # 토큰 사용량 로깅
+        log_token_usage(response, "IdeaAnalyzer")
 
         result = parse_json_response(response.chat_completion)
 
@@ -66,6 +74,23 @@ module Ai
     end
 
     private
+
+    # LLM 제공자에 따라 적절한 메시지 형식 반환
+    def build_chat_messages
+      if using_gemini?
+        # Gemini: parts 형식 사용, system prompt를 첫 메시지로
+        format_messages_for_gemini(
+          [{ role: "user", content: build_user_prompt }],
+          system_prompt: SYSTEM_PROMPT
+        )
+      else
+        # OpenAI: 표준 형식
+        [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: build_user_prompt }
+        ]
+      end
+    end
 
     def build_user_prompt
       <<~PROMPT
@@ -87,6 +112,7 @@ module Ai
         market_analysis: result[:market_analysis] || default_market_analysis,
         recommendations: result[:recommendations] || default_recommendations,
         score: result[:score] || default_score,
+        required_expertise: result[:required_expertise] || default_required_expertise,
         analyzed_at: Time.current,
         idea: @idea
       }
@@ -99,6 +125,7 @@ module Ai
         market_analysis: default_market_analysis,
         recommendations: default_recommendations,
         score: default_score,
+        required_expertise: default_required_expertise,
         analyzed_at: Time.current,
         idea: @idea,
         error: true
@@ -134,6 +161,14 @@ module Ai
         feasibility: 0,
         market_fit: 0,
         overall: 0
+      }
+    end
+
+    def default_required_expertise
+      {
+        roles: [],
+        skills: [],
+        description: ""
       }
     end
   end

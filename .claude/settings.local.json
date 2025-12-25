@@ -61,7 +61,9 @@
       "Bash(SKIP_ASSET_BUILD=true bin/rails test:*)",
       "Bash(ruby:*)",
       "Bash(bin/rails db:migrate:*)",
-      "Bash(TZ=Asia/Seoul date:*)"
+      "Bash(TZ=Asia/Seoul date:*)",
+      "Bash(bin/rails db:seed:*)",
+      "Bash(xargs ls:*)"
     ],
     "deny": [],
     "ask": []

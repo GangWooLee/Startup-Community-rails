@@ -4,28 +4,28 @@
   recipient = local_assigns[:preselected_recipient]
   has_preselected = recipient.present?
 %>
-<div class="flex flex-col h-full bg-white"
+<div class="flex flex-col h-full bg-background"
      data-controller="new-message"
      <% if has_preselected %>
      data-new-message-preselected-id-value="<%= recipient.id %>"
      data-new-message-preselected-name-value="<%= recipient.name %>"
      <% end %>>
   <!-- 헤더 -->
-  <header class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
+  <header class="flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
     <!-- 모바일: 뒤로가기 버튼 (Turbo Frame 탈출) -->
-    <%= link_to chat_rooms_path, class: "md:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors", data: { turbo_frame: "_top" } do %>
+    <%= link_to chat_rooms_path, class: "md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors", data: { turbo_frame: "_top" } do %>
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
     <% end %>
 
-    <h2 class="text-lg font-semibold text-gray-900">새 메시지</h2>
+    <h2 class="text-lg font-semibold text-foreground">새 메시지</h2>
   </header>
 
   <!-- 받는 사람 선택 영역 -->
-  <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+  <div class="px-4 py-3 border-b border-border bg-secondary/50">
     <div class="flex items-center gap-2">
-      <span class="text-sm font-medium text-gray-500 whitespace-nowrap">받는 사람:</span>
+      <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">받는 사람:</span>
 
       <!-- 선택된 사용자 표시 (선택 전에는 숨김) -->
       <div id="selected-recipient" class="hidden flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full" data-new-message-target="selectedRecipient">
@@ -44,7 +44,7 @@
       <div id="recipient-search-container" class="flex-1" data-new-message-target="searchContainer">
         <input type="text"
                id="recipient-search-input"
-               class="w-full px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+               class="w-full px-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
                placeholder="이름으로 검색..."
                autocomplete="off"
                data-new-message-target="searchInput"
@@ -54,7 +54,7 @@
 
     <!-- 검색 결과 드롭다운 -->
     <div id="search-results"
-         class="hidden mt-2 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg"
+         class="hidden mt-2 max-h-60 overflow-y-auto bg-background border border-border rounded-xl shadow-lg"
          data-new-message-target="searchResults">
       <!-- 검색 결과가 여기에 동적으로 표시됩니다 -->
     </div>
@@ -65,26 +65,26 @@
     <!-- 안내 메시지 -->
     <div class="flex-1 flex items-center justify-center p-4">
       <div class="text-center">
-        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
           </svg>
         </div>
-        <p class="text-gray-500 text-sm">
+        <p class="text-muted-foreground text-sm">
           선택한 사용자와 새로운 대화를 시작합니다
         </p>
       </div>
     </div>
 
     <!-- 메시지 입력 폼 -->
-    <div class="border-t border-gray-200 p-4 bg-white">
+    <div class="border-t border-border p-4 bg-background">
       <%= form_with url: chat_rooms_path, method: :post, class: "flex items-end gap-2", data: { new_message_target: "form", action: "submit->new-message#sendMessage", turbo_stream: true } do |f| %>
         <input type="hidden" name="user_id" id="recipient-user-id" data-new-message-target="recipientId">
 
         <div class="flex-1">
           <textarea name="initial_message"
                     rows="1"
-                    class="w-full px-4 py-2.5 bg-gray-100 border-0 rounded-xl text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-colors"
+                    class="w-full px-4 py-2.5 bg-secondary border-0 rounded-xl text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:bg-background transition-colors"
                     placeholder="메시지를 입력하세요..."
                     data-new-message-target="messageInput"
                     data-action="input->new-message#autoResize keydown->new-message#handleKeydown"></textarea>
@@ -105,13 +105,13 @@
   <!-- 대상 미선택 안내 (선택 전 표시) -->
   <div id="select-recipient-prompt" class="flex-1 flex items-center justify-center p-4" data-new-message-target="selectPrompt">
     <div class="text-center">
-      <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+        <svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-gray-700 mb-2">대화 상대를 선택하세요</h3>
-      <p class="text-gray-500 text-sm max-w-xs mx-auto">
+      <h3 class="text-lg font-medium text-foreground mb-2">대화 상대를 선택하세요</h3>
+      <p class="text-muted-foreground text-sm max-w-xs mx-auto">
         위 검색창에서 대화할 상대를 검색하고<br>선택하면 메시지를 보낼 수 있습니다
       </p>
     </div>

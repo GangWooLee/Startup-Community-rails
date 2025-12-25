@@ -33,11 +33,29 @@ class OnboardingController < ApplicationController
       @is_real_analysis = false
     end
 
+    # 추천 전문가 찾기
+    @recommended_experts = find_recommended_experts
+
     # 온보딩 경험 완료 표시 (다음 방문 시 커뮤니티 직접 접근 허용)
     cookies[:onboarding_completed] = {
       value: "true",
       expires: 1.year.from_now
     }
+  end
+
+  # 전문가 프로필 오버레이 (Turbo Stream)
+  def expert_profile
+    @user = User.find(params[:id])
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update(
+          "profile-overlay-container",
+          partial: "onboarding/expert_profile_overlay",
+          locals: { user: @user }
+        )
+      end
+    end
   end
 
   private
@@ -66,8 +84,28 @@ class OnboardingController < ApplicationController
         market_fit: 7,
         overall: 7
       },
+      required_expertise: mock_required_expertise,
       analyzed_at: Time.current,
       idea: @idea
     }
+  end
+
+  # Mock 필요 전문성 데이터
+  def mock_required_expertise
+    {
+      roles: [ "Developer", "Designer" ],
+      skills: [ "React", "Node.js", "UI/UX", "스타트업", "MVP" ],
+      description: "풀스택 개발자와 UI/UX 디자이너가 필요합니다"
+    }
+  end
+
+  # 추천 전문가 찾기
+  def find_recommended_experts
+    required_expertise = @analysis[:required_expertise] || mock_required_expertise
+
+    ExpertMatcher.new(
+      required_expertise,
+      exclude_user_id: current_user&.id
+    ).find_matches
   end
 end

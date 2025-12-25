@@ -3,17 +3,17 @@
 <% type ||= "success" %>
 <%
   bg_color = case type
-  when "success" then "bg-gray-800"
-  when "error" then "bg-red-600"
-  when "info" then "bg-blue-600"
-  else "bg-gray-800"
+  when "success" then "bg-foreground"
+  when "error" then "bg-destructive"
+  when "info" then "bg-primary"
+  else "bg-foreground"
   end
 %>
 
 <div class="toast-item fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 animate-toast-in"
      data-controller="toast"
      data-toast-duration-value="3000">
-  <div class="<%= bg_color %> text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 min-w-[200px] max-w-[90vw]">
+  <div class="<%= bg_color %> text-background px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 min-w-[200px] max-w-[90vw]">
     <% if type == "success" %>
       <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

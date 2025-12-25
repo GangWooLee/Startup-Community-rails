@@ -6,7 +6,7 @@
 <% show_author = local_assigns.fetch(:show_author, true) %>
 <% show_actions = local_assigns.fetch(:show_actions, true) %>
 
-<article class="bg-card rounded-xl p-6 border border-border hover:border-muted-foreground/20 transition-colors">
+<article class="rounded-xl border bg-card text-card-foreground p-6 hover:border-muted-foreground/20 transition-colors">
   <% if show_author %>
     <!-- Author Info -->
     <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 group mb-4" do %>
@@ -23,9 +23,7 @@
         <div class="flex items-center gap-2">
           <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.name %></h3>
           <% if post.user.role_title.present? %>
-            <span class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-              <%= post.user.role_title %>
-            </span>
+            <%= render_badge post.user.role_title, variant: :secondary, class: "text-xs" %>
           <% end %>
         </div>
         <p class="text-xs text-muted-foreground"><%= time_ago_in_words(post.created_at) %> 전</p>

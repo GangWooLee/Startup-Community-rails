@@ -6,11 +6,11 @@
   is_post_author = room.post_author?(current_user)
 %>
 
-<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors #{unread_count > 0 ? 'bg-primary/5' : ''}" do %>
+<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-secondary transition-colors #{unread_count > 0 ? 'bg-primary/5' : ''}" do %>
   <!-- 프로필 이미지 (이니셜 폴백 포함) -->
   <div class="relative flex-shrink-0">
     <% if other_user&.avatar&.attached? %>
-      <%= image_tag other_user.avatar, class: "w-12 h-12 rounded-full object-cover border border-gray-200" %>
+      <%= image_tag other_user.avatar, class: "w-12 h-12 rounded-full object-cover border border-border" %>
     <% else %>
       <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg <%= avatar_bg_color(other_user&.name) %>">
         <%= other_user&.name&.first&.upcase || "?" %>
@@ -28,16 +28,16 @@
     <!-- 상단: 이름 + 직군 + 시간 -->
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-1.5 min-w-0">
-        <p class="font-semibold text-gray-900 truncate <%= 'font-bold' if unread_count > 0 %>">
+        <p class="font-semibold text-foreground truncate <%= 'font-bold' if unread_count > 0 %>">
           <%= other_user&.name || "알 수 없음" %>
         </p>
         <% if other_user&.role_title.present? %>
-          <span class="text-gray-400">•</span>
-          <p class="text-xs text-gray-500 truncate"><%= other_user.role_title %></p>
+          <span class="text-muted-foreground/60">•</span>
+          <p class="text-xs text-muted-foreground truncate"><%= other_user.role_title %></p>
         <% end %>
       </div>
       <% if last_message %>
-        <span class="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap"
+        <span class="text-xs text-muted-foreground/70 flex-shrink-0 whitespace-nowrap"
               data-controller="relative-time"
               data-relative-time-timestamp-value="<%= last_message.created_at.iso8601 %>"></span>
       <% end %>
@@ -61,29 +61,29 @@
             구직
           </span>
         <% end %>
-        <p class="text-xs text-gray-500 truncate flex-1"><%= source_post.title.truncate(30) %></p>
+        <p class="text-xs text-muted-foreground truncate flex-1"><%= source_post.title.truncate(30) %></p>
       </div>
     <% end %>
 
     <!-- 마지막 메시지 + 상태 뱃지 -->
     <div class="flex items-center gap-2 mt-1">
       <% if last_message %>
-        <p class="text-sm truncate flex-1 <%= unread_count > 0 ? 'text-gray-900 font-medium' : 'text-gray-600' %>">
+        <p class="text-sm truncate flex-1 <%= unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground' %>">
           <% if last_message.sender_id == current_user.id %>
-            <span class="text-gray-400">나: </span>
+            <span class="text-muted-foreground/70">나: </span>
           <% end %>
           <% if last_message.system_message? || last_message.deal_confirm? %>
-            <span class="text-gray-500 italic"><%= message_preview(last_message) %></span>
+            <span class="text-muted-foreground italic"><%= message_preview(last_message) %></span>
           <% elsif last_message.profile_card? %>
-            <span class="text-gray-500">📋 프로필을 공유했습니다</span>
+            <span class="text-muted-foreground">📋 프로필을 공유했습니다</span>
           <% elsif last_message.contact_card? %>
-            <span class="text-gray-500">📧 연락처를 공유했습니다</span>
+            <span class="text-muted-foreground">📧 연락처를 공유했습니다</span>
           <% else %>
             <%= truncate(last_message.content, length: 30) %>
           <% end %>
         </p>
       <% else %>
-        <p class="text-sm text-gray-400 truncate flex-1">대화를 시작해보세요</p>
+        <p class="text-sm text-muted-foreground/70 truncate flex-1">대화를 시작해보세요</p>
       <% end %>
 
       <!-- 상태 뱃지들 -->
@@ -93,7 +93,7 @@
             ✓ 확정
           </span>
         <% elsif room.cancelled? %>
-          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-500">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary text-muted-foreground">
             취소됨
           </span>
         <% end %>
@@ -102,7 +102,7 @@
   </div>
 
   <!-- 화살표 -->
-  <svg class="w-5 h-5 text-gray-300 flex-shrink-0 self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg class="w-5 h-5 text-muted-foreground/50 flex-shrink-0 self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
   </svg>
 <% end %>

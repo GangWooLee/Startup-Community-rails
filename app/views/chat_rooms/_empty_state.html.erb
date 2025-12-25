@@ -1,14 +1,14 @@
 <%# 채팅방 미선택 또는 삭제 후 빈 상태 %>
-<%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-gray-50" do %>
+<%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-secondary/30" do %>
   <div class="flex-1 flex flex-col items-center justify-center">
     <div class="text-center px-8">
-      <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-6">
-        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-24 h-24 rounded-full bg-secondary flex items-center justify-center mx-auto mb-6">
+        <svg class="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
       </div>
-      <h2 class="text-xl font-semibold text-gray-700 mb-2">대화를 선택해주세요</h2>
-      <p class="text-gray-500 max-w-sm">
+      <h2 class="text-xl font-semibold text-foreground mb-2">대화를 선택해주세요</h2>
+      <p class="text-muted-foreground max-w-sm">
         좌측 목록에서 대화를 선택하면<br>
         이곳에서 메시지를 주고받을 수 있습니다
       </p>

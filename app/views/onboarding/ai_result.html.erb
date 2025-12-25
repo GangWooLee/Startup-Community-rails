@@ -2,7 +2,7 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
-      <%= link_to onboarding_ai_input_path, class: "text-muted-foreground hover:text-foreground p-1" do %>
+      <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -212,7 +212,60 @@
             </div>
           <% end %>
         </div>
+
+        <!-- Recommended Experts Section -->
+        <% if @recommended_experts.present? %>
+          <div class="bg-card rounded-xl border border-border p-4"
+               data-controller="expert-overlay">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                <svg class="h-4 w-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-foreground">추천 전문가</h3>
+                <p class="text-xs text-muted-foreground">이 아이디어를 함께 실현할 수 있는 전문가들</p>
+              </div>
+            </div>
+
+            <!-- Required Expertise Tags -->
+            <% if @analysis[:required_expertise].present? %>
+              <div class="mb-4">
+                <p class="text-xs text-muted-foreground mb-2">필요한 역량</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <% (@analysis[:required_expertise][:roles] || []).each do |role| %>
+                    <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= role %></span>
+                  <% end %>
+                  <% (@analysis[:required_expertise][:skills] || []).first(4).each do |skill| %>
+                    <span class="px-2 py-0.5 rounded-full bg-secondary text-muted-foreground text-xs"><%= skill %></span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Horizontal Scroll Expert Cards -->
+            <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              <% @recommended_experts.each do |expert| %>
+                <%= render "onboarding/expert_card", user: expert %>
+              <% end %>
+            </div>
+
+            <!-- More Experts Link -->
+            <div class="mt-4 pt-3 border-t border-border">
+              <%= link_to search_path(tab: "users"), class: "flex items-center justify-center gap-1 text-sm text-primary hover:underline" do %>
+                더 많은 전문가 찾기
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
+
+      <!-- Profile Overlay Container -->
+      <div id="profile-overlay-container"></div>
 
       <!-- CTA Buttons -->
       <div class="space-y-3">

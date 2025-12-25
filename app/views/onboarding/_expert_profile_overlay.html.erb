@@ -1,7 +1,7 @@
-<%# 채팅방 내 프로필 오버레이 카드 %>
+<%# 추천 전문가 프로필 오버레이 %>
 <%# locals: user %>
 
-<div id="profile-overlay"
+<div id="expert-profile-overlay"
      class="fixed inset-0 z-50 flex items-center justify-center p-4"
      data-controller="profile-overlay"
      data-action="keydown.esc->profile-overlay#close click->profile-overlay#backdropClick">
@@ -75,7 +75,7 @@
             </span>
           <% end %>
           <% if user.respond_to?(:skills_array) %>
-            <% user.skills_array.first(2).each do |skill| %>
+            <% user.skills_array.first(3).each do |skill| %>
               <span class="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                 <%= skill %>
               </span>
@@ -93,30 +93,6 @@
 
       <!-- 연락처 정보 -->
       <div class="px-6 py-4 space-y-3">
-        <% if user.email.present? %>
-          <div class="flex items-center gap-3 text-sm">
-            <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <span class="text-foreground truncate"><%= user.email %></span>
-          </div>
-        <% end %>
-
-        <% if user.open_chat_url.present? %>
-          <div class="flex items-center gap-3 text-sm">
-            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-              </svg>
-            </div>
-            <%= link_to user.open_chat_url, target: "_blank", class: "text-primary hover:underline truncate" do %>
-              오픈채팅 바로가기
-            <% end %>
-          </div>
-        <% end %>
-
         <% if user.github_url.present? %>
           <div class="flex items-center gap-3 text-sm">
             <div class="w-8 h-8 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
@@ -156,6 +132,19 @@
           전체 프로필 보기
         <% end %>
 
+        <!-- 대화하기 버튼 -->
+        <% if logged_in? && current_user.id != user.id %>
+          <%= link_to start_chat_path(user),
+                      method: :post,
+                      class: "w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-cyan-500 text-white hover:bg-cyan-600 transition-colors",
+                      data: { turbo_method: :post } do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            대화하기
+          <% end %>
+        <% end %>
+
         <!-- 닫기 버튼 -->
         <button type="button"
                 class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-background border border-border text-foreground hover:bg-secondary transition-colors"
@@ -166,20 +155,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.2s ease-out;
-  }
-</style>

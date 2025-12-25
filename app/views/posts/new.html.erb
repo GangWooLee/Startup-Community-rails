@@ -2,8 +2,8 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
-      <%= link_to "javascript:history.back()", class: "text-muted-foreground hover:text-foreground p-1" do %>
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       <% end %>
@@ -78,7 +78,7 @@
           <%= f.hidden_field :category, value: 'free' %>
         <% end %>
         <!-- Title -->
-        <div class="bg-card rounded-xl p-4 border border-border">
+        <div class="rounded-xl border bg-card text-card-foreground p-4">
           <%= f.text_field :title,
               placeholder: "제목을 입력하세요",
               data: { post_form_target: "title" },
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Content -->
-        <div class="bg-card rounded-xl p-4 border border-border">
+        <div class="rounded-xl border bg-card text-card-foreground p-4">
           <%= f.text_area :content,
               placeholder: "창업 아이디어, 개발 고민, 팀 빌딩 등 자유롭게 이야기해보세요.",
               rows: 12,
@@ -95,7 +95,7 @@
         </div>
 
         <!-- Image Upload -->
-        <div class="bg-card rounded-xl p-4 border border-border" data-controller="image-upload">
+        <div class="rounded-xl border bg-card text-card-foreground p-4" data-controller="image-upload">
           <div class="flex items-center justify-between mb-3">
             <label class="flex items-center text-sm font-medium text-foreground">
               <svg class="h-5 w-5 mr-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
         <!-- Outsourcing Fields (외주용) -->
         <% if @initial_type == 'outsourcing' %>
           <!-- 공통 필드 -->
-          <div class="bg-card rounded-xl p-4 border border-border space-y-4" data-post-form-target="outsourcingFields">
+          <div class="rounded-xl border bg-card text-card-foreground p-4 space-y-4" data-post-form-target="outsourcingFields">
             <h3 class="text-sm font-medium text-foreground">외주 정보</h3>
 
             <!-- Service Type -->
@@ -197,7 +197,7 @@
           </div>
 
           <!-- 구직(Seeking) 전용 필드 -->
-          <div class="bg-card rounded-xl p-4 border border-border space-y-4 hidden" data-post-form-target="seekingFields">
+          <div class="rounded-xl border bg-card text-card-foreground p-4 space-y-4 hidden" data-post-form-target="seekingFields">
             <h3 class="text-sm font-medium text-foreground">구직자 정보</h3>
 
             <!-- Portfolio URL -->
@@ -218,7 +218,7 @@
                 <%= f.check_box :available_now,
                     class: "sr-only peer",
                     checked: @post.available_now.nil? ? true : @post.available_now %>
-                <div class="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div class="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
 

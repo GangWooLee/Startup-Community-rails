@@ -4,11 +4,11 @@
     <div class="max-w-screen-xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
         <!-- 뒤로가기 버튼 -->
-        <button onclick="history.back()" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-md">
+        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
-        </button>
+        <% end %>
 
         <!-- 타이틀 -->
         <div>
@@ -42,7 +42,7 @@
       <% end %>
 
       <!-- Profile Image -->
-      <div class="bg-card rounded-xl p-6 border border-border">
+      <div class="rounded-xl border bg-card text-card-foreground p-6">
         <h3 class="text-lg font-semibold mb-4">프로필 사진</h3>
         <div class="flex items-center gap-6">
           <div class="h-24 w-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -70,56 +70,70 @@
       </div>
 
       <!-- Basic Info -->
-      <div class="bg-card rounded-xl p-6 border border-border space-y-4">
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
         <h3 class="text-lg font-semibold mb-4">기본 정보</h3>
 
         <!-- Name Field -->
-        <div>
-          <%= f.label :name, "이름 *", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :name,
-              required: true,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <div class="space-y-2">
+          <%= render_label name: "user[name]", label: "이름 *" %>
+          <%= render_input name: "user[name]",
+                          type: :text,
+                          id: "user_name",
+                          value: @user.name,
+                          required: true,
+                          class: "w-full" %>
         </div>
 
         <!-- Email (Read Only) -->
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">이메일</label>
-          <input type="email" value="<%= @user.email %>" disabled
-                 class="w-full px-3 py-2 rounded-md border border-border bg-muted text-muted-foreground cursor-not-allowed">
-          <p class="mt-1 text-xs text-muted-foreground">이메일은 변경할 수 없습니다</p>
+        <div class="space-y-2">
+          <%= render_label name: "email", label: "이메일" %>
+          <%= render_input name: "email",
+                          type: :email,
+                          id: "user_email",
+                          value: @user.email,
+                          disabled: true,
+                          class: "w-full bg-muted cursor-not-allowed" %>
+          <p class="text-xs text-muted-foreground">이메일은 변경할 수 없습니다</p>
         </div>
 
         <!-- Affiliation -->
-        <div>
-          <%= f.label :affiliation, "소속", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :affiliation,
-              placeholder: "예: 21학번/CS, 스타트업 재직중, 프리랜서",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
-          <p class="mt-1 text-xs text-muted-foreground">이름 옆에 표시됩니다</p>
+        <div class="space-y-2">
+          <%= render_label name: "user[affiliation]", label: "소속" %>
+          <%= render_input name: "user[affiliation]",
+                          type: :text,
+                          id: "user_affiliation",
+                          value: @user.affiliation,
+                          placeholder: "예: 21학번/CS, 스타트업 재직중, 프리랜서",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">이름 옆에 표시됩니다</p>
         </div>
 
         <!-- Role Title -->
-        <div>
-          <%= f.label :role_title, "직군/역할", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :role_title,
-              placeholder: "예: 백엔드 개발자, UI/UX 디자이너, PM",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <div class="space-y-2">
+          <%= render_label name: "user[role_title]", label: "직군/역할" %>
+          <%= render_input name: "user[role_title]",
+                          type: :text,
+                          id: "user_role_title",
+                          value: @user.role_title,
+                          placeholder: "예: 백엔드 개발자, UI/UX 디자이너, PM",
+                          class: "w-full" %>
         </div>
 
         <!-- Bio -->
-        <div>
-          <%= f.label :bio, "한 줄 소개", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_area :bio,
-              placeholder: "빠르게 MVP 만들어서 검증하는 개발자입니다.",
-              rows: 2,
-              maxlength: 500,
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" %>
-          <p class="mt-1 text-xs text-muted-foreground">프로필에 인용문처럼 표시됩니다 (최대 500자)</p>
+        <div class="space-y-2">
+          <%= render_label name: "user[bio]", label: "한 줄 소개" %>
+          <%= render_textarea name: "user[bio]",
+                             id: "user_bio",
+                             value: @user.bio,
+                             placeholder: "빠르게 MVP 만들어서 검증하는 개발자입니다.",
+                             rows: 2,
+                             class: "w-full resize-none" %>
+          <p class="text-xs text-muted-foreground">프로필에 인용문처럼 표시됩니다 (최대 500자)</p>
         </div>
       </div>
 
       <!-- Activity Status -->
-      <div class="bg-card rounded-xl p-6 border border-border space-y-4">
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
         <h3 class="text-lg font-semibold mb-4">활동 상태</h3>
         <p class="text-sm text-muted-foreground mb-4">현재 상태를 표시하여 다른 사용자들에게 연락 가능 여부를 알려주세요.</p>
 
@@ -145,22 +159,22 @@
         </div>
 
         <!-- Custom Status -->
-        <div class="mt-4 pt-4 border-t border-border" data-controller="custom-status-preview">
-          <label class="block text-sm font-medium text-foreground mb-2">
-            기타 상태 (직접 입력)
-          </label>
+        <div class="mt-4 pt-4 border-t border-border space-y-2" data-controller="custom-status-preview">
+          <%= render_label name: "user[custom_status]", label: "기타 상태 (직접 입력)" %>
           <div class="flex items-center gap-3">
-            <%= f.text_field :custom_status,
-                placeholder: "예: 재직 중, 학생",
-                maxlength: 10,
-                data: { custom_status_preview_target: "input", action: "input->custom-status-preview#update" },
-                class: "flex-1 px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+            <%= render_input name: "user[custom_status]",
+                            type: :text,
+                            id: "user_custom_status",
+                            value: @user.custom_status,
+                            placeholder: "예: 재직 중, 학생",
+                            data: { custom_status_preview_target: "input", action: "input->custom-status-preview#update" },
+                            class: "flex-1" %>
             <span data-custom-status-preview-target="preview" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white bg-pink-500 <%= @user.custom_status.blank? ? 'hidden' : '' %>">
               <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
               <span data-custom-status-preview-target="badge"><%= @user.custom_status %></span>
             </span>
           </div>
-          <p class="mt-1 text-xs text-muted-foreground">원하는 상태를 직접 입력하세요 (최대 10자)</p>
+          <p class="text-xs text-muted-foreground">원하는 상태를 직접 입력하세요 (최대 10자)</p>
         </div>
 
         <!-- Hidden field to ensure empty array is sent when nothing is checked -->
@@ -168,15 +182,18 @@
       </div>
 
       <!-- Skills -->
-      <div class="bg-card rounded-xl p-6 border border-border space-y-4">
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
         <h3 class="text-lg font-semibold mb-4">기술 스택</h3>
 
-        <div>
-          <%= f.label :skills, "기술/키워드", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.text_field :skills,
-              placeholder: "React, Node.js, Figma, 시장분석",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
-          <p class="mt-1 text-xs text-muted-foreground">쉼표(,)로 구분하여 입력하세요. 프로필에 태그로 표시됩니다.</p>
+        <div class="space-y-2">
+          <%= render_label name: "user[skills]", label: "기술/키워드" %>
+          <%= render_input name: "user[skills]",
+                          type: :text,
+                          id: "user_skills",
+                          value: @user.skills,
+                          placeholder: "React, Node.js, Figma, 시장분석",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">쉼표(,)로 구분하여 입력하세요. 프로필에 태그로 표시됩니다.</p>
         </div>
 
         <% if @user.skills_array.any? %>
@@ -184,9 +201,7 @@
             <p class="text-sm font-medium text-foreground mb-2">현재 등록된 기술:</p>
             <div class="flex flex-wrap gap-2">
               <% @user.skills_array.each do |skill| %>
-                <span class="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground">
-                  <%= skill %>
-                </span>
+                <%= render_badge skill, variant: :secondary %>
               <% end %>
             </div>
           </div>
@@ -194,44 +209,53 @@
       </div>
 
       <!-- Related Links -->
-      <div class="bg-card rounded-xl p-6 border border-border space-y-4">
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
         <h3 class="text-lg font-semibold mb-4">관련 링크</h3>
         <p class="text-sm text-muted-foreground mb-4">나를 더 알릴 수 있는 링크를 추가하세요.</p>
 
         <!-- LinkedIn URL -->
-        <div>
-          <%= f.label :linkedin_url, "LinkedIn", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.url_field :linkedin_url,
-              placeholder: "https://linkedin.com/in/username",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <div class="space-y-2">
+          <%= render_label name: "user[linkedin_url]", label: "LinkedIn" %>
+          <%= render_input name: "user[linkedin_url]",
+                          type: :url,
+                          id: "user_linkedin_url",
+                          value: @user.linkedin_url,
+                          placeholder: "https://linkedin.com/in/username",
+                          class: "w-full" %>
         </div>
 
         <!-- GitHub URL -->
-        <div>
-          <%= f.label :github_url, "GitHub", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.url_field :github_url,
-              placeholder: "https://github.com/username",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
+        <div class="space-y-2">
+          <%= render_label name: "user[github_url]", label: "GitHub" %>
+          <%= render_input name: "user[github_url]",
+                          type: :url,
+                          id: "user_github_url",
+                          value: @user.github_url,
+                          placeholder: "https://github.com/username",
+                          class: "w-full" %>
         </div>
 
         <!-- Portfolio URL -->
-        <div>
-          <%= f.label :portfolio_url, "포트폴리오", class: "block text-sm font-medium text-foreground mb-2" %>
-          <%= f.url_field :portfolio_url,
-              placeholder: "https://notion.so/..., https://behance.net/...",
-              class: "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
-          <p class="mt-1 text-xs text-muted-foreground">노션, 비핸스, 개인 웹사이트 등</p>
+        <div class="space-y-2">
+          <%= render_label name: "user[portfolio_url]", label: "포트폴리오" %>
+          <%= render_input name: "user[portfolio_url]",
+                          type: :url,
+                          id: "user_portfolio_url",
+                          value: @user.portfolio_url,
+                          placeholder: "https://notion.so/..., https://behance.net/...",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">노션, 비핸스, 개인 웹사이트 등</p>
         </div>
       </div>
 
       <!-- Submit Buttons -->
       <div class="flex gap-3">
-        <%= link_to my_page_path, class: "flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-11 px-8" do %>
+        <%= render_button variant: :outline, as: :link, href: my_page_path, class: "flex-1 h-11" do %>
           취소
         <% end %>
-        <button type="submit" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8">
+        <%= render_button class: "flex-1 h-11" do %>
           저장
-        </button>
+        <% end %>
       </div>
     <% end %>
   </main>
