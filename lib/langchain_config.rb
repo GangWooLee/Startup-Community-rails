@@ -4,19 +4,22 @@
 # AI Agent framework 설정
 
 # LLM Provider 설정
-# 환경변수 또는 Rails credentials에서 API 키를 가져옴
+# Rails credentials에서 API 키를 가져옴
 #
 # 사용법:
-#   OpenAI: OPENAI_API_KEY 환경변수 또는 credentials.dig(:openai, :api_key)
-#   Gemini: GEMINI_API_KEY 환경변수 또는 credentials.dig(:gemini, :api_key)
+#   OpenAI: credentials.dig(:openai, :api_key)
+#   Gemini: credentials.dig(:gemini, :api_key)
+#
+# credentials 설정:
+#   EDITOR="code --wait" bin/rails credentials:edit
 
 module LangchainConfig
   class << self
     # OpenAI LLM 인스턴스 생성
     def openai_llm(model: "gpt-4o-mini", temperature: 0.7)
-      api_key = ENV["OPENAI_API_KEY"] || Rails.application.credentials.dig(:openai, :api_key)
+      api_key = Rails.application.credentials.dig(:openai, :api_key)
 
-      raise "OpenAI API key not configured" if api_key.blank?
+      raise "OpenAI API key not configured. Run: EDITOR='code --wait' bin/rails credentials:edit" if api_key.blank?
 
       Langchain::LLM::OpenAI.new(
         api_key: api_key,
@@ -29,9 +32,9 @@ module LangchainConfig
 
     # Google Gemini LLM 인스턴스 생성
     def gemini_llm(model: "gemini-2.0-flash", temperature: 0.7)
-      api_key = ENV["GEMINI_API_KEY"] || Rails.application.credentials.dig(:gemini, :api_key)
+      api_key = Rails.application.credentials.dig(:gemini, :api_key)
 
-      raise "Gemini API key not configured" if api_key.blank?
+      raise "Gemini API key not configured. Run: EDITOR='code --wait' bin/rails credentials:edit" if api_key.blank?
 
       Langchain::LLM::GoogleGemini.new(
         api_key: api_key,
@@ -42,12 +45,11 @@ module LangchainConfig
       )
     end
 
-    # 기본 LLM 제공자 (환경변수로 전환 가능)
-    # DEFAULT_LLM_PROVIDER: "openai" 또는 "gemini"
+    # 기본 LLM 제공자 (credentials에서 설정)
     def default_llm(temperature: 0.7)
-      provider = ENV.fetch("DEFAULT_LLM_PROVIDER", "gemini")
+      provider = Rails.application.credentials.fetch(:default_llm_provider, "gemini")
 
-      case provider.downcase
+      case provider.to_s.downcase
       when "openai"
         openai_llm(temperature: temperature)
       when "gemini"
@@ -59,13 +61,11 @@ module LangchainConfig
 
     # API 키 설정 여부 확인
     def openai_configured?
-      api_key = ENV["OPENAI_API_KEY"] || Rails.application.credentials.dig(:openai, :api_key)
-      api_key.present?
+      Rails.application.credentials.dig(:openai, :api_key).present?
     end
 
     def gemini_configured?
-      api_key = ENV["GEMINI_API_KEY"] || Rails.application.credentials.dig(:gemini, :api_key)
-      api_key.present?
+      Rails.application.credentials.dig(:gemini, :api_key).present?
     end
 
     def any_llm_configured?

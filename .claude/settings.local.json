@@ -63,7 +63,8 @@
       "Bash(bin/rails db:migrate:*)",
       "Bash(TZ=Asia/Seoul date:*)",
       "Bash(bin/rails db:seed:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(EDITOR=\"cp /tmp/credentials_content.yml\" bin/rails credentials:edit)"
     ],
     "deny": [],
     "ask": []

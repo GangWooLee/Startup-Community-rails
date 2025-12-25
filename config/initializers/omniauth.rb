@@ -13,8 +13,11 @@ OmniAuth.config.on_failure = proc { |env|
 OmniAuth.config.silence_get_warning = true
 
 Rails.application.config.middleware.use OmniAuth::Builder do
+  # Rails credentials에서 OAuth 키 가져오기
+  google_credentials = Rails.application.credentials.dig(:google) || {}
+  github_credentials = Rails.application.credentials.dig(:github) || {}
+
   # Google OAuth2
-  # redirect_uri는 환경변수 또는 nil(OmniAuth 자동 감지) 사용
   google_options = {
     scope: "email, profile",
     prompt: "select_account",
@@ -23,11 +26,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   }
 
   # 프로덕션에서만 명시적 redirect_uri 설정, 개발 환경은 자동 감지
-  if ENV["GOOGLE_OAUTH_REDIRECT_URI"].present?
-    google_options[:redirect_uri] = ENV["GOOGLE_OAUTH_REDIRECT_URI"]
+  if google_credentials[:redirect_uri].present?
+    google_options[:redirect_uri] = google_credentials[:redirect_uri]
   end
 
-  provider :google_oauth2, ENV["GOOGLE_CLIENT_ID"], ENV["GOOGLE_CLIENT_SECRET"], google_options
+  provider :google_oauth2,
+           google_credentials[:client_id],
+           google_credentials[:client_secret],
+           google_options
 
   # GitHub OAuth
   github_options = {
@@ -35,9 +41,12 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   }
 
   # 프로덕션에서만 명시적 redirect_uri 설정, 개발 환경은 자동 감지
-  if ENV["GITHUB_OAUTH_REDIRECT_URI"].present?
-    github_options[:redirect_uri] = ENV["GITHUB_OAUTH_REDIRECT_URI"]
+  if github_credentials[:redirect_uri].present?
+    github_options[:redirect_uri] = github_credentials[:redirect_uri]
   end
 
-  provider :github, ENV["GITHUB_CLIENT_ID"], ENV["GITHUB_CLIENT_SECRET"], github_options
+  provider :github,
+           github_credentials[:client_id],
+           github_credentials[:client_secret],
+           github_options
 end
