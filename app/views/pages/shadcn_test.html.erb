@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-background p-8">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <h1 class="text-3xl font-bold text-foreground">shadcn UI Component Test</h1>
+    <p class="text-muted-foreground">shadcn-rails 컴포넌트 테스트 페이지입니다.</p>
+
+    <!-- Button Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Button Component</h2>
+      <div class="flex flex-wrap gap-4">
+        <%= render_button "Default Button" %>
+        <%= render_button "Secondary", variant: :secondary %>
+        <%= render_button "Outline", variant: :outline %>
+        <%= render_button "Ghost", variant: :ghost %>
+        <%= render_button "Destructive", variant: :destructive %>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <%= render_button "Link Button", as: :link, href: "#" %>
+        <%= render_button "With Icon", variant: :outline do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add New
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Badge Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Badge Component</h2>
+      <div class="flex flex-wrap gap-4">
+        <%= render_badge "Default" %>
+        <%= render_badge "Secondary", variant: :secondary %>
+        <%= render_badge "Outline", variant: :outline %>
+        <%= render_badge "Destructive", variant: :destructive %>
+      </div>
+    </section>
+
+    <!-- Card Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Card Component</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <%= render_card title: "Card Title", subtitle: "Card description goes here." do %>
+          <div class="px-6 pb-4">
+            <p>This is the card content. You can put any content here.</p>
+          </div>
+          <div class="px-6 pb-6">
+            <%= render_button "Action", variant: :outline %>
+          </div>
+        <% end %>
+
+        <%= render_card title: "Another Card" do %>
+          <div class="px-6 pb-6">
+            <p class="text-muted-foreground">Simple card without footer.</p>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Input Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Input Component</h2>
+      <div class="max-w-md space-y-4">
+        <div>
+          <%= render_label name: "email", label: "Email" %>
+          <%= render_input name: "email", type: :email, id: "email", placeholder: "Enter your email" %>
+        </div>
+        <div>
+          <%= render_label name: "password", label: "Password" %>
+          <%= render_input name: "password", type: :password, id: "password", placeholder: "Enter your password" %>
+        </div>
+        <div>
+          <%= render_label name: "disabled", label: "Disabled" %>
+          <%= render_input name: "disabled", id: "disabled", placeholder: "Disabled input", disabled: true %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Textarea Component -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Textarea Component</h2>
+      <div class="max-w-md">
+        <%= render_label name: "message", label: "Message" %>
+        <%= render_textarea name: "message", id: "message", placeholder: "Enter your message here...", rows: 4 %>
+      </div>
+    </section>
+
+    <!-- Color Test -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Color System Test</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 bg-primary text-primary-foreground rounded-lg text-center">Primary</div>
+        <div class="p-4 bg-secondary text-secondary-foreground rounded-lg text-center">Secondary</div>
+        <div class="p-4 bg-muted text-muted-foreground rounded-lg text-center">Muted</div>
+        <div class="p-4 bg-accent text-accent-foreground rounded-lg text-center">Accent</div>
+        <div class="p-4 bg-destructive text-white rounded-lg text-center">Destructive</div>
+        <div class="p-4 bg-card text-card-foreground border rounded-lg text-center">Card</div>
+        <div class="p-4 bg-popover text-popover-foreground border rounded-lg text-center">Popover</div>
+        <div class="p-4 bg-background text-foreground border rounded-lg text-center">Background</div>
+      </div>
+    </section>
+
+    <!-- Comparison with existing UI -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-semibold border-b pb-2">Existing UI vs shadcn</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <h3 class="font-medium">Existing Button Style</h3>
+          <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
+            기존 버튼
+          </button>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-medium">shadcn Button</h3>
+          <%= render_button "shadcn 버튼" %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="pt-8 border-t">
+      <div class="flex gap-4">
+        <%= link_to "← Back to Home", root_path, class: "text-primary hover:underline" %>
+        <%= link_to "Community", community_path, class: "text-primary hover:underline" %>
+      </div>
+    </section>
+  </div>
+</div>

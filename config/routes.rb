@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   # Onboarding Flow
   get "ai/input", to: "onboarding#ai_input", as: :onboarding_ai_input
   get "ai/result", to: "onboarding#ai_result", as: :onboarding_ai_result
+  get "ai/expert/:id", to: "onboarding#expert_profile", as: :expert_profile
 
   # Community (커뮤니티)
   get "community", to: "posts#index", as: :community
@@ -60,6 +61,9 @@ Rails.application.routes.draw do
 
   # Settings
   get "settings", to: "settings#show", as: :settings
+
+  # shadcn UI Test Page (development only)
+  get "shadcn_test", to: "pages#shadcn_test" if Rails.env.development?
 
   # Search
   get "search", to: "search#index", as: :search
