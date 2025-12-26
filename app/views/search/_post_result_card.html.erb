@@ -5,8 +5,8 @@
      role="link"
      tabindex="0"
      data-href="<%= post_path(post) %>"
-     onclick="window.location.assign(this.dataset.href)"
-     onkeydown="if(event.key==='Enter') window.location.assign(this.dataset.href)">
+     onmousedown="event.preventDefault(); window.location.href = this.dataset.href;"
+     onkeydown="if(event.key==='Enter') window.location.href = this.dataset.href;">
   <div class="flex gap-4 h-full">
     <!-- Content -->
     <div class="flex-1 min-w-0 flex flex-col">

@@ -94,8 +94,8 @@
                  role="link"
                  tabindex="0"
                  data-href="<%= profile_path(user) %>"
-                 onclick="window.location.assign(this.dataset.href)"
-                 onkeydown="if(event.key==='Enter') window.location.assign(this.dataset.href)">
+                 onmousedown="event.preventDefault(); window.location.href = this.dataset.href;"
+                 onkeydown="if(event.key==='Enter') window.location.href = this.dataset.href;">
               <div class="flex items-center gap-4 h-full">
                 <!-- 좌측: 아바타 -->
                 <%= render_user_avatar(user, size: "xl", class: "!h-14 !w-14") %>
