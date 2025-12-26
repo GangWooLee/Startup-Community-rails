@@ -1,10 +1,11 @@
 # 주문 컨트롤러
-# 주문 조회, 결제 완료 페이지, 취소 처리
+# 주문 조회, 결제 완료 페이지, 취소 처리, 거래 확정
 class OrdersController < ApplicationController
   before_action :require_login
-  before_action :set_order, only: [:show, :success, :cancel, :receipt]
+  before_action :set_order, only: [:show, :success, :cancel, :receipt, :confirm]
   before_action :authorize_order_access, only: [:show, :success, :receipt]
   before_action :authorize_order_cancel, only: [:cancel]
+  before_action :authorize_order_confirm, only: [:confirm]
 
   # GET /orders
   # 주문 목록 (구매 + 판매)
@@ -43,6 +44,25 @@ class OrdersController < ApplicationController
     unless @payment&.done?
       redirect_to order_path(@order), alert: "결제 완료된 주문만 영수증을 확인할 수 있습니다."
     end
+  end
+
+  # POST /orders/:id/confirm
+  # 거래 확정 (구매자가 작업 완료 확인 후 판매자에게 정산)
+  def confirm
+    unless @order.can_confirm?
+      redirect_to order_path(@order), alert: "확정할 수 없는 주문입니다."
+      return
+    end
+
+    if @order.confirm!
+      redirect_path = @order.chat_room.present? ? chat_room_path(@order.chat_room) : order_path(@order)
+      redirect_to redirect_path, notice: "거래가 확정되었습니다! #{@order.seller.name}님에게 #{@order.formatted_settlement_amount}이 정산됩니다."
+    else
+      redirect_to order_path(@order), alert: "거래 확정에 실패했습니다. 다시 시도해주세요."
+    end
+  rescue StandardError => e
+    Rails.logger.error "[OrdersController#confirm] Unexpected error: #{e.message}"
+    redirect_to order_path(@order), alert: "거래 확정 중 오류가 발생했습니다."
   end
 
   # POST /orders/:id/cancel
@@ -103,6 +123,13 @@ class OrdersController < ApplicationController
   def authorize_order_cancel
     unless @order.user_id == current_user.id
       redirect_to orders_path, alert: "취소 권한이 없습니다."
+    end
+  end
+
+  # 거래 확정 권한 확인 (구매자만)
+  def authorize_order_confirm
+    unless @order.user_id == current_user.id
+      redirect_to orders_path, alert: "거래 확정 권한이 없습니다."
     end
   end
 

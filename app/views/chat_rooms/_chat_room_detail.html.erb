@@ -2,7 +2,7 @@
 <%# locals: chat_room, messages, other_user %>
 
 <div class="flex-1 flex flex-col h-full bg-background"
-     data-controller="chat-room leave-chat"
+     data-controller="chat-room leave-chat offer-modal"
      data-chat-room-room-id-value="<%= chat_room.id %>"
      data-chat-room-id="<%= chat_room.id %>">
 
@@ -105,6 +105,11 @@
   <!-- 거래 상태 변경 버튼 (게시글 작성자에게만 표시) -->
   <% if chat_room.source_post.present? && chat_room.post_author?(current_user) %>
     <%= render "chat_rooms/deal_actions", chat_room: chat_room %>
+  <% end %>
+
+  <!-- 안전거래 상태 배너 (활성 주문이 있을 때만 표시) -->
+  <% if payment_enabled? && chat_room.active_order.present? %>
+    <%= render "chat_rooms/deal_confirm_banner", active_order: chat_room.active_order, current_user: current_user %>
   <% end %>
 
   <!-- 메시지 영역 (하단 입력창 + 네비게이션 공간 확보: 모바일에서 180px, PC에서 0) -->
@@ -220,6 +225,18 @@
             지원 의사 전달
           </button>
         <% end %>
+
+        <%# 거래 제안 버튼 - 결제 시스템 활성화 시 & 활성 주문이 없을 때만 표시 %>
+        <% if payment_enabled? && !chat_room.active_order.present? %>
+          <button type="button"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition whitespace-nowrap"
+                  data-action="click->offer-modal#open">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            거래 제안
+          </button>
+        <% end %>
       </div>
     </div>
 
@@ -250,4 +267,9 @@
 
   <!-- 프로필 오버레이 컨테이너 (Turbo Stream으로 삽입됨) -->
   <div id="profile-overlay-container"></div>
+
+  <!-- 거래 제안 모달 -->
+  <% if payment_enabled? %>
+    <%= render "chat_rooms/offer_modal", chat_room: chat_room %>
+  <% end %>
 </div>

@@ -40,8 +40,8 @@ module TossPayments
     #
     # 추가할 내용:
     #   toss:
-    #     client_key: "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
-    #     secret_key: "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R"
+    #     client_key: "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm"
+    #     secret_key: "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
     #     webhook_secret: "your_webhook_secret_here"
     def credentials
       @credentials ||= Rails.application.credentials.toss || {}
@@ -71,8 +71,8 @@ module TossPayments
     # Development/Test 환경: 테스트 키 폴백 허용
     def validate_development_credentials!
       # 테스트 키 (토스페이먼츠 공식 테스트 키)
-      test_client_key = "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
-      test_secret_key = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R"
+      test_client_key = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm"
+      test_secret_key = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
 
       if @client_key.blank?
         Rails.logger.warn "[TossPayments] Client key missing. Using test key (development only)."

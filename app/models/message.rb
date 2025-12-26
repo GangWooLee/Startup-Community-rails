@@ -2,13 +2,17 @@ class Message < ApplicationRecord
   belongs_to :chat_room, counter_cache: true, touch: :last_message_at
   belongs_to :sender, class_name: "User"
 
-  # 메시지 타입: text(일반), system(시스템), profile_card(프로필 전송), deal_confirm(거래 확정)
+  # 거래 제안 메시지는 주문과 연결될 수 있음
+  has_one :order, foreign_key: :offer_message_id, dependent: :nullify
+
+  # 메시지 타입: text(일반), system(시스템), profile_card(프로필 전송), deal_confirm(거래 확정), offer_card(거래 제안)
   enum :message_type, {
     text: "text",
     system: "system",
     profile_card: "profile_card",
     contact_card: "contact_card",
-    deal_confirm: "deal_confirm"
+    deal_confirm: "deal_confirm",
+    offer_card: "offer_card"
   }, default: :text
 
   validates :content, presence: true, length: { maximum: 2000 }
@@ -32,7 +36,47 @@ class Message < ApplicationRecord
 
   # 카드 타입 메시지인지 확인
   def card_message?
-    profile_card? || contact_card?
+    profile_card? || contact_card? || offer_card?
+  end
+
+  # 거래 제안 카드 데이터 접근
+  # metadata 구조:
+  # {
+  #   amount: 1000000,
+  #   title: "MVP 백엔드 개발",
+  #   description: "...",
+  #   deadline: "2025-01-26",
+  #   refund_policy: "no_refund", # or "partial", "full"
+  #   status: "pending"  # pending, paid, completed, cancelled
+  # }
+  def offer_data
+    return nil unless offer_card?
+    metadata&.with_indifferent_access
+  end
+
+  # 거래 제안 상태 확인 헬퍼
+  def offer_pending?
+    offer_card? && offer_data&.dig(:status) == "pending"
+  end
+
+  def offer_paid?
+    offer_card? && offer_data&.dig(:status) == "paid"
+  end
+
+  def offer_completed?
+    offer_card? && offer_data&.dig(:status) == "completed"
+  end
+
+  def offer_cancelled?
+    offer_card? && offer_data&.dig(:status) == "cancelled"
+  end
+
+  # 거래 제안 상태 업데이트
+  def update_offer_status!(new_status)
+    return false unless offer_card?
+    return false unless %w[pending paid completed cancelled].include?(new_status)
+
+    update!(metadata: (metadata || {}).merge("status" => new_status))
   end
 
   private

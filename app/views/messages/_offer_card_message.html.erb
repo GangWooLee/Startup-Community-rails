@@ -1,0 +1,157 @@
+<%# 거래 제안 카드 메시지 %>
+<%# locals: message, viewing_user (required), show_profile (optional), show_time (optional), is_read (optional) %>
+<%
+  # viewing_user는 상위 partial에서 전달됨
+  viewing_user_id = viewing_user&.id
+  is_mine = viewing_user_id && message.sender_id == viewing_user_id
+  container_class = is_mine ? "justify-end" : "justify-start"
+  offer_data = message.offer_data || {}
+
+  # 그룹화 옵션 (기본값: 프로필과 시간 모두 표시)
+  show_profile = local_assigns.fetch(:show_profile, true)
+  show_time = local_assigns.fetch(:show_time, true)
+  is_read = local_assigns.fetch(:is_read, true)
+
+  # 금액 포맷팅
+  amount = offer_data[:amount].to_i
+  formatted_amount = number_to_currency(amount, unit: "원", format: "%n%u", precision: 0)
+
+  # 정산 금액 (10% 수수료 제외)
+  settlement_amount = (amount * 0.9).to_i
+  formatted_settlement = number_to_currency(settlement_amount, unit: "원", format: "%n%u", precision: 0)
+
+  # 상태
+  offer_status = offer_data[:status] || "pending"
+%>
+
+<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in <%= show_profile ? '' : 'mt-0.5' %>">
+  <% unless is_mine %>
+    <%# 프로필 영역: 표시하거나 빈 공간 유지 %>
+    <div class="flex-shrink-0 mr-2 self-end w-8">
+      <% if show_profile %>
+        <%= link_to profile_path(message.sender), class: "block" do %>
+          <%= render "shared/avatar", user: message.sender, size: "sm" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="max-w-[85%] <%= is_mine ? 'order-1' : '' %>">
+    <%# 카드와 시간/읽음 표시를 같은 줄에 %>
+    <div class="flex items-end gap-1.5 <%= is_mine ? 'flex-row-reverse' : '' %>">
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden flex-1 min-w-[280px]">
+        <!-- 카드 헤더 -->
+        <div class="bg-blue-600 text-white px-4 py-2 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="font-medium text-sm">거래 제안서</span>
+        </div>
+
+        <!-- 카드 본문 -->
+        <div class="p-4">
+          <h3 class="font-semibold text-gray-900 mb-3 line-clamp-2">
+            <%= offer_data[:title] || "거래 제안" %>
+          </h3>
+
+          <div class="space-y-2 text-sm">
+            <!-- 금액 -->
+            <div class="flex justify-between items-center">
+              <span class="text-gray-500">금액</span>
+              <span class="font-bold text-blue-600 text-lg"><%= formatted_amount %></span>
+            </div>
+
+            <!-- 기한 -->
+            <% if offer_data[:deadline].present? %>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-500">작업 기한</span>
+                <span class="text-gray-700"><%= offer_data[:deadline] %> 까지</span>
+              </div>
+            <% end %>
+
+            <!-- 환불 정책 -->
+            <% if offer_data[:refund_policy] == "no_refund" %>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-500">환불 정책</span>
+                <span class="text-red-600 text-xs font-medium">중도 환불 불가</span>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- 안전거래 안내 -->
+          <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+            <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span>결제 시 금액은 플랫폼이 안전하게 보관합니다</span>
+          </p>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="px-4 pb-4">
+          <% case offer_status %>
+          <% when "pending" %>
+            <% if payment_enabled? && !is_mine %>
+              <%# 상대방이 보낸 제안: 결제 버튼 표시 (결제 시스템 활성화 시) %>
+              <%= link_to new_payment_path(offer_message_id: message.id),
+                          class: "block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors",
+                          data: { turbo: false } do %>
+                결제하러 가기
+              <% end %>
+            <% else %>
+              <%# 내가 보낸 제안 또는 결제 비활성화: 대기 상태 %>
+              <div class="bg-gray-100 text-gray-500 text-center py-3 rounded-xl text-sm">
+                제안 대기 중
+              </div>
+            <% end %>
+
+          <% when "paid" %>
+            <%# 결제 완료: 안전 보관 중 %>
+            <div class="bg-blue-100 text-blue-700 text-center py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <span>안전 보관 중 · 작업 진행 중</span>
+            </div>
+
+          <% when "completed" %>
+            <%# 거래 완료 %>
+            <div class="bg-green-100 text-green-700 text-center py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>거래 완료</span>
+            </div>
+
+          <% when "cancelled" %>
+            <%# 취소됨 %>
+            <div class="bg-red-100 text-red-600 text-center py-3 rounded-xl text-sm">
+              취소됨
+            </div>
+
+          <% else %>
+            <%# 기타 상태 %>
+            <div class="bg-gray-100 text-gray-500 text-center py-3 rounded-xl text-sm">
+              <%= offer_status %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# 시간 또는 읽음 표시가 필요한 경우 %>
+      <% if show_time || (is_mine && !is_read) %>
+        <div class="flex flex-col items-<%= is_mine ? 'end' : 'start' %> gap-0.5 flex-shrink-0">
+          <%# 읽음 표시 (내 메시지이고 상대방이 안 읽었을 때 - 시간과 관계없이 항상 표시) %>
+          <% if is_mine && !is_read %>
+            <span class="text-[11px] text-muted-foreground font-medium">-</span>
+          <% end %>
+          <% if show_time %>
+            <span class="text-[11px] text-muted-foreground/70">
+              <%= format_message_time(message.created_at) %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

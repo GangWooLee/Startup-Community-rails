@@ -1,5 +1,8 @@
 # 결제 컨트롤러
 # 토스페이먼츠 결제 위젯 페이지 및 결제 처리
+# 지원 방식:
+# 1. Post 기반 결제: GET /payments/new?post_id=:id
+# 2. 채팅 거래 제안 기반 결제: GET /payments/new?offer_message_id=:id
 require "ostruct"
 
 class PaymentsController < ApplicationController
@@ -7,10 +10,10 @@ class PaymentsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:webhook]
 
   before_action :require_login, except: [:webhook]
-  before_action :set_post, only: [:new, :create]
+  before_action :set_payment_context, only: [:new, :create]
   before_action :validate_payment_eligibility, only: [:new, :create]
 
-  # GET /payments/new?post_id=:id
+  # GET /payments/new?post_id=:id 또는 GET /payments/new?offer_message_id=:id
   # 결제 위젯 페이지 렌더링
   def new
     # 기존 주문이 있으면 재사용, 없으면 새로 생성
@@ -22,7 +25,7 @@ class PaymentsController < ApplicationController
       @toss_client_key = toss_client_key
       @customer_key = current_user.toss_customer_key
     else
-      redirect_to post_path(@post), alert: result.errors.join(", ")
+      redirect_back_or_root(result.errors.join(", "))
     end
   end
 
@@ -63,7 +66,7 @@ class PaymentsController < ApplicationController
     if existing_payment&.done?
       # 이미 승인 완료된 결제 - API 호출 생략
       Rails.logger.info "[PaymentsController#success] Payment already approved: #{order_id}"
-      redirect_to order_success_path(existing_payment.order), notice: "결제가 완료되었습니다!"
+      redirect_to success_order_path(existing_payment.order), notice: "결제가 완료되었습니다!"
       return
     end
 
@@ -80,7 +83,7 @@ class PaymentsController < ApplicationController
       @order = @payment&.order
 
       if @order
-        redirect_to order_success_path(@order), notice: "결제가 완료되었습니다!"
+        redirect_to success_order_path(@order), notice: "결제가 완료되었습니다!"
       else
         redirect_to root_path, alert: "주문 정보를 찾을 수 없습니다."
       end
@@ -143,7 +146,18 @@ class PaymentsController < ApplicationController
 
   private
 
-  def set_post
+  # 결제 컨텍스트 설정 (Post 또는 채팅 거래 제안)
+  def set_payment_context
+    if params[:post_id].present?
+      set_post_context
+    elsif params[:offer_message_id].present?
+      set_offer_context
+    else
+      redirect_to root_path, alert: "결제 대상을 찾을 수 없습니다."
+    end
+  end
+
+  def set_post_context
     @post = Post.find_by(id: params[:post_id])
 
     unless @post
@@ -151,10 +165,39 @@ class PaymentsController < ApplicationController
     end
   end
 
+  def set_offer_context
+    @offer_message = Message.find_by(id: params[:offer_message_id])
+
+    unless @offer_message&.offer_card?
+      redirect_to root_path, alert: "거래 제안을 찾을 수 없습니다."
+      return
+    end
+
+    @chat_room = @offer_message.chat_room
+
+    # 채팅방 참여자만 결제 가능
+    unless @chat_room.users.include?(current_user)
+      redirect_to root_path, alert: "접근 권한이 없습니다."
+      return
+    end
+
+    # 제안을 보낸 사람이 아닌 상대방만 결제 가능
+    if @offer_message.sender == current_user
+      redirect_to chat_room_path(@chat_room), alert: "본인이 보낸 제안은 결제할 수 없습니다."
+      return
+    end
+  end
+
   # 결제 가능 여부 검증
   def validate_payment_eligibility
-    return if @post.nil?
+    if @post.present?
+      validate_post_payment_eligibility
+    elsif @offer_message.present?
+      validate_offer_payment_eligibility
+    end
+  end
 
+  def validate_post_payment_eligibility
     unless @post.outsourcing?
       redirect_to post_path(@post), alert: "외주 글만 결제할 수 있습니다."
       return
@@ -176,8 +219,44 @@ class PaymentsController < ApplicationController
     end
   end
 
+  def validate_offer_payment_eligibility
+    offer_data = @offer_message.offer_data
+
+    unless offer_data.present?
+      redirect_to chat_room_path(@chat_room), alert: "거래 제안 정보가 올바르지 않습니다."
+      return
+    end
+
+    # 이미 결제된 제안인지 확인
+    if @offer_message.offer_paid? || @offer_message.offer_completed?
+      redirect_to chat_room_path(@chat_room), alert: "이미 결제된 거래입니다."
+      return
+    end
+
+    # 취소된 제안인지 확인
+    if @offer_message.offer_cancelled?
+      redirect_to chat_room_path(@chat_room), alert: "취소된 거래 제안입니다."
+      return
+    end
+
+    # 금액 검증
+    amount = offer_data[:amount].to_i
+    if amount <= 0
+      redirect_to chat_room_path(@chat_room), alert: "유효하지 않은 금액입니다."
+      return
+    end
+  end
+
   # 기존 주문 찾기 또는 새로 생성
   def find_or_create_order
+    if @post.present?
+      find_or_create_post_order
+    elsif @offer_message.present?
+      find_or_create_offer_order
+    end
+  end
+
+  def find_or_create_post_order
     # 대기 중인 주문이 있으면 재사용
     existing_order = current_user.orders.pending.find_by(post: @post)
 
@@ -195,6 +274,28 @@ class PaymentsController < ApplicationController
     Orders::CreateService.new(user: current_user, post: @post).call
   end
 
+  def find_or_create_offer_order
+    # 해당 거래 제안에 대한 대기 중인 주문이 있으면 재사용
+    existing_order = current_user.orders.pending.find_by(offer_message: @offer_message)
+
+    if existing_order
+      payment = existing_order.payments.pending.first || create_new_payment(existing_order)
+      return OpenStruct.new(
+        success?: true,
+        order: existing_order,
+        payment: payment,
+        errors: []
+      )
+    end
+
+    # 새 주문 생성
+    Orders::CreateService.new(
+      user: current_user,
+      chat_room: @chat_room,
+      offer_message: @offer_message
+    ).call
+  end
+
   # 새 결제 레코드 생성 (기존 주문에 대해)
   def create_new_payment(order)
     Payment.create!(
@@ -202,6 +303,17 @@ class PaymentsController < ApplicationController
       user: current_user,
       amount: order.amount
     )
+  end
+
+  # 결제 컨텍스트에 따른 리다이렉트
+  def redirect_back_or_root(message)
+    if @post.present?
+      redirect_to post_path(@post), alert: message
+    elsif @chat_room.present?
+      redirect_to chat_room_path(@chat_room), alert: message
+    else
+      redirect_to root_path, alert: message
+    end
   end
 
   # 토스페이먼츠 클라이언트 키
@@ -216,7 +328,7 @@ class PaymentsController < ApplicationController
       raise "TossPayments client_key가 설정되지 않았습니다. Rails credentials에 toss.client_key를 추가하세요."
     else
       Rails.logger.warn "[PaymentsController] Using test client key (development only)"
-      "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
+      "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm"
     end
   end
 

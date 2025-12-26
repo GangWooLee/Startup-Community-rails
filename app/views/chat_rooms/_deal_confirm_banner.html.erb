@@ -1,0 +1,57 @@
+<%# 거래 확정 배너 %>
+<%# locals: active_order, current_user %>
+<%# 결제 완료된 주문이 있을 때 채팅방 상단에 표시 %>
+
+<% if active_order&.paid? || active_order&.in_progress? %>
+  <div class="bg-green-50 border-b border-green-200 px-4 py-3">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-green-700 min-w-0">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        <span class="text-sm font-medium truncate">
+          <%= number_to_currency(active_order.amount, unit: "", precision: 0) %>원 안전 보관 중
+        </span>
+      </div>
+
+      <% if active_order.user_id == current_user.id %>
+        <%# 구매자에게 거래 확정 버튼 표시 %>
+        <%= button_to confirm_order_path(active_order),
+                      method: :post,
+                      class: "flex-shrink-0 px-4 py-1.5 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 transition-colors",
+                      data: { confirm: "작업이 완료되었나요? 거래 확정 시 판매자에게 #{active_order.formatted_settlement_amount}이 정산됩니다." } do %>
+          거래 확정
+        <% end %>
+      <% else %>
+        <%# 판매자에게 대기 메시지 표시 %>
+        <span class="flex-shrink-0 text-sm text-green-600">
+          작업 완료 후 구매자가 확정합니다
+        </span>
+      <% end %>
+    </div>
+
+    <%# 정산 금액 안내 (판매자에게만) %>
+    <% if active_order.seller_id == current_user.id %>
+      <p class="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        거래 확정 시 수수료 10% 제외 <span class="font-medium"><%= active_order.formatted_settlement_amount %></span> 정산 예정
+      </p>
+    <% end %>
+  </div>
+<% elsif active_order&.completed? %>
+  <div class="bg-gray-50 border-b border-gray-200 px-4 py-3">
+    <div class="flex items-center gap-2 text-gray-600">
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="text-sm">
+        거래 완료됨 · <%= active_order.completed_at&.strftime("%Y.%m.%d") %>
+        <% if active_order.seller_id == current_user.id %>
+          · <span class="font-medium"><%= active_order.formatted_settlement_amount %></span> 정산됨
+        <% end %>
+      </span>
+    </div>
+  </div>
+<% end %>

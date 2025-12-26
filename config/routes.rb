@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       get :success
       get :receipt
       post :cancel
+      post :confirm
     end
   end
 
@@ -111,6 +112,7 @@ Rails.application.routes.draw do
       collection do
         post :send_profile
         post :send_contact
+        post :send_offer
       end
     end
   end

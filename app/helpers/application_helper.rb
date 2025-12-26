@@ -1,4 +1,11 @@
 module ApplicationHelper
+  # 결제 시스템 활성화 여부
+  # 사업자등록 완료 후 true로 변경하면 결제 기능 활성화
+  # 관련 파일: payments_controller.rb, orders_controller.rb, TossPayments 서비스
+  def payment_enabled?
+    false
+  end
+
   # Open Graph 메타 태그 생성 헬퍼
   # 소셜 미디어 공유 시 링크 미리보기에 사용됨
   def og_meta_tags(options = {})

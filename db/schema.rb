@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_26_065436) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_26_075239) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -166,18 +166,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_26_065436) do
   create_table "orders", force: :cascade do |t|
     t.integer "amount", null: false
     t.datetime "cancelled_at"
+    t.integer "chat_room_id"
+    t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.text "description"
+    t.integer "offer_message_id"
     t.string "order_number", null: false
     t.integer "order_type", default: 0, null: false
     t.datetime "paid_at"
-    t.integer "post_id", null: false
+    t.integer "post_id"
     t.datetime "refunded_at"
     t.integer "seller_id", null: false
     t.integer "status", default: 0, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["chat_room_id"], name: "index_orders_on_chat_room_id"
+    t.index ["offer_message_id"], name: "index_orders_on_offer_message_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["order_type"], name: "index_orders_on_order_type"
     t.index ["post_id", "status"], name: "index_orders_on_post_id_and_status"
@@ -313,6 +318,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_26_065436) do
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "oauth_identities", "users"
+  add_foreign_key "orders", "chat_rooms"
+  add_foreign_key "orders", "messages", column: "offer_message_id"
   add_foreign_key "orders", "posts"
   add_foreign_key "orders", "users"
   add_foreign_key "orders", "users", column: "seller_id"

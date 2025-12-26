@@ -291,7 +291,7 @@
       <% end %>
 
       <!-- Payment Button (외주 글 결제) -->
-      <% if @post.outsourcing? && @post.payable? %>
+      <% if payment_enabled? && @post.outsourcing? && @post.payable? %>
         <div class="mb-6">
           <% if logged_in? %>
             <% if @post.owned_by?(current_user) %>
