@@ -270,10 +270,10 @@ main          # 프로덕션 브랜치
 
 ### 상세 문서
 - **PRD.md** - 제품 요구사항 상세
-- **ARCHITECTURE.md** - 시스템 아키텍처 (기본)
 - **API.md** - API 설계 문서
 - **DATABASE.md** - ERD 및 스키마
 - **TASKS.md** - 작업 목록 및 진행상황
+- **PERFORMANCE.md** - 성능 최적화 가이드
 
 ---
 
