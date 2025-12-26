@@ -11,8 +11,25 @@
 | **버전** | MVP v0.8 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
+| **마지막 업데이트** | 2025-12-26 |
 | **Database** | SQLite3 (개발), PostgreSQL (프로덕션) |
-| **Frontend** | Hotwire (Turbo + Stimulus) + Tailwind CSS |
+| **Frontend** | Hotwire (Turbo + Stimulus) + Tailwind CSS v4 |
+
+---
+
+## 📦 주요 기능
+
+| 기능 | 완성도 | 상태 | 설명 |
+|------|--------|------|------|
+| 커뮤니티 | 95% | ✅ 완성 | 게시글 CRUD, 댓글, 좋아요, 이미지, 스크랩 |
+| 채팅 | 90% | ✅ 완성 | 실시간 1:1 채팅, Solid Cable, Turbo Streams |
+| 프로필/OAuth | 85% | ✅ 완성 | Google, GitHub 소셜 로그인 |
+| AI 온보딩 | 70% | 🔄 진행중 | 아이디어 분석, Gemini API 연동 |
+| 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
+| 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
+| 외주 | 50% | ⚠️ 진행중 | 구인/구직, Post 모델 통합 중 |
+
+---
 
 ## 🚀 시작하기
 
@@ -88,17 +105,111 @@ rails server
 
 ---
 
-## 📦 주요 기능
+## 🏗️ 프로젝트 구조
 
-| 기능 | 완성도 | 상태 |
-|------|--------|------|
-| 커뮤니티 (게시글/댓글/좋아요) | 95% | ✅ 완성 |
-| 채팅 (실시간 1:1) | 90% | ✅ 완성 |
-| 프로필/OAuth | 85% | ✅ 완성 |
-| AI 온보딩 | 70% | 🔄 진행중 |
-| 알림 시스템 | 70% | ✅ 기본 완성 |
-| 검색 | 80% | ✅ 완성 |
-| 외주 (구인/구직) | 50% | ⚠️ 진행중 |
+```
+app/
+├── controllers/          # 19개 컨트롤러
+├── models/               # 15개 모델
+├── views/                # 20개 뷰 디렉토리
+│   ├── layouts/          # 레이아웃
+│   ├── shared/           # 공유 컴포넌트, 아이콘
+│   ├── components/ui/    # shadcn UI 컴포넌트
+│   ├── posts/            # 게시글
+│   ├── chat_rooms/       # 채팅
+│   ├── search/           # 검색
+│   └── onboarding/       # AI 온보딩
+├── javascript/
+│   └── controllers/      # 33개 Stimulus 컨트롤러
+├── services/
+│   ├── ai/               # AI 에이전트 (BaseAgent, IdeaAnalyzer)
+│   └── expert_matcher.rb # 전문가 매칭
+└── helpers/              # 뷰 헬퍼
+
+config/
+├── routes.rb             # 라우팅 정의
+├── credentials.yml.enc   # 암호화된 API 키
+└── initializers/
+    ├── langchain.rb      # AI 설정
+    └── omniauth.rb       # OAuth 설정
+
+db/
+├── migrate/              # 30개 마이그레이션
+└── schema.rb             # 현재 스키마
+
+.claude/                  # Claude AI 문서 (14개 Skills 포함)
+├── CLAUDE.md             # 메인 컨텍스트 ⭐
+├── PROJECT_OVERVIEW.md   # 프로젝트 개요 ⭐
+├── ARCHITECTURE_DETAIL.md # 상세 아키텍처 ⭐
+├── PRD.md                # 제품 요구사항
+├── DATABASE.md           # ERD 및 스키마
+├── API.md                # API 설계
+├── PERFORMANCE.md        # 성능 가이드
+└── skills/               # 14개 Claude Skills
+```
+
+---
+
+## 🛠️ 기술 스택
+
+### Backend
+- **Rails 8.1.1** + Ruby 3.4.7
+- **SQLite3** (개발) / **PostgreSQL** (프로덕션)
+- **Solid Queue** - 백그라운드 작업 (Redis 불필요)
+- **Solid Cache** - 캐싱
+- **Solid Cable** - WebSocket (실시간 채팅)
+- **Active Storage** - 이미지 업로드
+
+### Frontend
+- **Hotwire** (Turbo + Stimulus) - SPA 같은 UX
+- **Tailwind CSS v4** + **shadcn-ui** - 디자인 시스템
+- **Import Maps** - ES 모듈 (번들러 불필요)
+
+### AI
+- **LangchainRB** - AI 에이전트 프레임워크
+- **Google Gemini API** - LLM (아이디어 분석)
+
+### Auth
+- **has_secure_password** - 세션 기반 인증
+- **OmniAuth** - OAuth (Google, GitHub)
+
+### DevOps
+- **Docker** + **Kamal** - 배포
+- **Rack Attack** - Rate Limiting
+
+---
+
+## 🔗 주요 라우팅
+
+### 인증
+```
+POST   /login              → 로그인
+DELETE /logout             → 로그아웃
+GET    /signup             → 회원가입
+GET    /auth/:provider/callback → OAuth 콜백
+```
+
+### 커뮤니티
+```
+GET    /community          → 게시글 목록 (메인)
+GET    /posts/:id          → 게시글 상세
+POST   /posts/:id/like     → 좋아요 토글
+POST   /posts/:id/bookmark → 스크랩 토글
+```
+
+### 채팅
+```
+GET    /chat_rooms         → 채팅 목록
+GET    /chat_rooms/:id     → 채팅방
+POST   /chat_rooms/:id/messages → 메시지 전송
+```
+
+### AI 온보딩
+```
+GET    /                   → 랜딩 페이지
+GET    /ai/input           → 아이디어 입력
+GET    /ai/result          → 분석 결과
+```
 
 ---
 
@@ -108,7 +219,13 @@ rails server
 # 전체 테스트 실행
 rails test
 
-# 시스템 테스트 실행
+# 모델 테스트만
+rails test:models
+
+# 컨트롤러 테스트만
+rails test:controllers
+
+# 시스템 테스트 (E2E)
 rails test:system
 
 # 코드 품질 검사
@@ -118,49 +235,26 @@ brakeman
 
 ---
 
-## 🏗️ 프로젝트 구조
+## 📝 최근 업데이트
 
-```
-app/
-├── controllers/     # 19개 컨트롤러
-├── models/          # 15개 모델
-├── views/           # ERB 템플릿
-├── javascript/      # 33개 Stimulus 컨트롤러
-├── services/ai/     # AI 에이전트 (LangChain + Gemini)
-└── helpers/         # 뷰 헬퍼
-
-.claude/             # Claude AI 문서
-├── CLAUDE.md        # 메인 컨텍스트 ⭐
-├── PROJECT_OVERVIEW.md  # 프로젝트 개요 ⭐
-├── ARCHITECTURE_DETAIL.md  # 상세 아키텍처 ⭐
-├── PRD.md           # 제품 요구사항
-├── DATABASE.md      # ERD 및 스키마
-├── API.md           # API 설계
-└── PERFORMANCE.md   # 성능 가이드
-```
+| 날짜 | 내용 |
+|------|------|
+| 2025-12-26 | 검색 페이지 UTF-8 인코딩 오류 수정 |
+| 2025-12-26 | 검색 결과 클릭 문제 해결 (onmousedown 사용) |
+| 2025-12-26 | render_avatar 메서드명 충돌 해결 |
+| 2025-12-26 | .env → Rails credentials 전환 |
+| 2025-12-25 | AI 아이디어 분석 Gemini API 연동 |
+| 2025-12-24 | 채팅 기능 완성 (실시간 메시지, 읽음 표시) |
+| 2025-12-23 | OAuth 소셜 로그인 추가 (Google, GitHub) |
 
 ---
 
-## 🛠️ 기술 스택
+## 🎯 현재 진행 중인 작업
 
-### Backend
-- Rails 8.1.1 + Ruby 3.4.7
-- Solid Queue/Cache/Cable (Redis 불필요)
-- Active Storage (이미지 업로드)
-
-### Frontend
-- Hotwire (Turbo + Stimulus)
-- Tailwind CSS v4 + shadcn-ui
-- Import Maps (번들러 불필요)
-
-### AI
-- LangchainRB + Google Gemini API
-
-### Auth
-- has_secure_password + OAuth (Google, GitHub)
-
-### Deployment
-- Docker + Kamal
+1. **AI 아이디어 분석 기능 안정화** (70% → 90%)
+2. **외주 시스템 Post 모델 통합** (50% → 80%)
+3. **N+1 쿼리 최적화**
+4. **프로덕션 배포 준비**
 
 ---
 
@@ -176,6 +270,18 @@ app/
 | [PRD.md](.claude/PRD.md) | 제품 요구사항 |
 | [DATABASE.md](.claude/DATABASE.md) | ERD 및 스키마 |
 | [API.md](.claude/API.md) | API 라우팅 설계 |
+| [PERFORMANCE.md](.claude/PERFORMANCE.md) | 성능 최적화 가이드 |
+
+### Claude Skills (14개)
+
+| 카테고리 | 스킬 |
+|----------|------|
+| Backend | rails-resource, test-gen, api-endpoint, background-job, service-object, query-object |
+| DevOps | logging-setup |
+| Maintenance | database-maintenance, security-audit, performance-check |
+| Quality | code-review |
+| Frontend | ui-component, stimulus-controller |
+| Documentation | doc-sync |
 
 ---
 
