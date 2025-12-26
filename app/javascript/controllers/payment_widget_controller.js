@@ -74,11 +74,33 @@ export default class extends Controller {
   // 결제 위젯 초기화
   async initializeWidget() {
     try {
+      // 필수 값 검증
+      if (!this.clientKeyValue) {
+        throw new Error("Client key is missing")
+      }
+      if (!this.customerKeyValue) {
+        throw new Error("Customer key is missing")
+      }
+      if (!this.amountValue || this.amountValue <= 0) {
+        throw new Error(`Invalid amount: ${this.amountValue}`)
+      }
+
+      console.log("[PaymentWidget] Initializing with:", {
+        clientKey: this.clientKeyValue?.substring(0, 20) + "...",
+        customerKey: this.customerKeyValue?.substring(0, 10) + "...",
+        amount: this.amountValue,
+        orderId: this.orderIdValue
+      })
+
       // TossPayments 인스턴스 생성
+      if (typeof TossPayments === "undefined") {
+        throw new Error("TossPayments SDK not loaded")
+      }
+
       const tossPayments = TossPayments(this.clientKeyValue)
 
-      // 결제 위젯 생성
-      this.paymentWidget = tossPayments.widgets({
+      // 결제 위젯 생성 (Promise 반환 - await 필수)
+      this.paymentWidget = await tossPayments.widgets({
         customerKey: this.customerKeyValue
       })
 
@@ -101,7 +123,12 @@ export default class extends Controller {
       console.log("[PaymentWidget] Widget initialized successfully")
     } catch (error) {
       console.error("[PaymentWidget] Widget initialization error:", error)
-      this.showError("결제 위젯 초기화에 실패했습니다.")
+      console.error("[PaymentWidget] Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
+      this.showError(`결제 위젯 초기화에 실패했습니다: ${error.message}`)
     }
   }
 
