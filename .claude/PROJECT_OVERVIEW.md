@@ -1,0 +1,246 @@
+# Startup Community Platform - 프로젝트 개요
+
+> **이 문서는 새 세션에서 프로젝트를 빠르게 이해하기 위한 핵심 문서입니다.**
+
+## 프로젝트 정보
+
+| 항목 | 값 |
+|------|-----|
+| **프로젝트명** | Startup Community Platform |
+| **버전** | MVP v0.8 |
+| **Rails** | 8.1.1 |
+| **Ruby** | 3.4.7 |
+| **마지막 업데이트** | 2025-12-26 |
+
+**핵심 비전**: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
+
+---
+
+## 기능 완성도 현황
+
+| 기능 | 완성도 | 상태 | 설명 |
+|------|--------|------|------|
+| 커뮤니티 (게시글/댓글/좋아요) | 95% | ✅ 완성 | CRUD, 이미지, 스크랩 |
+| 채팅 (실시간 1:1) | 90% | ✅ 완성 | Solid Cable, Turbo Streams |
+| 프로필/OAuth | 85% | ✅ 완성 | Google, GitHub 로그인 |
+| AI 온보딩 (아이디어 분석) | 70% | 🔄 진행중 | Gemini API 연동 |
+| 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
+| 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
+| 외주 (구인/구직) | 50% | ⚠️ 진행중 | Post 모델 통합 중 |
+
+---
+
+## 디렉토리 구조
+
+```
+Startup-Community-rails/
+├── app/
+│   ├── controllers/          # 19개 컨트롤러
+│   ├── models/               # 15개 모델
+│   ├── views/                # 20개 뷰 디렉토리
+│   │   ├── layouts/          # 레이아웃
+│   │   ├── shared/           # 공유 컴포넌트, 아이콘
+│   │   ├── components/ui/    # shadcn UI 컴포넌트
+│   │   ├── posts/            # 게시글
+│   │   ├── chat_rooms/       # 채팅
+│   │   ├── comments/         # 댓글
+│   │   ├── profiles/         # 프로필
+│   │   ├── search/           # 검색
+│   │   ├── onboarding/       # AI 온보딩
+│   │   └── ...
+│   ├── javascript/
+│   │   └── controllers/      # 33개 Stimulus 컨트롤러
+│   ├── services/
+│   │   ├── ai/               # AI 에이전트 (BaseAgent, IdeaAnalyzer)
+│   │   └── expert_matcher.rb # 전문가 매칭
+│   └── helpers/              # 뷰 헬퍼
+│
+├── config/
+│   ├── routes.rb             # 라우팅 정의
+│   ├── credentials.yml.enc   # 암호화된 API 키
+│   └── initializers/
+│       ├── langchain.rb      # AI 설정
+│       └── omniauth.rb       # OAuth 설정
+│
+├── lib/
+│   └── langchain_config.rb   # LangChain 설정
+│
+├── db/
+│   ├── migrate/              # 30개 마이그레이션
+│   └── schema.rb             # 현재 스키마
+│
+└── .claude/                  # Claude 프로젝트 문서
+    ├── CLAUDE.md             # 메인 컨텍스트
+    ├── PROJECT_OVERVIEW.md   # 이 문서
+    ├── ARCHITECTURE_DETAIL.md # 상세 아키텍처
+    ├── PRD.md                # 제품 요구사항
+    ├── DATABASE.md           # ERD, 스키마
+    ├── API.md                # API 설계
+    └── TASKS.md              # 작업 목록
+```
+
+---
+
+## 핵심 파일 Quick Reference
+
+### Controllers (19개)
+
+| 파일 | 역할 |
+|------|------|
+| `application_controller.rb` | 인증, 헬퍼, 에러 핸들링 |
+| `posts_controller.rb` | 게시글 CRUD, 이미지 |
+| `comments_controller.rb` | 댓글 CRUD |
+| `likes_controller.rb` | 좋아요 토글 |
+| `bookmarks_controller.rb` | 스크랩 토글 |
+| `chat_rooms_controller.rb` | 채팅방 관리 |
+| `messages_controller.rb` | 메시지 전송 |
+| `profiles_controller.rb` | 프로필 조회 |
+| `search_controller.rb` | 검색 기능 |
+| `onboarding_controller.rb` | AI 온보딩 |
+| `sessions_controller.rb` | 로그인/로그아웃 |
+| `users_controller.rb` | 회원가입 |
+| `omniauth_callbacks_controller.rb` | OAuth 콜백 |
+| `notifications_controller.rb` | 알림 관리 |
+| `my_page_controller.rb` | 마이페이지 |
+| `job_posts_controller.rb` | 구인 공고 |
+
+### Models (15개)
+
+| 파일 | 역할 | 주요 관계 |
+|------|------|----------|
+| `user.rb` | 사용자 | has_many: posts, comments, likes, chat_rooms |
+| `post.rb` | 게시글 | belongs_to: user, has_many: comments, likes |
+| `comment.rb` | 댓글 | belongs_to: post, user |
+| `like.rb` | 좋아요 | polymorphic (likeable) |
+| `bookmark.rb` | 스크랩 | polymorphic (bookmarkable) |
+| `chat_room.rb` | 채팅방 | has_many: messages, participants |
+| `message.rb` | 메시지 | belongs_to: chat_room, sender |
+| `notification.rb` | 알림 | polymorphic (notifiable) |
+| `oauth_identity.rb` | OAuth | belongs_to: user |
+
+### Stimulus Controllers (33개) - 핵심
+
+| 파일 | 기능 |
+|------|------|
+| `like_button_controller.js` | 좋아요 토글 |
+| `bookmark_button_controller.js` | 스크랩 토글 |
+| `live_search_controller.js` | 실시간 검색 |
+| `comment_form_controller.js` | 댓글 입력 |
+| `new_message_controller.js` | 메시지 전송 |
+| `chat_room_controller.js` | 채팅방 UI |
+| `image_upload_controller.js` | 이미지 업로드 |
+| `post_form_controller.js` | 글쓰기 폼 |
+| `write_bottomsheet_controller.js` | 글쓰기 바텀시트 |
+| `share_controller.js` | 공유 기능 |
+
+### AI/Services
+
+| 파일 | 역할 |
+|------|------|
+| `lib/langchain_config.rb` | LLM 설정 (OpenAI/Gemini) |
+| `app/services/ai/base_agent.rb` | AI 에이전트 베이스 클래스 |
+| `app/services/ai/idea_analyzer.rb` | 아이디어 분석 |
+| `app/services/expert_matcher.rb` | 전문가 매칭 |
+
+---
+
+## 기술 스택 요약
+
+### Backend
+- **Rails 8.1.1** + Ruby 3.4.7
+- **SQLite3** (개발) / **PostgreSQL** (프로덕션)
+- **Solid Queue** - 백그라운드 작업
+- **Solid Cache** - 캐싱
+- **Solid Cable** - WebSocket (실시간 채팅)
+
+### Frontend
+- **Hotwire** (Turbo + Stimulus)
+- **Tailwind CSS v4** + **shadcn-ui**
+- **Import Maps** (ES 모듈)
+- **Active Storage** (이미지)
+
+### AI
+- **LangChain** - AI 에이전트 프레임워크
+- **Google Gemini API** - LLM
+
+### Auth
+- **Session 기반 인증** (has_secure_password)
+- **OAuth** - Google, GitHub (OmniAuth)
+
+### DevOps
+- **Docker** + **Kamal** (배포)
+- **Rack Attack** (보안)
+
+---
+
+## 라우팅 구조 요약
+
+### 인증
+```
+POST   /login              → sessions#create
+DELETE /logout             → sessions#destroy
+GET    /signup             → users#new
+POST   /signup             → users#create
+GET    /auth/:provider/callback → OAuth 콜백
+```
+
+### 커뮤니티
+```
+GET    /community          → posts#index (메인)
+GET    /posts/:id          → posts#show
+POST   /posts              → posts#create
+POST   /posts/:id/like     → likes#toggle
+POST   /posts/:id/bookmark → bookmarks#toggle
+```
+
+### 채팅
+```
+GET    /chat_rooms         → chat_rooms#index
+GET    /chat_rooms/:id     → chat_rooms#show
+POST   /chat_rooms/:id/messages → messages#create
+```
+
+### AI 온보딩
+```
+GET    /                   → onboarding#landing (루트)
+GET    /ai/input           → onboarding#ai_input
+GET    /ai/result          → onboarding#ai_result
+```
+
+### 기타
+```
+GET    /search             → search#index
+GET    /profiles/:id       → profiles#show
+GET    /my_page            → my_page#show
+GET    /notifications      → notifications#index
+```
+
+---
+
+## 최근 해결된 이슈
+
+| 날짜 | 이슈 | 해결 방법 |
+|------|------|----------|
+| 2025-12-26 | 검색 페이지 UTF-8 인코딩 오류 | `og_meta_tags`에서 `force_encoding("UTF-8")` 적용 |
+| 2025-12-26 | 검색 결과 클릭 시 두 번 클릭 | `onclick` → `onmousedown` + `preventDefault()` |
+| 2025-12-26 | render_avatar 메서드명 충돌 | `render_user_avatar()`로 이름 변경 |
+| 2025-12-26 | .env에서 credentials 전환 | Rails credentials로 API 키 마이그레이션 |
+
+---
+
+## 현재 진행 중인 작업
+
+1. **AI 아이디어 분석 기능 안정화** (70% → 90%)
+2. **외주 시스템 Post 모델 통합** (50% → 80%)
+3. **N+1 쿼리 최적화**
+4. **프로덕션 배포 준비**
+
+---
+
+## 관련 문서
+
+- **상세 아키텍처**: `.claude/ARCHITECTURE_DETAIL.md`
+- **데이터베이스 설계**: `.claude/DATABASE.md`
+- **API 설계**: `.claude/API.md`
+- **작업 목록**: `.claude/TASKS.md`
+- **제품 요구사항**: `.claude/PRD.md`
