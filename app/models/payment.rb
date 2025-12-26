@@ -183,9 +183,9 @@ class Payment < ApplicationRecord
     end
   end
 
-  # 금액 포맷팅
+  # 금액 포맷팅 (원화는 소수점 없음)
   def formatted_amount
-    ActiveSupport::NumberHelper.number_to_currency(amount, unit: "원", format: "%n%u")
+    ActiveSupport::NumberHelper.number_to_currency(amount, unit: "원", format: "%n%u", precision: 0)
   end
 
   private

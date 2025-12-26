@@ -1,9 +1,11 @@
 <%# 영수증 페이지 %>
 <div class="min-h-screen bg-gray-50 py-8">
   <div class="max-w-lg mx-auto px-4">
-    <%# 뒤로가기 %>
+    <%# 뒤로가기 - turbo-action="replace"로 히스토리 루프 방지 %>
     <div class="mb-6">
-      <%= link_to order_path(@order), class: "inline-flex items-center text-gray-600 hover:text-gray-900" do %>
+      <%= link_to order_path(@order),
+                  class: "inline-flex items-center text-gray-600 hover:text-gray-900",
+                  data: { turbo_action: "replace" } do %>
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
