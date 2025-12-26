@@ -59,15 +59,16 @@
     </div>
 
     <%# 결제 위젯 컨테이너 %>
+    <%# XSS 방지: 사용자 입력 값은 json_escape 처리 %>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
          data-controller="payment-widget"
          data-payment-widget-client-key-value="<%= @toss_client_key %>"
          data-payment-widget-customer-key-value="<%= @customer_key %>"
          data-payment-widget-order-id-value="<%= @payment.toss_order_id %>"
-         data-payment-widget-order-name-value="<%= @order.title %>"
+         data-payment-widget-order-name-value="<%= j(@order.title.to_s.truncate(100)) %>"
          data-payment-widget-amount-value="<%= @order.amount %>"
-         data-payment-widget-customer-name-value="<%= current_user.name %>"
-         data-payment-widget-customer-email-value="<%= current_user.email %>"
+         data-payment-widget-customer-name-value="<%= j(current_user.name.to_s.truncate(50)) %>"
+         data-payment-widget-customer-email-value="<%= j(current_user.email.to_s) %>"
          data-payment-widget-success-url-value="<%= success_payments_url %>"
          data-payment-widget-fail-url-value="<%= fail_payments_url %>">
 

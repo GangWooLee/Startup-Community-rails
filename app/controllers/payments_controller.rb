@@ -51,12 +51,23 @@ class PaymentsController < ApplicationController
 
   # GET /payments/success
   # 토스페이먼츠에서 결제 완료 후 리다이렉트
+  # 중복 승인 방지 (idempotency): 이미 완료된 결제는 API 호출 생략
   def success
     payment_key = params[:paymentKey]
     order_id = params[:orderId]
     amount = params[:amount].to_i
 
-    # 결제 승인 처리
+    # 1. 기존 결제 확인 - 이미 완료된 경우 바로 리다이렉트
+    existing_payment = Payment.find_by_toss_order_id(order_id)
+
+    if existing_payment&.done?
+      # 이미 승인 완료된 결제 - API 호출 생략
+      Rails.logger.info "[PaymentsController#success] Payment already approved: #{order_id}"
+      redirect_to order_success_path(existing_payment.order), notice: "결제가 완료되었습니다!"
+      return
+    end
+
+    # 2. 결제 승인 처리 (첫 요청)
     service = TossPayments::ApproveService.new
     result = service.call(
       payment_key: payment_key,
@@ -101,20 +112,15 @@ class PaymentsController < ApplicationController
 
   # POST /payments/webhook
   # 토스페이먼츠 웹훅 (결제 상태 변경 알림)
-  # 보안: HMAC-SHA256 서명 검증
+  # 보안: HMAC-SHA256 서명 검증 (Production 필수)
   def webhook
     raw_body = request.body.read
     signature = request.headers["TossPayments-Signature"]
 
-    # 서명 검증 (webhook_secret이 설정된 경우에만)
-    if webhook_secret.present?
-      unless verify_webhook_signature(raw_body, signature)
-        Rails.logger.warn "[PaymentsController#webhook] Invalid signature"
-        head :unauthorized
-        return
-      end
-    else
-      Rails.logger.warn "[PaymentsController#webhook] webhook_secret not configured. Skipping signature verification."
+    # 서명 검증 - Production에서는 필수
+    unless verify_webhook_with_signature(raw_body, signature)
+      head :unauthorized
+      return
     end
 
     payload = JSON.parse(raw_body, symbolize_names: true)
@@ -212,6 +218,33 @@ class PaymentsController < ApplicationController
       Rails.logger.warn "[PaymentsController] Using test client key (development only)"
       "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
     end
+  end
+
+  # 환경별 웹훅 서명 검증
+  # Production: 서명 검증 필수 (webhook_secret 미설정 시 거부)
+  # Development/Test: webhook_secret 미설정 시 경고 후 허용
+  def verify_webhook_with_signature(payload, signature)
+    secret = webhook_secret
+
+    if secret.blank?
+      if Rails.env.production?
+        # Production에서는 webhook_secret 필수
+        Rails.logger.error "[PaymentsController#webhook] SECURITY: webhook_secret not configured in production. Rejecting webhook."
+        return false
+      else
+        # Development/Test에서는 경고만 출력하고 허용
+        Rails.logger.warn "[PaymentsController#webhook] webhook_secret not configured. Skipping signature verification (development only)."
+        return true
+      end
+    end
+
+    # 서명 검증 수행
+    unless verify_webhook_signature(payload, signature)
+      Rails.logger.warn "[PaymentsController#webhook] Invalid signature"
+      return false
+    end
+
+    true
   end
 
   # 웹훅 서명 검증 (HMAC-SHA256)

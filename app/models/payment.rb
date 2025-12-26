@@ -38,7 +38,7 @@ class Payment < ApplicationRecord
     find_by(toss_order_id: toss_order_id)
   end
 
-  # 결제 승인 처리
+  # 결제 승인 처리 (트랜잭션으로 데이터 일관성 보장)
   def approve!(response_data)
     payment_method = response_data[:method]
 
@@ -50,55 +50,59 @@ class Payment < ApplicationRecord
       raw_response: response_data
     }
 
-    case payment_method
-    when "CARD"
-      # 카드 결제: 즉시 완료
-      update_attrs.merge!(
-        status: :done,
-        card_company: response_data.dig(:card, :company),
-        card_number: response_data.dig(:card, :number),
-        card_type: response_data.dig(:card, :cardType),
-        approved_at: Time.current
-      )
-      update!(update_attrs)
-      order.mark_as_paid!(self)
+    transaction do
+      case payment_method
+      when "CARD"
+        # 카드 결제: 즉시 완료
+        update_attrs.merge!(
+          status: :done,
+          card_company: response_data.dig(:card, :company),
+          card_number: response_data.dig(:card, :number),
+          card_type: response_data.dig(:card, :cardType),
+          approved_at: Time.current
+        )
+        update!(update_attrs)
+        order.mark_as_paid!(self)
 
-    when "VIRTUAL_ACCOUNT"
-      # 가상계좌: 입금 대기 상태
-      va_data = response_data[:virtualAccount] || {}
-      update_attrs.merge!(
-        status: :ready,
-        bank_code: va_data[:bankCode],
-        bank_name: va_data[:bank],
-        account_number: va_data[:accountNumber],
-        account_holder: va_data[:customerName],
-        due_date: va_data[:dueDate].present? ? Time.zone.parse(va_data[:dueDate]) : nil
-      )
-      update!(update_attrs)
-      # 가상계좌는 웹훅으로 입금 확인 후 주문 완료 처리
+      when "VIRTUAL_ACCOUNT"
+        # 가상계좌: 입금 대기 상태
+        va_data = response_data[:virtualAccount] || {}
+        update_attrs.merge!(
+          status: :ready,
+          bank_code: va_data[:bankCode],
+          bank_name: va_data[:bank],
+          account_number: va_data[:accountNumber],
+          account_holder: va_data[:customerName],
+          due_date: va_data[:dueDate].present? ? Time.zone.parse(va_data[:dueDate]) : nil
+        )
+        update!(update_attrs)
+        # 가상계좌는 웹훅으로 입금 확인 후 주문 완료 처리
 
-    else
-      # 계좌이체, 휴대폰 등: 즉시 완료
-      update_attrs.merge!(
-        status: :done,
-        approved_at: Time.current
-      )
-      update!(update_attrs)
-      order.mark_as_paid!(self)
+      else
+        # 계좌이체, 휴대폰 등: 즉시 완료
+        update_attrs.merge!(
+          status: :done,
+          approved_at: Time.current
+        )
+        update!(update_attrs)
+        order.mark_as_paid!(self)
+      end
     end
   end
 
-  # 가상계좌 입금 확인 처리 (웹훅에서 호출)
+  # 가상계좌 입금 확인 처리 (웹훅에서 호출, 트랜잭션 적용)
   def confirm_virtual_account_deposit!(response_data = nil)
     return false unless virtual_account? && ready?
 
-    update!(
-      status: :done,
-      approved_at: Time.current,
-      raw_response: response_data || raw_response
-    )
+    transaction do
+      update!(
+        status: :done,
+        approved_at: Time.current,
+        raw_response: response_data || raw_response
+      )
 
-    order.mark_as_paid!(self)
+      order.mark_as_paid!(self)
+    end
     true
   end
 

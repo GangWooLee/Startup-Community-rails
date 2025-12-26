@@ -46,31 +46,48 @@ class OrdersController < ApplicationController
   end
 
   # POST /orders/:id/cancel
-  # 주문 취소
+  # 주문 취소 (트랜잭션으로 데이터 일관성 보장)
   def cancel
-    if @order.can_cancel?
+    unless @order.can_cancel?
+      redirect_to order_path(@order), alert: "취소할 수 없는 주문입니다."
+      return
+    end
+
+    ActiveRecord::Base.transaction do
       # 결제 완료 상태면 토스페이먼츠 취소 API 호출
       if @order.paid? && @order.successful_payment.present?
         service = TossPayments::CancelService.new
         result = service.cancel_payment(@order.successful_payment, reason: cancel_reason)
 
         unless result.success?
-          redirect_to order_path(@order), alert: "결제 취소 실패: #{result.error&.message}"
-          return
+          # 결제 취소 실패 시 트랜잭션 롤백
+          Rails.logger.error "[OrdersController#cancel] Payment cancel failed: #{result.error&.message}"
+          raise ActiveRecord::Rollback
         end
+
+        # 결제 상태 업데이트
+        @order.successful_payment.mark_as_cancelled!(result.data)
       end
 
+      # 주문 상태 업데이트
       @order.mark_as_cancelled!
+    end
+
+    if @order.cancelled?
       redirect_to orders_path, notice: "주문이 취소되었습니다."
     else
-      redirect_to order_path(@order), alert: "취소할 수 없는 주문입니다."
+      redirect_to order_path(@order), alert: "결제 취소에 실패했습니다. 다시 시도해주세요."
     end
+  rescue StandardError => e
+    Rails.logger.error "[OrdersController#cancel] Unexpected error: #{e.message}"
+    redirect_to order_path(@order), alert: "취소 처리 중 오류가 발생했습니다."
   end
 
   private
 
+  # N+1 쿼리 방지: 필요한 연관 객체 eager loading
   def set_order
-    @order = Order.find(params[:id])
+    @order = Order.includes(:user, :seller, :post, :payments).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to orders_path, alert: "주문을 찾을 수 없습니다."
   end
