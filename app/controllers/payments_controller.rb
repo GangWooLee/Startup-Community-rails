@@ -1,0 +1,277 @@
+# 결제 컨트롤러
+# 토스페이먼츠 결제 위젯 페이지 및 결제 처리
+require "ostruct"
+
+class PaymentsController < ApplicationController
+  # 웹훅은 외부 서비스에서 호출하므로 인증/CSRF 제외
+  skip_before_action :verify_authenticity_token, only: [:webhook]
+
+  before_action :require_login, except: [:webhook]
+  before_action :set_post, only: [:new, :create]
+  before_action :validate_payment_eligibility, only: [:new, :create]
+
+  # GET /payments/new?post_id=:id
+  # 결제 위젯 페이지 렌더링
+  def new
+    # 기존 주문이 있으면 재사용, 없으면 새로 생성
+    result = find_or_create_order
+
+    if result.success?
+      @order = result.order
+      @payment = result.payment
+      @toss_client_key = toss_client_key
+      @customer_key = current_user.toss_customer_key
+    else
+      redirect_to post_path(@post), alert: result.errors.join(", ")
+    end
+  end
+
+  # POST /payments
+  # 주문 및 결제 레코드 생성 (AJAX 요청용)
+  def create
+    result = find_or_create_order
+
+    if result.success?
+      render json: {
+        success: true,
+        order_id: result.payment.toss_order_id,
+        order_name: result.order.title,
+        amount: result.order.amount,
+        customer_key: current_user.toss_customer_key,
+        customer_name: current_user.name,
+        customer_email: current_user.email
+      }
+    else
+      render json: {
+        success: false,
+        errors: result.errors
+      }, status: :unprocessable_entity
+    end
+  end
+
+  # GET /payments/success
+  # 토스페이먼츠에서 결제 완료 후 리다이렉트
+  def success
+    payment_key = params[:paymentKey]
+    order_id = params[:orderId]
+    amount = params[:amount].to_i
+
+    # 결제 승인 처리
+    service = TossPayments::ApproveService.new
+    result = service.call(
+      payment_key: payment_key,
+      order_id: order_id,
+      amount: amount
+    )
+
+    if result.success?
+      @payment = Payment.find_by_toss_order_id(order_id)
+      @order = @payment&.order
+
+      if @order
+        redirect_to order_success_path(@order), notice: "결제가 완료되었습니다!"
+      else
+        redirect_to root_path, alert: "주문 정보를 찾을 수 없습니다."
+      end
+    else
+      Rails.logger.error "[PaymentsController#success] Payment approval failed: #{result.error&.message}"
+      redirect_to payments_fail_path(
+        code: result.error&.code,
+        message: result.error&.message,
+        orderId: order_id
+      )
+    end
+  end
+
+  # GET /payments/fail
+  # 토스페이먼츠에서 결제 실패 시 리다이렉트
+  def fail
+    @error_code = params[:code]
+    @error_message = params[:message]
+    @order_id = params[:orderId]
+
+    # 결제 실패 기록
+    if @order_id.present?
+      payment = Payment.find_by_toss_order_id(@order_id)
+      payment&.mark_as_failed!(code: @error_code, message: @error_message)
+    end
+
+    Rails.logger.warn "[PaymentsController#fail] Payment failed: #{@error_code} - #{@error_message}"
+  end
+
+  # POST /payments/webhook
+  # 토스페이먼츠 웹훅 (결제 상태 변경 알림)
+  # 보안: HMAC-SHA256 서명 검증
+  def webhook
+    raw_body = request.body.read
+    signature = request.headers["TossPayments-Signature"]
+
+    # 서명 검증 (webhook_secret이 설정된 경우에만)
+    if webhook_secret.present?
+      unless verify_webhook_signature(raw_body, signature)
+        Rails.logger.warn "[PaymentsController#webhook] Invalid signature"
+        head :unauthorized
+        return
+      end
+    else
+      Rails.logger.warn "[PaymentsController#webhook] webhook_secret not configured. Skipping signature verification."
+    end
+
+    payload = JSON.parse(raw_body, symbolize_names: true)
+    event_type = payload[:eventType]
+
+    Rails.logger.info "[PaymentsController#webhook] Received: #{event_type}"
+
+    case event_type
+    when "PAYMENT_STATUS_CHANGED"
+      handle_payment_status_change(payload)
+    when "DEPOSIT_CALLBACK"
+      handle_virtual_account_deposit(payload)
+    end
+
+    head :ok
+  rescue JSON::ParserError => e
+    Rails.logger.error "[PaymentsController#webhook] JSON parse error: #{e.message}"
+    head :bad_request
+  end
+
+  private
+
+  def set_post
+    @post = Post.find_by(id: params[:post_id])
+
+    unless @post
+      redirect_to root_path, alert: "게시글을 찾을 수 없습니다."
+    end
+  end
+
+  # 결제 가능 여부 검증
+  def validate_payment_eligibility
+    return if @post.nil?
+
+    unless @post.outsourcing?
+      redirect_to post_path(@post), alert: "외주 글만 결제할 수 있습니다."
+      return
+    end
+
+    unless @post.payable?
+      redirect_to post_path(@post), alert: "가격이 설정되지 않은 글입니다."
+      return
+    end
+
+    if @post.owned_by?(current_user)
+      redirect_to post_path(@post), alert: "본인의 글은 결제할 수 없습니다."
+      return
+    end
+
+    if @post.paid_by?(current_user)
+      redirect_to post_path(@post), alert: "이미 결제한 글입니다."
+      return
+    end
+  end
+
+  # 기존 주문 찾기 또는 새로 생성
+  def find_or_create_order
+    # 대기 중인 주문이 있으면 재사용
+    existing_order = current_user.orders.pending.find_by(post: @post)
+
+    if existing_order
+      payment = existing_order.payments.pending.first || create_new_payment(existing_order)
+      return OpenStruct.new(
+        success?: true,
+        order: existing_order,
+        payment: payment,
+        errors: []
+      )
+    end
+
+    # 새 주문 생성
+    Orders::CreateService.new(user: current_user, post: @post).call
+  end
+
+  # 새 결제 레코드 생성 (기존 주문에 대해)
+  def create_new_payment(order)
+    Payment.create!(
+      order: order,
+      user: current_user,
+      amount: order.amount
+    )
+  end
+
+  # 토스페이먼츠 클라이언트 키
+  # Production: credentials 필수
+  # Development/Test: 테스트 키 폴백 허용
+  def toss_client_key
+    key = Rails.application.credentials.dig(:toss, :client_key)
+
+    if key.present?
+      key
+    elsif Rails.env.production?
+      raise "TossPayments client_key가 설정되지 않았습니다. Rails credentials에 toss.client_key를 추가하세요."
+    else
+      Rails.logger.warn "[PaymentsController] Using test client key (development only)"
+      "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq"
+    end
+  end
+
+  # 웹훅 서명 검증 (HMAC-SHA256)
+  # 토스페이먼츠 공식 문서: https://docs.tosspayments.com/guides/webhook#서명-검증
+  def verify_webhook_signature(payload, signature)
+    return false if signature.blank?
+
+    expected_signature = OpenSSL::HMAC.hexdigest(
+      OpenSSL::Digest.new("sha256"),
+      webhook_secret,
+      payload
+    )
+
+    # 타이밍 공격 방지를 위한 secure_compare 사용
+    ActiveSupport::SecurityUtils.secure_compare(expected_signature, signature)
+  end
+
+  # 웹훅 시크릿 키
+  def webhook_secret
+    Rails.application.credentials.dig(:toss, :webhook_secret)
+  end
+
+  # 웹훅: 결제 상태 변경 처리
+  def handle_payment_status_change(payload)
+    data = payload[:data]
+    payment_key = data[:paymentKey]
+    status = data[:status]
+
+    payment = Payment.find_by(payment_key: payment_key)
+    return unless payment
+
+    case status
+    when "DONE"
+      payment.update!(status: :done) unless payment.done?
+    when "CANCELED"
+      payment.mark_as_cancelled!
+    end
+  end
+
+  # 웹훅: 가상계좌 입금 확인 처리
+  def handle_virtual_account_deposit(payload)
+    data = payload[:data]
+    order_id = data[:orderId]
+    status = data[:status]
+
+    payment = Payment.find_by_toss_order_id(order_id)
+    return unless payment
+
+    Rails.logger.info "[PaymentsController#webhook] Virtual account deposit: #{order_id}, status: #{status}"
+
+    case status
+    when "DONE"
+      # 입금 완료
+      if payment.confirm_virtual_account_deposit!(data)
+        Rails.logger.info "[PaymentsController#webhook] Virtual account deposit confirmed: #{order_id}"
+      end
+    when "CANCELED"
+      # 가상계좌 취소 (입금 기한 초과 등)
+      payment.mark_as_cancelled!
+      Rails.logger.info "[PaymentsController#webhook] Virtual account cancelled: #{order_id}"
+    end
+  end
+end

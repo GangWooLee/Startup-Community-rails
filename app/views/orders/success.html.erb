@@ -1,0 +1,163 @@
+<%# 결제 완료 페이지 %>
+<%= stylesheet_tag "payment_success" if defined?(stylesheet_tag) %>
+<style>
+  @keyframes checkmark-draw {
+    0% { stroke-dashoffset: 24; }
+    100% { stroke-dashoffset: 0; }
+  }
+  @keyframes circle-scale {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes fade-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+  }
+  .success-circle { animation: circle-scale 0.5s ease-out forwards; }
+  .success-check { stroke-dasharray: 24; stroke-dashoffset: 24; animation: checkmark-draw 0.5s ease-out 0.3s forwards; }
+  .fade-up-1 { opacity: 0; animation: fade-up 0.5s ease-out 0.5s forwards; }
+  .fade-up-2 { opacity: 0; animation: fade-up 0.5s ease-out 0.6s forwards; }
+  .fade-up-3 { opacity: 0; animation: fade-up 0.5s ease-out 0.7s forwards; }
+  .fade-up-4 { opacity: 0; animation: fade-up 0.5s ease-out 0.8s forwards; }
+  .confetti-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: confetti 1s ease-out forwards;
+  }
+</style>
+
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+  <div class="max-w-md w-full">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center relative overflow-hidden">
+      <%# Confetti 효과 %>
+      <div class="absolute inset-0 pointer-events-none" id="confetti-container">
+        <% 8.times do |i| %>
+          <div class="confetti-particle"
+               style="left: <%= 10 + (i * 12) %>%;
+                      top: 50%;
+                      background: <%= ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'][i] %>;
+                      animation-delay: <%= i * 0.1 %>s;"></div>
+        <% end %>
+      </div>
+
+      <%# 성공 아이콘 (애니메이션) %>
+      <div class="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 success-circle">
+        <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path class="success-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+
+      <h1 class="text-2xl font-bold text-gray-900 mb-2 fade-up-1">결제 완료!</h1>
+      <p class="text-gray-600 mb-6 fade-up-1">결제가 성공적으로 완료되었습니다.</p>
+
+      <%# 주문 정보 %>
+      <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left fade-up-2">
+        <dl class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-gray-500">주문 번호</dt>
+            <dd class="font-mono text-gray-900"><%= @order.order_number %></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">상품명</dt>
+            <dd class="text-gray-900 truncate max-w-[180px]"><%= @order.title %></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">결제 금액</dt>
+            <dd class="font-semibold text-gray-900"><%= @order.formatted_amount %></dd>
+          </div>
+          <% if @payment %>
+            <div class="flex justify-between">
+              <dt class="text-gray-500">결제 수단</dt>
+              <dd class="text-gray-900"><%= @payment.method_label %></dd>
+            </div>
+            <% if @payment.card_company.present? %>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">카드사</dt>
+                <dd class="text-gray-900"><%= @payment.card_company %></dd>
+              </div>
+            <% end %>
+          <% end %>
+          <div class="flex justify-between">
+            <dt class="text-gray-500">결제 일시</dt>
+            <dd class="text-gray-900"><%= @order.paid_at&.strftime("%Y.%m.%d %H:%M") %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <%# 판매자 정보 + 채팅 버튼 %>
+      <div class="bg-blue-50 rounded-xl p-4 mb-6 fade-up-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center space-x-3">
+            <%= render_user_avatar(@order.seller, size: :sm) %>
+            <div class="text-left">
+              <p class="text-sm font-medium text-gray-900"><%= @order.seller.name %></p>
+              <p class="text-xs text-gray-500">판매자</p>
+            </div>
+          </div>
+          <%= link_to "프로필 보기",
+                      profile_path(@order.seller),
+                      class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+        </div>
+        <%# 판매자와 채팅 시작 버튼 %>
+        <%= button_to start_chat_path(@order.seller),
+                      method: :post,
+                      class: "w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-semibold rounded-lg
+                             hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2",
+                      data: { turbo: false } do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          <span>판매자에게 메시지 보내기</span>
+        <% end %>
+      </div>
+
+      <%# 버튼 %>
+      <div class="space-y-3 fade-up-4">
+        <% if @payment&.receipt_available? %>
+          <%= link_to @payment.receipt_url,
+                      target: "_blank",
+                      rel: "noopener",
+                      class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>영수증 보기</span>
+          <% end %>
+        <% end %>
+
+        <%= link_to order_path(@order),
+                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          <span>주문 상세 보기</span>
+        <% end %>
+
+        <%= link_to job_posts_path,
+                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+          </svg>
+          <span>외주 목록으로</span>
+        <% end %>
+      </div>
+
+      <%# 안내 %>
+      <p class="mt-6 text-xs text-gray-500 fade-up-4">
+        결제 관련 문의는 고객센터로 연락해주세요.<br>
+        취소는 결제 후 7일 이내에만 가능합니다.
+      </p>
+    </div>
+  </div>
+</div>

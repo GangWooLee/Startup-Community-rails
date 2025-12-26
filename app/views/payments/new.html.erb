@@ -1,0 +1,176 @@
+<%# 결제 페이지 - 토스페이먼츠 위젯 %>
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-2xl mx-auto px-4">
+    <%# 헤더 %>
+    <div class="mb-6">
+      <%= link_to post_path(@post), class: "inline-flex items-center text-gray-600 hover:text-gray-900" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        돌아가기
+      <% end %>
+    </div>
+
+    <%# 주문 정보 카드 %>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h1 class="text-xl font-bold text-gray-900 mb-4">결제하기</h1>
+
+      <div class="border-t border-gray-100 pt-4">
+        <div class="flex items-start space-x-4">
+          <%# 작성자 아바타 %>
+          <div class="flex-shrink-0">
+            <%= render_user_avatar(@post.user, size: :md) %>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <h2 class="text-lg font-semibold text-gray-900 truncate">
+              <%= @post.title %>
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+              <%= @post.user.name %> · <%= @post.category_label %>
+            </p>
+
+            <%# 서비스 정보 %>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <% if @post.service_type.present? %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <%= @post.service_type_label %>
+                </span>
+              <% end %>
+              <% if @post.work_type.present? %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  <%= @post.work_type_label %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <%# 결제 금액 %>
+        <div class="mt-6 pt-4 border-t border-gray-100">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">결제 금액</span>
+            <span class="text-2xl font-bold text-gray-900">
+              <%= @order.formatted_amount %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# 결제 위젯 컨테이너 %>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+         data-controller="payment-widget"
+         data-payment-widget-client-key-value="<%= @toss_client_key %>"
+         data-payment-widget-customer-key-value="<%= @customer_key %>"
+         data-payment-widget-order-id-value="<%= @payment.toss_order_id %>"
+         data-payment-widget-order-name-value="<%= @order.title %>"
+         data-payment-widget-amount-value="<%= @order.amount %>"
+         data-payment-widget-customer-name-value="<%= current_user.name %>"
+         data-payment-widget-customer-email-value="<%= current_user.email %>"
+         data-payment-widget-success-url-value="<%= success_payments_url %>"
+         data-payment-widget-fail-url-value="<%= fail_payments_url %>">
+
+      <%# 로딩 상태 - 스켈레톤 UI %>
+      <div data-payment-widget-target="loading" class="p-6">
+        <%# 스켈레톤 헤더 %>
+        <div class="animate-pulse mb-6">
+          <div class="h-5 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div class="flex items-center space-x-4">
+            <div class="rounded-full bg-gray-200 h-10 w-10"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+
+        <%# 스켈레톤 결제 수단 카드들 %>
+        <div class="animate-pulse space-y-3 mb-6">
+          <div class="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
+          <% 4.times do %>
+            <div class="flex items-center space-x-3 p-4 border border-gray-200 rounded-xl">
+              <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+              </div>
+              <div class="rounded-full bg-gray-200 h-5 w-5"></div>
+            </div>
+          <% end %>
+        </div>
+
+        <%# 스켈레톤 약관 동의 %>
+        <div class="animate-pulse space-y-2 mb-6">
+          <div class="flex items-center space-x-2">
+            <div class="rounded bg-gray-200 h-5 w-5"></div>
+            <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="rounded bg-gray-200 h-5 w-5"></div>
+            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+
+        <%# 로딩 인디케이터 %>
+        <div class="flex items-center justify-center space-x-3 py-4">
+          <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+          <p class="text-sm text-gray-600">결제 모듈을 불러오는 중...</p>
+        </div>
+      </div>
+
+      <%# 에러 메시지 (토스트 스타일) %>
+      <div data-payment-widget-target="error"
+           class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-50
+                  max-w-md w-full mx-4 p-4 bg-red-600 text-white rounded-xl shadow-lg
+                  flex items-center space-x-3"
+           data-action="click->payment-widget#dismissError">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm flex-1" data-payment-widget-target="errorMessage"></p>
+        <button type="button" class="flex-shrink-0 hover:opacity-80">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <%# 결제 수단 선택 %>
+      <div id="payment-methods" data-payment-widget-target="paymentMethods" class="p-6"></div>
+
+      <%# 약관 동의 %>
+      <div id="agreement" data-payment-widget-target="agreement" class="px-6 pb-4"></div>
+
+      <%# 결제 버튼 %>
+      <div class="p-6 pt-0">
+        <button type="button"
+                data-payment-widget-target="payButton"
+                data-action="click->payment-widget#requestPayment"
+                disabled
+                class="w-full py-4 px-6 bg-blue-600 text-white font-semibold rounded-xl
+                       hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          <%= @order.formatted_amount %> 결제하기
+        </button>
+
+        <p class="mt-4 text-xs text-gray-500 text-center">
+          결제 시
+          <a href="#" class="text-blue-600 hover:underline">이용약관</a> 및
+          <a href="#" class="text-blue-600 hover:underline">개인정보처리방침</a>에 동의합니다.
+        </p>
+      </div>
+    </div>
+
+    <%# 안내 문구 %>
+    <div class="mt-6 p-4 bg-gray-100 rounded-xl">
+      <h3 class="text-sm font-medium text-gray-700 mb-2">안내사항</h3>
+      <ul class="text-xs text-gray-500 space-y-1">
+        <li>• 결제 완료 후 취소는 7일 이내에만 가능합니다.</li>
+        <li>• 결제 관련 문의는 고객센터로 연락해주세요.</li>
+        <li>• 테스트 환경에서는 실제 결제가 이루어지지 않습니다.</li>
+      </ul>
+    </div>
+  </div>
+</div>

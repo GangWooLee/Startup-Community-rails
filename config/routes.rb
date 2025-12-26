@@ -54,6 +54,24 @@ Rails.application.routes.draw do
   # Job Posts (Freelance/Outsourcing) - 외주 마켓플레이스 인덱스
   resources :job_posts, only: [:index]
 
+  # Payments (결제)
+  resources :payments, only: [:new, :create] do
+    collection do
+      get :success
+      get :fail
+      post :webhook
+    end
+  end
+
+  # Orders (주문)
+  resources :orders, only: [:index, :show] do
+    member do
+      get :success
+      get :receipt
+      post :cancel
+    end
+  end
+
   # My Page
   get "my_page", to: "my_page#show", as: :my_page
   get "my_page/edit", to: "my_page#edit", as: :edit_my_page

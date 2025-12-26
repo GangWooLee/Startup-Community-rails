@@ -7,6 +7,7 @@ class Post < ApplicationRecord
   belongs_to :user
   has_many :comments, dependent: :destroy
   has_many :notifications, as: :notifiable, dependent: :destroy
+  has_many :orders, dependent: :destroy
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images
@@ -186,5 +187,43 @@ class Post < ApplicationRecord
     else
       content.truncate(max_length)
     end
+  end
+
+  # ===== 결제 관련 메서드 =====
+
+  # 결제 가능한 글인지 확인 (외주 글 + 가격이 설정됨)
+  def payable?
+    outsourcing? && price.present? && price.positive?
+  end
+
+  # 특정 사용자가 이 글에 대해 주문을 했는지 확인 (취소된 주문 제외)
+  def ordered_by?(user)
+    return false unless user
+
+    orders.where(user: user).where.not(status: :cancelled).exists?
+  end
+
+  # 특정 사용자가 이 글에 대해 결제 완료했는지 확인
+  def paid_by?(user)
+    return false unless user
+
+    orders.paid.where(user: user).exists?
+  end
+
+  # 작성자 본인 글인지 확인
+  def owned_by?(user)
+    return false unless user
+
+    user_id == user.id
+  end
+
+  # 결제 가능 상태인지 (본인 글 아님 + 결제 가능 + 아직 결제 안함)
+  def can_be_ordered_by?(user)
+    return false unless user
+    return false if owned_by?(user)
+    return false unless payable?
+    return false if paid_by?(user)
+
+    true
   end
 end

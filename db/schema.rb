@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_24_014319) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_26_065436) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -163,6 +163,66 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_24_014319) do
     t.index ["user_id"], name: "index_oauth_identities_on_user_id"
   end
 
+  create_table "orders", force: :cascade do |t|
+    t.integer "amount", null: false
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "order_number", null: false
+    t.integer "order_type", default: 0, null: false
+    t.datetime "paid_at"
+    t.integer "post_id", null: false
+    t.datetime "refunded_at"
+    t.integer "seller_id", null: false
+    t.integer "status", default: 0, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["order_number"], name: "index_orders_on_order_number", unique: true
+    t.index ["order_type"], name: "index_orders_on_order_type"
+    t.index ["post_id", "status"], name: "index_orders_on_post_id_and_status"
+    t.index ["post_id"], name: "index_orders_on_post_id"
+    t.index ["seller_id", "created_at"], name: "index_orders_on_seller_id_and_created_at"
+    t.index ["seller_id"], name: "index_orders_on_seller_id"
+    t.index ["status"], name: "index_orders_on_status"
+    t.index ["user_id", "created_at"], name: "index_orders_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.string "account_holder"
+    t.string "account_number"
+    t.integer "amount", null: false
+    t.datetime "approved_at"
+    t.string "bank_code"
+    t.string "bank_name"
+    t.datetime "cancelled_at"
+    t.string "card_company"
+    t.string "card_number"
+    t.string "card_type"
+    t.datetime "created_at", null: false
+    t.datetime "due_date"
+    t.string "failure_code"
+    t.string "failure_message"
+    t.string "method"
+    t.string "method_detail"
+    t.integer "order_id", null: false
+    t.string "payment_key"
+    t.json "raw_response"
+    t.string "receipt_url"
+    t.integer "status", default: 0, null: false
+    t.string "toss_order_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["payment_key"], name: "index_payments_on_payment_key", unique: true
+    t.index ["status", "due_date"], name: "index_payments_on_virtual_account_pending"
+    t.index ["status"], name: "index_payments_on_status"
+    t.index ["toss_order_id"], name: "index_payments_on_toss_order_id", unique: true
+    t.index ["user_id", "created_at"], name: "index_payments_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_payments_on_user_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.boolean "available_now", default: true
     t.integer "category", default: 0, null: false
@@ -253,6 +313,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_24_014319) do
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "oauth_identities", "users"
+  add_foreign_key "orders", "posts"
+  add_foreign_key "orders", "users"
+  add_foreign_key "orders", "users", column: "seller_id"
+  add_foreign_key "payments", "orders"
+  add_foreign_key "payments", "users"
   add_foreign_key "posts", "users"
   add_foreign_key "talent_listings", "users"
 end

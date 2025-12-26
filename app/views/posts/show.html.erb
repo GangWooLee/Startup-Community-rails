@@ -290,6 +290,52 @@
         </div>
       <% end %>
 
+      <!-- Payment Button (외주 글 결제) -->
+      <% if @post.outsourcing? && @post.payable? %>
+        <div class="mb-6">
+          <% if logged_in? %>
+            <% if @post.owned_by?(current_user) %>
+              <%# 본인 글 - 결제 불가 %>
+            <% elsif @post.paid_by?(current_user) %>
+              <%# 이미 결제 완료 %>
+              <div class="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-green-100 text-green-800 h-11 px-8">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                결제 완료
+              </div>
+            <% elsif current_user.has_pending_order_for?(@post) %>
+              <%# 대기 중인 주문이 있음 %>
+              <%= link_to new_payment_path(post_id: @post),
+                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-amber-500 text-white shadow hover:bg-amber-600 h-11 px-8" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                결제 진행하기
+              <% end %>
+            <% else %>
+              <%# 새 결제 %>
+              <%= link_to new_payment_path(post_id: @post),
+                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow hover:bg-blue-700 h-11 px-8" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <%= @post.price_display %> 결제하기
+              <% end %>
+            <% end %>
+          <% else %>
+            <%# 비로그인 상태 %>
+            <%= link_to login_path(return_to: post_path(@post)),
+                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow hover:bg-blue-700 h-11 px-8" do %>
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              로그인하고 결제하기
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+
       <!-- Interaction Buttons -->
       <div class="flex items-center gap-4 pt-4 border-t border-border">
         <%= render partial: "shared/like_button", locals: { post: @post, liked: logged_in? ? @post.liked_by?(current_user) : false } %>

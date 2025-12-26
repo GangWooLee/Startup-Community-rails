@@ -1,0 +1,88 @@
+<%# 주문 내역 페이지 %>
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-3xl mx-auto px-4">
+    <%# 헤더 %>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">주문 내역</h1>
+      <p class="text-gray-600 mt-1">결제 및 판매 내역을 확인하세요.</p>
+    </div>
+
+    <%# 탭 %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+      <div class="flex border-b border-gray-200">
+        <%= link_to "구매 내역",
+                    orders_path(tab: "purchases"),
+                    class: "flex-1 py-4 px-6 text-center font-medium transition-colors #{@tab == 'purchases' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500 hover:text-gray-700'}" %>
+        <%= link_to "판매 내역",
+                    orders_path(tab: "sales"),
+                    class: "flex-1 py-4 px-6 text-center font-medium transition-colors #{@tab == 'sales' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500 hover:text-gray-700'}" %>
+      </div>
+    </div>
+
+    <%# 주문 목록 %>
+    <% if @orders.any? %>
+      <div class="space-y-4">
+        <% @orders.each do |order| %>
+          <%= link_to order_path(order), class: "block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow" do %>
+            <div class="flex items-start justify-between">
+              <div class="flex items-start space-x-4 flex-1 min-w-0">
+                <%# 상대방 아바타 %>
+                <% other_user = @tab == 'sales' ? order.user : order.seller %>
+                <%= render_user_avatar(other_user, size: :md) %>
+
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 truncate"><%= order.title %></h3>
+                  <p class="text-sm text-gray-500 mt-1">
+                    <%= @tab == 'sales' ? '구매자' : '판매자' %>: <%= other_user.name %>
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1">
+                    <%= order.created_at.strftime("%Y.%m.%d %H:%M") %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="text-right flex-shrink-0 ml-4">
+                <p class="font-bold text-gray-900"><%= order.formatted_amount %></p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2
+                             <%= case order.status
+                                 when 'pending' then 'bg-yellow-100 text-yellow-800'
+                                 when 'paid' then 'bg-green-100 text-green-800'
+                                 when 'cancelled' then 'bg-gray-100 text-gray-800'
+                                 when 'refunded' then 'bg-red-100 text-red-800'
+                                 end %>">
+                  <%= order.status_label %>
+                </span>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%# 페이지네이션 %>
+      <% if @orders.respond_to?(:total_pages) && @orders.total_pages > 1 %>
+        <div class="mt-8 flex justify-center">
+          <%= paginate @orders %>
+        </div>
+      <% end %>
+    <% else %>
+      <%# 빈 상태 %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          <%= @tab == 'sales' ? '판매 내역이 없습니다' : '구매 내역이 없습니다' %>
+        </h3>
+        <p class="text-gray-500 mb-6">
+          <%= @tab == 'sales' ? '아직 판매된 상품이 없습니다.' : '아직 구매한 상품이 없습니다.' %>
+        </p>
+        <%= link_to "외주 둘러보기",
+                    job_posts_path,
+                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>

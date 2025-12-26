@@ -46,6 +46,11 @@ class User < ApplicationRecord
   has_many :active_chat_rooms, through: :active_chat_room_participants, source: :chat_room
   has_many :sent_messages, class_name: "Message", foreign_key: :sender_id, dependent: :destroy
 
+  # 결제/주문
+  has_many :orders, dependent: :destroy                                              # 구매 내역
+  has_many :sales, class_name: "Order", foreign_key: :seller_id, dependent: :destroy # 판매 내역
+  has_many :payments, dependent: :destroy
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
 
@@ -217,6 +222,21 @@ class User < ApplicationRecord
   # 읽지 않은 메시지가 있는지 확인
   def has_unread_messages?
     total_unread_messages > 0
+  end
+
+  # 토스페이먼츠 고객 키 (결제 시 사용)
+  def toss_customer_key
+    "CUST-#{Digest::SHA256.hexdigest("#{id}-#{created_at.to_i}")[0..15].upcase}"
+  end
+
+  # 해당 Post에 대한 대기 중인 주문이 있는지 확인
+  def has_pending_order_for?(post)
+    orders.pending.where(post: post).exists?
+  end
+
+  # 해당 Post에 대한 주문 가져오기
+  def order_for(post)
+    orders.find_by(post: post)
   end
 
   private
