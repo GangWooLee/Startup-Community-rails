@@ -152,7 +152,7 @@ class OnboardingController < ApplicationController
   # LLM 미설정 시 사용할 Mock 분석 결과
   def mock_analysis
     {
-      summary: "커뮤니티 기반의 스타트업 네트워킹 플랫폼으로, 초기 창업자들이 정보를 공유하고 협업 기회를 찾을 수 있는 공간입니다.",
+      summary: "초기 창업자를 위한 커뮤니티 기반 네트워킹 플랫폼",
       target_users: {
         primary: "20-30대 초기 창업자 및 예비 창업자",
         characteristics: ["IT/스타트업에 관심 있는 대학생", "사이드프로젝트를 찾는 개발자/디자이너", "첫 창업을 준비하는 직장인"]
@@ -168,11 +168,20 @@ class OnboardingController < ApplicationController
         next_steps: ["타겟 커뮤니티에서 베타 테스트", "핵심 사용자 그룹 형성", "피드백 기반 기능 개선"]
       },
       score: {
-        innovation: 7,
-        feasibility: 8,
-        market_fit: 7,
-        overall: 7
+        overall: 72,
+        weak_areas: ["시장 분석", "수익 모델"],
+        strong_areas: ["아이디어 독창성", "타겟 명확성"],
+        improvement_tips: [
+          "타겟 시장의 규모를 구체화하세요",
+          "수익화 모델을 명확히 정의하세요",
+          "경쟁사 대비 차별점을 더 부각하세요"
+        ]
       },
+      actions: [
+        { title: "핵심 타깃 1줄 정의하기", description: "주 사용자가 누구인지 한 문장으로 정리하세요" },
+        { title: "경쟁 서비스 분석", description: "유사 서비스 3개 이상 조사하고 차별점 도출" },
+        { title: "MVP 기능 리스트", description: "반드시 필요한 핵심 기능 5개 이내로 정리" }
+      ],
       required_expertise: mock_required_expertise,
       analyzed_at: Time.current,
       idea: @idea

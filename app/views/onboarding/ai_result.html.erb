@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background flex flex-col pb-20" data-controller="ai-result" data-ai-result-idea-value="<%= @idea %>">
+<div class="min-h-screen bg-background flex flex-col pb-20" data-controller="ai-result accordion" data-ai-result-idea-value="<%= @idea %>">
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
@@ -17,7 +17,7 @@
     <div class="flex items-center justify-center gap-2 mb-8">
       <div class="h-2 w-8 rounded-full bg-primary"></div>
       <div class="h-2 w-8 rounded-full bg-primary"></div>
-      <div class="h-2 w-8 rounded-full bg-secondary"></div>
+      <div class="h-2 w-8 rounded-full bg-primary"></div>
     </div>
 
     <!-- Loading State -->
@@ -32,10 +32,10 @@
     </div>
 
     <!-- Result Content (Hidden initially) -->
-    <div data-ai-result-target="result" class="hidden">
+    <div data-ai-result-target="result" class="hidden space-y-6">
       <!-- Status Badge -->
       <% if @is_real_analysis %>
-        <div class="mb-6 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+        <div class="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
           <div class="flex items-start gap-2">
             <svg class="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -44,7 +44,7 @@
           </div>
         </div>
       <% else %>
-        <div class="mb-6 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+        <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
           <div class="flex items-start gap-2">
             <svg class="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -54,221 +54,366 @@
         </div>
       <% end %>
 
-      <!-- User's Idea -->
-      <div class="bg-card rounded-xl border border-border p-4 mb-6">
-        <div class="flex items-start gap-3">
-          <div class="h-10 w-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-            <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
+      <!-- =============================================== -->
+      <!-- SECTION 1: THE NAVIGATOR -->
+      <!-- =============================================== -->
+      <section class="bg-gradient-to-br from-primary/5 via-background to-primary/10 rounded-2xl border border-primary/20 p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
+            <span class="text-xs font-bold text-primary">1</span>
           </div>
-          <div>
+          <h2 class="text-sm font-semibold text-primary uppercase tracking-wider">The Navigator</h2>
+        </div>
+
+        <!-- Summary + Score Row -->
+        <div class="flex flex-col md:flex-row gap-6 mb-6">
+          <!-- Left: Summary -->
+          <div class="flex-1">
             <p class="text-xs text-muted-foreground mb-1">내 아이디어</p>
-            <p class="text-sm text-foreground leading-relaxed"><%= @analysis[:idea] %></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Score Card (if available) -->
-      <% if @analysis[:score] && @analysis[:score][:overall].to_i > 0 %>
-        <div class="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 p-4 mb-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-semibold text-foreground">종합 점수</h3>
-            <span class="text-2xl font-bold text-primary"><%= @analysis[:score][:overall] %>/10</span>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="text-center">
-              <p class="text-xs text-muted-foreground mb-1">혁신성</p>
-              <p class="font-semibold text-foreground"><%= @analysis[:score][:innovation] %></p>
-            </div>
-            <div class="text-center">
-              <p class="text-xs text-muted-foreground mb-1">실현 가능성</p>
-              <p class="font-semibold text-foreground"><%= @analysis[:score][:feasibility] %></p>
-            </div>
-            <div class="text-center">
-              <p class="text-xs text-muted-foreground mb-1">시장 적합성</p>
-              <p class="font-semibold text-foreground"><%= @analysis[:score][:market_fit] %></p>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-      <!-- AI Analysis Cards -->
-      <div class="space-y-4 mb-8">
-        <!-- Summary Card -->
-        <div class="bg-card rounded-xl border border-border p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-foreground">요약</h3>
-          </div>
-          <p class="text-sm text-muted-foreground leading-relaxed">
-            <%= @analysis[:summary] %>
-          </p>
-        </div>
-
-        <!-- Target Users Card -->
-        <div class="bg-card rounded-xl border border-border p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-foreground">타깃 사용자</h3>
-          </div>
-          <p class="text-sm text-muted-foreground mb-3"><%= @analysis[:target_users][:primary] %></p>
-          <div class="flex flex-wrap gap-2">
-            <% @analysis[:target_users][:characteristics].each do |char| %>
-              <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium"><%= char %></span>
-            <% end %>
-          </div>
-        </div>
-
-        <!-- Market Analysis Card -->
-        <div class="bg-card rounded-xl border border-border p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-foreground">시장 분석</h3>
-          </div>
-          <div class="space-y-3">
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-muted-foreground">시장 잠재력:</span>
-              <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= @analysis[:market_analysis][:potential] %></span>
-            </div>
-            <% if @analysis[:market_analysis][:competitors].present? %>
-              <div>
-                <p class="text-xs text-muted-foreground mb-2">경쟁 서비스:</p>
-                <div class="flex flex-wrap gap-2">
-                  <% @analysis[:market_analysis][:competitors].each do |competitor| %>
-                    <span class="px-2 py-1 rounded bg-secondary text-xs text-muted-foreground"><%= competitor %></span>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-            <p class="text-sm text-muted-foreground">
-              <span class="font-medium text-foreground">차별화 포인트:</span> <%= @analysis[:market_analysis][:differentiation] %>
+            <p class="text-sm text-foreground mb-3 leading-relaxed"><%= @analysis[:idea] %></p>
+            <p class="text-lg font-semibold text-foreground leading-snug">
+              <%= @analysis[:summary] %>
             </p>
           </div>
-        </div>
 
-        <!-- Recommendations Card -->
-        <div class="bg-card rounded-xl border border-border p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <svg class="h-4 w-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          <!-- Right: Score Circle -->
+          <% score = @analysis.dig(:score, :overall) || 0 %>
+          <div class="flex-shrink-0 flex flex-col items-center justify-center">
+            <div class="relative h-28 w-28">
+              <!-- Background circle -->
+              <svg class="h-28 w-28 transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke-width="8" class="stroke-secondary"/>
+                <!-- Progress circle -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke-width="8"
+                        class="stroke-primary transition-all duration-1000"
+                        stroke-linecap="round"
+                        stroke-dasharray="<%= (score * 2.83).round %> 283"/>
               </svg>
+              <!-- Score text -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-3xl font-bold text-foreground"><%= score %></span>
+                <span class="text-xs text-muted-foreground">/100점</span>
+              </div>
             </div>
-            <h3 class="font-semibold text-foreground">추천 방향</h3>
+
+            <!-- Score status -->
+            <% score_status = case score
+                 when 0..40 then { label: "보완 필요", color: "text-red-500" }
+                 when 41..60 then { label: "기본기 갖춤", color: "text-yellow-500" }
+                 when 61..80 then { label: "좋은 출발", color: "text-primary" }
+                 else { label: "훌륭한 아이디어", color: "text-green-500" }
+               end %>
+            <p class="text-sm font-medium mt-2 <%= score_status[:color] %>"><%= score_status[:label] %></p>
           </div>
-
-          <% if @analysis[:recommendations][:mvp_features].present? %>
-            <div class="mb-4">
-              <p class="text-xs text-muted-foreground mb-2 font-medium">MVP 핵심 기능</p>
-              <ul class="space-y-1">
-                <% @analysis[:recommendations][:mvp_features].each do |feature| %>
-                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span class="text-primary mt-1">•</span>
-                    <span><%= feature %></span>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
-
-          <% if @analysis[:recommendations][:challenges].present? %>
-            <div class="mb-4">
-              <p class="text-xs text-muted-foreground mb-2 font-medium">예상 도전과제</p>
-              <ul class="space-y-1">
-                <% @analysis[:recommendations][:challenges].each do |challenge| %>
-                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span class="text-orange-500 mt-1">!</span>
-                    <span><%= challenge %></span>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
-
-          <% if @analysis[:recommendations][:next_steps].present? %>
-            <div>
-              <p class="text-xs text-muted-foreground mb-2 font-medium">다음 단계</p>
-              <ul class="space-y-1">
-                <% @analysis[:recommendations][:next_steps].each_with_index do |step, index| %>
-                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span class="text-primary font-medium"><%= index + 1 %>.</span>
-                    <span><%= step %></span>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
         </div>
 
-        <!-- Recommended Experts Section -->
-        <% if @recommended_experts.present? %>
-          <div class="bg-card rounded-xl border border-border p-4"
-               data-controller="expert-overlay">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <svg class="h-4 w-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-semibold text-foreground">추천 전문가</h3>
-                <p class="text-xs text-muted-foreground">이 아이디어를 함께 실현할 수 있는 전문가들</p>
-              </div>
-            </div>
-
-            <!-- Required Expertise Tags -->
-            <% if @analysis[:required_expertise].present? %>
-              <div class="mb-4">
-                <p class="text-xs text-muted-foreground mb-2">필요한 역량</p>
-                <div class="flex flex-wrap gap-1.5">
-                  <% (@analysis[:required_expertise][:roles] || []).each do |role| %>
-                    <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= role %></span>
-                  <% end %>
-                  <% (@analysis[:required_expertise][:skills] || []).first(4).each do |skill| %>
-                    <span class="px-2 py-0.5 rounded-full bg-secondary text-muted-foreground text-xs"><%= skill %></span>
+        <!-- Weak/Strong Areas -->
+        <% if @analysis[:score] %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Weak Areas -->
+            <% if @analysis[:score][:weak_areas].present? %>
+              <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                <p class="text-xs font-medium text-red-600 mb-2 flex items-center gap-1">
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  보완이 필요한 영역
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <% @analysis[:score][:weak_areas].each do |area| %>
+                    <span class="px-2 py-1 rounded-full bg-red-500/10 text-red-600 text-xs font-medium"><%= area %></span>
                   <% end %>
                 </div>
               </div>
             <% end %>
 
-            <!-- Horizontal Scroll Expert Cards -->
-            <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-              <% @recommended_experts.each do |expert| %>
-                <%= render "onboarding/expert_card", user: expert %>
-              <% end %>
-            </div>
+            <!-- Strong Areas -->
+            <% if @analysis[:score][:strong_areas].present? %>
+              <div class="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                <p class="text-xs font-medium text-green-600 mb-2 flex items-center gap-1">
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  강점 영역
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <% @analysis[:score][:strong_areas].each do |area| %>
+                    <span class="px-2 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium"><%= area %></span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
 
-            <!-- More Experts Link -->
-            <div class="mt-4 pt-3 border-t border-border">
-              <%= link_to search_path(tab: "users"), class: "flex items-center justify-center gap-1 text-sm text-primary hover:underline" do %>
-                더 많은 전문가 찾기
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+          <!-- Improvement Tips -->
+          <% if @analysis[:score][:improvement_tips].present? %>
+            <div class="bg-secondary/30 rounded-lg p-4 mb-6">
+              <p class="text-xs font-medium text-foreground mb-2">💡 개선 팁</p>
+              <ul class="space-y-1">
+                <% @analysis[:score][:improvement_tips].each do |tip| %>
+                  <li class="text-sm text-muted-foreground flex items-start gap-2">
+                    <span class="text-primary mt-0.5">•</span>
+                    <span><%= tip %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        <% end %>
+
+        <!-- Action Cards (지금 필요한 액션) -->
+        <% if @analysis[:actions].present? %>
+          <div>
+            <p class="text-xs font-semibold text-foreground mb-3 uppercase tracking-wider">🚀 지금 필요한 액션</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <% @analysis[:actions].first(3).each_with_index do |action, index| %>
+                <div class="bg-card border border-border rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all">
+                  <div class="flex items-center gap-2 mb-2">
+                    <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="text-xs font-bold text-primary"><%= index + 1 %></span>
+                    </div>
+                    <p class="font-semibold text-foreground text-sm"><%= action[:title] %></p>
+                  </div>
+                  <p class="text-xs text-muted-foreground"><%= action[:description] %></p>
+                </div>
               <% end %>
             </div>
           </div>
         <% end %>
-      </div>
+      </section>
+
+      <!-- =============================================== -->
+      <!-- SECTION 2: THE TEAM BUILDER -->
+      <!-- =============================================== -->
+      <% if @recommended_experts.present? %>
+        <section class="bg-card rounded-2xl border border-border p-6" data-controller="expert-overlay">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-6 w-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <span class="text-xs font-bold text-cyan-600">2</span>
+            </div>
+            <h2 class="text-sm font-semibold text-cyan-600 uppercase tracking-wider">The Team Builder</h2>
+          </div>
+          <p class="text-lg font-semibold text-foreground mb-1">부족한 점수를 채워줄 최적의 스쿼드</p>
+          <p class="text-sm text-muted-foreground mb-6">이 전문가들과 함께하면 아이디어가 더욱 완성도 높아집니다</p>
+
+          <!-- Required Expertise Tags -->
+          <% if @analysis[:required_expertise].present? %>
+            <div class="mb-6">
+              <p class="text-xs text-muted-foreground mb-2">필요한 역량</p>
+              <div class="flex flex-wrap gap-2">
+                <% (@analysis[:required_expertise][:roles] || []).each do |role| %>
+                  <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= role %></span>
+                <% end %>
+                <% (@analysis[:required_expertise][:skills] || []).first(4).each do |skill| %>
+                  <span class="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs"><%= skill %></span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- 2x2 Expert Grid -->
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <% @recommended_experts.first(4).each_with_index do |expert, index| %>
+              <%= render "onboarding/expert_card_v2", user: expert, index: index %>
+            <% end %>
+          </div>
+
+          <!-- More Experts Link -->
+          <div class="pt-4 border-t border-border">
+            <%= link_to search_path(tab: "users"), class: "flex items-center justify-center gap-2 text-sm text-primary hover:underline font-medium" do %>
+              더 많은 전문가 찾기
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
+      <!-- =============================================== -->
+      <!-- SECTION 3: THE EVIDENCE (Collapsible) -->
+      <!-- =============================================== -->
+      <section class="bg-card rounded-2xl border border-border overflow-hidden">
+        <div class="flex items-center gap-2 p-6 pb-4">
+          <div class="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+            <span class="text-xs font-bold text-purple-600">3</span>
+          </div>
+          <h2 class="text-sm font-semibold text-purple-600 uppercase tracking-wider">The Evidence</h2>
+        </div>
+        <p class="px-6 text-sm text-muted-foreground mb-4">상세 분석 데이터를 확인하세요</p>
+
+        <!-- Accordion Items -->
+        <div class="border-t border-border divide-y divide-border">
+          <!-- Target Users Accordion -->
+          <div data-accordion-target="item">
+            <button type="button"
+                    class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                    data-action="click->accordion#toggle"
+                    data-accordion-target="trigger">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </div>
+                <span class="font-medium text-foreground">타깃 사용자</span>
+              </div>
+              <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div class="hidden px-6 pb-4" data-accordion-target="content">
+              <p class="text-sm text-muted-foreground mb-3"><%= @analysis[:target_users][:primary] %></p>
+              <div class="flex flex-wrap gap-2">
+                <% @analysis[:target_users][:characteristics].each do |char| %>
+                  <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium"><%= char %></span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Market Analysis Accordion -->
+          <div data-accordion-target="item">
+            <button type="button"
+                    class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                    data-action="click->accordion#toggle"
+                    data-accordion-target="trigger">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                </div>
+                <span class="font-medium text-foreground">시장 분석</span>
+              </div>
+              <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div class="hidden px-6 pb-4 space-y-3" data-accordion-target="content">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-muted-foreground">시장 잠재력:</span>
+                <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= @analysis[:market_analysis][:potential] %></span>
+              </div>
+              <% if @analysis[:market_analysis][:competitors].present? %>
+                <div>
+                  <p class="text-xs text-muted-foreground mb-2">경쟁 서비스:</p>
+                  <div class="flex flex-wrap gap-2">
+                    <% @analysis[:market_analysis][:competitors].each do |competitor| %>
+                      <span class="px-2 py-1 rounded bg-secondary text-xs text-muted-foreground"><%= competitor %></span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+              <p class="text-sm text-muted-foreground">
+                <span class="font-medium text-foreground">차별화 포인트:</span> <%= @analysis[:market_analysis][:differentiation] %>
+              </p>
+            </div>
+          </div>
+
+          <!-- MVP Features Accordion -->
+          <% if @analysis[:recommendations][:mvp_features].present? %>
+            <div data-accordion-target="item">
+              <button type="button"
+                      class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                      data-action="click->accordion#toggle"
+                      data-accordion-target="trigger">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                  </div>
+                  <span class="font-medium text-foreground">MVP 핵심 기능</span>
+                </div>
+                <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div class="hidden px-6 pb-4" data-accordion-target="content">
+                <ul class="space-y-2">
+                  <% @analysis[:recommendations][:mvp_features].each do |feature| %>
+                    <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span class="text-primary mt-0.5">✓</span>
+                      <span><%= feature %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Challenges Accordion -->
+          <% if @analysis[:recommendations][:challenges].present? %>
+            <div data-accordion-target="item">
+              <button type="button"
+                      class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                      data-action="click->accordion#toggle"
+                      data-accordion-target="trigger">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                    <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                  </div>
+                  <span class="font-medium text-foreground">예상 도전과제</span>
+                </div>
+                <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div class="hidden px-6 pb-4" data-accordion-target="content">
+                <ul class="space-y-2">
+                  <% @analysis[:recommendations][:challenges].each do |challenge| %>
+                    <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span class="text-yellow-500 mt-0.5">⚠</span>
+                      <span><%= challenge %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Next Steps Accordion -->
+          <% if @analysis[:recommendations][:next_steps].present? %>
+            <div data-accordion-target="item">
+              <button type="button"
+                      class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                      data-action="click->accordion#toggle"
+                      data-accordion-target="trigger">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <svg class="h-4 w-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                  </div>
+                  <span class="font-medium text-foreground">다음 단계 로드맵</span>
+                </div>
+                <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div class="hidden px-6 pb-4" data-accordion-target="content">
+                <ul class="space-y-2">
+                  <% @analysis[:recommendations][:next_steps].each_with_index do |step, index| %>
+                    <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span class="text-primary font-bold mt-0.5"><%= index + 1 %>.</span>
+                      <span><%= step %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </section>
 
       <!-- Profile Overlay Container -->
       <div id="profile-overlay-container"></div>
 
       <!-- CTA Buttons -->
-      <div class="space-y-3">
+      <div class="space-y-3 pt-4">
         <!-- Primary CTA -->
         <%= link_to new_post_path(type: 'community', prefill: 'idea'),
             class: "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:bg-primary/90 transition-all",
