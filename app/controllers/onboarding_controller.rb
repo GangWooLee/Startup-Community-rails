@@ -1,6 +1,6 @@
 class OnboardingController < ApplicationController
   # AI 분석 기능은 로그인 필수 (계정당 무료 체험 3회)
-  before_action :require_login, only: [:ai_input, :ai_result]
+  before_action :require_login, only: [:ai_input, :ai_questions, :ai_result]
   before_action :hide_floating_button, only: [:ai_input, :ai_result]
 
   def landing
@@ -14,8 +14,30 @@ class OnboardingController < ApplicationController
     @back_path = logged_in? ? community_path : root_path
   end
 
+  # AI 추가 질문 생성 (POST /ai/questions)
+  # 초기 아이디어 입력 후 맥락에 맞는 추가 질문 2-3개 생성
+  def ai_questions
+    idea = params[:idea]
+
+    if idea.blank?
+      render json: { error: "아이디어를 입력해주세요" }, status: :unprocessable_entity
+      return
+    end
+
+    # AI로 추가 질문 생성 (LLM 설정이 있는 경우)
+    if LangchainConfig.any_llm_configured?
+      result = Ai::FollowUpGenerator.new(idea).generate
+    else
+      # LLM 미설정 시 기본 질문 사용
+      result = default_follow_up_questions
+    end
+
+    render json: result
+  end
+
   def ai_result
     @idea = params[:idea]
+    @follow_up_answers = parse_follow_up_answers
 
     # 아이디어가 없으면 입력 화면으로 리디렉션
     if @idea.blank?
@@ -23,9 +45,12 @@ class OnboardingController < ApplicationController
       return
     end
 
+    # 분석에 전달할 전체 컨텍스트 생성
+    analysis_context = build_analysis_context
+
     # 실제 AI 분석 수행 (LLM 설정이 있는 경우)
     if LangchainConfig.any_llm_configured?
-      @analysis = Ai::IdeaAnalyzer.new(@idea).analyze
+      @analysis = Ai::IdeaAnalyzer.new(analysis_context).analyze
       @is_real_analysis = !@analysis[:error]
     else
       # LLM 미설정 시 Mock 데이터 사용
@@ -59,6 +84,70 @@ class OnboardingController < ApplicationController
   end
 
   private
+
+  # 추가 질문 답변 파싱
+  def parse_follow_up_answers
+    answers = params[:answers]
+    return {} if answers.blank?
+
+    # JSON 문자열이면 파싱
+    if answers.is_a?(String)
+      begin
+        JSON.parse(answers, symbolize_names: true)
+      rescue JSON::ParserError
+        {}
+      end
+    else
+      answers.to_unsafe_h.symbolize_keys
+    end
+  end
+
+  # 분석에 전달할 전체 컨텍스트 생성
+  def build_analysis_context
+    context = "아이디어: #{@idea}"
+
+    if @follow_up_answers.present?
+      context += "\n\n추가 정보:"
+      @follow_up_answers.each do |key, value|
+        next if value.blank?
+        label = case key.to_s
+        when "target" then "타겟 사용자"
+        when "problem" then "해결하려는 문제"
+        when "differentiator" then "차별화 포인트"
+        else key.to_s.humanize
+        end
+        context += "\n- #{label}: #{value}"
+      end
+    end
+
+    context
+  end
+
+  # LLM 미설정 시 사용할 기본 추가 질문
+  def default_follow_up_questions
+    {
+      questions: [
+        {
+          id: "target",
+          question: "주요 타겟 사용자는 누구인가요?",
+          placeholder: "예: 20-30대 직장인, 대학생, 주부 등",
+          required: true
+        },
+        {
+          id: "problem",
+          question: "해결하려는 가장 큰 문제는 무엇인가요?",
+          placeholder: "현재 겪고 있는 불편함이나 해소되지 않는 니즈",
+          required: true
+        },
+        {
+          id: "differentiator",
+          question: "기존 서비스와 다른 점은 무엇인가요? (선택)",
+          placeholder: "차별화 포인트가 있다면 알려주세요",
+          required: false
+        }
+      ]
+    }
+  end
 
   # LLM 미설정 시 사용할 Mock 분석 결과
   def mock_analysis

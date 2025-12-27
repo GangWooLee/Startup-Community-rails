@@ -13,8 +13,9 @@ Rails.application.routes.draw do
   # 첫 접속 시 온보딩 화면으로 시작
   root "onboarding#landing"
 
-  # Onboarding Flow
+  # Onboarding Flow (AI 분석)
   get "ai/input", to: "onboarding#ai_input", as: :onboarding_ai_input
+  post "ai/questions", to: "onboarding#ai_questions", as: :onboarding_ai_questions
   get "ai/result", to: "onboarding#ai_result", as: :onboarding_ai_result
   get "ai/expert/:id", to: "onboarding#expert_profile", as: :expert_profile
 

@@ -2,7 +2,7 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
-<%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
+      <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -12,12 +12,16 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-screen-xl mx-auto w-full px-4 py-6" data-controller="ai-input">
+  <main class="flex-1 max-w-screen-xl mx-auto w-full px-4 py-6"
+        data-controller="ai-input"
+        data-ai-input-questions-url-value="<%= onboarding_ai_questions_path %>"
+        data-ai-input-result-url-value="<%= onboarding_ai_result_path %>">
+
     <!-- Progress Indicator -->
     <div class="flex items-center justify-center gap-2 mb-8">
-      <div class="h-2 w-8 rounded-full bg-primary"></div>
-      <div class="h-2 w-8 rounded-full bg-secondary"></div>
-      <div class="h-2 w-8 rounded-full bg-secondary"></div>
+      <div class="h-2 w-8 rounded-full bg-primary" data-ai-input-target="progress1"></div>
+      <div class="h-2 w-8 rounded-full bg-secondary" data-ai-input-target="progress2"></div>
+      <div class="h-2 w-8 rounded-full bg-secondary" data-ai-input-target="progress3"></div>
     </div>
 
     <!-- Token Display -->
@@ -30,24 +34,31 @@
       </div>
     </div>
 
-    <!-- AI Character -->
-    <div class="text-center mb-6">
-      <div class="h-20 w-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-        <svg class="h-10 w-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
+    <!-- Chat Container -->
+    <div class="space-y-4 mb-6" data-ai-input-target="chatContainer">
+      <!-- AI Initial Message -->
+      <div class="flex gap-3" data-ai-input-target="aiMessage">
+        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-foreground mb-1">AI 분석봇</p>
+          <div class="bg-secondary/50 rounded-2xl rounded-tl-md px-4 py-3">
+            <p class="text-sm text-foreground">어떤 아이디어가 있으신가요? 자유롭게 적어주세요!</p>
+          </div>
+        </div>
       </div>
-      <h2 class="text-xl font-bold text-foreground mb-2">어떤 아이디어가 있으신가요?</h2>
-      <p class="text-sm text-muted-foreground">자유롭게 적어주세요. AI가 분석해드릴게요!</p>
     </div>
 
-    <!-- Input Form -->
-    <form action="<%= onboarding_ai_result_path %>" method="get" data-action="submit->ai-input#handleSubmit">
-      <div class="bg-card rounded-xl border border-border p-4 mb-6">
+    <!-- Step 1: Initial Idea Input -->
+    <div data-ai-input-target="step1">
+      <div class="bg-card rounded-xl border border-border p-4 mb-4">
         <textarea
           name="idea"
           id="idea-input"
-          rows="6"
+          rows="4"
           placeholder="예: 대학생을 위한 AI 공부 커뮤니티를 만들고 싶어요. 서로 질문하고 답변하면서 학습할 수 있는 플랫폼이요."
           class="w-full bg-transparent text-foreground placeholder:text-muted-foreground resize-none focus:outline-none text-base leading-relaxed"
           data-ai-input-target="textarea"
@@ -57,18 +68,11 @@
           <span class="text-xs text-muted-foreground">
             <span data-ai-input-target="charCount">0</span> / 500자
           </span>
-          <div class="flex gap-2">
-            <button type="button" class="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-              </svg>
-            </button>
-          </div>
         </div>
       </div>
 
       <!-- Example Ideas -->
-      <div class="mb-6">
+      <div class="mb-4">
         <p class="text-xs text-muted-foreground mb-3">예시 아이디어</p>
         <div class="flex flex-wrap gap-2">
           <button type="button" data-action="click->ai-input#fillExample" data-example="대학생들이 서로 스터디 그룹을 만들고 관리할 수 있는 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
@@ -83,13 +87,43 @@
         </div>
       </div>
 
-      <!-- Submit Button -->
-      <%= render_button class: "w-full h-14 gap-2 shadow-lg", data: { ai_input_target: "submitButton" }, disabled: true do %>
+      <!-- Submit Button (Step 1) -->
+      <button type="button"
+              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium disabled:opacity-50 disabled:pointer-events-none"
+              data-ai-input-target="submitButton"
+              data-action="click->ai-input#submitIdea"
+              disabled>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+        다음
+      </button>
+    </div>
+
+    <!-- Step 2: Follow-up Questions (Hidden initially) -->
+    <div class="hidden" data-ai-input-target="step2">
+      <!-- Questions will be dynamically inserted here -->
+      <div data-ai-input-target="questionsContainer"></div>
+
+      <!-- Submit Button (Step 2) -->
+      <button type="button"
+              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium disabled:opacity-50 disabled:pointer-events-none"
+              data-ai-input-target="analyzeButton"
+              data-action="click->ai-input#submitForAnalysis"
+              disabled>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
         AI에게 분석 요청하기
-      <% end %>
-    </form>
+      </button>
+    </div>
+
+    <!-- Loading State (Hidden initially) -->
+    <div class="hidden text-center py-8" data-ai-input-target="loading">
+      <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50">
+        <div class="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
+        <span class="text-sm text-muted-foreground" data-ai-input-target="loadingText">추가 질문 생성 중...</span>
+      </div>
+    </div>
   </main>
 </div>
