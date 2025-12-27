@@ -5,7 +5,7 @@
 - **API 스타일**: RESTful + Hotwire (Turbo)
 - **버전**: v1 (MVP)
 - **응답 형식**: HTML (Turbo) / JSON (API)
-- **업데이트**: 2025-11-26
+- **업데이트**: 2025-12-27
 
 ---
 
@@ -173,11 +173,63 @@ end
 
 ---
 
-### 2.7 홈페이지 & 기타
+### 2.7 AI 온보딩
 
 ```ruby
-root 'posts#index'  # 커뮤니티 홈이 메인
+# 랜딩 페이지 (루트)
+root 'onboarding#landing'
 
+# AI 분석 플로우
+get 'ai/input', to: 'onboarding#ai_input'        # 아이디어 입력 (로그인 필수)
+post 'ai/questions', to: 'onboarding#ai_questions'  # 추가 질문 생성 (JSON)
+get 'ai/result', to: 'onboarding#ai_result'      # 분석 결과 (5개 에이전트)
+get 'ai/expert/:id', to: 'onboarding#expert_profile'  # 전문가 프로필 (Turbo Stream)
+
+# 커뮤니티 (서브라우트)
+get 'community', to: 'posts#index'
+```
+
+**엔드포인트**:
+
+#### 온보딩 플로우
+- `GET /` - 랜딩 페이지 (AI 분석 소개)
+- `GET /ai/input` - 아이디어 입력 폼 (로그인 필수)
+- `POST /ai/questions` - 추가 질문 생성 (JSON 응답)
+  - 요청: `{ idea: "아이디어 텍스트" }`
+  - 응답: `{ questions: [{ id: "target", question: "...", placeholder: "..." }] }`
+- `GET /ai/result` - 분석 결과 페이지
+  - 5개 전문 에이전트 순차 실행
+  - 파라미터: `idea`, `answers` (JSON)
+- `GET /ai/expert/:id` - 전문가 프로필 오버레이 (Turbo Stream)
+
+---
+
+### 2.8 Admin 패널
+
+```ruby
+namespace :admin do
+  root 'dashboard#index'
+  resources :users, only: [:index, :show, :edit, :update, :destroy] do
+    member do
+      patch :toggle_admin
+    end
+  end
+  resources :chat_rooms, only: [:index, :show, :destroy]
+end
+```
+
+**엔드포인트**:
+- `GET /admin` - 관리자 대시보드
+- `GET /admin/users` - 사용자 목록
+- `PATCH /admin/users/:id/toggle_admin` - 관리자 권한 토글
+- `GET /admin/chat_rooms` - 채팅방 목록
+- `DELETE /admin/chat_rooms/:id` - 채팅방 삭제
+
+---
+
+### 2.9 기타 Static 페이지
+
+```ruby
 # Static pages (선택)
 get 'about', to: 'pages#about'
 get 'terms', to: 'pages#terms'
@@ -703,4 +755,5 @@ end
 
 | 날짜 | 변경사항 | 작성자 |
 |------|----------|--------|
+| 2025-12-27 | AI 온보딩, Admin 패널 라우트 추가 | Claude |
 | 2025-11-26 | One-pager 기반 API 설계 (Hotwire 중심) | Claude |

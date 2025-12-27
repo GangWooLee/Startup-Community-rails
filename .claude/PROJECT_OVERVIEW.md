@@ -10,7 +10,7 @@
 | **버전** | MVP v0.8 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
-| **마지막 업데이트** | 2025-12-26 |
+| **마지막 업데이트** | 2025-12-27 |
 
 **핵심 비전**: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
 
@@ -23,7 +23,7 @@
 | 커뮤니티 (게시글/댓글/좋아요) | 95% | ✅ 완성 | CRUD, 이미지, 스크랩 |
 | 채팅 (실시간 1:1) | 90% | ✅ 완성 | Solid Cable, Turbo Streams |
 | 프로필/OAuth | 85% | ✅ 완성 | Google, GitHub 로그인 |
-| AI 온보딩 (아이디어 분석) | 70% | 🔄 진행중 | Gemini API 연동 |
+| AI 온보딩 (아이디어 분석) | 85% | ✅ 완성 | 멀티에이전트 시스템 (5개 에이전트) |
 | 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
 | 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
 | 외주 (구인/구직) | 50% | ⚠️ 진행중 | Post 모델 통합 중 |
@@ -51,7 +51,10 @@ Startup-Community-rails/
 │   ├── javascript/
 │   │   └── controllers/      # 33개 Stimulus 컨트롤러
 │   ├── services/
-│   │   ├── ai/               # AI 에이전트 (BaseAgent, IdeaAnalyzer)
+│   │   ├── ai/               # AI 멀티에이전트 시스템
+│   │   │   ├── agents/       # 5개 전문 에이전트
+│   │   │   ├── orchestrators/# 에이전트 오케스트레이터
+│   │   │   └── tools/        # LangchainRB 도구 (3개)
 │   │   └── expert_matcher.rb # 전문가 매칭
 │   └── helpers/              # 뷰 헬퍼
 │
@@ -133,13 +136,23 @@ Startup-Community-rails/
 | `write_bottomsheet_controller.js` | 글쓰기 바텀시트 |
 | `share_controller.js` | 공유 기능 |
 
-### AI/Services
+### AI/Services - 멀티에이전트 시스템
 
 | 파일 | 역할 |
 |------|------|
-| `lib/langchain_config.rb` | LLM 설정 (OpenAI/Gemini) |
+| `lib/langchain_config.rb` | LLM 설정, 에이전트별 모델 최적화 |
 | `app/services/ai/base_agent.rb` | AI 에이전트 베이스 클래스 |
-| `app/services/ai/idea_analyzer.rb` | 아이디어 분석 |
+| `app/services/ai/follow_up_generator.rb` | 추가 질문 생성기 |
+| `app/services/ai/expert_score_predictor.rb` | 전문가 점수 예측 |
+| `app/services/ai/orchestrators/analysis_orchestrator.rb` | 멀티에이전트 오케스트레이터 |
+| `app/services/ai/agents/summary_agent.rb` | 요약 에이전트 |
+| `app/services/ai/agents/target_user_agent.rb` | 타겟 사용자 에이전트 |
+| `app/services/ai/agents/market_analysis_agent.rb` | 시장 분석 에이전트 |
+| `app/services/ai/agents/strategy_agent.rb` | 전략 에이전트 |
+| `app/services/ai/agents/scoring_agent.rb` | 점수 에이전트 |
+| `app/services/ai/tools/gemini_grounding_tool.rb` | Gemini 실시간 웹 검색 |
+| `app/services/ai/tools/market_data_tool.rb` | 정적 시장 데이터 |
+| `app/services/ai/tools/competitor_database_tool.rb` | 경쟁사 데이터베이스 |
 | `app/services/expert_matcher.rb` | 전문가 매칭 |
 
 ---
@@ -160,8 +173,10 @@ Startup-Community-rails/
 - **Active Storage** (이미지)
 
 ### AI
-- **LangChain** - AI 에이전트 프레임워크
-- **Google Gemini API** - LLM
+- **LangchainRB** - AI 에이전트 프레임워크
+- **Google Gemini 2.0** - LLM (5개 전문 에이전트)
+  - gemini-2.0-flash, gemini-2.0-flash-lite
+  - Gemini Grounding (실시간 웹 검색)
 
 ### Auth
 - **Session 기반 인증** (has_secure_password)
@@ -203,8 +218,10 @@ POST   /chat_rooms/:id/messages → messages#create
 ### AI 온보딩
 ```
 GET    /                   → onboarding#landing (루트)
-GET    /ai/input           → onboarding#ai_input
-GET    /ai/result          → onboarding#ai_result
+GET    /ai/input           → onboarding#ai_input (로그인 필수)
+POST   /ai/questions       → onboarding#ai_questions (추가 질문 생성)
+GET    /ai/result          → onboarding#ai_result (5개 에이전트 분석)
+GET    /ai/expert/:id      → onboarding#expert_profile (Turbo Stream)
 ```
 
 ### 기타
@@ -230,7 +247,7 @@ GET    /notifications      → notifications#index
 
 ## 현재 진행 중인 작업
 
-1. **AI 아이디어 분석 기능 안정화** (70% → 90%)
+1. ~~**AI 아이디어 분석 기능 안정화**~~ ✅ 완료 (85%)
 2. **외주 시스템 Post 모델 통합** (50% → 80%)
 3. **N+1 쿼리 최적화**
 4. **프로덕션 배포 준비**

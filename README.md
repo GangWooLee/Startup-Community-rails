@@ -11,7 +11,7 @@
 | **버전** | MVP v0.8 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
-| **마지막 업데이트** | 2025-12-26 |
+| **마지막 업데이트** | 2025-12-27 |
 | **Database** | SQLite3 (개발), PostgreSQL (프로덕션) |
 | **Frontend** | Hotwire (Turbo + Stimulus) + Tailwind CSS v4 |
 
@@ -24,7 +24,7 @@
 | 커뮤니티 | 95% | ✅ 완성 | 게시글 CRUD, 댓글, 좋아요, 이미지, 스크랩 |
 | 채팅 | 90% | ✅ 완성 | 실시간 1:1 채팅, Solid Cable, Turbo Streams |
 | 프로필/OAuth | 85% | ✅ 완성 | Google, GitHub 소셜 로그인 |
-| AI 온보딩 | 70% | 🔄 진행중 | 아이디어 분석, Gemini API 연동 |
+| AI 온보딩 | 85% | ✅ 완성 | 멀티에이전트 아이디어 분석, Gemini 2.0 |
 | 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
 | 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
 | 외주 | 50% | ⚠️ 진행중 | 구인/구직, Post 모델 통합 중 |
@@ -122,7 +122,10 @@ app/
 ├── javascript/
 │   └── controllers/      # 33개 Stimulus 컨트롤러
 ├── services/
-│   ├── ai/               # AI 에이전트 (BaseAgent, IdeaAnalyzer)
+│   ├── ai/               # AI 멀티에이전트 시스템
+│   │   ├── agents/       # 5개 전문 에이전트
+│   │   ├── orchestrators/# 에이전트 오케스트레이터
+│   │   └── tools/        # LangchainRB 도구
 │   └── expert_matcher.rb # 전문가 매칭
 └── helpers/              # 뷰 헬퍼
 
@@ -167,7 +170,10 @@ db/
 
 ### AI
 - **LangchainRB** - AI 에이전트 프레임워크
-- **Google Gemini API** - LLM (아이디어 분석)
+- **Google Gemini 2.0** - LLM (멀티에이전트 아이디어 분석)
+  - 5개 전문 에이전트: Summary, TargetUser, MarketAnalysis, Strategy, Scoring
+  - Gemini Grounding - 실시간 웹 검색
+  - 에이전트별 최적화 모델 (gemini-2.0-flash, gemini-2.0-flash-lite)
 
 ### Auth
 - **has_secure_password** - 세션 기반 인증
@@ -239,6 +245,9 @@ brakeman
 
 | 날짜 | 내용 |
 |------|------|
+| 2025-12-27 | AI 멀티에이전트 시스템 완성 (5개 전문 에이전트) |
+| 2025-12-27 | Gemini Grounding 실시간 웹 검색 연동 |
+| 2025-12-27 | Admin 패널 추가 (사용자/채팅방 관리) |
 | 2025-12-26 | 검색 페이지 UTF-8 인코딩 오류 수정 |
 | 2025-12-26 | 검색 결과 클릭 문제 해결 (onmousedown 사용) |
 | 2025-12-26 | render_avatar 메서드명 충돌 해결 |
@@ -251,7 +260,7 @@ brakeman
 
 ## 🎯 현재 진행 중인 작업
 
-1. **AI 아이디어 분석 기능 안정화** (70% → 90%)
+1. ~~**AI 아이디어 분석 기능 안정화**~~ ✅ 완료 (85%)
 2. **외주 시스템 Post 모델 통합** (50% → 80%)
 3. **N+1 쿼리 최적화**
 4. **프로덕션 배포 준비**

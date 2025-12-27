@@ -153,7 +153,7 @@ module Ai
       }
     end
 
-    # "왜 이 전문가인가" 설명 생성
+    # "왜 이 전문가인가" 설명 생성 (간단 버전 - 카드용)
     def generate_why_text(expert, match_result)
       parts = []
 
@@ -180,6 +180,36 @@ module Ai
       else
         "#{match_result[:area]} 영역 전문성 보유"
       end
+    end
+
+    # 상세 추천 이유 생성 (오버레이용)
+    def generate_detailed_why_text(expert, match_result)
+      area = match_result[:area]
+      matched_skills = match_result[:matched_skills]
+      role_matched = match_result[:role_matched]
+
+      # 기본 문장 구성
+      intro = "현재 아이디어의 약점인 '#{area}' 영역을 "
+
+      # 역할 기반 설명
+      if role_matched && expert.role_title.present?
+        intro += "#{expert.role_title}로서의 전문 경험을 통해 보완할 수 있습니다. "
+      else
+        intro += "전문적인 역량으로 보완할 수 있습니다. "
+      end
+
+      # 스킬 기반 상세 설명
+      if matched_skills.any?
+        skills_text = matched_skills.join(", ")
+        intro += "특히 #{skills_text} 역량이 #{area} 개선에 직접적인 도움이 됩니다."
+      end
+
+      # bio가 있으면 경험 요약 추가
+      if expert.bio.present? && expert.bio.length > 30
+        intro += " 실제 프로젝트 경험과 전문성을 바탕으로 실용적인 조언을 제공할 수 있습니다."
+      end
+
+      intro
     end
 
     # 스킬 배열 정규화

@@ -8,8 +8,8 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.8 |
-| **마지막 업데이트** | 2025-12-26 |
-| **진행 중 작업** | AI 아이디어 분석 기능 |
+| **마지막 업데이트** | 2025-12-27 |
+| **진행 중 작업** | Admin 패널, 외주 시스템 통합 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
 
@@ -20,7 +20,7 @@
 | 커뮤니티 (게시글/댓글/좋아요) | 95% | ✅ 완성 |
 | 채팅 (실시간 1:1) | 90% | ✅ 완성 |
 | 프로필/OAuth | 85% | ✅ 완성 |
-| AI 온보딩 (아이디어 분석) | 70% | 🔄 진행중 |
+| AI 온보딩 (아이디어 분석) | 85% | ✅ 완성 |
 | 알림 시스템 | 70% | ✅ 기본 완성 |
 | 검색 | 80% | ✅ 완성 |
 | 외주 (구인/구직) | 50% | ⚠️ Post 통합 중 |
@@ -55,10 +55,21 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - **인증**: `app/controllers/sessions_controller.rb`
 - **AI 온보딩**: `app/controllers/onboarding_controller.rb`
 
-### AI 서비스
+### AI 서비스 (멀티에이전트 시스템)
 - **설정**: `lib/langchain_config.rb`
 - **기본 에이전트**: `app/services/ai/base_agent.rb`
-- **아이디어 분석**: `app/services/ai/idea_analyzer.rb`
+- **오케스트레이터**: `app/services/ai/orchestrators/analysis_orchestrator.rb`
+- **에이전트 (5개)**:
+  - `app/services/ai/agents/summary_agent.rb`
+  - `app/services/ai/agents/target_user_agent.rb`
+  - `app/services/ai/agents/market_analysis_agent.rb`
+  - `app/services/ai/agents/strategy_agent.rb`
+  - `app/services/ai/agents/scoring_agent.rb`
+- **도구 (3개)**:
+  - `app/services/ai/tools/gemini_grounding_tool.rb` (실시간 웹 검색)
+  - `app/services/ai/tools/market_data_tool.rb`
+  - `app/services/ai/tools/competitor_database_tool.rb`
+- **기타**: `app/services/ai/follow_up_generator.rb`, `app/services/ai/expert_score_predictor.rb`
 - **전문가 매칭**: `app/services/expert_matcher.rb`
 
 ### 핵심 모델
@@ -72,6 +83,9 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - 주요: `new_message`, `chat_list`, `live_search`, `image_upload`, `like_button`, `bookmark_button`
 
 ## 최근 작업 내역
+- **[2025-12-27]** AI 멀티에이전트 시스템 완성 (5개 전문 에이전트)
+- **[2025-12-27]** Gemini Grounding 실시간 웹 검색 연동
+- **[2025-12-27]** Admin 패널 추가 (사용자/채팅방 관리)
 - **[2025-12-26]** 검색 페이지 UTF-8 인코딩 오류 수정
 - **[2025-12-26]** 검색 결과 클릭 문제 해결 (onmousedown 사용)
 - **[2025-12-26]** render_avatar 메서드명 충돌 해결
@@ -81,7 +95,7 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - **[2025-12-23]** OAuth 소셜 로그인 추가 (Google, GitHub)
 
 ## 다음 작업 우선순위
-1. AI 분석 기능 완성 및 안정화
+1. ~~AI 분석 기능 완성 및 안정화~~ ✅ 완료
 2. 외주 시스템 Post 모델 통합 완료
 3. N+1 쿼리 최적화
 4. 프로덕션 배포 준비

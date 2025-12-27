@@ -358,48 +358,197 @@ render_avatar(src: user.avatar_url, alt: user.name, size: :md)
 
 ---
 
-## 3. AI 에이전트 구조
+## 3. AI 멀티에이전트 시스템
 
-### 3.1 LangChain 설정
+### 3.1 아키텍처 개요
+
+```
+OnboardingController#ai_result
+    ↓
+Ai::Orchestrators::AnalysisOrchestrator
+    ├─ Step 1: SummaryAgent (gemini-2.0-flash-lite)
+    │   → summary, core_value, problem_statement
+    ├─ Step 2: TargetUserAgent (gemini-2.0-flash)
+    │   → target_users, personas, pain_points, goals
+    ├─ Step 3: MarketAnalysisAgent (gemini-2.0-flash)
+    │   ├─ Mode 1: GeminiGroundingTool (실시간 웹 검색)
+    │   ├─ Mode 2: MarketDataTool + CompetitorDatabaseTool
+    │   └─ Mode 3: LLM 직접 호출 (fallback)
+    │   → market_size, trends, competitors, differentiation
+    ├─ Step 4: StrategyAgent (gemini-2.0-flash)
+    │   → mvp_features, challenges, next_steps, actions
+    └─ Step 5: ScoringAgent (gemini-2.0-flash)
+        → overall score, weak_areas, strong_areas, required_expertise
+```
+
+### 3.2 LangchainRB 설정
+
 ```ruby
 # lib/langchain_config.rb
 module LangchainConfig
-  def self.default_llm(temperature: 0.7)
-    case Rails.application.credentials.dig(:ai, :provider)
-    when "openai"
-      openai_llm(temperature: temperature)
-    else
-      gemini_llm(temperature: temperature)
-    end
+  # 에이전트별 최적화된 모델 설정
+  AGENT_MODEL_CONFIGS = {
+    summary: { model: "gemini-2.0-flash-lite", temperature: 0.5 },
+    target_user: { model: "gemini-2.0-flash", temperature: 0.7 },
+    market_analysis: { model: "gemini-2.0-flash", temperature: 0.7 },
+    strategy: { model: "gemini-2.0-flash", temperature: 0.7 },
+    scoring: { model: "gemini-2.0-flash", temperature: 0.5 }
+  }.freeze
+
+  def self.llm_for_agent(agent_type)
+    config = AGENT_MODEL_CONFIGS[agent_type]
+    gemini_llm(model: config[:model], temperature: config[:temperature])
   end
 
-  def self.gemini_llm(model: "gemini-2.0-flash", temperature: 0.7)
-    Langchain::LLM::GoogleGemini.new(
-      api_key: Rails.application.credentials.dig(:google, :gemini_api_key),
-      default_options: { chat_model: model, temperature: temperature }
-    )
+  def self.gemini_api_key
+    Rails.application.credentials.dig(:gemini, :api_key) ||
+      Rails.application.credentials.dig(:google, :gemini_api_key) ||
+      ENV["GOOGLE_GEMINI_API_KEY"] ||
+      ENV["GEMINI_API_KEY"]
   end
 end
 ```
 
-### 3.2 IdeaAnalyzer 분석 항목
+### 3.3 5개 전문 에이전트
+
+| 에이전트 | 역할 | 모델 | 출력 |
+|---------|------|------|------|
+| **SummaryAgent** | 아이디어 핵심 요약 | gemini-2.0-flash-lite | summary, core_value, problem_statement |
+| **TargetUserAgent** | 타겟 사용자 분석 | gemini-2.0-flash | target_users, personas, pain_points, goals |
+| **MarketAnalysisAgent** | 시장 분석 | gemini-2.0-flash | market_size, trends, competitors, differentiation |
+| **StrategyAgent** | 실행 전략 | gemini-2.0-flash | mvp_features, challenges, next_steps, actions |
+| **ScoringAgent** | 종합 평가 | gemini-2.0-flash | overall, weak_areas, strong_areas, required_expertise |
+
+### 3.4 LangchainRB 도구
+
+```ruby
+# app/services/ai/tools/
+
+# 1. GeminiGroundingTool - 실시간 웹 검색
+class GeminiGroundingTool
+  # Gemini 2.0 네이티브 Google Search 통합
+  # 시장 규모, 최신 트렌드, 경쟁사 정보 실시간 검색
+  def call(query:, idea:)
+    # google_search_retrieval 도구로 실시간 데이터 조회
+  end
+end
+
+# 2. MarketDataTool - 정적 시장 데이터
+class MarketDataTool
+  # 30+ 산업별 시장 규모/성장률/트렌드 데이터
+  MARKET_DATA = {
+    "fintech" => { size: "5조원", growth: "15%", trends: [...] },
+    "edtech" => { size: "3조원", growth: "20%", trends: [...] },
+    # ...
+  }
+end
+
+# 3. CompetitorDatabaseTool - 경쟁사 정보
+class CompetitorDatabaseTool
+  # 80+ 분야별 주요 경쟁사 정보
+  COMPETITOR_DATA = {
+    "community_platform" => ["블라인드", "리멤버", "로켓펀치"],
+    "freelance_matching" => ["크몽", "숨고", "탈잉"],
+    # ...
+  }
+end
 ```
-1. summary        - 아이디어 핵심 요약
-2. target_users   - 주요 사용자 및 특성
-3. market_analysis
-   - market_potential  - 시장 잠재력
-   - competitors       - 경쟁사
-   - differentiation   - 차별화 포인트
-4. recommendations
-   - mvp_features      - MVP 기능
-   - challenges        - 도전 과제
-   - next_steps        - 다음 단계
-5. score
-   - innovation        - 혁신성 (1-10)
-   - feasibility       - 실현 가능성 (1-10)
-   - market_fit        - 시장 적합도 (1-10)
-   - overall           - 종합 (1-10)
-6. required_expertise - 필요 역할/기술
+
+### 3.5 오케스트레이터 패턴
+
+```ruby
+# app/services/ai/orchestrators/analysis_orchestrator.rb
+class Ai::Orchestrators::AnalysisOrchestrator
+  def analyze
+    results = {}
+
+    # 순차 실행 (이전 결과를 다음 에이전트에 전달)
+    results[:summary] = SummaryAgent.new(context).analyze
+    results[:target_user] = TargetUserAgent.new(context.merge(previous: results)).analyze
+    results[:market_analysis] = MarketAnalysisAgent.new(context.merge(previous: results)).analyze
+    results[:strategy] = StrategyAgent.new(context.merge(previous: results)).analyze
+    results[:score] = ScoringAgent.new(context.merge(previous: results)).analyze
+
+    merge_results(results)
+  end
+end
+```
+
+### 3.6 에이전트 실행 결과 구조
+
+```ruby
+{
+  # SummaryAgent
+  summary: "아이디어 한 줄 요약",
+  core_value: "핵심 가치",
+  problem_statement: "해결하려는 문제",
+
+  # TargetUserAgent
+  target_users: {
+    primary: "주요 타겟",
+    characteristics: [...],
+    personas: [{ name: "...", age_range: "...", description: "..." }]
+  },
+
+  # MarketAnalysisAgent
+  market_analysis: {
+    potential: "높음/중간/낮음",
+    market_size: "시장 규모",
+    trends: "트렌드",
+    competitors: ["경쟁사1", "경쟁사2"],
+    differentiation: "차별화 포인트"
+  },
+
+  # StrategyAgent
+  recommendations: {
+    mvp_features: ["MVP 기능1", "MVP 기능2"],
+    challenges: ["도전과제 → 대응방안"],
+    next_steps: ["다음 단계1", "다음 단계2"]
+  },
+  actions: [{ title: "액션", description: "설명" }],
+
+  # ScoringAgent
+  score: {
+    overall: 72,  # 0-100
+    weak_areas: ["시장 분석", "수익 모델"],
+    strong_areas: ["아이디어 독창성", "타겟 명확성"],
+    improvement_tips: ["개선 팁1", "개선 팁2"]
+  },
+  required_expertise: {
+    roles: ["Developer", "Designer"],
+    skills: ["React", "Node.js", "UI/UX"],
+    description: "필요한 전문성 설명"
+  },
+
+  # 메타데이터
+  metadata: {
+    agents_completed: 5,
+    agents_total: 5,
+    execution_time: 55.25,
+    partial_success: false
+  }
+}
+```
+
+### 3.7 AI 서비스 파일 구조
+
+```
+app/services/ai/
+├── base_agent.rb                    # 기본 에이전트 클래스
+├── follow_up_generator.rb           # 추가 질문 생성기
+├── expert_score_predictor.rb        # 전문가 점수 예측
+├── agents/
+│   ├── summary_agent.rb             # 요약 에이전트
+│   ├── target_user_agent.rb         # 타겟 사용자 에이전트
+│   ├── market_analysis_agent.rb     # 시장 분석 에이전트
+│   ├── strategy_agent.rb            # 전략 에이전트
+│   └── scoring_agent.rb             # 점수 에이전트
+├── orchestrators/
+│   └── analysis_orchestrator.rb     # 멀티에이전트 오케스트레이터
+└── tools/
+    ├── market_data_tool.rb          # 시장 데이터 도구
+    ├── competitor_database_tool.rb  # 경쟁사 데이터베이스 도구
+    └── gemini_grounding_tool.rb     # Gemini 실시간 웹 검색 도구
 ```
 
 ---
@@ -492,17 +641,21 @@ end
 
 ## 6. 주요 데이터 흐름
 
-### 6.1 온보딩 플로우
+### 6.1 AI 온보딩 플로우
 ```
 GET /                     → landing.html.erb
-  └─ "시작하기" 클릭
+  └─ "시작하기" 클릭 (로그인 필수)
 GET /ai/input             → ai_input.html.erb
   └─ 아이디어 입력 & 제출
-POST /ai/analyze          → IdeaAnalyzer.analyze
-  └─ 분석 완료
+POST /ai/questions        → FollowUpGenerator로 추가 질문 생성 (JSON)
+  └─ 추가 질문 답변
 GET /ai/result            → ai_result.html.erb
-  └─ 전문가 클릭
-GET /ai/expert/:id        → expert 상세
+  ├─ AnalysisOrchestrator 실행 (5개 에이전트 순차)
+  │   ├─ SummaryAgent → TargetUserAgent → MarketAnalysisAgent
+  │   └─ StrategyAgent → ScoringAgent
+  ├─ ExpertMatcher로 추천 전문가 검색
+  └─ ExpertScorePredictor로 점수 향상 예측
+GET /ai/expert/:id        → expert 프로필 오버레이 (Turbo Stream)
 ```
 
 ### 6.2 채팅 플로우

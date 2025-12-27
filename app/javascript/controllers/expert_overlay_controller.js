@@ -9,8 +9,20 @@ export default class extends Controller {
     const userId = event.params.userId
     if (!userId) return
 
+    // Prediction 데이터 추출 (expert_card_v2에서 전달)
+    const scoreBoost = event.params.scoreBoost || 10
+    const boostArea = event.params.boostArea || "전문성"
+    const why = event.params.why || ""
+
+    // Query params 생성
+    const params = new URLSearchParams({
+      score_boost: scoreBoost,
+      boost_area: boostArea,
+      why: why
+    })
+
     // Turbo Stream으로 프로필 오버레이 로드
-    fetch(`/ai/expert/${userId}`, {
+    fetch(`/ai/expert/${userId}?${params}`, {
       method: "GET",
       headers: {
         "Accept": "text/vnd.turbo-stream.html",

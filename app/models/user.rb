@@ -169,6 +169,17 @@ class User < ApplicationRecord
     self.skills = arr.is_a?(Array) ? arr.join(", ") : arr
   end
 
+  # 주요 성과/포트폴리오를 배열로 반환 (줄바꿈으로 구분)
+  def achievements_array
+    return [] if achievements.blank?
+    achievements.split("\n").map(&:strip).reject(&:blank?)
+  end
+
+  # 성과 배열을 문자열로 저장
+  def achievements_array=(arr)
+    self.achievements = arr.is_a?(Array) ? arr.join("\n") : arr
+  end
+
   # 활동 상태 배열 반환 (JSON 컬럼)
   def availability_statuses_array
     availability_statuses || []

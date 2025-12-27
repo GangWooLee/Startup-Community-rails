@@ -4,7 +4,7 @@
 - **프로젝트**: Startup Community Platform
 - **DBMS**: SQLite3 (dev) / PostgreSQL (prod)
 - **ORM**: ActiveRecord (Rails 8.1)
-- **업데이트**: 2025-11-26
+- **업데이트**: 2025-12-27
 
 ---
 
@@ -95,11 +95,22 @@ create_table :users do |t|
   t.text :bio                     # 한줄 소개
   t.string :avatar_url            # 프로필 사진 (Active Storage 사용 시 불필요)
   t.datetime :last_sign_in_at
+  t.boolean :is_admin, default: false  # 관리자 여부 (Admin 패널 접근 권한)
+
+  # 프로필 확장 필드
+  t.string :affiliation           # 소속
+  t.text :skills                  # 기술 스택 (쉼표 구분)
+  t.string :open_chat_url         # 오픈채팅 URL
+  t.string :github_url            # GitHub URL
+  t.string :portfolio_url         # 포트폴리오 URL
+  t.text :activity_status         # 활동 상태 (JSON, 다중 선택)
+  t.string :custom_status         # 기타 활동 상태
 
   t.timestamps
 end
 
 add_index :users, :email, unique: true
+add_index :users, :is_admin
 ```
 
 **컬럼 설명**:
@@ -110,6 +121,14 @@ add_index :users, :email, unique: true
 - `bio`: 간단한 자기소개
 - `avatar_url`: 프로필 이미지 URL
 - `last_sign_in_at`: 마지막 로그인 시각
+- `is_admin`: 관리자 여부 (Admin 패널 접근 권한)
+- `affiliation`: 소속 (회사, 학교 등)
+- `skills`: 기술 스택 (쉼표로 구분된 문자열)
+- `open_chat_url`: 오픈채팅 URL
+- `github_url`: GitHub 프로필 URL
+- `portfolio_url`: 포트폴리오 URL
+- `activity_status`: 활동 상태 (JSON, 다중 선택 - 외주 가능, 팀 구하는 중 등)
+- `custom_status`: 사용자 정의 활동 상태
 
 **모델 관계**:
 ```ruby
@@ -638,4 +657,5 @@ end
 
 | 날짜 | 변경사항 | 작성자 |
 |------|----------|--------|
+| 2025-12-27 | User 테이블에 is_admin, 프로필 확장 필드 추가 | Claude |
 | 2025-11-26 | One-pager 기반 ERD 및 스키마 설계 | Claude |

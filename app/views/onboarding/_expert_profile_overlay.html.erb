@@ -1,5 +1,27 @@
-<%# 추천 전문가 프로필 오버레이 %>
-<%# locals: user %>
+<%# 추천 전문가 프로필 오버레이 (Figma 디자인 v2) %>
+<%# locals: user, prediction %>
+
+<%
+  # prediction 기본값 설정
+  prediction ||= {}
+  score_boost = prediction[:score_boost] || 10
+  boost_area = prediction[:boost_area] || "전문성"
+  why = prediction[:why] || "#{boost_area} 보완에 적합"
+
+  # 역할별 이모지 매핑
+  role_emojis = {
+    "developer" => "💻", "개발자" => "💻", "엔지니어" => "💻", "engineer" => "💻",
+    "designer" => "🎨", "디자이너" => "🎨",
+    "marketer" => "📊", "마케터" => "📊", "마케팅" => "📊",
+    "pm" => "📋", "기획자" => "📋", "product manager" => "📋",
+    "ceo" => "🚀", "대표" => "🚀", "창업자" => "🚀", "founder" => "🚀",
+    "data" => "📈", "데이터" => "📈", "분석가" => "📈"
+  }
+
+  # 사용자 역할에서 이모지 찾기
+  user_role = user.role_title&.downcase || ""
+  role_emoji = role_emojis.find { |key, _| user_role.include?(key) }&.last || "🚀"
+%>
 
 <div id="expert-profile-overlay"
      class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -10,12 +32,12 @@
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-profile-overlay-target="backdrop"></div>
 
   <!-- 프로필 카드 -->
-  <div class="relative bg-background rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-hidden animate-slide-up"
+  <div class="relative bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden animate-slide-up"
        data-profile-overlay-target="card">
 
     <!-- 닫기 버튼 -->
     <button type="button"
-            class="absolute top-3 right-3 z-10 p-2 rounded-full bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground transition-colors shadow-sm"
+            class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
             data-action="click->profile-overlay#close">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -23,135 +45,169 @@
     </button>
 
     <!-- 카드 내용 (스크롤 가능) -->
-    <div class="overflow-y-auto max-h-[85vh]">
-      <!-- 프로필 헤더 -->
-      <div class="px-6 pt-8 pb-6 text-center border-b border-border">
-        <!-- 프로필 이미지 -->
-        <div class="h-20 w-20 rounded-full ring-4 ring-background overflow-hidden bg-secondary flex items-center justify-center mx-auto mb-4 shadow-lg">
+    <div class="overflow-y-auto max-h-[90vh]">
+
+      <!-- 그라디언트 헤더 (파랑 → 보라) -->
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8 text-center text-white">
+        <!-- 이모지 아바타 -->
+        <div class="h-20 w-20 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mx-auto mb-4 ring-4 ring-white/30 shadow-lg">
           <% if user.avatar.attached? %>
             <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
           <% elsif user.avatar_url.present? %>
-            <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
+            <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+            <span class="text-4xl hidden items-center justify-center"><%= role_emoji %></span>
           <% else %>
-            <span class="text-2xl font-semibold text-muted-foreground"><%= user.name&.first&.upcase || "?" %></span>
+            <span class="text-4xl"><%= role_emoji %></span>
           <% end %>
         </div>
 
-        <!-- 이름 & 소속 -->
-        <div class="mb-3">
-          <div class="flex items-center justify-center gap-2 mb-1">
-            <h2 class="text-xl font-bold text-foreground"><%= user.name %></h2>
-            <% if user.provider.present? %>
-              <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                인증됨
-              </span>
-            <% end %>
+        <!-- 이름 -->
+        <h2 class="text-xl font-bold mb-2"><%= user.name %></h2>
+
+        <!-- 역할 뱃지 -->
+        <% if user.role_title.present? %>
+          <span class="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+            <%= user.role_title %>
+          </span>
+        <% end %>
+
+        <!-- 소속 -->
+        <% if user.affiliation.present? %>
+          <p class="text-white/80 text-sm mt-2"><%= user.affiliation %></p>
+        <% end %>
+      </div>
+
+      <!-- 본문 섹션들 -->
+      <div class="px-6 py-5 space-y-5">
+
+        <!-- 📈 기대 효과 섹션 -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">📈</span>
+            <h3 class="font-semibold text-foreground">기대 효과</h3>
           </div>
-          <% if user.affiliation.present? %>
-            <p class="text-sm text-muted-foreground"><%= user.affiliation %></p>
-          <% end %>
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              +<%= score_boost %>점
+            </span>
+            <span class="text-sm text-muted-foreground">예상</span>
+          </div>
+          <p class="text-sm text-muted-foreground">
+            이 전문가와 협업하면 <span class="font-medium text-foreground"><%= boost_area %></span> 점수가 크게 향상될 것으로 예상됩니다.
+          </p>
         </div>
+
+        <!-- 💡 AI 추천 상세 이유 섹션 -->
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">💡</span>
+            <h3 class="font-semibold text-foreground">AI 추천 상세 이유</h3>
+          </div>
+          <p class="text-sm text-muted-foreground leading-relaxed">
+            <%= why %>
+          </p>
+        </div>
+
+        <!-- 📊 경험 및 전문성 섹션 -->
+        <% if user.bio.present? %>
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">📊</span>
+              <h3 class="font-semibold text-foreground">경험 및 전문성</h3>
+            </div>
+            <p class="text-sm text-muted-foreground leading-relaxed">
+              <%= user.bio %>
+            </p>
+          </div>
+        <% end %>
+
+        <!-- 🏆 주요 포트폴리오 섹션 -->
+        <% if user.respond_to?(:achievements_array) && user.achievements_array.any? %>
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">🏆</span>
+              <h3 class="font-semibold text-foreground">주요 포트폴리오</h3>
+            </div>
+            <ul class="space-y-2">
+              <% user.achievements_array.first(5).each do |achievement| %>
+                <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span class="text-primary mt-0.5">•</span>
+                  <span><%= achievement %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <!-- 🛠️ 핵심 보유 기술 섹션 -->
+        <% if user.respond_to?(:skills_array) && user.skills_array.any? %>
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">🛠️</span>
+              <h3 class="font-semibold text-foreground">핵심 보유 기술</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <% user.skills_array.each do |skill| %>
+                <span class="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium">
+                  <%= skill %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
 
         <!-- 활동 상태 뱃지 -->
         <% if user.respond_to?(:has_availability_status?) && user.has_availability_status? %>
-          <div class="flex items-center justify-center gap-2 flex-wrap mb-3">
+          <div class="flex items-center gap-2 flex-wrap">
             <% user.availability_badges.each do |badge| %>
               <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-white <%= badge[:color] %>">
-                <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
                 <%= badge[:label] %>
               </span>
             <% end %>
           </div>
         <% end %>
 
-        <!-- 역할 & 스킬 태그 -->
-        <div class="flex items-center justify-center gap-2 flex-wrap">
-          <% if user.role_title.present? %>
-            <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-semibold">
-              <%= user.role_title %>
-            </span>
+      </div>
+
+      <!-- 하단 CTA 버튼 영역 -->
+      <div class="px-6 py-4 bg-secondary/30 border-t border-border">
+        <div class="flex gap-3">
+          <!-- 메시지 보내기 -->
+          <% if logged_in? && current_user.id != user.id %>
+            <% chat_btn_class = "flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all shadow-md" %>
+            <%= link_to start_chat_path(user), class: chat_btn_class, data: { turbo_method: :post } do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              메시지 보내기
+            <% end %>
+          <% else %>
+            <div class="flex-1"></div>
           <% end %>
-          <% if user.respond_to?(:skills_array) %>
-            <% user.skills_array.first(3).each do |skill| %>
-              <span class="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                <%= skill %>
-              </span>
+
+          <!-- 이메일 문의 -->
+          <% if user.email.present? %>
+            <% email_btn_class = "flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-background border border-border text-foreground hover:bg-secondary transition-colors" %>
+            <%= link_to "mailto:#{user.email}", class: email_btn_class do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              이메일 문의
             <% end %>
           <% end %>
         </div>
-      </div>
 
-      <!-- 한줄 소개 -->
-      <% if user.bio.present? %>
-        <div class="px-6 py-4 border-b border-border">
-          <p class="text-sm text-muted-foreground text-center leading-relaxed">"<%= user.bio %>"</p>
-        </div>
-      <% end %>
-
-      <!-- 연락처 정보 -->
-      <div class="px-6 py-4 space-y-3">
-        <% if user.github_url.present? %>
-          <div class="flex items-center gap-3 text-sm">
-            <div class="w-8 h-8 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </div>
-            <%= link_to user.github_url, target: "_blank", class: "text-primary hover:underline truncate" do %>
-              GitHub 프로필
-            <% end %>
-          </div>
-        <% end %>
-
-        <% if user.portfolio_url.present? %>
-          <div class="flex items-center gap-3 text-sm">
-            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-              </svg>
-            </div>
-            <%= link_to user.portfolio_url, target: "_blank", class: "text-primary hover:underline truncate" do %>
-              포트폴리오
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-
-      <!-- 하단 버튼 영역 -->
-      <div class="px-6 py-4 bg-secondary/50 border-t border-border space-y-2">
-        <!-- 전체 프로필 보기 -->
-        <%= link_to profile_path(user),
-                    class: "w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors",
-                    data: { turbo_frame: "_top" } do %>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- 전체 프로필 보기 (서브) -->
+        <% profile_link_class = "mt-3 w-full inline-flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors" %>
+        <%= link_to profile_path(user), class: profile_link_class, data: { turbo_frame: "_top" } do %>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
-          전체 프로필 보기
+          전체 프로필 보기 →
         <% end %>
-
-        <!-- 대화하기 버튼 -->
-        <% if logged_in? && current_user.id != user.id %>
-          <%= link_to start_chat_path(user),
-                      method: :post,
-                      class: "w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-cyan-500 text-white hover:bg-cyan-600 transition-colors",
-                      data: { turbo_method: :post } do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            대화하기
-          <% end %>
-        <% end %>
-
-        <!-- 닫기 버튼 -->
-        <button type="button"
-                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-background border border-border text-foreground hover:bg-secondary transition-colors"
-                data-action="click->profile-overlay#close">
-          닫기
-        </button>
       </div>
+
     </div>
   </div>
 </div>

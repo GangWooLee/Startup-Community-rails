@@ -32,7 +32,7 @@ module LangchainConfig
 
     # Google Gemini LLM 인스턴스 생성
     def gemini_llm(model: "gemini-2.0-flash", temperature: 0.7)
-      api_key = Rails.application.credentials.dig(:gemini, :api_key)
+      api_key = gemini_api_key
 
       raise "Gemini API key not configured. Run: EDITOR='code --wait' bin/rails credentials:edit" if api_key.blank?
 
@@ -43,6 +43,14 @@ module LangchainConfig
           chat_model: model
         }
       )
+    end
+
+    # Gemini API 키 조회 (여러 경로에서 탐색)
+    def gemini_api_key
+      Rails.application.credentials.dig(:gemini, :api_key) ||
+        Rails.application.credentials.dig(:google, :gemini_api_key) ||
+        ENV["GOOGLE_GEMINI_API_KEY"] ||
+        ENV["GEMINI_API_KEY"]
     end
 
     # 기본 LLM 제공자 (credentials에서 설정)
@@ -65,11 +73,29 @@ module LangchainConfig
     end
 
     def gemini_configured?
-      Rails.application.credentials.dig(:gemini, :api_key).present?
+      gemini_api_key.present?
     end
 
     def any_llm_configured?
       openai_configured? || gemini_configured?
+    end
+
+    # 에이전트별 최적화된 LLM 설정
+    # 간단한 작업(요약)은 저렴한 모델, 복잡한 분석은 고성능 모델 사용
+    AGENT_MODEL_CONFIGS = {
+      summary: { model: "gemini-2.0-flash-lite", temperature: 0.5 },
+      target_user: { model: "gemini-2.0-flash", temperature: 0.7 },
+      market_analysis: { model: "gemini-2.0-flash", temperature: 0.7 },
+      strategy: { model: "gemini-2.0-flash", temperature: 0.7 },
+      scoring: { model: "gemini-2.0-flash", temperature: 0.5 }
+    }.freeze
+
+    # 에이전트 타입에 맞는 LLM 인스턴스 생성
+    # @param agent_type [Symbol] :summary, :target_user, :market_analysis, :strategy, :scoring
+    # @return [Langchain::LLM::GoogleGemini] 에이전트에 최적화된 LLM 인스턴스
+    def llm_for_agent(agent_type)
+      config = AGENT_MODEL_CONFIGS[agent_type] || { model: "gemini-2.0-flash", temperature: 0.7 }
+      gemini_llm(model: config[:model], temperature: config[:temperature])
     end
   end
 end

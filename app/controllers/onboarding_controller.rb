@@ -45,17 +45,33 @@ class OnboardingController < ApplicationController
       return
     end
 
-    # 분석에 전달할 전체 컨텍스트 생성
-    analysis_context = build_analysis_context
+    # 디버그 로깅
+    Rails.logger.info("[OnboardingController] LLM configured: #{LangchainConfig.any_llm_configured?}")
+    Rails.logger.info("[OnboardingController] Gemini API key present: #{LangchainConfig.gemini_api_key.present?}")
 
     # 실제 AI 분석 수행 (LLM 설정이 있는 경우)
     if LangchainConfig.any_llm_configured?
-      @analysis = Ai::IdeaAnalyzer.new(analysis_context).analyze
+      Rails.logger.info("[OnboardingController] Using real AI analysis with multi-agent orchestrator")
+
+      # 멀티 에이전트 오케스트레이터 사용 (5개 전문 에이전트 순차 실행)
+      orchestrator = Ai::Orchestrators::AnalysisOrchestrator.new(
+        @idea,
+        follow_up_answers: @follow_up_answers
+      )
+      @analysis = orchestrator.analyze
+
+      Rails.logger.info("[OnboardingController] Analysis complete. Score: #{@analysis.dig(:score, :overall)}, Agents: #{@analysis.dig(:metadata, :agents_completed)}/#{@analysis.dig(:metadata, :agents_total)}")
+
+      # 부분 실패 또는 에러 여부 확인
       @is_real_analysis = !@analysis[:error]
+      @partial_analysis = @analysis.dig(:metadata, :partial_success)
     else
+      Rails.logger.warn("[OnboardingController] Falling back to mock analysis - no LLM configured")
+
       # LLM 미설정 시 Mock 데이터 사용
       @analysis = mock_analysis
       @is_real_analysis = false
+      @partial_analysis = false
     end
 
     # 추천 전문가 찾기 + 점수 향상 예측
@@ -72,12 +88,19 @@ class OnboardingController < ApplicationController
   def expert_profile
     @user = User.find(params[:id])
 
+    # Prediction 데이터 (expert_card에서 전달됨)
+    @prediction = {
+      score_boost: params[:score_boost]&.to_i || 10,
+      boost_area: params[:boost_area] || "전문성",
+      why: params[:why].presence || "#{params[:boost_area] || '전문성'} 보완에 적합"
+    }
+
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.update(
           "profile-overlay-container",
           partial: "onboarding/expert_profile_overlay",
-          locals: { user: @user }
+          locals: { user: @user, prediction: @prediction }
         )
       end
     end
@@ -100,27 +123,6 @@ class OnboardingController < ApplicationController
     else
       answers.to_unsafe_h.symbolize_keys
     end
-  end
-
-  # 분석에 전달할 전체 컨텍스트 생성
-  def build_analysis_context
-    context = "아이디어: #{@idea}"
-
-    if @follow_up_answers.present?
-      context += "\n\n추가 정보:"
-      @follow_up_answers.each do |key, value|
-        next if value.blank?
-        label = case key.to_s
-        when "target" then "타겟 사용자"
-        when "problem" then "해결하려는 문제"
-        when "differentiator" then "차별화 포인트"
-        else key.to_s.humanize
-        end
-        context += "\n- #{label}: #{value}"
-      end
-    end
-
-    context
   end
 
   # LLM 미설정 시 사용할 기본 추가 질문
@@ -149,23 +151,51 @@ class OnboardingController < ApplicationController
     }
   end
 
-  # LLM 미설정 시 사용할 Mock 분석 결과
+  # LLM 미설정 시 사용할 Mock 분석 결과 (Figma 디자인에 맞게 확장)
   def mock_analysis
     {
       summary: "초기 창업자를 위한 커뮤니티 기반 네트워킹 플랫폼",
       target_users: {
         primary: "20-30대 초기 창업자 및 예비 창업자",
-        characteristics: ["IT/스타트업에 관심 있는 대학생", "사이드프로젝트를 찾는 개발자/디자이너", "첫 창업을 준비하는 직장인"]
+        characteristics: ["IT/스타트업에 관심 있는 대학생", "사이드프로젝트를 찾는 개발자/디자이너", "첫 창업을 준비하는 직장인"],
+        personas: [
+          {
+            name: "열정적 대학생 창업가",
+            age_range: "20-25세",
+            description: "IT 관련 학과를 전공하며 창업에 관심이 많고, 팀원을 구하고 싶어하는 대학생. 아이디어는 있지만 실행력이 부족한 경우가 많음."
+          },
+          {
+            name: "전환을 꿈꾸는 직장인",
+            age_range: "28-35세",
+            description: "현 직장에서 3-5년 경력을 쌓았으며, 사이드 프로젝트로 창업을 준비 중인 직장인. 실행력은 있지만 시간이 부족함."
+          }
+        ]
       },
       market_analysis: {
         potential: "높음",
-        competitors: ["블라인드", "리멤버", "로켓펀치"],
-        differentiation: "커뮤니티 활동과 외주 매칭을 통합한 신뢰 기반 플랫폼"
+        market_size: "국내 스타트업 지원 플랫폼 시장 규모 약 3,000억원 (2024년 기준), 연평균 12% 성장 중",
+        trends: "AI 기반 매칭 서비스와 커뮤니티 중심 네트워킹 플랫폼이 성장세. 특히 초기 창업자 대상 서비스가 급성장 중.",
+        competitors: ["블라인드", "리멤버", "로켓펀치", "원티드", "디스콰이어트"],
+        differentiation: "커뮤니티 활동과 외주 매칭을 통합한 신뢰 기반 플랫폼. 활동 기반 프로필로 신뢰도 검증 가능."
       },
       recommendations: {
-        mvp_features: ["커뮤니티 게시판", "프로필 기반 네트워킹", "구인/구직 매칭"],
-        challenges: ["초기 사용자 확보", "콘텐츠 품질 유지"],
-        next_steps: ["타겟 커뮤니티에서 베타 테스트", "핵심 사용자 그룹 형성", "피드백 기반 기능 개선"]
+        mvp_features: [
+          "커뮤니티 게시판 (자유/질문/홍보 카테고리)",
+          "프로필 기반 네트워킹 및 스킬 태그",
+          "구인/구직 매칭 및 1:1 채팅"
+        ],
+        challenges: [
+          "초기 사용자 확보가 어려울 수 있음 → 대학교/창업동아리 타겟 마케팅 권장",
+          "콘텐츠 품질 유지가 관건 → 커뮤니티 가이드라인 및 모더레이션 필요",
+          "경쟁사 대비 차별점 부각 필요 → 신뢰 기반 프로필 시스템 강조"
+        ],
+        next_steps: [
+          "타겟 커뮤니티(대학교 창업동아리)에서 베타 테스트 진행",
+          "핵심 사용자 그룹 100명 확보",
+          "피드백 기반 기능 개선 및 반복",
+          "외주 매칭 기능 추가 개발",
+          "수익화 모델 검증 (프리미엄 구독, 매칭 수수료)"
+        ]
       },
       score: {
         overall: 72,
@@ -178,9 +208,9 @@ class OnboardingController < ApplicationController
         ]
       },
       actions: [
-        { title: "핵심 타깃 1줄 정의하기", description: "주 사용자가 누구인지 한 문장으로 정리하세요" },
-        { title: "경쟁 서비스 분석", description: "유사 서비스 3개 이상 조사하고 차별점 도출" },
-        { title: "MVP 기능 리스트", description: "반드시 필요한 핵심 기능 5개 이내로 정리" }
+        { title: "핵심 타깃 1줄 정의하기", description: "명확한 페르소나 설정으로 마케팅 전략의 기반을 만드세요. 예: '창업 1년 미만 IT 분야 초기 창업자'" },
+        { title: "경쟁 서비스 분석", description: "유사 서비스 5개 이상 조사하고 각각의 강점/약점 분석. 나만의 차별점 3가지 도출" },
+        { title: "MVP 기능 리스트", description: "반드시 필요한 핵심 기능 5개 이내로 정리. 우선순위를 정하고 1차 런칭 범위 확정" }
       ],
       required_expertise: mock_required_expertise,
       analyzed_at: Time.current,
