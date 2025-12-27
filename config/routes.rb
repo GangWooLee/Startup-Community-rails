@@ -122,4 +122,17 @@ Rails.application.routes.draw do
 
   # 게시글에서 채팅 시작 (컨텍스트 포함)
   post "posts/:id/start_chat", to: "chat_rooms#create_from_post", as: :start_chat_from_post
+
+  # Admin (관리자)
+  namespace :admin do
+    root to: "dashboard#index"
+
+    resources :users, only: [:index, :show] do
+      member do
+        get :chat_rooms  # 해당 사용자의 채팅방 목록
+      end
+    end
+
+    resources :chat_rooms, only: [:show]  # 채팅방 대화 내용 열람
+  end
 end

@@ -1,0 +1,362 @@
+<% content_for :page_title, "대시보드" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">대시보드</span>
+</nav>
+
+<!-- 스코어카드 (Stat Cards) - 오늘 집중해야 할 지표 -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- 총 회원수 -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">총 회원</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= number_with_delimiter(@total_users) %></p>
+        <p class="text-xs text-gray-400 mt-1">
+          <span class="text-green-600 font-medium">+<%= @today_users %></span> 오늘 가입
+        </p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+        <%= icon "users", variant: :solid, class: "w-6 h-6 text-blue-600" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 처리 대기 신고 -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">신고 대기</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">
+          <% pending_reports = 0 %>
+          <% if pending_reports > 0 %>
+            <span class="text-red-600"><%= pending_reports %></span>
+          <% else %>
+            <span class="text-gray-400">0</span>
+          <% end %>
+        </p>
+        <p class="text-xs mt-1">
+          <% if pending_reports > 0 %>
+            <span class="text-red-600 font-medium">처리 필요!</span>
+          <% else %>
+            <span class="text-green-600 font-medium">모두 처리됨</span>
+          <% end %>
+        </p>
+      </div>
+      <div class="w-12 h-12 rounded-xl <%= pending_reports > 0 ? 'bg-red-50' : 'bg-gray-50' %> flex items-center justify-center">
+        <%= icon "flag", variant: :solid, class: "w-6 h-6 #{pending_reports > 0 ? 'text-red-600' : 'text-gray-400'}" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 정산 요청 -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">정산 요청</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">
+          <% pending_settlements = 0 %>
+          <% if pending_settlements > 0 %>
+            <span class="text-orange-600"><%= pending_settlements %></span>
+          <% else %>
+            <span class="text-gray-400">0</span>
+          <% end %>
+        </p>
+        <p class="text-xs mt-1">
+          <% if pending_settlements > 0 %>
+            <span class="text-orange-600 font-medium">정산 대기 중</span>
+          <% else %>
+            <span class="text-green-600 font-medium">정산 완료</span>
+          <% end %>
+        </p>
+      </div>
+      <div class="w-12 h-12 rounded-xl <%= pending_settlements > 0 ? 'bg-orange-50' : 'bg-gray-50' %> flex items-center justify-center">
+        <%= icon "banknotes", variant: :solid, class: "w-6 h-6 #{pending_settlements > 0 ? 'text-orange-600' : 'text-gray-400'}" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 오늘 메시지 -->
+  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">오늘 메시지</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1"><%= number_with_delimiter(@today_messages) %></p>
+        <p class="text-xs text-gray-400 mt-1">
+          총 <%= number_with_delimiter(@total_messages) %>개
+        </p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+        <%= icon "chat-bubble-left-right", variant: :solid, class: "w-6 h-6 text-green-600" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 메인 콘텐츠 그리드 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- 왼쪽: 최근 가입 회원 (2/3) -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- 최근 가입 회원 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="font-semibold text-gray-900">최근 가입 회원</h2>
+          <p class="text-sm text-gray-500">최근 7일 내 가입</p>
+        </div>
+        <%= link_to admin_users_path, class: "text-sm text-blue-600 hover:text-blue-800 font-medium" do %>
+          전체 보기 →
+        <% end %>
+      </div>
+
+      <div class="divide-y divide-gray-100">
+        <% @recent_users.each do |user| %>
+          <%= link_to admin_user_path(user), class: "flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition-colors" do %>
+            <!-- 아바타 -->
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0">
+              <%= user.name&.first&.upcase || "?" %>
+            </div>
+
+            <!-- 정보 -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="font-medium text-gray-900 truncate"><%= user.name %></p>
+                <% if user.admin? %>
+                  <span class="px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">관리자</span>
+                <% elsif user.oauth_user? %>
+                  <span class="px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">OAuth</span>
+                <% end %>
+              </div>
+              <p class="text-sm text-gray-500 truncate"><%= user.email %></p>
+            </div>
+
+            <!-- 가입일 -->
+            <div class="text-right flex-shrink-0">
+              <p class="text-sm text-gray-900"><%= user.created_at.strftime("%m/%d %H:%M") %></p>
+              <p class="text-xs text-gray-400"><%= time_ago_in_words(user.created_at) %> 전</p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @recent_users.empty? %>
+        <div class="py-12 text-center">
+          <%= icon "user-plus", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
+          <p class="mt-2 text-sm text-gray-500">최근 가입한 회원이 없습니다</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 활성 채팅방 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="font-semibold text-gray-900">활성 채팅방</h2>
+          <p class="text-sm text-gray-500">최근 메시지가 있는 채팅방</p>
+        </div>
+        <span class="text-sm text-gray-400">총 <%= @total_chat_rooms %>개</span>
+      </div>
+
+      <div class="divide-y divide-gray-100">
+        <% @recent_chat_rooms.each do |room| %>
+          <%= link_to admin_chat_room_path(room), class: "flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition-colors" do %>
+            <!-- 아이콘 -->
+            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-gray-500" %>
+            </div>
+
+            <!-- 참여자 -->
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-900 truncate">
+                <%= room.users.map(&:name).join(" ↔ ") %>
+              </p>
+              <p class="text-sm text-gray-500">
+                <%= room.messages.count %>개 메시지
+              </p>
+            </div>
+
+            <!-- 마지막 활동 -->
+            <div class="text-right flex-shrink-0">
+              <% if room.last_message_at %>
+                <p class="text-xs text-gray-400"><%= time_ago_in_words(room.last_message_at) %> 전</p>
+              <% end %>
+            </div>
+
+            <!-- 열람 버튼 -->
+            <span class="px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded hover:bg-gray-200">
+              열람
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @recent_chat_rooms.empty? %>
+        <div class="py-12 text-center">
+          <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
+          <p class="mt-2 text-sm text-gray-500">채팅방이 없습니다</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 오른쪽: 통계 요약 (1/3) -->
+  <div class="space-y-6">
+    <!-- 서비스 통계 -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-4">서비스 통계</h3>
+
+      <div class="space-y-4">
+        <!-- 회원 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <%= icon "users", variant: :solid, class: "w-4 h-4 text-blue-600" %>
+            </div>
+            <span class="text-sm text-gray-600">총 회원</span>
+          </div>
+          <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_users) %></span>
+        </div>
+
+        <!-- 채팅방 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+              <%= icon "chat-bubble-left-right", variant: :solid, class: "w-4 h-4 text-green-600" %>
+            </div>
+            <span class="text-sm text-gray-600">채팅방</span>
+          </div>
+          <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_chat_rooms) %></span>
+        </div>
+
+        <!-- 메시지 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+              <%= icon "chat-bubble-left", variant: :solid, class: "w-4 h-4 text-purple-600" %>
+            </div>
+            <span class="text-sm text-gray-600">메시지</span>
+          </div>
+          <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_messages) %></span>
+        </div>
+
+        <!-- 게시글 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+              <%= icon "document-text", variant: :solid, class: "w-4 h-4 text-orange-600" %>
+            </div>
+            <span class="text-sm text-gray-600">게시글</span>
+          </div>
+          <span class="font-semibold text-gray-900"><%= number_with_delimiter(@total_posts) %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 회원 분포 -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-4">회원 분포</h3>
+
+      <!-- 프로그레스 바 형태 분포 -->
+      <div class="space-y-3">
+        <% total = @total_users.to_f %>
+        <% admin_count = @admin_users_count || 0 %>
+        <% oauth_count = @oauth_users_count || 0 %>
+        <% regular_count = total - admin_count - oauth_count %>
+
+        <!-- 일반 회원 -->
+        <div>
+          <div class="flex items-center justify-between text-sm mb-1">
+            <span class="text-gray-600">일반 회원</span>
+            <span class="font-medium"><%= regular_count.to_i %></span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-gray-500 rounded-full" style="width: <%= total > 0 ? (regular_count / total * 100).round : 0 %>%"></div>
+          </div>
+        </div>
+
+        <!-- OAuth -->
+        <div>
+          <div class="flex items-center justify-between text-sm mb-1">
+            <span class="text-gray-600">OAuth 회원</span>
+            <span class="font-medium"><%= oauth_count %></span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 rounded-full" style="width: <%= total > 0 ? (oauth_count / total * 100).round : 0 %>%"></div>
+          </div>
+        </div>
+
+        <!-- 관리자 -->
+        <div>
+          <div class="flex items-center justify-between text-sm mb-1">
+            <span class="text-gray-600">관리자</span>
+            <span class="font-medium"><%= admin_count %></span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-red-500 rounded-full" style="width: <%= total > 0 ? (admin_count / total * 100).round : 0 %>%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top 활동 회원 -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-4">Top 활동 회원</h3>
+
+      <div class="space-y-3">
+        <% @top_active_users&.each_with_index do |user, index| %>
+          <%= link_to admin_user_path(user), class: "flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 -mx-1 transition-colors" do %>
+            <!-- 순위 -->
+            <span class="w-5 h-5 rounded-full <%= index < 3 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500' %> text-xs font-bold flex items-center justify-center flex-shrink-0">
+              <%= index + 1 %>
+            </span>
+
+            <!-- 아바타 -->
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">
+              <%= user.name&.first&.upcase || "?" %>
+            </div>
+
+            <!-- 이름 -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate"><%= user.name %></p>
+            </div>
+
+            <!-- 메시지 수 -->
+            <span class="text-sm text-gray-500"><%= user.messages_count %> msg</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @top_active_users.blank? %>
+        <p class="text-sm text-gray-400 text-center py-4">활동 데이터 없음</p>
+      <% end %>
+    </div>
+
+    <!-- 빠른 액션 -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-4">빠른 액션</h3>
+
+      <div class="space-y-2">
+        <%= link_to admin_users_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors" do %>
+          <%= icon "users", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+          <span class="text-sm text-gray-700">회원 관리</span>
+          <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-gray-300 ml-auto" %>
+        <% end %>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+          <%= icon "flag", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+          <span class="text-sm text-gray-700">신고 관리</span>
+          <span class="text-xs text-gray-400 ml-auto">준비 중</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+          <%= icon "banknotes", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+          <span class="text-sm text-gray-700">정산 관리</span>
+          <span class="text-xs text-gray-400 ml-auto">준비 중</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

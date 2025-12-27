@@ -1,0 +1,76 @@
+<div class="p-6 space-y-6">
+  <!-- 헤더 -->
+  <div class="flex items-center justify-between">
+    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">회원 현황</h3>
+    <span class="text-xs text-gray-400">Active</span>
+  </div>
+
+  <!-- 도넛 차트 영역 -->
+  <div class="relative">
+    <div class="w-40 h-40 mx-auto">
+      <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+        <!-- 배경 원 -->
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="12"/>
+        <!-- 일반 회원 (회색) -->
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#6b7280" stroke-width="12"
+                stroke-dasharray="<%= @normal_dash || 200 %> 251.2" stroke-linecap="round"/>
+        <!-- OAuth 회원 (파랑) -->
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="12"
+                stroke-dasharray="<%= @oauth_dash || 40 %> 251.2" stroke-dashoffset="<%= @oauth_offset || -200 %>" stroke-linecap="round"/>
+        <!-- 관리자 (빨강) -->
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="12"
+                stroke-dasharray="<%= @admin_dash || 11 %> 251.2" stroke-dashoffset="<%= @admin_offset || -240 %>" stroke-linecap="round"/>
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-center flex-col">
+        <span class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@total_count) %></span>
+        <span class="text-xs text-gray-500">총 회원</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원 타입 분포 -->
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded bg-gray-500"></span>
+        <span class="text-sm text-gray-600">일반</span>
+      </div>
+      <span class="text-sm font-medium"><%= @normal_percentage || 80 %>%</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded bg-blue-500"></span>
+        <span class="text-sm text-gray-600">OAuth</span>
+      </div>
+      <span class="text-sm font-medium"><%= @oauth_percentage || 16 %>%</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded bg-red-500"></span>
+        <span class="text-sm text-gray-600">관리자</span>
+      </div>
+      <span class="text-sm font-medium"><%= @admin_percentage || 4 %>%</span>
+    </div>
+  </div>
+
+  <!-- 최근 가입 회원 -->
+  <div class="pt-4 border-t border-gray-100">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">최근 가입</h3>
+      <span class="text-xs text-gray-400">This week</span>
+    </div>
+    <div class="space-y-3">
+      <% User.order(created_at: :desc).limit(5).each do |user| %>
+        <%= link_to admin_user_path(user), class: "flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 -mx-1 transition" do %>
+          <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">
+            <%= user.name&.first&.upcase || "?" %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate"><%= user.name %></p>
+          </div>
+          <span class="text-xs text-gray-500"><%= time_ago_in_words(user.created_at) %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,220 @@
+<% content_for :page_title, "회원 상세" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <span>/</span>
+  <%= link_to "회원 관리", admin_users_path, class: "hover:text-gray-700" %>
+  <span>/</span>
+  <span class="text-gray-900 font-medium"><%= @user.name %></span>
+</nav>
+
+<div class="flex gap-6">
+  <!-- 왼쪽: 프로필 카드 (고정 너비) -->
+  <div class="w-80 flex-shrink-0">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-6">
+      <!-- 프로필 헤더 -->
+      <div class="bg-gradient-to-br from-blue-500 to-purple-600 px-6 py-8 text-center">
+        <div class="w-20 h-20 mx-auto rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white text-2xl font-bold border-4 border-white/30">
+          <%= @user.name&.first&.upcase || "?" %>
+        </div>
+        <h2 class="text-xl font-bold text-white mt-4"><%= @user.name %></h2>
+        <p class="text-sm text-white/80 mt-1"><%= @user.email %></p>
+
+        <!-- 상태 뱃지 -->
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <% if @user.admin? %>
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 text-white">관리자</span>
+          <% end %>
+          <% if @user.oauth_user? %>
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 text-white">OAuth</span>
+          <% end %>
+          <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 text-white flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            Active
+          </span>
+        </div>
+      </div>
+
+      <!-- 프로필 정보 -->
+      <div class="p-5 space-y-4">
+        <!-- 기본 정보 -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">가입일</span>
+            <span class="font-medium text-gray-900"><%= @user.created_at.strftime("%Y-%m-%d") %></span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">가입 경과</span>
+            <span class="font-medium text-gray-900"><%= time_ago_in_words(@user.created_at) %></span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">최근 로그인</span>
+            <span class="font-medium text-gray-900">
+              <%= @user.last_sign_in_at&.strftime("%m/%d %H:%M") || "-" %>
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">인증 방식</span>
+            <span class="font-medium text-gray-900">
+              <% if @user.oauth_user? %>
+                <%= @user.connected_providers.map(&:capitalize).join(", ") %>
+              <% else %>
+                이메일
+              <% end %>
+            </span>
+          </div>
+        </div>
+
+        <!-- 활동 통계 -->
+        <div class="pt-4 border-t border-gray-100">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">활동 통계</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+              <p class="text-xl font-bold text-gray-900"><%= @posts_count %></p>
+              <p class="text-xs text-gray-500">게시글</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+              <p class="text-xl font-bold text-gray-900"><%= @comments_count %></p>
+              <p class="text-xs text-gray-500">댓글</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+              <p class="text-xl font-bold text-gray-900"><%= @messages_count %></p>
+              <p class="text-xs text-gray-500">메시지</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+              <p class="text-xl font-bold text-gray-900"><%= @chat_rooms.count %></p>
+              <p class="text-xs text-gray-500">채팅방</p>
+            </div>
+          </div>
+        </div>
+
+        <% if @user.bio.present? %>
+          <div class="pt-4 border-t border-gray-100">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">자기소개</p>
+            <p class="text-sm text-gray-700"><%= @user.bio %></p>
+          </div>
+        <% end %>
+
+        <!-- 액션 버튼 -->
+        <div class="pt-4 border-t border-gray-100 space-y-2">
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+            <%= icon "envelope", variant: :outline, class: "w-4 h-4" %>
+            메시지 보내기
+          </button>
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition"
+                  onclick="confirm('정말 이 사용자를 정지하시겠습니까?') && alert('정지 기능은 준비 중입니다.')">
+            <%= icon "no-symbol", variant: :outline, class: "w-4 h-4" %>
+            사용자 정지
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 오른쪽: 탭 콘텐츠 -->
+  <div class="flex-1 min-w-0">
+    <!-- 탭 네비게이션 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <button class="px-6 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                  data-tab="chatrooms">
+            <%= icon "chat-bubble-left-right", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            채팅방 (<%= @chat_rooms.count %>)
+          </button>
+          <button class="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+                  data-tab="posts" disabled>
+            <%= icon "document-text", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            게시글 (<%= @posts_count %>)
+          </button>
+          <button class="px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+                  data-tab="payments" disabled>
+            <%= icon "credit-card", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            결제 내역
+          </button>
+        </nav>
+      </div>
+
+      <!-- 채팅방 목록 -->
+      <div class="p-4" id="tab-chatrooms">
+        <% if @chat_rooms.any? %>
+          <div class="space-y-3">
+            <% @chat_rooms.each do |room| %>
+              <div class="border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                <div class="p-4">
+                  <!-- 채팅방 헤더 -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                      <!-- 상대방 아바타 -->
+                      <% other_user = room.users.find { |u| u != @user } || room.users.first %>
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-medium">
+                        <%= other_user&.name&.first&.upcase || "?" %>
+                      </div>
+                      <div>
+                        <p class="font-medium text-gray-900">
+                          <%= room.users.map(&:name).join(" ↔ ") %>
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          채팅방 #<%= room.id %> · <%= room.messages.count %>개 메시지
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 열람 버튼 -->
+                    <%= link_to admin_chat_room_path(room),
+                                class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition" do %>
+                      <%= icon "eye", variant: :outline, class: "w-4 h-4" %>
+                      대화 열람
+                    <% end %>
+                  </div>
+
+                  <!-- 최근 메시지 미리보기 -->
+                  <% if room.messages.any? %>
+                    <% last_msg = room.messages.last %>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                      <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 flex-shrink-0 mt-0.5">
+                          <%= last_msg.sender&.name&.first&.upcase || "S" %>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 mb-0.5">
+                            <span class="text-xs font-medium text-gray-700">
+                              <%= last_msg.sender&.name || "시스템" %>
+                            </span>
+                            <span class="text-xs text-gray-400">
+                              <%= last_msg.created_at.strftime("%m/%d %H:%M") %>
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 truncate"><%= last_msg.content.truncate(80) %></p>
+                        </div>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="bg-gray-50 rounded-lg p-3 text-center">
+                      <p class="text-sm text-gray-400">대화 내용 없음</p>
+                    </div>
+                  <% end %>
+
+                  <!-- 메타 정보 -->
+                  <div class="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                    <span>생성: <%= room.created_at.strftime("%Y-%m-%d") %></span>
+                    <% if room.last_message_at %>
+                      <span>마지막 활동: <%= time_ago_in_words(room.last_message_at) %> 전</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="py-12 text-center">
+            <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">채팅방 없음</h3>
+            <p class="mt-1 text-sm text-gray-500">이 사용자는 참여 중인 채팅방이 없습니다.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

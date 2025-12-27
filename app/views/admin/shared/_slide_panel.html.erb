@@ -1,0 +1,30 @@
+<%# 슬라이드 패널 컴포넌트 - 오른쪽에서 슬라이드 인 %>
+<%# 사용법: render "admin/shared/slide_panel", title: "제목" do ... end %>
+<%= turbo_frame_tag "slide_panel" do %>
+  <div class="fixed inset-0 z-50" data-controller="admin--slide-panel">
+    <!-- 오버레이 배경 -->
+    <div class="absolute inset-0 bg-black/50 transition-opacity"
+         data-action="click->admin--slide-panel#close"></div>
+
+    <!-- 슬라이드 패널 -->
+    <div class="absolute right-0 top-0 h-full w-full max-w-[480px] bg-white shadow-2xl
+                transform translate-x-full transition-transform duration-300 ease-out"
+         data-admin--slide-panel-target="panel">
+
+      <!-- 패널 헤더 -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <h2 class="text-lg font-semibold text-gray-900"><%= local_assigns[:title] || "상세 정보" %></h2>
+        <button type="button"
+                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                data-action="click->admin--slide-panel#close">
+          <%= icon "x-mark", variant: :outline, class: "w-5 h-5" %>
+        </button>
+      </div>
+
+      <!-- 패널 콘텐츠 -->
+      <div class="p-6 overflow-y-auto" style="height: calc(100% - 64px);">
+        <%= yield if block_given? %>
+      </div>
+    </div>
+  </div>
+<% end %>

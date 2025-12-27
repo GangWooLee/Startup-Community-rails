@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - <%= content_for?(:title) ? yield(:title) : "관리자 페이지" %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%# Tailwind CSS CDN %>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <%# Tailwind Config %>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Admin 전용 컬러
+            sidebar: {
+              DEFAULT: '#111827', // gray-900
+              hover: '#1f2937',   // gray-800
+              active: '#374151',  // gray-700
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <style>
+    :root {
+      --admin-sidebar-width: 240px;
+      --admin-header-height: 56px;
+      --admin-right-panel-width: 320px;
+    }
+
+    /* Admin 기본 스타일 */
+    * {
+      border-color: #e5e7eb; /* gray-200 */
+    }
+  </style>
+</head>
+<body class="h-full bg-gray-100">
+  <div class="flex h-full">
+    <!-- Sidebar -->
+    <%= render "admin/shared/sidebar" %>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex" style="margin-left: var(--admin-sidebar-width);">
+      <!-- Center Content -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Header -->
+        <%= render "admin/shared/header" %>
+
+        <!-- Flash Messages -->
+        <% if flash[:notice] %>
+          <div class="bg-green-50 border-l-4 border-green-500 p-4 mx-6 mt-4">
+            <p class="text-green-700"><%= flash[:notice] %></p>
+          </div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 mx-6 mt-4">
+            <p class="text-red-700"><%= flash[:alert] %></p>
+          </div>
+        <% end %>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-auto p-6">
+          <%= yield %>
+        </main>
+      </div>
+
+      <!-- Right Stats Panel (Optional) -->
+      <% if content_for?(:right_panel) %>
+        <aside class="hidden xl:block border-l border-gray-200 bg-white overflow-y-auto"
+               style="width: var(--admin-right-panel-width);">
+          <%= yield :right_panel %>
+        </aside>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Slide Panel (Turbo Frame) -->
+  <%= turbo_frame_tag "slide_panel" %>
+</body>
+</html>

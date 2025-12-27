@@ -134,6 +134,11 @@ class User < ApplicationRecord
     !oauth_user?
   end
 
+  # 관리자인지 확인
+  def admin?
+    is_admin == true
+  end
+
   # 연결된 OAuth provider 목록
   def connected_providers
     oauth_identities.pluck(:provider)

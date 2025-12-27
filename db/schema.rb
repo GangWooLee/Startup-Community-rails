@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_26_075239) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_26_142342) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -284,6 +284,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_26_075239) do
     t.string "custom_status"
     t.string "email", null: false
     t.string "github_url"
+    t.boolean "is_admin", default: false, null: false
     t.datetime "last_sign_in_at"
     t.string "linkedin_url"
     t.string "name", null: false
@@ -296,6 +297,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_26_075239) do
     t.string "uid"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["is_admin"], name: "index_users_on_is_admin"
     t.index ["name"], name: "index_users_on_name_for_search"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["role_title"], name: "index_users_on_role_title_for_search"
