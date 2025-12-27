@@ -58,8 +58,8 @@ class OnboardingController < ApplicationController
       @is_real_analysis = false
     end
 
-    # 추천 전문가 찾기
-    @recommended_experts = find_recommended_experts
+    # 추천 전문가 찾기 + 점수 향상 예측
+    @recommended_experts = find_recommended_experts_with_predictions
 
     # 온보딩 경험 완료 표시 (다음 방문 시 커뮤니티 직접 접근 허용)
     cookies[:onboarding_completed] = {
@@ -197,13 +197,18 @@ class OnboardingController < ApplicationController
     }
   end
 
-  # 추천 전문가 찾기
-  def find_recommended_experts
+  # 추천 전문가 찾기 (점수 예측 포함)
+  def find_recommended_experts_with_predictions
     required_expertise = @analysis[:required_expertise] || mock_required_expertise
 
-    ExpertMatcher.new(
+    # 전문가 매칭
+    experts = ExpertMatcher.new(
       required_expertise,
       exclude_user_id: current_user&.id
     ).find_matches
+
+    # 점수 향상 예측
+    predictor = Ai::ExpertScorePredictor.new(@analysis)
+    predictor.predict_all(experts)
   end
 end

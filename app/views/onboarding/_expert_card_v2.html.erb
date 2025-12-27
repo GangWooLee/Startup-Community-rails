@@ -1,12 +1,12 @@
 <%# 추천 전문가 카드 v2 (2x2 그리드용, 점수 향상 예측 포함) %>
-<%# locals: user, index %>
+<%# locals: prediction %>
 
 <%
-  # Phase 4에서 실제 AI 예측으로 대체될 예정
-  # 현재는 Mock 데이터 사용
-  score_boost = [25, 20, 15, 10][index.to_i] || 10
-  boost_areas = ["시장 분석", "기술 구현", "디자인", "마케팅"]
-  boost_area = boost_areas[index.to_i] || "전문성"
+  # prediction 구조: { user:, score_boost:, boost_area:, why: }
+  user = prediction[:user]
+  score_boost = prediction[:score_boost] || 10
+  boost_area = prediction[:boost_area] || "전문성"
+  why = prediction[:why] || "#{boost_area} 보완에 적합"
 %>
 
 <button type="button"
@@ -45,7 +45,7 @@
 
   <!-- Why 설명 (점수 향상 이유) -->
   <div class="bg-secondary/50 rounded-lg p-2 mb-2">
-    <p class="text-[11px] text-muted-foreground text-center leading-tight">
+    <p class="text-[11px] text-muted-foreground text-center leading-tight line-clamp-2">
       <span class="text-primary font-medium"><%= boost_area %></span> 보완에 적합
     </p>
   </div>

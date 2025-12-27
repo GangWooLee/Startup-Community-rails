@@ -213,8 +213,8 @@
 
           <!-- 2x2 Expert Grid -->
           <div class="grid grid-cols-2 gap-4 mb-6">
-            <% @recommended_experts.first(4).each_with_index do |expert, index| %>
-              <%= render "onboarding/expert_card_v2", user: expert, index: index %>
+            <% @recommended_experts.first(4).each do |prediction| %>
+              <%= render "onboarding/expert_card_v2", prediction: prediction %>
             <% end %>
           </div>
 
