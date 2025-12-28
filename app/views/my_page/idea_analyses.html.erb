@@ -1,0 +1,68 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <!-- 뒤로가기 버튼 -->
+        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+        <div>
+          <h1 class="text-xl font-bold">AI 분석 기록</h1>
+          <p class="text-xs text-muted-foreground">내 아이디어 분석 히스토리</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6">
+    <% if @idea_analyses.any? %>
+      <div class="space-y-3">
+        <% @idea_analyses.each do |analysis| %>
+          <%= link_to ai_result_path(analysis) do %>
+            <div class="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-all mb-3">
+              <!-- 점수 뱃지 & 날짜 -->
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium <%= analysis.score.to_i >= 70 ? 'bg-green-500/10 text-green-600' : analysis.score.to_i >= 50 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-red-500/10 text-red-600' %>">
+                  <span class="font-bold"><%= analysis.score || 0 %>점</span>
+                </span>
+                <span class="text-xs text-muted-foreground">
+                  <%= analysis.created_at.strftime("%Y.%m.%d %H:%M") %>
+                </span>
+              </div>
+
+              <!-- 아이디어 내용 -->
+              <p class="text-sm font-medium line-clamp-2 mb-2"><%= analysis.idea %></p>
+
+              <!-- 요약 (있으면) -->
+              <% if analysis.summary.present? %>
+                <p class="text-xs text-muted-foreground line-clamp-1"><%= analysis.summary %></p>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
+          <svg class="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">아직 분석 기록이 없어요</h3>
+        <p class="text-sm text-muted-foreground mb-4">AI에게 아이디어를 분석받아 보세요!</p>
+        <%= render_button as: :link, href: onboarding_ai_input_path, class: "gap-2" do %>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          AI 분석 시작하기
+        <% end %>
+      </div>
+    <% end %>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>

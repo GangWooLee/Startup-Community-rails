@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_27_124200) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_28_115820) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -93,6 +93,20 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_27_124200) do
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "idea_analyses", force: :cascade do |t|
+    t.json "analysis_result", null: false
+    t.datetime "created_at", null: false
+    t.json "follow_up_answers"
+    t.text "idea", null: false
+    t.boolean "is_real_analysis", default: true
+    t.boolean "partial_success", default: false
+    t.integer "score"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id", "created_at"], name: "index_idea_analyses_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_idea_analyses_on_user_id"
   end
 
   create_table "job_posts", force: :cascade do |t|
@@ -314,6 +328,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_27_124200) do
   add_foreign_key "comments", "comments", column: "parent_id", on_delete: :cascade
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
+  add_foreign_key "idea_analyses", "users"
   add_foreign_key "job_posts", "users"
   add_foreign_key "likes", "users"
   add_foreign_key "messages", "chat_rooms"

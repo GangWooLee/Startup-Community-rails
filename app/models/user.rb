@@ -51,6 +51,9 @@ class User < ApplicationRecord
   has_many :sales, class_name: "Order", foreign_key: :seller_id, dependent: :destroy # 판매 내역
   has_many :payments, dependent: :destroy
 
+  # AI 아이디어 분석
+  has_many :idea_analyses, dependent: :destroy
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
 

@@ -31,6 +31,11 @@ class MyPageController < ApplicationController
     @user = current_user
   end
 
+  def idea_analyses
+    @user = current_user
+    @idea_analyses = @user.idea_analyses.order(created_at: :desc)
+  end
+
   def update
     @user = current_user
 

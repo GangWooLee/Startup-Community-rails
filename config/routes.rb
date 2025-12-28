@@ -16,7 +16,8 @@ Rails.application.routes.draw do
   # Onboarding Flow (AI 분석)
   get "ai/input", to: "onboarding#ai_input", as: :onboarding_ai_input
   post "ai/questions", to: "onboarding#ai_questions", as: :onboarding_ai_questions
-  get "ai/result", to: "onboarding#ai_result", as: :onboarding_ai_result
+  post "ai/analyze", to: "onboarding#ai_analyze", as: :onboarding_ai_analyze
+  get "ai/result/:id", to: "onboarding#ai_result", as: :ai_result
   get "ai/expert/:id", to: "onboarding#expert_profile", as: :expert_profile
 
   # Community (커뮤니티)
@@ -77,6 +78,7 @@ Rails.application.routes.draw do
   # My Page
   get "my_page", to: "my_page#show", as: :my_page
   get "my_page/edit", to: "my_page#edit", as: :edit_my_page
+  get "my_page/idea_analyses", to: "my_page#idea_analyses", as: :my_idea_analyses
   patch "my_page", to: "my_page#update"
 
   # Settings

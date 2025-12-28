@@ -1,6 +1,6 @@
 class OnboardingController < ApplicationController
-  # AI 분석 기능은 로그인 필수 (계정당 무료 체험 3회)
-  before_action :require_login, only: [:ai_input, :ai_questions, :ai_result]
+  # AI 분석 결과 페이지만 로그인 필수 (분석은 비로그인으로 가능)
+  before_action :require_login, only: [:ai_result]
   before_action :hide_floating_button, only: [:ai_input, :ai_result]
 
   def landing
@@ -35,44 +35,83 @@ class OnboardingController < ApplicationController
     render json: result
   end
 
-  def ai_result
+  # AI 분석 실행 및 DB 저장 (POST /ai/analyze)
+  # 분석 완료 후 결과 페이지로 리다이렉트
+  def ai_analyze
     @idea = params[:idea]
     @follow_up_answers = parse_follow_up_answers
 
     # 아이디어가 없으면 입력 화면으로 리디렉션
     if @idea.blank?
-      redirect_to onboarding_ai_input_path
+      redirect_to onboarding_ai_input_path, alert: "아이디어를 입력해주세요"
       return
     end
 
     # 디버그 로깅
-    Rails.logger.info("[OnboardingController] LLM configured: #{LangchainConfig.any_llm_configured?}")
-    Rails.logger.info("[OnboardingController] Gemini API key present: #{LangchainConfig.gemini_api_key.present?}")
+    Rails.logger.info("[OnboardingController#ai_analyze] Starting analysis")
+    Rails.logger.info("[OnboardingController#ai_analyze] LLM configured: #{LangchainConfig.any_llm_configured?}")
 
-    # 실제 AI 분석 수행 (LLM 설정이 있는 경우)
+    # AI 분석 수행
     if LangchainConfig.any_llm_configured?
-      Rails.logger.info("[OnboardingController] Using real AI analysis with multi-agent orchestrator")
+      Rails.logger.info("[OnboardingController#ai_analyze] Using real AI analysis with multi-agent orchestrator")
 
-      # 멀티 에이전트 오케스트레이터 사용 (5개 전문 에이전트 순차 실행)
       orchestrator = Ai::Orchestrators::AnalysisOrchestrator.new(
         @idea,
         follow_up_answers: @follow_up_answers
       )
-      @analysis = orchestrator.analyze
+      analysis = orchestrator.analyze
+      is_real = !analysis[:error]
+      partial = analysis.dig(:metadata, :partial_success) || false
 
-      Rails.logger.info("[OnboardingController] Analysis complete. Score: #{@analysis.dig(:score, :overall)}, Agents: #{@analysis.dig(:metadata, :agents_completed)}/#{@analysis.dig(:metadata, :agents_total)}")
-
-      # 부분 실패 또는 에러 여부 확인
-      @is_real_analysis = !@analysis[:error]
-      @partial_analysis = @analysis.dig(:metadata, :partial_success)
+      Rails.logger.info("[OnboardingController#ai_analyze] Analysis complete. Score: #{analysis.dig(:score, :overall)}")
     else
-      Rails.logger.warn("[OnboardingController] Falling back to mock analysis - no LLM configured")
-
-      # LLM 미설정 시 Mock 데이터 사용
-      @analysis = mock_analysis
-      @is_real_analysis = false
-      @partial_analysis = false
+      Rails.logger.warn("[OnboardingController#ai_analyze] Falling back to mock analysis - no LLM configured")
+      analysis = mock_analysis
+      is_real = false
+      partial = false
     end
+
+    # 로그인 상태: DB에 저장 후 결과 페이지로 리다이렉트
+    if logged_in?
+      idea_analysis = current_user.idea_analyses.create!(
+        idea: @idea,
+        follow_up_answers: @follow_up_answers,
+        analysis_result: analysis,
+        score: analysis.dig(:score, :overall),
+        is_real_analysis: is_real,
+        partial_success: partial
+      )
+
+      Rails.logger.info("[OnboardingController#ai_analyze] Saved IdeaAnalysis##{idea_analysis.id}")
+      redirect_to ai_result_path(idea_analysis)
+    else
+      # 비로그인: 캐시에 분석 결과 저장 (세션에는 키만 저장 - CookieOverflow 방지)
+      cache_key = "pending_analysis:#{SecureRandom.uuid}"
+      Rails.cache.write(cache_key, {
+        idea: @idea,
+        follow_up_answers: @follow_up_answers,
+        analysis_result: analysis,
+        score: analysis.dig(:score, :overall),
+        is_real_analysis: is_real,
+        partial_success: partial
+      }, expires_in: 1.hour)
+
+      session[:pending_analysis_key] = cache_key
+
+      Rails.logger.info("[OnboardingController#ai_analyze] Saved analysis to cache (key: #{cache_key}) for non-logged-in user")
+      redirect_to login_path, notice: "분석이 완료되었습니다! 결과를 확인하려면 로그인해주세요."
+    end
+  end
+
+  # 분석 결과 조회 (GET /ai/result/:id)
+  # DB에서 저장된 결과를 로드 (재분석 없음)
+  def ai_result
+    # DB에서 분석 결과 로드
+    @idea_analysis = current_user.idea_analyses.find(params[:id])
+    @idea = @idea_analysis.idea
+    @analysis = @idea_analysis.parsed_result
+    @is_real_analysis = @idea_analysis.is_real_analysis
+    @partial_analysis = @idea_analysis.partial_success
 
     # 추천 전문가 찾기 + 점수 향상 예측
     @recommended_experts = find_recommended_experts_with_predictions
@@ -82,6 +121,8 @@ class OnboardingController < ApplicationController
       value: "true",
       expires: 1.year.from_now
     }
+  rescue ActiveRecord::RecordNotFound
+    redirect_to onboarding_ai_input_path, alert: "분석 결과를 찾을 수 없습니다"
   end
 
   # 전문가 프로필 오버레이 (Turbo Stream)

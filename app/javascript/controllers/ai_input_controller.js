@@ -10,7 +10,8 @@ export default class extends Controller {
 
   static values = {
     questionsUrl: String,
-    resultUrl: String
+    analyzeUrl: String,
+    csrfToken: String
   }
 
   connect() {
@@ -177,25 +178,59 @@ export default class extends Controller {
     this.analyzeButtonTarget.disabled = !allRequiredFilled
   }
 
-  // Step 2: Submit for analysis
+  // Step 2: Submit for analysis via POST form
   submitForAnalysis() {
     // Update progress
     this.progress3Target.classList.remove("bg-secondary")
     this.progress3Target.classList.add("bg-primary")
 
-    // Build URL with query params
-    const url = new URL(this.resultUrlValue, window.location.origin)
-    url.searchParams.set("idea", this.idea)
-    url.searchParams.set("answers", JSON.stringify(this.answers))
+    // Show loading state
+    this.step2Target.classList.add("hidden")
+    this.loadingTarget.classList.remove("hidden")
+    this.loadingTextTarget.textContent = "AI가 아이디어를 분석하고 있어요..."
 
-    // Navigate to result page
-    window.location.href = url.toString()
+    // Submit via POST form (for CSRF protection and proper redirect)
+    this.submitPostForm(this.idea, this.answers)
   }
 
   goToAnalysis() {
-    const url = new URL(this.resultUrlValue, window.location.origin)
-    url.searchParams.set("idea", this.idea)
-    window.location.href = url.toString()
+    // Show loading state
+    this.loadingTarget.classList.remove("hidden")
+    this.loadingTextTarget.textContent = "AI가 아이디어를 분석하고 있어요..."
+
+    // Submit via POST form
+    this.submitPostForm(this.idea, {})
+  }
+
+  // Create and submit a hidden POST form
+  submitPostForm(idea, answers) {
+    const form = document.createElement("form")
+    form.method = "POST"
+    form.action = this.analyzeUrlValue
+
+    // CSRF token
+    const csrfInput = document.createElement("input")
+    csrfInput.type = "hidden"
+    csrfInput.name = "authenticity_token"
+    csrfInput.value = this.csrfTokenValue
+    form.appendChild(csrfInput)
+
+    // Idea
+    const ideaInput = document.createElement("input")
+    ideaInput.type = "hidden"
+    ideaInput.name = "idea"
+    ideaInput.value = idea
+    form.appendChild(ideaInput)
+
+    // Answers (JSON)
+    const answersInput = document.createElement("input")
+    answersInput.type = "hidden"
+    answersInput.name = "answers"
+    answersInput.value = JSON.stringify(answers)
+    form.appendChild(answersInput)
+
+    document.body.appendChild(form)
+    form.submit()
   }
 
   scrollToBottom() {

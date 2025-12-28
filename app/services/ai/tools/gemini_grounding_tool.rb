@@ -47,7 +47,7 @@ module Ai
 
       # 시장 데이터 검색
       def search_market_data(query:)
-        enhanced_query = "#{query} 시장 규모 성장률 통계 2024"
+        enhanced_query = "#{query} 시장 규모 성장률 통계 #{current_date_context}"
         execute_grounded_search(enhanced_query, context: "시장 데이터")
       end
 
@@ -59,11 +59,21 @@ module Ai
 
       # 최신 트렌드 검색
       def search_trends(query:)
-        enhanced_query = "#{query} 트렌드 동향 전망 2024 2025"
+        enhanced_query = "#{query} 트렌드 동향 전망 #{current_date_context}"
         execute_grounded_search(enhanced_query, context: "트렌드")
       end
 
       private
+
+      # 현재 날짜 기반 검색 컨텍스트 생성
+      # 예: "2024-2025년 2025년 1분기 최신"
+      def current_date_context
+        now = Time.current
+        year = now.year
+        quarter = ((now.month - 1) / 3) + 1
+
+        "#{year - 1}-#{year}년 #{year}년 #{quarter}분기 최신"
+      end
 
       def execute_grounded_search(query, context: "검색 결과")
         Rails.logger.info("[GeminiGroundingTool] Searching: #{query}")
@@ -122,13 +132,15 @@ module Ai
       end
 
       def build_search_prompt(query)
+        current_year = Time.current.year
         <<~PROMPT
           다음 주제에 대해 웹 검색을 통해 최신 정보를 찾아주세요:
 
           #{query}
 
           요청사항:
-          - 가능한 최신 데이터 (2024년 이후) 우선
+          - 가능한 최신 데이터 (#{current_year}년 이후) 우선
+          - #{current_year}년 데이터가 없으면 #{current_year - 1}년 데이터 참고
           - 구체적인 수치와 통계 포함
           - 신뢰할 수 있는 출처 (정부 기관, 리서치 기관, 언론사) 우선
           - 한국 시장 기준으로 답변
@@ -182,7 +194,7 @@ module Ai
 
         if response[:sources].present?
           result += "\n\n[출처]\n"
-          response[:sources].first(3).each do |source|
+          response[:sources].first(6).each do |source|
             result += "- #{source[:title]}\n"
           end
         end
