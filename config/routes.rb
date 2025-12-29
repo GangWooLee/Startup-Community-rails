@@ -30,11 +30,25 @@ Rails.application.routes.draw do
   get    "/signup", to: "users#new",        as: :signup
   post   "/signup", to: "users#create"
 
+  # Email Verification (회원가입 이메일 인증)
+  resources :email_verifications, only: [:create] do
+    collection do
+      post :verify
+    end
+  end
+
   # OAuth Authentication
   # OAuth 요청 전 return_to 저장을 위한 중간 경로
   post "/oauth/:provider", to: "oauth#passthru", as: :oauth_passthru
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [:get, :post]
   get "/auth/failure", to: "omniauth_callbacks#failure"
+
+  # Account Recovery (비밀번호 찾기)
+  get   "password/forgot",        to: "account_recovery#forgot_password_form", as: :forgot_password_form
+  post  "password/forgot",        to: "account_recovery#forgot_password",      as: :forgot_password
+  get   "password/forgot/sent",   to: "account_recovery#forgot_password_sent", as: :forgot_password_sent
+  get   "password/reset/:token",  to: "account_recovery#reset_password_form",  as: :reset_password_form
+  patch "password/reset/:token",  to: "account_recovery#reset_password",       as: :reset_password
 
   # Posts (Community)
   resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do

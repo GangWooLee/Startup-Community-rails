@@ -34,13 +34,13 @@
                           class: "w-full" %>
         </div>
 
-        <!-- Remember Me -->
+        <!-- Remember Me & Account Recovery -->
         <div class="flex items-center justify-between">
           <label class="flex items-center gap-2 text-sm text-muted-foreground">
             <input type="checkbox" name="remember_me" class="rounded border-input h-4 w-4">
             <span>로그인 상태 유지</span>
           </label>
-          <a href="#" class="text-sm text-primary hover:underline">비밀번호 찾기</a>
+          <%= link_to "비밀번호 찾기", forgot_password_form_path, class: "text-sm text-primary hover:underline" %>
         </div>
 
         <!-- Submit Button - shadcn Button -->

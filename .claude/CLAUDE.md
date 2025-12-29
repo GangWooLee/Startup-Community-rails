@@ -258,6 +258,20 @@ main          # 프로덕션 브랜치
 
 ## 금지 사항
 
+### 🚨 절대 수정 금지 파일 (Critical - Never Modify)
+다음 파일들은 **어떤 상황에서도 절대 수정하면 안 됩니다**:
+
+| 파일 | 설명 |
+|------|------|
+| `config/credentials.yml.enc` | 암호화된 credentials (API 키, OAuth secrets) |
+| `config/master.key` | 마스터 키 |
+| `.env` | 환경 변수 (존재하는 경우) |
+
+⚠️ 이 파일들은 Google OAuth, GitHub OAuth, Gemini API, Toss 결제 등 **고유한 설정값**을 포함합니다.
+⚠️ 수정 시 프로젝트 전체가 작동하지 않습니다!
+
+**유일한 예외**: 사용자가 "credentials를 업데이트해줘"라고 **명시적으로 요청**한 경우에만 수정
+
 ### 절대 하지 말 것
 ❌ `User.all` (without pagination)
 ❌ N+1 쿼리 (includes/joins 사용)
@@ -311,3 +325,30 @@ main          # 프로덕션 브랜치
 2. 관련 파일 컨텍스트 파악
 3. Rails 가이드 참조
 4. 여러 해결책 제시 (장단점)
+
+---
+
+## Figma MCP 연동 규칙
+
+### MCP 서버
+- **Remote**: `figma` - 링크 기반 작업 (항상 사용 가능)
+- **Desktop**: `figma-desktop` - 선택 기반 작업 (Figma 앱 필요)
+
+### 코드 생성 규칙
+- Figma MCP 출력(React + Tailwind)을 **ERB + Tailwind**로 변환
+- 기존 컴포넌트 재사용: `app/views/components/ui/`
+- shadcn-ui 헬퍼 사용: `render_button`, `render_card`, `render_badge` 등
+- Stimulus 컨트롤러 연동 필요시 `app/javascript/controllers/` 참조
+
+### 이미지/SVG 처리
+- Figma localhost 소스가 제공되면 그대로 사용
+- 새 아이콘 패키지 추가 금지, Figma 에셋 사용
+- 플레이스홀더 생성 금지
+
+### 파일 위치
+| 유형 | 경로 |
+|------|------|
+| 페이지 뷰 | `app/views/[controller]/` |
+| 공통 컴포넌트 | `app/views/shared/` |
+| UI 컴포넌트 | `app/views/components/ui/` |
+| Stimulus | `app/javascript/controllers/` |

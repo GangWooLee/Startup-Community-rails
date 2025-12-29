@@ -56,6 +56,7 @@ class User < ApplicationRecord
 
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
+  # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)
 
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -136,6 +137,19 @@ class User < ApplicationRecord
   def local_user?
     !oauth_user?
   end
+
+  # OAuth만으로 가입한 사용자인지 확인 (비밀번호 재설정 불가)
+  def oauth_only?
+    oauth_user? && provider.present?
+  end
+
+  # 비밀번호 재설정이 가능한지 확인
+  def can_reset_password?
+    !oauth_only?
+  end
+
+  # Rails 8.1 토큰 시스템 사용
+  # 비밀번호 재설정: user.generate_token_for(:password_reset) / User.find_by_token_for(:password_reset, token)
 
   # 관리자인지 확인
   def admin?

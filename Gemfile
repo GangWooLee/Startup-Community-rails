@@ -86,6 +86,9 @@ group :development do
 
   # Claude AI integration for Rails development [https://github.com/obie/claude-on-rails]
   gem "claude-on-rails"
+
+  # Preview emails in browser instead of sending [https://github.com/ryanb/letter_opener]
+  gem "letter_opener"
 end
 
 group :test do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_28_115820) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_29_151557) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -93,6 +93,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_28_115820) do
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "email_verifications", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "verified", default: false, null: false
+    t.index ["email", "code"], name: "index_email_verifications_on_email_and_code"
+    t.index ["email"], name: "index_email_verifications_on_email"
   end
 
   create_table "idea_analyses", force: :cascade do |t|
@@ -305,6 +316,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_28_115820) do
     t.string "name", null: false
     t.string "open_chat_url"
     t.string "password_digest", null: false
+    t.datetime "password_reset_sent_at"
+    t.string "password_reset_token"
     t.string "portfolio_url"
     t.string "provider"
     t.string "role_title"
@@ -314,6 +327,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_28_115820) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["is_admin"], name: "index_users_on_is_admin"
     t.index ["name"], name: "index_users_on_name_for_search"
+    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["role_title"], name: "index_users_on_role_title_for_search"
   end

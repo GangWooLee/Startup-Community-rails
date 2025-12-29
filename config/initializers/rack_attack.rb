@@ -50,9 +50,32 @@ class Rack::Attack
     end
   end
 
-  # Throttle password reset requests (if implemented)
+  # Throttle email verification requests by IP
+  # 회원가입 이메일 인증: 10회/시간
+  throttle("email_verification/ip", limit: 10, period: 1.hour) do |req|
+    if req.path == "/email_verifications" && req.post?
+      req.ip
+    end
+  end
+
+  # Throttle account recovery requests by IP
+  # 비밀번호 찾기: 5회/시간
+  throttle("forgot_password/ip", limit: 5, period: 1.hour) do |req|
+    if req.path == "/password/forgot" && req.post?
+      req.ip
+    end
+  end
+
+  # 비밀번호 찾기: 이메일당 3회/시간 (더 엄격한 제한)
+  throttle("forgot_password/email", limit: 3, period: 1.hour) do |req|
+    if req.path == "/password/forgot" && req.post?
+      req.params["email"].to_s.downcase.gsub(/\s+/, "").presence
+    end
+  end
+
+  # 비밀번호 재설정: 5회/시간
   throttle("password_reset/ip", limit: 5, period: 1.hour) do |req|
-    if req.path == "/password/reset" && req.post?
+    if req.path.match?(%r{/password/reset/}) && req.patch?
       req.ip
     end
   end
