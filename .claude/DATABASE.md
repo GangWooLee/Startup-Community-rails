@@ -4,7 +4,7 @@
 - **프로젝트**: Startup Community Platform
 - **DBMS**: SQLite3 (dev) / PostgreSQL (prod)
 - **ORM**: ActiveRecord (Rails 8.1)
-- **업데이트**: 2025-12-27
+- **업데이트**: 2025-12-30
 
 ---
 
@@ -106,11 +106,15 @@ create_table :users do |t|
   t.text :activity_status         # 활동 상태 (JSON, 다중 선택)
   t.string :custom_status         # 기타 활동 상태
 
+  # 회원 탈퇴 관련
+  t.datetime :deleted_at            # Soft Delete (탈퇴 시각)
+
   t.timestamps
 end
 
 add_index :users, :email, unique: true
 add_index :users, :is_admin
+add_index :users, :deleted_at        # 탈퇴 회원 필터링
 ```
 
 **컬럼 설명**:
@@ -129,6 +133,7 @@ add_index :users, :is_admin
 - `portfolio_url`: 포트폴리오 URL
 - `activity_status`: 활동 상태 (JSON, 다중 선택 - 외주 가능, 팀 구하는 중 등)
 - `custom_status`: 사용자 정의 활동 상태
+- `deleted_at`: 탈퇴 시각 (NULL이면 활동 중, 값이 있으면 탈퇴)
 
 **모델 관계**:
 ```ruby
@@ -403,6 +408,134 @@ end
 
 ---
 
+### 2.8 user_deletions (회원 탈퇴 기록)
+
+```ruby
+create_table :user_deletions do |t|
+  t.references :user, null: false, foreign_key: true
+  t.string :status, default: "completed", null: false  # completed (즉시 익명화)
+  t.string :reason_category                             # 탈퇴 사유 카테고리
+  t.text :reason_detail                                 # 상세 사유
+  t.datetime :requested_at, null: false                 # 탈퇴 요청 시각
+  t.datetime :permanently_deleted_at                    # 완전 삭제 시각
+  t.datetime :destroy_scheduled_at                      # 5년 후 자동 파기 예정일
+
+  # 암호화된 개인정보 (Rails Active Record Encryption)
+  t.string :email_original                              # encrypts - 원본 이메일
+  t.string :name_original                               # encrypts - 원본 이름
+  t.string :phone_original                              # encrypts - 원본 전화번호
+  t.text :snapshot_data                                 # encrypts - 프로필 스냅샷 (JSON)
+  t.string :email_hash                                  # encrypts deterministic - 검색용
+
+  # 활동 통계
+  t.json :user_snapshot, null: false                    # 탈퇴 시점 사용자 정보
+  t.json :activity_stats                                # 활동 통계 (게시글, 댓글 수 등)
+
+  # 메타 정보
+  t.string :ip_address                                  # 탈퇴 요청 IP
+  t.string :user_agent                                  # 탈퇴 요청 브라우저
+  t.integer :admin_view_count, default: 0               # 관리자 열람 횟수
+  t.datetime :last_viewed_at                            # 마지막 열람 시각
+  t.integer :last_viewed_by                             # 마지막 열람 관리자 ID
+
+  t.timestamps
+end
+
+add_index :user_deletions, :user_id
+add_index :user_deletions, :status
+add_index :user_deletions, :destroy_scheduled_at
+add_index :user_deletions, :email_hash                  # deterministic 암호화로 검색 가능
+```
+
+**컬럼 설명**:
+- `status`: 탈퇴 상태 (completed: 즉시 익명화 완료)
+- `reason_category`: 탈퇴 사유 카테고리 (not_using, privacy_concern 등)
+- `email_original`: 암호화된 원본 이메일 (Rails encrypts)
+- `email_hash`: 결정적 암호화 이메일 해시 (재가입 방지, 검색용)
+- `destroy_scheduled_at`: 5년 후 자동 파기 예정일
+
+**탈퇴 사유 카테고리**:
+```ruby
+REASON_CATEGORIES = {
+  "not_using" => "서비스를 더 이상 사용하지 않음",
+  "found_alternative" => "다른 서비스로 이동",
+  "privacy_concern" => "개인정보 보호 우려",
+  "too_many_notifications" => "알림이 너무 많음",
+  "not_useful" => "유용한 정보가 없음",
+  "technical_issues" => "기술적 문제",
+  "other" => "기타"
+}
+```
+
+**모델 관계**:
+```ruby
+class UserDeletion < ApplicationRecord
+  belongs_to :user
+
+  # Rails 7 Active Record Encryption
+  encrypts :email_original
+  encrypts :name_original
+  encrypts :phone_original
+  encrypts :snapshot_data
+  encrypts :email_hash, deterministic: true  # 검색 가능
+
+  RETENTION_PERIOD = 5.years
+
+  before_create :set_destroy_scheduled_at
+
+  scope :expired, -> { where("destroy_scheduled_at <= ?", Time.current) }
+  scope :expiring_soon, -> { where("destroy_scheduled_at <= ?", 30.days.from_now) }
+
+  def reason_label
+    REASON_CATEGORIES[reason_category] || "미선택"
+  end
+end
+```
+
+---
+
+### 2.9 admin_view_logs (관리자 열람 로그)
+
+```ruby
+create_table :admin_view_logs do |t|
+  t.references :admin, null: false, foreign_key: { to_table: :users }
+  t.references :target, polymorphic: true, null: false
+  t.string :action, null: false                         # 열람 동작 (reveal_personal_info 등)
+  t.text :reason, null: false                           # 열람 사유 (필수)
+  t.string :ip_address                                  # 접근 IP
+  t.string :user_agent                                  # 접근 브라우저
+
+  t.timestamps
+end
+
+add_index :admin_view_logs, :admin_id
+add_index :admin_view_logs, [:target_type, :target_id]
+add_index :admin_view_logs, :created_at
+```
+
+**컬럼 설명**:
+- `admin_id`: 열람한 관리자 (FK → users)
+- `target_type`: 열람 대상 타입 (UserDeletion 등)
+- `target_id`: 열람 대상 ID
+- `action`: 수행한 동작 (reveal_personal_info)
+- `reason`: 열람 사유 (필수 - 법적 분쟁 등)
+
+**모델 관계**:
+```ruby
+class AdminViewLog < ApplicationRecord
+  belongs_to :admin, class_name: "User"
+  belongs_to :target, polymorphic: true
+
+  validates :action, presence: true
+  validates :reason, presence: true
+
+  scope :recent, -> { order(created_at: :desc) }
+  scope :for_deletion, ->(deletion) { where(target: deletion) }
+end
+```
+
+---
+
 ## 3. 인덱스 전략
 
 ### 3.1 Primary Index
@@ -657,5 +790,7 @@ end
 
 | 날짜 | 변경사항 | 작성자 |
 |------|----------|--------|
+| 2025-12-30 | user_deletions, admin_view_logs 테이블 추가 (회원 탈퇴 시스템) | Claude |
+| 2025-12-30 | users 테이블에 deleted_at 컬럼 추가 (Soft Delete) | Claude |
 | 2025-12-27 | User 테이블에 is_admin, 프로필 확장 필드 추가 | Claude |
 | 2025-11-26 | One-pager 기반 ERD 및 스키마 설계 | Claude |

@@ -1,0 +1,105 @@
+<div class="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+  <div class="w-full max-w-md">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+        <svg class="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-foreground mb-2">회원 탈퇴</h1>
+      <p class="text-muted-foreground">정말 탈퇴하시겠습니까?</p>
+    </div>
+
+    <!-- Deletion Card -->
+    <div class="rounded-xl border bg-card text-card-foreground shadow-lg p-6">
+      <!-- Warning Box -->
+      <div class="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <h3 class="font-semibold text-destructive mb-2">탈퇴 전 반드시 확인해주세요</h3>
+        <ul class="text-sm text-muted-foreground space-y-2">
+          <li class="flex items-start gap-2">
+            <span class="text-destructive font-bold">!</span>
+            <span><strong class="text-destructive">탈퇴 즉시 개인정보가 영구 삭제됩니다</strong></span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-destructive font-bold">!</span>
+            <span><strong class="text-destructive">복구가 불가능합니다</strong></span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-muted-foreground">-</span>
+            <span>작성한 게시글과 댓글은 "(탈퇴한 회원)"으로 표시됩니다</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-muted-foreground">-</span>
+            <span>채팅 대화 내용은 유지되나 작성자가 익명 처리됩니다</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-muted-foreground">-</span>
+            <span>결제 내역은 법적 보관 기간(5년) 동안 보관됩니다</span>
+          </li>
+        </ul>
+      </div>
+
+      <%= form_with url: delete_account_path, method: :post, local: true, class: "space-y-4", data: { controller: "reason-toggle" } do |f| %>
+        <!-- 탈퇴 사유 -->
+        <div class="space-y-2">
+          <label for="reason_category" class="text-sm font-medium leading-none">
+            탈퇴 사유 <span class="text-muted-foreground">(선택)</span>
+          </label>
+          <select name="reason_category" id="reason_category"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  data-action="change->reason-toggle#toggle"
+                  data-reason-toggle-target="select">
+            <option value="">선택해주세요</option>
+            <% @reason_categories.each do |key, label| %>
+              <option value="<%= key %>"><%= label %></option>
+            <% end %>
+          </select>
+        </div>
+
+        <!-- 기타 사유 상세 (reason_category가 other일 때만 표시) -->
+        <div class="space-y-2 hidden" data-reason-toggle-target="detail">
+          <label for="reason_detail" class="text-sm font-medium leading-none">상세 사유</label>
+          <textarea name="reason_detail" id="reason_detail" rows="3"
+                    class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="탈퇴 사유를 알려주시면 서비스 개선에 참고하겠습니다."></textarea>
+        </div>
+
+        <% if @user.oauth_only? %>
+          <!-- OAuth 사용자: 확인 체크박스 -->
+          <div class="space-y-2 pt-2">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" name="confirm_deletion" value="1" required
+                     class="h-4 w-4 rounded border-input text-primary focus:ring-primary">
+              <span class="text-sm">위 내용을 확인했으며, 탈퇴에 동의합니다</span>
+            </label>
+          </div>
+        <% else %>
+          <!-- 일반 사용자: 비밀번호 확인 -->
+          <div class="space-y-2 pt-2">
+            <label for="password" class="text-sm font-medium leading-none">비밀번호 확인</label>
+            <input type="password" name="password" id="password" required
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                   placeholder="현재 비밀번호를 입력해주세요">
+          </div>
+        <% end %>
+
+        <!-- Submit Button -->
+        <div class="pt-4 space-y-3">
+          <button type="submit"
+                  class="inline-flex items-center justify-center w-full h-11 px-4 py-2 rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
+            회원 탈퇴
+          </button>
+          <%= link_to "취소", settings_path,
+              class: "block text-center w-full h-11 leading-[2.75rem] rounded-md border border-input hover:bg-accent text-sm font-medium transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 계정 정보 -->
+    <div class="mt-4 text-center text-sm text-muted-foreground">
+      <p><%= @user.email %></p>
+      <p class="mt-1">가입일: <%= @user.created_at.strftime("%Y년 %m월 %d일") %></p>
+    </div>
+  </div>
+</div>

@@ -50,6 +50,10 @@ Rails.application.routes.draw do
   get   "password/reset/:token",  to: "account_recovery#reset_password_form",  as: :reset_password_form
   patch "password/reset/:token",  to: "account_recovery#reset_password",       as: :reset_password
 
+  # Account Deletion (회원 탈퇴) - 즉시 익명화, 복구 불가
+  get  "account/delete", to: "user_deletions#new",    as: :delete_account
+  post "account/delete", to: "user_deletions#create"
+
   # Posts (Community)
   resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
     member do
@@ -151,5 +155,11 @@ Rails.application.routes.draw do
     end
 
     resources :chat_rooms, only: [:show]  # 채팅방 대화 내용 열람
+
+    resources :user_deletions, only: [:index, :show] do
+      member do
+        post :reveal  # 암호화된 개인정보 열람 (로깅 필수)
+      end
+    end
   end
 end

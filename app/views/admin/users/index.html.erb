@@ -8,15 +8,29 @@
 </nav>
 
 <!-- 상단 통계 -->
-<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-5 gap-4 mb-6">
+  <% active_count = User.active.count %>
   <div class="bg-white rounded-xl border border-gray-200 p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
         <%= icon "users", variant: :solid, class: "w-5 h-5 text-blue-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@total_count) %></p>
-        <p class="text-xs text-gray-500">전체 회원</p>
+        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(active_count) %></p>
+        <p class="text-xs text-gray-500">활동 회원</p>
+      </div>
+    </div>
+  </div>
+
+  <% withdrawn_count = User.deleted.count %>
+  <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+        <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900"><%= withdrawn_count %></p>
+        <p class="text-xs text-gray-500">탈퇴 회원</p>
       </div>
     </div>
   </div>
@@ -24,8 +38,8 @@
   <% admin_count = User.where(is_admin: true).count %>
   <div class="bg-white rounded-xl border border-gray-200 p-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-        <%= icon "shield-check", variant: :solid, class: "w-5 h-5 text-red-600" %>
+      <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+        <%= icon "shield-check", variant: :solid, class: "w-5 h-5 text-amber-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-gray-900"><%= admin_count %></p>
@@ -76,17 +90,35 @@
       </div>
     <% end %>
 
-    <!-- 필터 버튼들 -->
-    <div class="flex items-center gap-2">
-      <%= link_to admin_users_path,
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+    <!-- 상태 필터 탭 -->
+    <div class="flex items-center gap-2 border-l border-gray-200 pl-4">
+      <%= link_to admin_users_path(type: params[:type]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
         전체
       <% end %>
-      <%= link_to admin_users_path(type: 'admin'),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'admin' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+      <%= link_to admin_users_path(status: 'active', type: params[:type]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'active' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+        <%= icon "check-circle", variant: :solid, class: "w-4 h-4 inline mr-1" %>
+        활동 중
+      <% end %>
+      <%= link_to admin_users_path(status: 'withdrawn', type: params[:type]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'withdrawn' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+        <%= icon "x-circle", variant: :solid, class: "w-4 h-4 inline mr-1" %>
+        탈퇴
+      <% end %>
+    </div>
+
+    <!-- 타입 필터 버튼들 -->
+    <div class="flex items-center gap-2 border-l border-gray-200 pl-4">
+      <%= link_to admin_users_path(status: params[:status]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+        전체
+      <% end %>
+      <%= link_to admin_users_path(type: 'admin', status: params[:status]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'admin' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
         관리자
       <% end %>
-      <%= link_to admin_users_path(type: 'oauth'),
+      <%= link_to admin_users_path(type: 'oauth', status: params[:status]),
                   class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'oauth' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
         OAuth
       <% end %>
@@ -121,7 +153,7 @@
     </thead>
     <tbody class="divide-y divide-gray-100">
       <% @users.each do |user| %>
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="<%= user.deleted? ? 'bg-red-50/50 hover:bg-red-100/50' : 'hover:bg-gray-50' %> transition-colors">
           <!-- 회원 정보 -->
           <td class="px-5 py-4">
             <%= link_to admin_user_path(user), class: "flex items-center gap-3" do %>
@@ -156,10 +188,17 @@
 
           <!-- 상태 -->
           <td class="px-5 py-4">
-            <span class="inline-flex items-center gap-1.5 text-sm">
-              <span class="w-2 h-2 rounded-full bg-green-500"></span>
-              <span class="text-gray-600">Active</span>
-            </span>
+            <% if user.deleted? %>
+              <span class="inline-flex items-center gap-1.5 text-sm">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span class="text-red-600 font-medium">Withdrawn</span>
+              </span>
+            <% else %>
+              <span class="inline-flex items-center gap-1.5 text-sm">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span class="text-gray-600">Active</span>
+              </span>
+            <% end %>
           </td>
 
           <!-- 활동 -->

@@ -8,8 +8,8 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.8 |
-| **마지막 업데이트** | 2025-12-27 |
-| **진행 중 작업** | Admin 패널, 외주 시스템 통합 |
+| **마지막 업데이트** | 2025-12-30 |
+| **진행 중 작업** | 외주 시스템 통합, 프로덕션 배포 준비 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
 
@@ -24,6 +24,7 @@
 | 알림 시스템 | 70% | ✅ 기본 완성 |
 | 검색 | 80% | ✅ 완성 |
 | 외주 (구인/구직) | 50% | ⚠️ Post 통합 중 |
+| 회원 탈퇴 (암호화 보관) | 85% | ✅ 완성 |
 
 ## ⚠️ 프로젝트 특화 규칙 (중요!)
 
@@ -82,7 +83,18 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - `app/javascript/controllers/` 디렉토리
 - 주요: `new_message`, `chat_list`, `live_search`, `image_upload`, `like_button`, `bookmark_button`
 
+### 회원 탈퇴 시스템
+- **탈퇴 처리**: `app/services/users/deletion_service.rb`
+- **탈퇴 모델**: `app/models/user_deletion.rb`
+- **열람 로그**: `app/models/admin_view_log.rb`
+- **사용자 컨트롤러**: `app/controllers/user_deletions_controller.rb`
+- **관리자 컨트롤러**: `app/controllers/admin/user_deletions_controller.rb`
+- **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
+
 ## 최근 작업 내역
+- **[2025-12-30]** 회원 탈퇴 시스템 완성 (즉시 익명화, 암호화 보관, 5년 후 자동 파기)
+- **[2025-12-30]** 관리자 회원관리 개선 (탈퇴 회원 필터, 원본 정보 표시, 열람 로그)
+- **[2025-12-30]** SECURITY_GUIDE.md 작성 (암호화/복호화 가이드)
 - **[2025-12-27]** AI 멀티에이전트 시스템 완성 (5개 전문 에이전트)
 - **[2025-12-27]** Gemini Grounding 실시간 웹 검색 연동
 - **[2025-12-27]** Admin 패널 추가 (사용자/채팅방 관리)
@@ -302,6 +314,7 @@ main          # 프로덕션 브랜치
 - **DATABASE.md** - ERD 및 스키마
 - **TASKS.md** - 작업 목록 및 진행상황
 - **PERFORMANCE.md** - 성능 최적화 가이드
+- **SECURITY_GUIDE.md** - 보안 및 암호화 가이드 (회원 탈퇴 데이터 복호화)
 
 ---
 

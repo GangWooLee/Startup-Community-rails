@@ -54,6 +54,9 @@ class User < ApplicationRecord
   # AI 아이디어 분석
   has_many :idea_analyses, dependent: :destroy
 
+  # 회원 탈퇴 기록
+  has_many :user_deletions, dependent: :destroy
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
   # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)
@@ -78,6 +81,9 @@ class User < ApplicationRecord
   validates :portfolio_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
   validates :open_chat_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
 
+  # 재가입 방지: 탈퇴한 이메일로는 재가입 불가
+  validate :check_blacklisted_email, on: :create
+
   # Callbacks
   before_save :downcase_email
 
@@ -85,12 +91,15 @@ class User < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :oauth_users, -> { joins(:oauth_identities).distinct }
   scope :local_users, -> { left_joins(:oauth_identities).where(oauth_identities: { id: nil }) }
+  scope :active, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil) }
 
   # OAuth 사용자 생성 또는 찾기
   # 1. oauth_identities에서 provider + uid로 기존 연결 찾기
   # 2. 없으면 이메일로 기존 사용자 찾고, OAuth 연결 추가
   # 3. 없으면 새 사용자 생성 + OAuth 연결 추가
   # 보안: 트랜잭션으로 데이터 무결성 보장
+  # 반환: { user:, deleted: } - deleted가 true면 탈퇴 처리된 사용자
   def self.from_omniauth(auth)
     email = auth.info.email&.downcase
     provider = auth.provider
@@ -99,21 +108,27 @@ class User < ApplicationRecord
     # 1. oauth_identities에서 찾기 (트랜잭션 외부 - 읽기만)
     identity = OauthIdentity.find_by(provider: provider, uid: uid)
     if identity
-      # 기존 사용자는 프로필 사진 덮어쓰지 않음 (사용자가 직접 관리)
-      return identity.user
+      user = identity.user
+      # 탈퇴한 사용자 확인
+      return { user: user, deleted: user.deleted? }
     end
 
     # 2, 3단계는 트랜잭션으로 묶어서 원자성 보장
     transaction do
-      # 2. 이메일로 기존 사용자 찾기
-      user = find_by(email: email)
+      # 2. 이메일로 기존 사용자 찾기 (삭제된 사용자 포함)
+      user = unscoped.find_by(email: email)
 
       if user
+        # 탈퇴한 사용자 확인
+        if user.deleted?
+          return { user: user, deleted: true }
+        end
+
         # 기존 사용자에게 새 OAuth 연결 추가
         user.oauth_identities.create!(provider: provider, uid: uid)
         # 프로필 사진이 없을 때만 OAuth 사진 사용
         user.update(avatar_url: auth.info.image) if user.avatar_url.blank? && auth.info.image.present?
-        return user
+        return { user: user, deleted: false }
       end
 
       # 3. 새 사용자 생성 + OAuth 연결 (최초 가입 시에만 OAuth 사진 사용)
@@ -124,7 +139,7 @@ class User < ApplicationRecord
         avatar_url: auth.info.image
       )
       user.oauth_identities.create!(provider: provider, uid: uid)
-      user
+      { user: user, deleted: false }
     end
   end
 
@@ -146,6 +161,21 @@ class User < ApplicationRecord
   # 비밀번호 재설정이 가능한지 확인
   def can_reset_password?
     !oauth_only?
+  end
+
+  # 탈퇴한 사용자인지 확인
+  def deleted?
+    deleted_at.present?
+  end
+
+  # 활성 사용자인지 확인
+  def active?
+    deleted_at.nil?
+  end
+
+  # 가장 최근 탈퇴 기록 가져오기 (관리자용)
+  def last_deletion
+    user_deletions.order(created_at: :desc).first
   end
 
   # Rails 8.1 토큰 시스템 사용
@@ -276,6 +306,16 @@ class User < ApplicationRecord
 
   def downcase_email
     self.email = email.downcase if email.present?
+  end
+
+  # 재가입 방지: 탈퇴한 이메일 해시와 비교
+  def check_blacklisted_email
+    return if email.blank?
+
+    email_hash = Digest::SHA256.hexdigest(email.to_s.downcase.strip)
+    if UserDeletion.exists?(email_hash: email_hash)
+      errors.add(:email, "이전에 탈퇴한 이메일입니다. 다른 이메일로 가입하거나 고객센터에 문의해주세요.")
+    end
   end
 
   # 비밀번호 복잡성 검증 (영문+숫자 조합 필수)

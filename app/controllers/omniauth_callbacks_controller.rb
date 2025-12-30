@@ -14,10 +14,17 @@ class OmniauthCallbacksController < ApplicationController
 
     provider_name = auth.provider == "google_oauth2" ? "Google" : "GitHub"
 
-    # 사용자 생성 또는 찾기
-    @user = User.from_omniauth(auth)
+    # 사용자 생성 또는 찾기 (반환: { user:, deleted: })
+    result = User.from_omniauth(auth)
+    @user = result[:user]
 
-    if @user.persisted?
+    # 탈퇴한 사용자 처리 (즉시 익명화 방식 - 복구 불가)
+    if result[:deleted] && @user.present?
+      redirect_to login_path, alert: "탈퇴가 완료된 계정입니다. 새 계정으로 가입해주세요."
+      return
+    end
+
+    if @user&.persisted?
       # 세션에 사용자 ID 저장
       session[:user_id] = @user.id
 

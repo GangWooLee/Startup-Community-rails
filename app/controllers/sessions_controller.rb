@@ -26,7 +26,16 @@ class SessionsController < ApplicationController
   def create
     user = User.find_by(email: params[:email]&.downcase)
 
-    if user&.authenticate(params[:password])
+    # 탈퇴한 사용자는 User.find_by로 찾으면 nil이 됨 (익명화되어 이메일 다름)
+    # 만약 unscoped로 찾아서 deleted?인 경우 처리
+    if user.nil?
+      # 익명화된 사용자인지 확인 (이메일이 변경되었으므로 찾을 수 없음)
+      flash.now[:alert] = "이메일 또는 비밀번호가 올바르지 않습니다."
+      render :new, status: :unprocessable_entity
+      return
+    end
+
+    if user.authenticate(params[:password])
       log_in(user)
 
       # 대기 중인 AI 분석 결과가 있으면 캐시에서 읽어 DB에 저장

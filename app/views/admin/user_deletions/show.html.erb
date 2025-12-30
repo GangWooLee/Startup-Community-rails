@@ -1,0 +1,281 @@
+<% content_for :page_title, "탈퇴 회원 상세" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <span>/</span>
+  <%= link_to "탈퇴 회원 관리", admin_user_deletions_path, class: "hover:text-gray-700" %>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">#<%= @deletion.user_id %></span>
+</nav>
+
+<div class="grid grid-cols-3 gap-6">
+  <!-- 왼쪽: 기본 정보 -->
+  <div class="col-span-2 space-y-6">
+    <!-- 탈퇴 정보 카드 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-200 bg-red-50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+            <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">탈퇴 회원 #<%= @deletion.user_id %></h2>
+            <p class="text-sm text-gray-500">
+              <%= @deletion.requested_at.strftime("%Y년 %m월 %d일 %H:%M") %> 탈퇴
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- 탈퇴 사유 -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">탈퇴 사유</h3>
+          <% if @deletion.reason_category.present? %>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 text-red-700">
+              <%= @deletion.reason_label %>
+            </span>
+          <% else %>
+            <span class="text-gray-400">미선택</span>
+          <% end %>
+        </div>
+
+        <% if @deletion.reason_detail.present? %>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2">상세 사유</h3>
+            <p class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+              <%= @deletion.reason_detail %>
+            </p>
+          </div>
+        <% end %>
+
+        <!-- 처리 상태 -->
+        <div class="flex items-center gap-4 pt-2 border-t border-gray-100">
+          <div>
+            <span class="text-xs text-gray-500">상태</span>
+            <p class="text-sm font-medium">
+              <% case @deletion.status %>
+              <% when "completed" %>
+                <span class="inline-flex items-center gap-1 text-green-600">
+                  <%= icon "check-circle", variant: :solid, class: "w-4 h-4" %>
+                  완료 (익명화됨)
+                </span>
+              <% when "pending" %>
+                <span class="inline-flex items-center gap-1 text-yellow-600">
+                  <%= icon "clock", variant: :solid, class: "w-4 h-4" %>
+                  대기 중
+                </span>
+              <% else %>
+                <span class="text-gray-600"><%= @deletion.status %></span>
+              <% end %>
+            </p>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">IP 주소</span>
+            <p class="text-sm font-mono text-gray-600"><%= @deletion.ip_address || "-" %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사용자 스냅샷 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900">사용자 스냅샷 (탈퇴 당시 정보)</h3>
+        <p class="text-xs text-gray-500 mt-1">법적 보관용 데이터 - 5년간 보존</p>
+      </div>
+
+      <div class="p-5">
+        <dl class="grid grid-cols-2 gap-4">
+          <% snapshot = @deletion.user_snapshot || {} %>
+
+          <div>
+            <dt class="text-xs text-gray-500">이메일</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= snapshot["email"] || "-" %></dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-gray-500">이름</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= snapshot["name"] || "-" %></dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-gray-500">소속</dt>
+            <dd class="text-sm text-gray-600"><%= snapshot["affiliation"].presence || "-" %></dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-gray-500">역할</dt>
+            <dd class="text-sm text-gray-600"><%= snapshot["role_title"].presence || "-" %></dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-gray-500">기술 스택</dt>
+            <dd class="text-sm text-gray-600"><%= snapshot["skills"].presence || "-" %></dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-gray-500">가입일</dt>
+            <dd class="text-sm text-gray-600">
+              <% if snapshot["created_at"] %>
+                <%= Time.parse(snapshot["created_at"]).strftime("%Y-%m-%d") rescue "-" %>
+              <% else %>
+                -
+              <% end %>
+            </dd>
+          </div>
+
+          <div class="col-span-2">
+            <dt class="text-xs text-gray-500">자기소개</dt>
+            <dd class="text-sm text-gray-600 mt-1">
+              <%= snapshot["bio"].presence || "-" %>
+            </dd>
+          </div>
+
+          <!-- 연락처 정보 -->
+          <% if snapshot["github_url"].present? || snapshot["portfolio_url"].present? || snapshot["open_chat_url"].present? %>
+            <div class="col-span-2 pt-3 border-t border-gray-100">
+              <dt class="text-xs text-gray-500 mb-2">연결 링크</dt>
+              <dd class="flex flex-wrap gap-2">
+                <% if snapshot["github_url"].present? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-xs text-gray-600">
+                    GitHub: <%= snapshot["github_url"] %>
+                  </span>
+                <% end %>
+                <% if snapshot["portfolio_url"].present? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-xs text-gray-600">
+                    포트폴리오: <%= snapshot["portfolio_url"] %>
+                  </span>
+                <% end %>
+                <% if snapshot["open_chat_url"].present? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-xs text-gray-600">
+                    오픈채팅: <%= snapshot["open_chat_url"] %>
+                  </span>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    </div>
+
+    <!-- 원본 JSON (개발/디버깅용) -->
+    <details class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <summary class="px-5 py-4 cursor-pointer hover:bg-gray-50 text-sm font-medium text-gray-700">
+        원본 스냅샷 JSON 보기
+      </summary>
+      <div class="px-5 pb-5">
+        <pre class="text-xs bg-gray-900 text-green-400 rounded-lg p-4 overflow-x-auto"><%= JSON.pretty_generate(@deletion.user_snapshot || {}) %></pre>
+      </div>
+    </details>
+  </div>
+
+  <!-- 오른쪽: 활동 통계 -->
+  <div class="space-y-6">
+    <!-- 활동 통계 카드 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900">활동 통계</h3>
+        <p class="text-xs text-gray-500 mt-1">탈퇴 당시 활동 기록</p>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <% stats = @deletion.activity_stats || {} %>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <%= icon "document-text", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+            <span class="text-sm text-gray-600">게시글</span>
+          </div>
+          <span class="text-lg font-semibold text-gray-900"><%= stats["total_posts"] || 0 %></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <%= icon "chat-bubble-left", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+            <span class="text-sm text-gray-600">댓글</span>
+          </div>
+          <span class="text-lg font-semibold text-gray-900"><%= stats["total_comments"] || 0 %></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <%= icon "heart", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+            <span class="text-sm text-gray-600">받은 좋아요</span>
+          </div>
+          <span class="text-lg font-semibold text-gray-900"><%= stats["total_likes_received"] || 0 %></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+            <span class="text-sm text-gray-600">채팅방</span>
+          </div>
+          <span class="text-lg font-semibold text-gray-900"><%= stats["total_chat_rooms"] || 0 %></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <%= icon "light-bulb", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+            <span class="text-sm text-gray-600">AI 분석</span>
+          </div>
+          <span class="text-lg font-semibold text-gray-900"><%= stats["total_idea_analyses"] || 0 %></span>
+        </div>
+
+        <% if stats["total_orders"].to_i > 0 %>
+          <div class="pt-3 border-t border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <%= icon "shopping-cart", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+                <span class="text-sm text-gray-600">주문</span>
+              </div>
+              <span class="text-lg font-semibold text-gray-900"><%= stats["total_orders"] || 0 %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 현재 User 레코드 상태 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900">현재 DB 상태</h3>
+      </div>
+
+      <div class="p-5 space-y-3">
+        <% user = @deletion.user %>
+        <% if user %>
+          <div>
+            <span class="text-xs text-gray-500">현재 이메일</span>
+            <p class="text-sm font-mono text-gray-600 break-all"><%= user.email %></p>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">현재 이름</span>
+            <p class="text-sm text-gray-600"><%= user.name %></p>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">deleted_at</span>
+            <p class="text-sm text-gray-600">
+              <% if user.deleted_at %>
+                <%= user.deleted_at.strftime("%Y-%m-%d %H:%M:%S") %>
+              <% else %>
+                <span class="text-yellow-600">⚠️ 설정되지 않음</span>
+              <% end %>
+            </p>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500">User 레코드를 찾을 수 없습니다.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 뒤로 가기 -->
+    <div>
+      <%= link_to admin_user_deletions_path, class: "flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition" do %>
+        <%= icon "arrow-left", variant: :outline, class: "w-4 h-4" %>
+        목록으로 돌아가기
+      <% end %>
+    </div>
+  </div>
+</div>

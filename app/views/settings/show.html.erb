@@ -122,16 +122,19 @@
           <span class="text-sm font-medium">로그아웃</span>
         <% end %>
 
-        <!-- Delete Account - shadcn Button destructive (disabled) -->
-        <div class="px-4 py-4 flex items-center gap-3 opacity-50 cursor-not-allowed">
+        <!-- Delete Account -->
+        <%= link_to delete_account_path, class: "px-4 py-4 flex items-center gap-3 hover:bg-destructive/10 transition-colors" do %>
           <svg class="h-5 w-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
           <div>
             <span class="text-sm font-medium text-destructive">회원 탈퇴</span>
-            <p class="text-xs text-muted-foreground">준비 중</p>
+            <p class="text-xs text-muted-foreground">계정 삭제 및 데이터 처리</p>
           </div>
-        </div>
+          <svg class="h-5 w-5 text-muted-foreground ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        <% end %>
       </div>
     </div>
 

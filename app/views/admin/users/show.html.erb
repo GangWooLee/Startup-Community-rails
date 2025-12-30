@@ -24,15 +24,22 @@
         <!-- 상태 뱃지 -->
         <div class="flex items-center justify-center gap-2 mt-3">
           <% if @user.admin? %>
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 text-white">관리자</span>
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500 text-white">관리자</span>
           <% end %>
           <% if @user.oauth_user? %>
             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 text-white">OAuth</span>
           <% end %>
-          <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 text-white flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-            Active
-          </span>
+          <% if @user.deleted? %>
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 text-white flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+              Withdrawn
+            </span>
+          <% else %>
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 text-white flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+              Active
+            </span>
+          <% end %>
         </div>
       </div>
 
@@ -93,6 +100,57 @@
           <div class="pt-4 border-t border-gray-100">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">자기소개</p>
             <p class="text-sm text-gray-700"><%= @user.bio %></p>
+          </div>
+        <% end %>
+
+        <!-- 탈퇴 회원 원본 정보 박스 -->
+        <% if @user.deleted? && @user_deletion.present? %>
+          <div class="pt-4 border-t border-red-200">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+              <h4 class="text-sm font-bold text-red-700 flex items-center gap-2 mb-3">
+                <%= icon "lock-closed", variant: :solid, class: "w-4 h-4" %>
+                탈퇴 전 원본 데이터
+              </h4>
+              <p class="text-xs text-red-500 mb-4">
+                법적 분쟁 및 정산 처리를 위해 암호화되어 보관된 정보입니다.<br>
+                열람 기록이 자동으로 남습니다.
+              </p>
+
+              <div class="space-y-3 text-sm">
+                <div>
+                  <span class="block text-xs font-semibold text-red-600 mb-0.5">원본 이메일</span>
+                  <span class="text-gray-900 bg-white px-2 py-1 rounded border border-red-100 inline-block"><%= @user_deletion.email_original %></span>
+                </div>
+                <div>
+                  <span class="block text-xs font-semibold text-red-600 mb-0.5">원본 이름</span>
+                  <span class="text-gray-900 bg-white px-2 py-1 rounded border border-red-100 inline-block"><%= @user_deletion.name_original %></span>
+                </div>
+                <div>
+                  <span class="block text-xs font-semibold text-red-600 mb-0.5">탈퇴 사유</span>
+                  <span class="text-gray-900"><%= @user_deletion.reason_label %></span>
+                </div>
+                <% if @user_deletion.reason_detail.present? %>
+                  <div>
+                    <span class="block text-xs font-semibold text-red-600 mb-0.5">상세 사유</span>
+                    <span class="text-gray-700 text-xs"><%= @user_deletion.reason_detail %></span>
+                  </div>
+                <% end %>
+                <div>
+                  <span class="block text-xs font-semibold text-red-600 mb-0.5">탈퇴일</span>
+                  <span class="text-gray-900"><%= @user.deleted_at.strftime("%Y-%m-%d %H:%M") %></span>
+                </div>
+                <div>
+                  <span class="block text-xs font-semibold text-red-600 mb-0.5">데이터 파기 예정일</span>
+                  <span class="text-gray-900"><%= @user_deletion.destroy_scheduled_at&.strftime("%Y-%m-%d") || "-" %></span>
+                </div>
+              </div>
+
+              <!-- 상세 보기 링크 -->
+              <%= link_to admin_user_deletion_path(@user_deletion),
+                          class: "mt-4 inline-flex items-center text-sm text-red-600 hover:text-red-800 font-medium" do %>
+                탈퇴 기록 상세 보기 →
+              <% end %>
+            </div>
           </div>
         <% end %>
 

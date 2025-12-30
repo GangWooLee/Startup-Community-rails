@@ -4,9 +4,25 @@ class Admin::UsersController < Admin::BaseController
   before_action :set_user, only: [:show, :chat_rooms]
 
   # GET /admin/users
-  # 회원 목록 + 검색 기능
+  # 회원 목록 + 검색 + 필터링 기능
   def index
     @users = User.order(created_at: :desc)
+
+    # 상태 필터링: active(활동 중) / withdrawn(탈퇴)
+    case params[:status]
+    when "active"
+      @users = @users.active
+    when "withdrawn"
+      @users = @users.deleted
+    end
+
+    # 타입 필터링: admin / oauth
+    case params[:type]
+    when "admin"
+      @users = @users.where(is_admin: true)
+    when "oauth"
+      @users = @users.joins(:oauth_identities).distinct
+    end
 
     # 검색 기능: 이메일 또는 이름으로 검색
     if params[:q].present?
@@ -37,6 +53,9 @@ class Admin::UsersController < Admin::BaseController
     @posts_count = @user.posts.count
     @comments_count = @user.comments.count
     @messages_count = @user.sent_messages.count
+
+    # 탈퇴 회원인 경우 탈퇴 기록 로드
+    @user_deletion = @user.last_deletion if @user.deleted?
   end
 
   # GET /admin/users/:id/chat_rooms

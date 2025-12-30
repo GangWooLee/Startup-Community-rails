@@ -10,7 +10,7 @@
 | **버전** | MVP v0.8 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
-| **마지막 업데이트** | 2025-12-27 |
+| **마지막 업데이트** | 2025-12-30 |
 
 **핵심 비전**: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
 
@@ -27,6 +27,7 @@
 | 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
 | 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
 | 외주 (구인/구직) | 50% | ⚠️ 진행중 | Post 모델 통합 중 |
+| 회원 탈퇴 (암호화 보관) | 85% | ✅ 완성 | 즉시 익명화, 5년 보관, 관리자 열람 |
 
 ---
 
@@ -155,6 +156,17 @@ Startup-Community-rails/
 | `app/services/ai/tools/competitor_database_tool.rb` | 경쟁사 데이터베이스 |
 | `app/services/expert_matcher.rb` | 전문가 매칭 |
 
+### 회원 탈퇴 시스템
+
+| 파일 | 역할 |
+|------|------|
+| `app/models/user_deletion.rb` | 탈퇴 기록 (암호화된 개인정보) |
+| `app/models/admin_view_log.rb` | 관리자 열람 감사 로그 |
+| `app/services/users/deletion_service.rb` | 탈퇴 처리 서비스 |
+| `app/controllers/user_deletions_controller.rb` | 사용자 탈퇴 요청 처리 |
+| `app/controllers/admin/user_deletions_controller.rb` | 관리자 탈퇴 기록 조회 |
+| `app/jobs/destroy_expired_deletions_job.rb` | 5년 후 자동 파기 작업 |
+
 ---
 
 ## 기술 스택 요약
@@ -224,6 +236,13 @@ GET    /ai/result          → onboarding#ai_result (5개 에이전트 분석)
 GET    /ai/expert/:id      → onboarding#expert_profile (Turbo Stream)
 ```
 
+### 회원 탈퇴
+```
+GET    /settings           → settings#show (탈퇴 버튼)
+GET    /withdrawal/new     → user_deletions#new
+POST   /withdrawal         → user_deletions#create
+```
+
 ### 기타
 ```
 GET    /search             → search#index
@@ -261,3 +280,4 @@ GET    /notifications      → notifications#index
 - **API 설계**: `.claude/API.md`
 - **작업 목록**: `.claude/TASKS.md`
 - **제품 요구사항**: `.claude/PRD.md`
+- **보안 및 암호화 가이드**: `.claude/SECURITY_GUIDE.md`

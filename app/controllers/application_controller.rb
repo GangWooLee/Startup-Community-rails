@@ -40,8 +40,19 @@ class ApplicationController < ActionController::Base
   end
 
   # Returns the currently logged-in user (if any)
+  # 탈퇴한 사용자는 nil 반환 (세션 무효화)
   def current_user
-    @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+    return nil unless session[:user_id]
+    @current_user ||= begin
+      user = User.find_by(id: session[:user_id])
+      # 탈퇴한 사용자는 세션 무효화
+      if user&.deleted?
+        reset_session
+        nil
+      else
+        user
+      end
+    end
   end
 
   # Returns true if the user is logged in, false otherwise
