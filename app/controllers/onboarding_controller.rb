@@ -2,16 +2,22 @@ class OnboardingController < ApplicationController
   # AI 분석 결과 페이지만 로그인 필수 (분석은 비로그인으로 가능)
   before_action :require_login, only: [:ai_result]
   before_action :hide_floating_button, only: [:ai_input, :ai_result]
+  before_action :check_usage_limit, only: [:ai_analyze]
+
+  # 무료 체험 최대 사용 횟수
+  MAX_FREE_ANALYSES = 5
 
   def landing
     # 온보딩 랜딩은 누구나 접근 가능
     # 로그인한 사용자도 AI 분석 기능 사용 가능
+    @remaining_analyses = [MAX_FREE_ANALYSES - current_usage_count, 0].max
   end
 
   def ai_input
-    # AI 아이디어 입력 화면 (로그인 필수)
+    # AI 아이디어 입력 화면
     # 뒤로가기 경로 설정: 로그인한 사용자는 커뮤니티로, 비로그인은 온보딩으로
     @back_path = logged_in? ? community_path : root_path
+    @remaining_analyses = [MAX_FREE_ANALYSES - current_usage_count, 0].max
   end
 
   # AI 추가 질문 생성 (POST /ai/questions)
@@ -98,6 +104,9 @@ class OnboardingController < ApplicationController
 
       session[:pending_analysis_key] = cache_key
 
+      # 비로그인 사용자: 쿠키 횟수 증가
+      increment_guest_usage_count
+
       Rails.logger.info("[OnboardingController#ai_analyze] Saved analysis to cache (key: #{cache_key}) for non-logged-in user")
       redirect_to login_path, notice: "분석이 완료되었습니다! 결과를 확인하려면 로그인해주세요."
     end
@@ -148,6 +157,50 @@ class OnboardingController < ApplicationController
   end
 
   private
+
+  # 사용 횟수 제한 확인 (비로그인 + 로그인 합산 5회)
+  def check_usage_limit
+    usage_count = current_usage_count
+    remaining = MAX_FREE_ANALYSES - usage_count
+
+    if usage_count >= MAX_FREE_ANALYSES
+      respond_to do |format|
+        format.html do
+          flash[:alert] = "무료 분석 #{MAX_FREE_ANALYSES}회가 끝났습니다."
+          redirect_to community_path
+        end
+        format.json do
+          render json: {
+            error: "limit_exceeded",
+            message: "무료 분석 #{MAX_FREE_ANALYSES}회가 끝났습니다.",
+            remaining: 0
+          }, status: :forbidden
+        end
+      end
+    elsif remaining == 1
+      # 마지막 1회 남았을 때 경고 (분석 진행은 허용)
+      flash.now[:notice] = "마지막 무료 분석입니다."
+    end
+  end
+
+  # 현재 사용 횟수 조회 (비로그인 쿠키 + 로그인 DB 합산)
+  def current_usage_count
+    guest_count = cookies[:guest_ai_usage_count].to_i
+
+    if logged_in?
+      # 로그인 사용자: DB 분석 횟수 + 비로그인 시 사용 횟수
+      current_user.idea_analyses.count + guest_count
+    else
+      # 비로그인 사용자: 쿠키 횟수만
+      guest_count
+    end
+  end
+
+  # 비로그인 사용자 쿠키 횟수 증가
+  def increment_guest_usage_count
+    current_count = cookies[:guest_ai_usage_count].to_i
+    cookies.permanent[:guest_ai_usage_count] = (current_count + 1).to_s
+  end
 
   # 추가 질문 답변 파싱
   def parse_follow_up_answers

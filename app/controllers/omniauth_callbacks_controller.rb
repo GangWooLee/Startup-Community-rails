@@ -25,29 +25,15 @@ class OmniauthCallbacksController < ApplicationController
     end
 
     if @user&.persisted?
-      # 세션에 사용자 ID 저장
-      session[:user_id] = @user.id
+      # 로그인 처리 (세션 ID 재생성 + pending_analysis_key 보존)
+      log_in(@user)
 
-      # 대기 중인 AI 분석 결과가 있으면 캐시에서 읽어 DB에 저장
-      if session[:pending_analysis_key].present?
-        cache_key = session.delete(:pending_analysis_key)
-        pending = Rails.cache.read(cache_key)
-
-        if pending.present?
-          Rails.cache.delete(cache_key)  # 사용 후 캐시 삭제
-          idea_analysis = @user.idea_analyses.create!(
-            idea: pending[:idea] || pending["idea"],
-            follow_up_answers: pending[:follow_up_answers] || pending["follow_up_answers"] || {},
-            analysis_result: pending[:analysis_result] || pending["analysis_result"],
-            score: pending[:score] || pending["score"],
-            is_real_analysis: pending[:is_real_analysis] || pending["is_real_analysis"],
-            partial_success: pending[:partial_success] || pending["partial_success"] || false
-          )
-          Rails.logger.info "OAuth login with pending analysis: #{provider_name} - User #{@user.id}"
-          flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다! AI 분석 결과를 확인하세요."
-          redirect_to ai_result_path(idea_analysis)
-          return
-        end
+      # 대기 중인 AI 분석 결과가 있으면 복원 후 결과 페이지로 이동
+      if (analysis = restore_pending_analysis)
+        Rails.logger.info "OAuth login with pending analysis: #{provider_name} - User #{@user.id}"
+        flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다! AI 분석 결과를 확인하세요."
+        redirect_to ai_result_path(analysis)
+        return
       end
 
       # 리디렉션 URL 결정 (세션 > 쿠키 > 기본값)

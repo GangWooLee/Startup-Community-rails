@@ -34,9 +34,10 @@ class UsersController < ApplicationController
         EmailVerification.where(email: email).destroy_all
         log_in(existing_user)
 
-        # 대기 중인 AI 분석 결과 처리
-        if session[:pending_analysis_key].present?
-          handle_pending_analysis(existing_user)
+        # 대기 중인 AI 분석 결과 복원 후 결과 페이지로 이동
+        if (analysis = restore_pending_analysis)
+          flash[:notice] = "기존 소셜 계정에 비밀번호가 설정되었습니다! AI 분석 결과를 확인하세요."
+          redirect_to ai_result_path(analysis)
           return
         end
 
@@ -58,9 +59,10 @@ class UsersController < ApplicationController
       EmailVerification.where(email: email).destroy_all
       log_in(@user)
 
-      # 대기 중인 AI 분석 결과 처리
-      if session[:pending_analysis_key].present?
-        handle_pending_analysis(@user)
+      # 대기 중인 AI 분석 결과 복원 후 결과 페이지로 이동
+      if (analysis = restore_pending_analysis)
+        flash[:notice] = "회원가입이 완료되었습니다! AI 분석 결과를 확인하세요."
+        redirect_to ai_result_path(analysis)
         return
       end
 
@@ -76,28 +78,5 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :password_confirmation, :name, :role_title, :bio)
-  end
-
-  # 대기 중인 AI 분석 결과를 사용자 계정에 연결
-  def handle_pending_analysis(user)
-    cache_key = session.delete(:pending_analysis_key)
-    pending = Rails.cache.read(cache_key)
-
-    if pending.present?
-      Rails.cache.delete(cache_key)  # 사용 후 캐시 삭제
-      idea_analysis = user.idea_analyses.create!(
-        idea: pending[:idea] || pending["idea"],
-        follow_up_answers: pending[:follow_up_answers] || pending["follow_up_answers"] || {},
-        analysis_result: pending[:analysis_result] || pending["analysis_result"],
-        score: pending[:score] || pending["score"],
-        is_real_analysis: pending[:is_real_analysis] || pending["is_real_analysis"],
-        partial_success: pending[:partial_success] || pending["partial_success"] || false
-      )
-      flash[:notice] = "계정이 설정되었습니다! AI 분석 결과를 확인하세요."
-      redirect_to ai_result_path(idea_analysis)
-    else
-      flash[:notice] = "계정이 설정되었습니다. 환영합니다!"
-      redirect_back_or(community_path)
-    end
   end
 end

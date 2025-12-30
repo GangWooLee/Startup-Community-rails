@@ -1,13 +1,22 @@
 <div class="min-h-screen bg-background flex flex-col">
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
-    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
-      <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+        <h1 class="text-lg font-semibold text-foreground">아이디어 분석</h1>
+      </div>
+      <!-- 남은 횟수 표시 -->
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 border border-border">
+        <svg class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
-      <% end %>
-      <h1 class="text-lg font-semibold text-foreground">아이디어 분석</h1>
+        <span class="text-xs font-medium text-muted-foreground"><%= @remaining_analyses %>/<%= OnboardingController::MAX_FREE_ANALYSES %>회 남음</span>
+      </div>
     </div>
   </header>
 

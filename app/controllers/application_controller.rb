@@ -63,14 +63,16 @@ class ApplicationController < ActionController::Base
   # Logs in the given user by storing their id in the session
   # 보안: 로그인 시 세션 ID 재생성 (Session Fixation 방지)
   def log_in(user)
-    # 기존 세션의 return_to 값 보존
+    # 기존 세션의 중요 값들 보존
     return_to = session[:return_to]
+    pending_analysis_key = session[:pending_analysis_key]
 
     # 세션 ID 재생성 (Session Fixation Attack 방지)
     reset_session
 
     # 보존된 값 복원
     session[:return_to] = return_to if return_to.present?
+    session[:pending_analysis_key] = pending_analysis_key if pending_analysis_key.present?
 
     # 새 세션에 사용자 ID 저장
     session[:user_id] = user.id
@@ -174,5 +176,40 @@ class ApplicationController < ActionController::Base
     rescue URI::InvalidURIError
       nil
     end
+  end
+
+  # 대기 중인 AI 분석 결과 복원 (비로그인 상태에서 분석 후 로그인 시)
+  # 캐시에 저장된 분석 결과를 DB로 이전하고, 해당 IdeaAnalysis 레코드 반환
+  def restore_pending_analysis
+    return nil unless logged_in?
+    return nil unless session[:pending_analysis_key].present?
+
+    cache_key = session[:pending_analysis_key]
+    cached_data = Rails.cache.read(cache_key)
+
+    return nil unless cached_data
+
+    Rails.logger.info "[AI] Restoring pending analysis from cache: #{cache_key}"
+
+    # DB에 저장
+    idea_analysis = current_user.idea_analyses.create!(
+      idea: cached_data[:idea],
+      follow_up_answers: cached_data[:follow_up_answers],
+      analysis_result: cached_data[:analysis_result],
+      score: cached_data[:score],
+      is_real_analysis: cached_data[:is_real_analysis],
+      partial_success: cached_data[:partial_success]
+    )
+
+    # 정리
+    Rails.cache.delete(cache_key)
+    session.delete(:pending_analysis_key)
+
+    Rails.logger.info "[AI] Restored analysis as IdeaAnalysis##{idea_analysis.id}"
+    idea_analysis
+  rescue => e
+    Rails.logger.error "[AI] Failed to restore pending analysis: #{e.message}"
+    session.delete(:pending_analysis_key)
+    nil
   end
 end
