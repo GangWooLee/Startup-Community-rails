@@ -131,6 +131,29 @@
       }
     </style>
 
+    <%# Google Analytics 4 (사용자 행동 분석) %>
+    <%
+      ga_id = Rails.application.credentials.dig(:google, :analytics_id)
+    %>
+    <% if ga_id.present? && Rails.env.production? %>
+      <!-- GA4 Script -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=<%= ga_id %>"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '<%= ga_id %>');
+
+        // Rails Turbo 대응 (SPA 페이지 이동 추적)
+        document.addEventListener("turbo:load", function(event) {
+          gtag('config', '<%= ga_id %>', {
+            'page_location': window.location.href,
+            'page_title': document.title
+          });
+        });
+      </script>
+    <% end %>
+
     <%# 카카오 JavaScript SDK (공유 기능용) %>
     <%
       # 카카오 JavaScript 키 (credentials에서 가져옴)
