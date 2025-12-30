@@ -1,0 +1,59 @@
+<%# AI 분석 진행률 표시 Partial %>
+<%# Turbo Stream으로 동적 업데이트됨 %>
+<%
+  progress_percent = total_stages > 0 ? (current_stage.to_f / total_stages * 100).round : 0
+  # SVG stroke-dasharray 계산: 원주 = 2πr = 2 * 3.14159 * 42 ≈ 264
+  circumference = 264
+  filled = (progress_percent / 100.0 * circumference).round
+  remaining = circumference - filled
+%>
+
+<div class="relative flex flex-col items-center justify-center transition-transform duration-200"
+     data-ai-loading-target="progressContainer"
+     data-progress="<%= progress_percent %>">
+
+  <%# 외부 펄스 링 %>
+  <div class="absolute h-36 w-36 rounded-full border border-purple-500/20 animate-spinner-pulse"></div>
+
+  <%# 원형 프로그레스 %>
+  <div class="relative h-32 w-32">
+    <svg class="h-full w-full transform -rotate-90" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" />
+          <stop offset="50%" stop-color="#a855f7" />
+          <stop offset="100%" stop-color="#c084fc" />
+        </linearGradient>
+      </defs>
+
+      <%# 배경 원 %>
+      <circle cx="50" cy="50" r="42" fill="none" stroke-width="8"
+              class="stroke-secondary/30" />
+
+      <%# 프로그레스 호 (채워지는 부분) %>
+      <circle cx="50" cy="50" r="42" fill="none" stroke-width="8"
+              stroke="url(#progress-gradient)"
+              stroke-linecap="round"
+              stroke-dasharray="<%= filled %> <%= remaining %>"
+              class="transition-all duration-700 ease-out" />
+    </svg>
+
+    <%# 중앙 단계 표시 %>
+    <div class="absolute inset-0 flex flex-col items-center justify-center">
+      <span class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-500 bg-clip-text text-transparent">
+        <%= current_stage %>/<%= total_stages %>
+      </span>
+    </div>
+  </div>
+
+  <%# 현재 단계 이름 %>
+  <p class="text-sm text-muted-foreground mt-6" data-ai-loading-target="stageName">
+    <% if current_stage == 0 %>
+      준비 중...
+    <% elsif current_stage <= total_stages %>
+      <%= stage_name %>...
+    <% else %>
+      완료!
+    <% end %>
+  </p>
+</div>

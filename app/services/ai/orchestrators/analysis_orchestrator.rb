@@ -29,10 +29,11 @@ module Ai
         scoring: Agents::ScoringAgent
       }.freeze
 
-      def initialize(idea, follow_up_answers: {})
+      def initialize(idea, follow_up_answers: {}, on_stage_complete: nil)
         super()
         @idea = idea
         @follow_up_answers = follow_up_answers
+        @on_stage_complete = on_stage_complete  # 단계 완료 콜백
         @results = {}
         @errors = []
         @start_time = nil
@@ -47,7 +48,12 @@ module Ai
 
           # 순차 실행: 각 에이전트가 이전 결과를 받음
           AGENT_SEQUENCE.each_with_index do |agent_type, index|
-            Rails.logger.info("[AnalysisOrchestrator] Step #{index + 1}/#{AGENT_SEQUENCE.size}: #{agent_type}")
+            stage_number = index + 1
+            Rails.logger.info("[AnalysisOrchestrator] Step #{stage_number}/#{AGENT_SEQUENCE.size}: #{agent_type}")
+
+            # 단계 시작 콜백 호출 (진행률 브로드캐스트용)
+            @on_stage_complete&.call(stage_number)
+
             execute_agent(agent_type)
           end
 

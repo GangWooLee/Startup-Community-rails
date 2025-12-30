@@ -1,0 +1,490 @@
+<%# AI 분석 결과 콘텐츠 Partial %>
+<%# 이 파일은 Turbo Stream으로 동적 교체됩니다 %>
+
+<%# 분석 실패 시 에러 표시 %>
+<% if idea_analysis.failed? %>
+  <div class="flex flex-col items-center justify-center py-20 space-y-6">
+    <div class="h-16 w-16 rounded-full bg-red-100 flex items-center justify-center">
+      <svg class="h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+    </div>
+    <div class="text-center space-y-2">
+      <h3 class="text-lg font-semibold text-foreground">분석에 실패했습니다</h3>
+      <p class="text-sm text-muted-foreground">잠시 후 다시 시도해주세요</p>
+    </div>
+    <%= link_to onboarding_ai_input_path,
+        class: "inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors" do %>
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      다시 분석하기
+    <% end %>
+  </div>
+<% elsif idea_analysis.analyzing? %>
+  <%# 분석 중일 때는 스켈레톤 UI 표시 %>
+  <div class="space-y-6 animate-pulse">
+    <%# 아이디어 요약 스켈레톤 %>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-full px-5 py-3 inline-flex items-center gap-2 w-64">
+      <span class="text-lg">💡</span>
+      <div class="h-4 bg-yellow-200 rounded w-40"></div>
+    </div>
+
+    <%# 상태 배지 스켈레톤 %>
+    <div class="p-3 rounded-lg bg-secondary/50">
+      <div class="h-4 bg-secondary rounded w-48"></div>
+    </div>
+
+    <%# Section 1 스켈레톤 %>
+    <section class="bg-gradient-to-br from-primary/5 via-background to-primary/10 rounded-2xl border border-primary/20 p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="h-6 w-6 rounded-full bg-primary/20"></div>
+        <div class="h-4 bg-primary/20 rounded w-32"></div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex-shrink-0 flex flex-col items-center justify-center bg-card rounded-xl p-6 border border-border">
+          <div class="h-32 w-32 rounded-full bg-secondary"></div>
+        </div>
+        <div class="flex-1 bg-card rounded-xl p-6 border border-border space-y-4">
+          <div class="h-5 bg-secondary rounded w-40"></div>
+          <div class="h-4 bg-secondary rounded w-full"></div>
+          <div class="h-4 bg-secondary rounded w-3/4"></div>
+        </div>
+      </div>
+    </section>
+
+    <%# Section 2 스켈레톤 %>
+    <section class="bg-card rounded-2xl border border-border p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="h-6 w-6 rounded-full bg-cyan-500/20"></div>
+        <div class="h-4 bg-cyan-100 rounded w-32"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% 2.times do %>
+          <div class="bg-secondary/30 rounded-xl p-4 h-40"></div>
+        <% end %>
+      </div>
+    </section>
+  </div>
+<% else %>
+  <%# 분석 완료 - 실제 결과 표시 %>
+  <div class="space-y-6">
+    <!-- Idea Summary Badge (Yellow) -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-full px-5 py-3 inline-flex items-center gap-2">
+      <span class="text-lg">💡</span>
+      <span class="text-yellow-800 font-medium text-sm"><%= analysis[:summary] %></span>
+    </div>
+
+    <!-- Status Badge -->
+    <% if idea_analysis.is_real_analysis %>
+      <div class="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+        <div class="flex items-start gap-2">
+          <svg class="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-xs text-green-700">AI가 실제로 분석한 결과입니다.</p>
+        </div>
+      </div>
+    <% else %>
+      <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+        <div class="flex items-start gap-2">
+          <svg class="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-xs text-yellow-700">현재는 데모 결과입니다. API 키 설정 후 실제 AI 분석이 제공됩니다.</p>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- =============================================== -->
+    <!-- SECTION 1: THE NAVIGATOR -->
+    <!-- =============================================== -->
+    <section class="bg-gradient-to-br from-primary/5 via-background to-primary/10 rounded-2xl border border-primary/20 p-6">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
+          <span class="text-xs font-bold text-primary">1</span>
+        </div>
+        <h2 class="text-sm font-semibold text-primary uppercase tracking-wider">The Navigator</h2>
+      </div>
+      <p class="text-lg font-semibold text-foreground mb-1">아이디어 진단 및 핵심 액션</p>
+      <p class="text-sm text-muted-foreground mb-6">당신의 아이디어가 나아갈 방향을 제시합니다</p>
+
+      <!-- Score + Diagnosis Row (Score LEFT, Diagnosis RIGHT) -->
+      <% score = analysis.dig(:score, :overall) || 0 %>
+      <div class="flex flex-col md:flex-row gap-6 mb-6">
+        <!-- LEFT: Score Circle -->
+        <div class="flex-shrink-0 flex flex-col items-center justify-center bg-card rounded-xl p-6 border border-border">
+          <div class="relative h-32 w-32">
+            <!-- Background circle -->
+            <svg class="h-32 w-32 transform -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke-width="10" class="stroke-secondary"/>
+              <!-- Progress circle -->
+              <circle cx="50" cy="50" r="42" fill="none" stroke-width="10"
+                      class="stroke-primary transition-all duration-1000"
+                      stroke-linecap="round"
+                      stroke-dasharray="<%= (score * 2.64).round %> 264"/>
+            </svg>
+            <!-- Score text -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-4xl font-bold text-foreground"><%= score %></span>
+              <span class="text-sm text-muted-foreground">점</span>
+            </div>
+          </div>
+
+          <!-- Score status pills -->
+          <% score_status = case score
+               when 0..40 then { label: "보완 필요", color: "bg-red-100 text-red-600" }
+               when 41..60 then { label: "기본기 갖춤", color: "bg-yellow-100 text-yellow-700" }
+               when 61..80 then { label: "좋은 출발", color: "bg-primary/10 text-primary" }
+               else { label: "훌륭한 아이디어", color: "bg-green-100 text-green-600" }
+             end %>
+          <div class="flex items-center gap-1 mt-3">
+            <span class="h-2 w-2 rounded-full <%= score >= 41 ? 'bg-green-500' : 'bg-gray-300' %>"></span>
+            <span class="h-2 w-2 rounded-full <%= score >= 61 ? 'bg-green-500' : 'bg-gray-300' %>"></span>
+            <span class="h-2 w-2 rounded-full <%= score >= 81 ? 'bg-green-500' : 'bg-gray-300' %>"></span>
+          </div>
+          <p class="text-sm font-medium mt-2 px-3 py-1 rounded-full <%= score_status[:color] %>"><%= score_status[:label] %></p>
+        </div>
+
+        <!-- RIGHT: Diagnosis Box -->
+        <div class="flex-1 bg-card rounded-xl p-6 border border-border">
+          <h3 class="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+            <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            아이디어 진단 결과
+          </h3>
+
+          <!-- Dynamic diagnosis text based on score and weak areas -->
+          <% weak_areas = analysis.dig(:score, :weak_areas) || [] %>
+          <% strong_areas = analysis.dig(:score, :strong_areas) || [] %>
+          <p class="text-sm text-muted-foreground leading-relaxed mb-4">
+            <% if strong_areas.any? %>
+              당신의 아이디어는 <span class="text-foreground font-medium"><%= strong_areas.first %></span> 면에서 강점을 가지고 있<%= strong_areas.length > 1 ? "으며, #{strong_areas[1]}도 좋습니다" : "습니다" %>.
+              <% if weak_areas.any? %>
+                다만, <span class="text-primary font-medium"><%= weak_areas.join(', ') %></span> 영역의 보완이 필요합니다.
+              <% end %>
+            <% elsif weak_areas.any? %>
+              아이디어의 기본 컨셉은 좋지만, <span class="text-primary font-medium"><%= weak_areas.join(', ') %></span> 영역을 보강하면 더욱 완성도 높은 아이디어가 될 수 있습니다.
+            <% else %>
+              전반적으로 균형 잡힌 아이디어입니다. 세부 사항을 더 구체화하면 성공 가능성이 높아집니다.
+            <% end %>
+          </p>
+
+          <!-- Weak/Strong Area Badges (Inline) -->
+          <div class="flex flex-wrap gap-2">
+            <% weak_areas.each do |area| %>
+              <span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
+                <%= area %> 보완 필요
+              </span>
+            <% end %>
+            <% strong_areas.first(2).each do |area| %>
+              <span class="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-100">
+                ✓ <%= area %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Improvement Tips (Optional) -->
+      <% improvement_tips = analysis.dig(:score, :improvement_tips) %>
+      <% if improvement_tips.present? %>
+        <div class="bg-secondary/30 rounded-lg p-4 mb-6">
+          <p class="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
+            <span>💡</span> 개선 팁
+          </p>
+          <ul class="space-y-1">
+            <% improvement_tips.each do |tip| %>
+              <li class="text-sm text-muted-foreground flex items-start gap-2">
+                <span class="text-primary mt-0.5">•</span>
+                <span><%= tip %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Action Cards (Figma Style: "Action N" header) -->
+      <% if analysis[:actions].present? %>
+        <div>
+          <p class="text-xs font-semibold text-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+            <span>🚀</span> 지금 필요한 액션
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <% analysis[:actions].first(3).each_with_index do |action, index| %>
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all">
+                <!-- Action Header -->
+                <div class="px-4 py-2 border-b border-border flex items-center gap-2">
+                  <div class="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span class="text-[10px] text-primary">●</span>
+                  </div>
+                  <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Action <%= index + 1 %></span>
+                </div>
+                <!-- Action Content -->
+                <div class="p-4">
+                  <p class="font-semibold text-foreground text-sm mb-2"><%= action[:title] %></p>
+                  <p class="text-xs text-muted-foreground leading-relaxed"><%= action[:description] %></p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </section>
+
+    <!-- =============================================== -->
+    <!-- SECTION 2: THE TEAM BUILDER -->
+    <!-- =============================================== -->
+    <% if recommended_experts.present? %>
+      <section class="bg-card rounded-2xl border border-border p-6" data-controller="expert-overlay">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="h-6 w-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
+            <span class="text-xs font-bold text-cyan-600">2</span>
+          </div>
+          <h2 class="text-sm font-semibold text-cyan-600 uppercase tracking-wider">The Team Builder</h2>
+        </div>
+        <p class="text-lg font-semibold text-foreground mb-1">부족한 점수를 채워줄 최적의 스쿼드</p>
+        <p class="text-sm text-muted-foreground mb-6">이 전문가들과 함께하면 아이디어가 더욱 완성도 높아집니다</p>
+
+        <!-- Required Expertise Tags -->
+        <% if analysis[:required_expertise].present? %>
+          <div class="mb-6">
+            <p class="text-xs text-muted-foreground mb-2">필요한 역량</p>
+            <div class="flex flex-wrap gap-2">
+              <% (analysis[:required_expertise][:roles] || []).each do |role| %>
+                <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= role %></span>
+              <% end %>
+              <% (analysis[:required_expertise][:skills] || []).first(4).each do |skill| %>
+                <span class="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs"><%= skill %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Expert Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <% recommended_experts.first(4).each do |prediction| %>
+            <%= render "onboarding/expert_card_v2", prediction: prediction %>
+          <% end %>
+        </div>
+
+        <!-- More Experts Link -->
+        <div class="pt-4 border-t border-border">
+          <%= link_to search_path(tab: "users"), class: "flex items-center justify-center gap-2 text-sm text-primary hover:underline font-medium" do %>
+            더 많은 전문가 찾기
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <!-- =============================================== -->
+    <!-- SECTION 3: THE EVIDENCE (Single Collapsible Panel) -->
+    <!-- =============================================== -->
+    <section class="bg-card rounded-2xl border border-border overflow-hidden" data-controller="accordion">
+      <div class="flex items-center gap-2 p-6 pb-4">
+        <div class="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+          <span class="text-xs font-bold text-purple-600">3</span>
+        </div>
+        <h2 class="text-sm font-semibold text-purple-600 uppercase tracking-wider">The Evidence</h2>
+      </div>
+
+      <!-- Single Collapsible: 심층 분석 리포트 -->
+      <div class="border-t border-border" data-accordion-target="item">
+        <button type="button"
+                class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
+                data-action="click->accordion#toggle"
+                data-accordion-target="trigger">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-primary flex items-center justify-center">
+              <span class="text-lg">💡</span>
+            </div>
+            <div>
+              <span class="font-semibold text-foreground block">심층 분석 리포트</span>
+              <span class="text-xs text-muted-foreground">이 추천이 나온 배경: Undrew AI의 딥리서치</span>
+            </div>
+          </div>
+          <svg class="h-5 w-5 text-muted-foreground transition-transform" data-accordion-target="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Expanded Content -->
+        <div class="hidden px-6 pb-6 space-y-6" data-accordion-target="content">
+
+          <!-- 📊 시장 분석 데이터 -->
+          <div class="bg-secondary/30 rounded-xl p-5">
+            <h4 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <span>📊</span> 시장 분석 데이터
+            </h4>
+            <div class="space-y-4">
+              <!-- 시장 규모 -->
+              <% if analysis.dig(:market_analysis, :market_size).present? %>
+                <div>
+                  <p class="text-xs font-medium text-muted-foreground mb-1">시장 규모</p>
+                  <p class="text-sm text-foreground"><%= analysis.dig(:market_analysis, :market_size) %></p>
+                </div>
+              <% end %>
+
+              <!-- 트렌드 -->
+              <% if analysis.dig(:market_analysis, :trends).present? %>
+                <div>
+                  <p class="text-xs font-medium text-muted-foreground mb-1">트렌드</p>
+                  <p class="text-sm text-foreground"><%= analysis.dig(:market_analysis, :trends) %></p>
+                </div>
+              <% end %>
+
+              <!-- 시장 잠재력 -->
+              <% if analysis.dig(:market_analysis, :potential).present? %>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-muted-foreground">시장 잠재력:</span>
+                  <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium"><%= analysis.dig(:market_analysis, :potential) %></span>
+                </div>
+              <% end %>
+
+              <!-- 주요 경쟁사 -->
+              <% competitors = analysis.dig(:market_analysis, :competitors) %>
+              <% if competitors.present? %>
+                <div>
+                  <p class="text-xs font-medium text-muted-foreground mb-2">주요 경쟁사</p>
+                  <div class="flex flex-wrap gap-2">
+                    <% competitors.each do |competitor| %>
+                      <span class="px-3 py-1.5 rounded-lg bg-card border border-border text-sm text-foreground"><%= competitor %></span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- 차별화 포인트 -->
+              <% if analysis.dig(:market_analysis, :differentiation).present? %>
+                <div>
+                  <p class="text-xs font-medium text-muted-foreground mb-1">차별화 포인트</p>
+                  <p class="text-sm text-foreground"><%= analysis.dig(:market_analysis, :differentiation) %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 👥 타겟 사용자 정의 -->
+          <% target_users = analysis[:target_users] %>
+          <% if target_users.present? %>
+            <div>
+              <h4 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <span>👥</span> 타겟 사용자 정의
+              </h4>
+              <% if target_users[:primary].present? %>
+                <p class="text-sm text-muted-foreground mb-4"><%= target_users[:primary] %></p>
+              <% end %>
+
+              <!-- Persona Cards (2 columns if personas exist) -->
+              <% personas = target_users[:personas] %>
+              <% if personas.present? %>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <% personas.each do |persona| %>
+                    <div class="bg-secondary/30 rounded-xl p-4 border border-border">
+                      <p class="font-semibold text-foreground mb-1"><%= persona[:name] %></p>
+                      <p class="text-xs text-muted-foreground mb-2"><%= persona[:age_range] %></p>
+                      <p class="text-sm text-muted-foreground"><%= persona[:description] %></p>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <!-- Fallback: Characteristic tags -->
+                <% characteristics = target_users[:characteristics] %>
+                <% if characteristics.present? %>
+                  <div class="flex flex-wrap gap-2">
+                    <% characteristics.each do |char| %>
+                      <span class="px-3 py-1.5 rounded-full bg-green-500/10 text-green-600 text-sm font-medium"><%= char %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <!-- 🚀 MVP 필수 기능 -->
+          <% recommendations = analysis[:recommendations] %>
+          <% mvp_features = recommendations&.dig(:mvp_features) %>
+          <% if mvp_features.present? %>
+            <div>
+              <h4 class="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <span>🚀</span> MVP 필수 기능
+              </h4>
+              <p class="text-xs text-muted-foreground mb-4">우선순위가 높은 기능 Top <%= mvp_features.length %></p>
+              <div class="space-y-3">
+                <% mvp_features.each_with_index do |feature, index| %>
+                  <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                      <span class="text-xs font-bold text-white"><%= index + 1 %></span>
+                    </div>
+                    <p class="text-sm text-foreground pt-0.5"><%= feature %></p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- ⚠️ 예상 과제 -->
+          <% challenges = recommendations&.dig(:challenges) %>
+          <% if challenges.present? %>
+            <div>
+              <h4 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <span>⚠️</span> 예상 과제
+              </h4>
+              <div class="space-y-3">
+                <% challenges.each do |challenge| %>
+                  <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+                    <p class="text-sm text-red-800"><%= challenge %></p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- 🗺️ 다음 단계 로드맵 -->
+          <% next_steps = recommendations&.dig(:next_steps) %>
+          <% if next_steps.present? %>
+            <div>
+              <h4 class="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <span>🗺️</span> 다음 단계
+              </h4>
+              <p class="text-xs text-muted-foreground mb-4">1단계 액션 이후의 로드맵</p>
+              <ul class="space-y-2">
+                <% next_steps.each do |step| %>
+                  <li class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span class="text-primary mt-0.5">•</span>
+                    <span><%= step %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Overlay Container -->
+    <div id="profile-overlay-container"></div>
+
+    <!-- CTA Buttons -->
+    <div class="space-y-3 pt-4">
+      <!-- Primary CTA -->
+      <%= link_to new_post_path(type: 'community', prefill: 'idea'),
+          class: "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:bg-primary/90 transition-all",
+          data: { action: "click->ai-result#goToPost" } do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        이 아이디어로 커뮤니티에 게시하기
+      <% end %>
+
+      <!-- Secondary CTA -->
+      <%= link_to community_path, class: "w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-border bg-card text-foreground font-medium hover:bg-secondary/50 transition-colors" do %>
+        커뮤니티 보러가기
+      <% end %>
+    </div>
+  </div>
+<% end %>

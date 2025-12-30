@@ -41,8 +41,9 @@ class OnboardingController < ApplicationController
     render json: result
   end
 
-  # AI 분석 실행 및 DB 저장 (POST /ai/analyze)
-  # 분석 완료 후 결과 페이지로 리다이렉트
+  # AI 분석 요청 처리 (POST /ai/analyze)
+  # - 로그인 사용자: 바로 AI 분석 실행 → 결과 페이지
+  # - 비로그인 사용자: 입력만 저장 (API 비용 0) → 로그인 유도 → 로그인 후 분석 실행
   def ai_analyze
     @idea = params[:idea]
     @follow_up_answers = parse_follow_up_answers
@@ -53,62 +54,16 @@ class OnboardingController < ApplicationController
       return
     end
 
-    # 디버그 로깅
-    Rails.logger.info("[OnboardingController#ai_analyze] Starting analysis")
-    Rails.logger.info("[OnboardingController#ai_analyze] LLM configured: #{LangchainConfig.any_llm_configured?}")
-
-    # AI 분석 수행
-    if LangchainConfig.any_llm_configured?
-      Rails.logger.info("[OnboardingController#ai_analyze] Using real AI analysis with multi-agent orchestrator")
-
-      orchestrator = Ai::Orchestrators::AnalysisOrchestrator.new(
-        @idea,
-        follow_up_answers: @follow_up_answers
-      )
-      analysis = orchestrator.analyze
-      is_real = !analysis[:error]
-      partial = analysis.dig(:metadata, :partial_success) || false
-
-      Rails.logger.info("[OnboardingController#ai_analyze] Analysis complete. Score: #{analysis.dig(:score, :overall)}")
-    else
-      Rails.logger.warn("[OnboardingController#ai_analyze] Falling back to mock analysis - no LLM configured")
-      analysis = mock_analysis
-      is_real = false
-      partial = false
-    end
-
-    # 로그인 상태: DB에 저장 후 결과 페이지로 리다이렉트
     if logged_in?
-      idea_analysis = current_user.idea_analyses.create!(
-        idea: @idea,
-        follow_up_answers: @follow_up_answers,
-        analysis_result: analysis,
-        score: analysis.dig(:score, :overall),
-        is_real_analysis: is_real,
-        partial_success: partial
-      )
-
-      Rails.logger.info("[OnboardingController#ai_analyze] Saved IdeaAnalysis##{idea_analysis.id}")
-      redirect_to ai_result_path(idea_analysis)
+      # 로그인 사용자: 바로 AI 분석 실행
+      execute_and_save_analysis
     else
-      # 비로그인: 캐시에 분석 결과 저장 (세션에는 키만 저장 - CookieOverflow 방지)
-      cache_key = "pending_analysis:#{SecureRandom.uuid}"
-      Rails.cache.write(cache_key, {
-        idea: @idea,
-        follow_up_answers: @follow_up_answers,
-        analysis_result: analysis,
-        score: analysis.dig(:score, :overall),
-        is_real_analysis: is_real,
-        partial_success: partial
-      }, expires_in: 1.hour)
-
-      session[:pending_analysis_key] = cache_key
-
+      # 비로그인 사용자: 입력 데이터만 저장 (AI 미실행 - API 비용 절감)
+      save_pending_input
       # 비로그인 사용자: 쿠키 횟수 증가
       increment_guest_usage_count
-
-      Rails.logger.info("[OnboardingController#ai_analyze] Saved analysis to cache (key: #{cache_key}) for non-logged-in user")
-      redirect_to login_path, notice: "분석이 완료되었습니다! 결과를 확인하려면 로그인해주세요."
+      # 로그인 페이지로 리다이렉트 (AI 분석은 로그인 후 실행)
+      redirect_to login_path, notice: "분석 준비가 완료되었습니다! 로그인하면 바로 결과를 확인할 수 있어요."
     end
   end
 
@@ -200,6 +155,43 @@ class OnboardingController < ApplicationController
   def increment_guest_usage_count
     current_count = cookies[:guest_ai_usage_count].to_i
     cookies.permanent[:guest_ai_usage_count] = (current_count + 1).to_s
+  end
+
+  # 입력 데이터만 캐시에 저장 (AI 미실행 - Lazy Registration)
+  def save_pending_input
+    cache_key = "pending_input:#{SecureRandom.uuid}"
+    Rails.cache.write(cache_key, {
+      idea: @idea,
+      follow_up_answers: @follow_up_answers
+    }, expires_in: 1.hour)
+
+    session[:pending_input_key] = cache_key
+    Rails.logger.info("[OnboardingController#ai_analyze] Saved pending input (no analysis yet): #{cache_key}")
+  end
+
+  # 비동기 AI 분석 실행 (로그인 사용자용)
+  # placeholder 레코드 생성 후 백그라운드 잡으로 분석 실행
+  def execute_and_save_analysis
+    Rails.logger.info("[OnboardingController#execute_and_save_analysis] Creating placeholder for async analysis - user #{current_user.id}")
+
+    # 1. placeholder 레코드 생성 (status: analyzing)
+    idea_analysis = current_user.idea_analyses.create!(
+      idea: @idea,
+      follow_up_answers: @follow_up_answers,
+      status: :analyzing,        # 분석 중 상태
+      analysis_result: {},       # 빈 결과
+      score: nil,
+      is_real_analysis: false,
+      partial_success: false
+    )
+
+    # 2. 백그라운드 잡 실행
+    AiAnalysisJob.perform_later(idea_analysis.id)
+
+    Rails.logger.info("[OnboardingController#execute_and_save_analysis] Enqueued AiAnalysisJob for IdeaAnalysis##{idea_analysis.id}")
+
+    # 3. 즉시 결과 페이지로 리다이렉트 (로딩 상태로 표시됨)
+    redirect_to ai_result_path(idea_analysis)
   end
 
   # 추가 질문 답변 파싱

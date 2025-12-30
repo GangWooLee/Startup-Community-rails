@@ -25,10 +25,18 @@ class OmniauthCallbacksController < ApplicationController
     end
 
     if @user&.persisted?
-      # 로그인 처리 (세션 ID 재생성 + pending_analysis_key 보존)
+      # 로그인 처리 (세션 ID 재생성 + pending_analysis_key/pending_input_key 보존)
       log_in(@user)
 
-      # 대기 중인 AI 분석 결과가 있으면 복원 후 결과 페이지로 이동
+      # 1순위: 대기 중인 입력 → AI 분석 실행 (Lazy Registration)
+      if (analysis = restore_pending_input_and_analyze)
+        Rails.logger.info "OAuth login with pending input (Lazy Registration): #{provider_name} - User #{@user.id}"
+        flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다! AI 분석 결과를 확인하세요."
+        redirect_to ai_result_path(analysis)
+        return
+      end
+
+      # 2순위: 기존 캐시된 분석 결과 복원 (하위 호환성)
       if (analysis = restore_pending_analysis)
         Rails.logger.info "OAuth login with pending analysis: #{provider_name} - User #{@user.id}"
         flash[:notice] = "#{provider_name} 계정으로 로그인되었습니다! AI 분석 결과를 확인하세요."

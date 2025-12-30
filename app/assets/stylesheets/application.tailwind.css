@@ -116,3 +116,61 @@
 .animate-modal-in {
   animation: modal-in 0.2s ease-out forwards;
 }
+
+/* AI 분석 결과 애니메이션 */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* 그라데이션 스피너 애니메이션 */
+@keyframes spinner-gradient-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes spinner-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  }
+}
+
+.animate-spinner-gradient {
+  animation: spinner-gradient-rotate 1.5s linear infinite;
+}
+
+.animate-spinner-pulse {
+  animation: spinner-pulse 2s ease-in-out infinite;
+}
+
+.animate-spinner-glow {
+  animation: spinner-glow 2s ease-in-out infinite;
+}
