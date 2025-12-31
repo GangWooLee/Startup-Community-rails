@@ -4,6 +4,8 @@
 
 **비전**: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
 
+> **브랜드명**: Undrew
+
 ## 📋 프로젝트 정보
 
 | 항목 | 값 |
@@ -11,7 +13,7 @@
 | **버전** | MVP v0.8 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
-| **마지막 업데이트** | 2025-12-27 |
+| **마지막 업데이트** | 2025-12-31 |
 | **Database** | SQLite3 (개발), PostgreSQL (프로덕션) |
 | **Frontend** | Hotwire (Turbo + Stimulus) + Tailwind CSS v4 |
 
@@ -24,7 +26,7 @@
 | 커뮤니티 | 95% | ✅ 완성 | 게시글 CRUD, 댓글, 좋아요, 이미지, 스크랩 |
 | 채팅 | 90% | ✅ 완성 | 실시간 1:1 채팅, Solid Cable, Turbo Streams |
 | 프로필/OAuth | 85% | ✅ 완성 | Google, GitHub 소셜 로그인 |
-| AI 온보딩 | 85% | ✅ 완성 | 멀티에이전트 아이디어 분석, Gemini 2.0 |
+| AI 온보딩 | 85% | ✅ 완성 | 멀티에이전트 아이디어 분석, Gemini 3 Flash |
 | 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
 | 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
 | 외주 | 50% | ⚠️ 진행중 | 구인/구직, Post 모델 통합 중 |
@@ -170,10 +172,10 @@ db/
 
 ### AI
 - **LangchainRB** - AI 에이전트 프레임워크
-- **Google Gemini 2.0** - LLM (멀티에이전트 아이디어 분석)
+- **Google Gemini 3 Flash** - LLM (멀티에이전트 아이디어 분석)
   - 5개 전문 에이전트: Summary, TargetUser, MarketAnalysis, Strategy, Scoring
   - Gemini Grounding - 실시간 웹 검색
-  - 에이전트별 최적화 모델 (gemini-2.0-flash, gemini-2.0-flash-lite)
+  - 에이전트별 최적화 모델 (gemini-3-flash-preview, gemini-2.0-flash-lite)
 
 ### Auth
 - **has_secure_password** - 세션 기반 인증
@@ -245,6 +247,10 @@ brakeman
 
 | 날짜 | 내용 |
 |------|------|
+| 2025-12-31 | Gemini 3 Flash 모델 업그레이드 (AI 분석 정확도 향상) |
+| 2025-12-31 | Undrew 브랜딩 적용 (로고, 헤더 통일) |
+| 2025-12-30 | 회원 탈퇴 시스템 구현 (암호화 보관, 5년 후 자동 파기) |
+| 2025-12-30 | GA4 (Google Analytics 4) 연동 |
 | 2025-12-27 | AI 멀티에이전트 시스템 완성 (5개 전문 에이전트) |
 | 2025-12-27 | Gemini Grounding 실시간 웹 검색 연동 |
 | 2025-12-27 | Admin 패널 추가 (사용자/채팅방 관리) |
