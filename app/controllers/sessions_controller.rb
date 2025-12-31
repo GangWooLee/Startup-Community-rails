@@ -38,6 +38,13 @@ class SessionsController < ApplicationController
     if user.authenticate(params[:password])
       log_in(user)
 
+      # Remember Me: 체크박스 선택 시 영구 쿠키 저장
+      if params[:remember_me] == "1"
+        remember(user)
+      else
+        forget(user)
+      end
+
       # 1순위: 대기 중인 입력 → AI 분석 실행 (Lazy Registration)
       if (analysis = restore_pending_input_and_analyze)
         flash[:notice] = "로그인되었습니다! AI 분석 결과를 확인하세요."

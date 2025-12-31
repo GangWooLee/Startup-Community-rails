@@ -40,19 +40,29 @@ class ApplicationController < ActionController::Base
   end
 
   # Returns the currently logged-in user (if any)
-  # 탈퇴한 사용자는 nil 반환 (세션 무효화)
+  # 1. 세션에서 확인 (일반 로그인)
+  # 2. 쿠키에서 확인 (Remember Me)
+  # 탈퇴한 사용자는 nil 반환 (세션/쿠키 무효화)
   def current_user
-    return nil unless session[:user_id]
-    @current_user ||= begin
-      user = User.find_by(id: session[:user_id])
-      # 탈퇴한 사용자는 세션 무효화
-      if user&.deleted?
-        reset_session
-        nil
-      else
-        user
+    if session[:user_id]
+      @current_user ||= User.find_by(id: session[:user_id])
+    elsif cookies.encrypted[:user_id]
+      # Remember Me: 쿠키 기반 인증
+      user = User.find_by(id: cookies.encrypted[:user_id])
+      if user&.authenticated?(cookies.encrypted[:remember_token])
+        log_in(user)
+        @current_user = user
       end
     end
+
+    # 탈퇴한 사용자는 세션/쿠키 무효화
+    if @current_user&.deleted?
+      forget(@current_user)
+      reset_session
+      @current_user = nil
+    end
+
+    @current_user
   end
 
   # Returns true if the user is logged in, false otherwise
@@ -81,9 +91,24 @@ class ApplicationController < ActionController::Base
     user.update(last_sign_in_at: Time.current)
   end
 
-  # Logs out the current user by clearing the session
-  # 보안: 로그아웃 시 전체 세션 삭제
+  # Remember Me: 영구 쿠키 생성 (20년)
+  def remember(user)
+    user.remember
+    cookies.permanent.encrypted[:user_id] = user.id
+    cookies.permanent.encrypted[:remember_token] = user.remember_token
+  end
+
+  # Remember Me: 쿠키 및 DB 토큰 삭제
+  def forget(user)
+    user&.forget
+    cookies.delete(:user_id)
+    cookies.delete(:remember_token)
+  end
+
+  # Logs out the current user by clearing the session and cookies
+  # 보안: 로그아웃 시 전체 세션 + 쿠키 삭제
   def log_out
+    forget(@current_user) if @current_user
     reset_session  # 세션 완전 삭제 (session.delete보다 안전)
     @current_user = nil
   end
