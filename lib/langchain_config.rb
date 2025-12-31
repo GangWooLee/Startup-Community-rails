@@ -82,12 +82,14 @@ module LangchainConfig
 
     # 에이전트별 최적화된 LLM 설정
     # 간단한 작업(요약)은 저렴한 모델, 복잡한 분석은 고성능 모델 사용
+    # Gemini 3 Flash (2025-12-17 출시) - Pro 수준 지능, Flash 가격
+    # summary는 비용 절감을 위해 flash-lite 유지
     AGENT_MODEL_CONFIGS = {
       summary: { model: "gemini-2.0-flash-lite", temperature: 0.5 },
-      target_user: { model: "gemini-2.0-flash", temperature: 0.7 },
-      market_analysis: { model: "gemini-2.0-flash", temperature: 0.7 },
-      strategy: { model: "gemini-2.0-flash", temperature: 0.7 },
-      scoring: { model: "gemini-2.0-flash", temperature: 0.5 }
+      target_user: { model: "gemini-3-flash-preview", temperature: 0.7 },
+      market_analysis: { model: "gemini-3-flash-preview", temperature: 0.7 },
+      strategy: { model: "gemini-3-flash-preview", temperature: 0.7 },
+      scoring: { model: "gemini-3-flash-preview", temperature: 0.5 }
     }.freeze
 
     # 에이전트 타입에 맞는 LLM 인스턴스 생성
