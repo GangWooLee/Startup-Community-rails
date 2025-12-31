@@ -40,7 +40,12 @@ module LangchainConfig
         api_key: api_key,
         default_options: {
           temperature: temperature,
-          chat_model: model
+          chat_model: model,
+          # SSL 검증 비활성화 (개발 환경)
+          request: {
+            open_timeout: 60,
+            read_timeout: 60
+          }
         }
       )
     end
