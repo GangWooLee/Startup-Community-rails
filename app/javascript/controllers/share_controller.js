@@ -165,7 +165,7 @@ export default class extends Controller {
       Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
-          title: this.titleValue || "Grounded",
+          title: this.titleValue || "Undrew",
           description: description,
           imageUrl: imageUrl,
           link: {

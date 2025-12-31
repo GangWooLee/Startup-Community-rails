@@ -18,7 +18,7 @@ module ApplicationHelper
     end
 
     defaults = {
-      title: "Grounded - 창업자 커뮤니티",
+      title: "Undrew - 창업자 커뮤니티",
       description: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티",
       type: "website",
       image: nil,
@@ -32,7 +32,7 @@ module ApplicationHelper
     tags << tag.meta(property: "og:description", content: opts[:description].to_s.force_encoding("UTF-8"))
     tags << tag.meta(property: "og:type", content: opts[:type])
     tags << tag.meta(property: "og:url", content: opts[:url].to_s.force_encoding("UTF-8"))
-    tags << tag.meta(property: "og:site_name", content: "Grounded")
+    tags << tag.meta(property: "og:site_name", content: "Undrew")
     tags << tag.meta(property: "og:locale", content: "ko_KR")
 
     if opts[:image].present?
