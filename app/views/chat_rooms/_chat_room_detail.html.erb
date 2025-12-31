@@ -250,13 +250,13 @@
                     },
                     class: "flex items-end gap-2" do |f| %>
         <%= f.text_area :content,
-                        placeholder: "메시지를 입력하세요... (Ctrl+Enter로 전송)",
+                        placeholder: "메시지를 입력하세요... (Enter로 전송)",
                         rows: 1,
                         class: "flex-1 px-4 py-2.5 rounded-2xl border border-border bg-secondary text-foreground placeholder-muted-foreground resize-none focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary max-h-32 text-sm",
                         data: {
                           message_form_target: "input",
                           chat_room_target: "messageInput",
-                          action: "input->message-form#autoResize keydown.ctrl+enter->message-form#submit keydown.meta+enter->message-form#submit"
+                          action: "input->message-form#autoResize keydown->message-form#handleKeydown"
                         } %>
         <%= f.submit "전송",
                      class: "px-5 py-2.5 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:bg-primary/90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",

@@ -14,9 +14,9 @@ export default class extends Controller {
     this.updateSubmitState()
   }
 
-  // Ctrl+Enter 또는 Cmd+Enter로 제출
+  // Enter로 제출, Shift+Enter로 줄바꿈
   submitOnEnter(event) {
-    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
       if (this.hasSubmitTarget && !this.submitTarget.disabled) {
         this.submit(event)

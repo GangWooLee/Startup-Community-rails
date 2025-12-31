@@ -7,8 +7,18 @@ export default class extends Controller {
     this.autoResize()
   }
 
+  // Enter로 전송, Shift+Enter로 줄바꿈
+  handleKeydown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault()
+      if (this.hasInputTarget && this.inputTarget.value.trim() !== "") {
+        this.element.requestSubmit()
+      }
+    }
+  }
+
   submit(event) {
-    // Ctrl+Enter 또는 Cmd+Enter로 전송
+    // 직접 호출 시 전송
     if (this.hasInputTarget && this.inputTarget.value.trim() !== "") {
       event.preventDefault()
       this.element.requestSubmit()
