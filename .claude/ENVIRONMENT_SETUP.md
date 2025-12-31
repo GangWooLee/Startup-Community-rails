@@ -291,7 +291,7 @@ ls config/initializers/faraday_ssl.rb
 **구조**:
 ```yaml
 gemini:
-  api_key: AIzaSyBSAe4Z4CANuM3nyeZp3gGWA10SWD3cZj4
+  api_key: <YOUR_GEMINI_API_KEY>
 
 google:
   client_id: <Google OAuth Client ID>
