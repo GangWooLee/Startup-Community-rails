@@ -33,17 +33,6 @@ export default class extends Controller {
     }
   }
 
-  // Enter로 다음 단계, Shift+Enter로 줄바꿈
-  handleKeydown(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault()
-      // Step 1에서만 Enter 키로 제출 (아이디어 입력)
-      if (!this.submitButtonTarget.disabled) {
-        this.submitIdea()
-      }
-    }
-  }
-
   fillExample(event) {
     const example = event.currentTarget.dataset.example
     this.textareaTarget.value = example
