@@ -1,17 +1,13 @@
-<%# 메인 헤더 - 커뮤니티, 외주 등 공통 사용 %>
-<%# 사용법: render partial: "shared/main_header", locals: { title: "Undrew", subtitle: "창업자들의 커뮤니티" } %>
-
-<% title ||= "Undrew" %>
-<% subtitle ||= "창업자들의 커뮤니티" %>
+<%# 메인 헤더 - 모든 페이지 공통 (로고 + Undrew 고정) %>
 
 <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
   <div class="max-w-screen-xl mx-auto px-4 py-3">
     <div class="flex items-center justify-between">
-      <!-- Left: Logo & Title -->
-      <div>
-        <h1 class="text-xl font-bold text-foreground"><%= title %></h1>
-        <p class="text-xs text-muted-foreground"><%= subtitle %></p>
-      </div>
+      <!-- Left: Logo & Brand -->
+      <%= link_to root_path, class: "flex items-center gap-2 hover:opacity-80 transition-opacity" do %>
+        <img src="/icon.png" alt="Undrew" class="h-8 w-8 rounded">
+        <span class="text-xl font-bold text-foreground">Undrew</span>
+      <% end %>
 
       <!-- Right: Action Icons -->
       <div class="flex items-center gap-1">
