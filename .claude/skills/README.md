@@ -2,6 +2,89 @@
 
 이 디렉토리는 Startup Community Rails 프로젝트를 위한 커스텀 Claude Skills를 포함합니다.
 
+---
+
+## 🎯 Quick Decision Guide: 언제 어떤 스킬을 사용할까?
+
+### 작업 유형별 스킬 선택
+
+| 작업 유형 | 사용할 스킬 | 명령어 예시 |
+|-----------|-------------|-------------|
+| **새 모델/리소스 생성** | `rails-resource` | "Notification 모델 생성해줘" |
+| **테스트 추가** | `test-gen` | "User 모델에 테스트 추가해줘" |
+| **API 엔드포인트** | `api-endpoint` | "Posts API 엔드포인트 만들어줘" |
+| **복잡한 비즈니스 로직** | `service-object` | "결제 로직을 서비스로 분리해줘" |
+| **복잡한 검색/필터** | `query-object` | "고급 검색 쿼리 객체 만들어줘" |
+| **백그라운드 작업** | `background-job` | "이메일을 백그라운드로 보내줘" |
+| **UI 컴포넌트** | `ui-component` | "알림 카드 컴포넌트 만들어줘" |
+| **인터랙션 추가** | `stimulus-controller` | "드롭다운 인터랙션 추가해줘" |
+| **UI 개선/디자인** | `frontend-design` | "랜딩 페이지 예쁘게 만들어줘" |
+| **UI 주석 처리** | `bridge` | `/bridge` 또는 `/bridge yolo` |
+| **문서 동기화** | `doc-sync` | "DATABASE.md 업데이트해줘" |
+| **DB 헬스 체크** | `database-maintenance` | "데이터베이스 상태 확인해줘" |
+| **보안 감사** | `security-audit` | "보안 취약점 스캔해줘" |
+| **성능 분석** | `performance-check` | "N+1 쿼리 찾아줘" |
+| **통합 코드 리뷰** | `code-review` | "전체 코드 검수해줘" |
+| **로깅 시스템** | `logging-setup` | "프로덕션 로깅 설정해줘" |
+| **Rails 전문 조언** | `rails-dev` | "Rails 아키텍처 조언해줘" |
+
+### 워크플로우별 스킬 조합
+
+#### 🚀 새 기능 개발 워크플로우
+```
+1. rails-resource    → 모델, 컨트롤러, 뷰 생성
+2. test-gen          → 테스트 추가
+3. stimulus-controller → 인터랙션 추가
+4. ui-component      → UI 컴포넌트 스타일링
+5. doc-sync          → 문서 업데이트
+```
+
+#### 🔍 코드 품질 검수 워크플로우
+```
+1. code-review        → 통합 코드 검수 (권장)
+   또는 개별 실행:
+   - security-audit   → 보안 검사
+   - performance-check → 성능 분석
+   - database-maintenance → DB 상태 확인
+```
+
+#### 🎨 UI 개선 워크플로우
+```
+1. bridge (Drawbridge) → 브라우저에서 UI 주석 생성
+2. frontend-design    → 디자인 품질 향상
+3. ui-component       → 컴포넌트 일관성
+```
+
+#### 📦 배포 전 체크리스트
+```
+1. test-gen          → 테스트 커버리지 확인
+2. code-review       → 통합 검수
+3. logging-setup     → 로깅 설정 확인
+4. doc-sync          → 문서 최신화
+```
+
+---
+
+## 📁 관련 문서
+
+### Standards (코드 품질 기준)
+개발 시 준수해야 할 규칙들입니다. 스킬 실행 시 자동으로 참조됩니다.
+
+| 문서 | 내용 | 언제 참조? |
+|------|------|-----------|
+| [standards/rails-backend.md](../standards/rails-backend.md) | Rails 백엔드 규칙 | 모델, 컨트롤러 작업 시 |
+| [standards/tailwind-frontend.md](../standards/tailwind-frontend.md) | Tailwind/Stimulus 규칙 | UI 작업 시 |
+| [standards/testing.md](../standards/testing.md) | 테스트 표준 | 테스트 작성 시 |
+
+### Workflows (작업 프로세스)
+복잡한 작업의 단계별 프로세스입니다.
+
+| 문서 | 내용 | 언제 사용? |
+|------|------|-----------|
+| [workflows/feature-development.md](../workflows/feature-development.md) | 기능 개발 5단계 | 새 기능 구현 시 |
+
+---
+
 ## 📦 Available Skills
 
 ### Backend Skills
@@ -147,9 +230,40 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 - **Includes**: Controller file, Data attributes, Turbo integration
 - **Common patterns**: Modal, Tab, Dropdown, Toggle, Form validation
 
+#### 14. frontend-design 🆕 **NEW!**
+**고품질 프론트엔드 디자인 (Anthropic 공식)**
+
+제네릭한 "AI 슬롭"을 피하고 독특하고 세련된 UI를 생성합니다.
+
+- **Trigger keywords**: "frontend design", "beautiful UI", "make it pretty", "improve design", "예쁘게"
+- **Design principles**: Bold aesthetic direction, unique typography, dominant colors
+- **Anti-patterns**: Inter/Arial 폰트 피하기, 자주색 그라디언트 피하기, 쿠키커터 디자인 피하기
+- **Source**: [Anthropic Official](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design)
+
+### Rails Expert Skills 🆕 **NEW CATEGORY!**
+
+#### 15. rails-dev
+**Rails 개발 통합 스킬 라우터 (13개 전문 스킬)**
+
+복잡한 Rails 작업을 적합한 전문가 스킬로 라우팅합니다.
+
+- **Trigger keywords**: "rails expert", "rails architect", "rails security", "rails api", "rails testing"
+- **Includes**: 13개 전문 스킬 (testing, security, api, graphql, devops, business-logic 등)
+- **Features**: 자동 스킬 선택, TDD 강제, 보안 기본 설계
+- **Source**: [alec-c4/claude-skills-rails-dev](https://github.com/alec-c4/claude-skills-rails-dev)
+
+**주요 하위 스킬**:
+- `rails-testing`: Minitest/RSpec 전문가
+- `rails-security`: Pundit, Lockbox, 보안 전문가
+- `rails-api`: RESTful API 전문가
+- `rails-graphql`: GraphQL 전문가
+- `rails-devops`: Kamal, Docker 전문가
+- `rails-business-logic`: Service Object 전문가
+- `rails-project-manager`: 프로젝트 조율 전문가
+
 ### UI Workflow Skills
 
-#### 15. bridge
+#### 16. bridge
 **Drawbridge UI 주석 처리 자동화**
 
 브라우저에서 Drawbridge 확장 프로그램으로 생성한 UI 주석을 코드로 변환합니다.
@@ -169,7 +283,7 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 
 ### Documentation Skills
 
-#### 16. doc-sync
+#### 17. doc-sync
 **코드 변경사항으로 문서 자동 동기화**
 
 코드베이스 변경사항을 `.claude/` 문서에 자동으로 반영합니다.
@@ -282,13 +396,15 @@ skill-name/
 | code-review | Quality | ~200 | 3 reference docs | 1 full review |
 | ui-component | Frontend | ~200 | 5 reference docs + 2 examples | - |
 | stimulus-controller | Frontend | ~180 | 2 examples | - |
-| doc-sync | Documentation | 226 | - | 2 sync scripts |
+| frontend-design | Frontend | ~200 | - | - |
+| rails-dev | Rails Expert | ~220 | - | - |
 | bridge | UI Workflow | ~150 | 1 reference doc | - |
-| **Total** | **15 skills** | **~3,677** | **20 docs** | **10 scripts** |
+| doc-sync | Documentation | 226 | - | 2 sync scripts |
+| **Total** | **17 skills** | **~4,097** | **20 docs** | **10 scripts** |
 
 ## 🎯 Skill Coverage
 
-### Backend (46%)
+### Backend (35%)
 - ✅ Resource generation (rails-resource)
 - ✅ Testing (test-gen)
 - ✅ API development (api-endpoint)
@@ -296,37 +412,78 @@ skill-name/
 - ✅ Business logic (service-object)
 - ✅ Complex queries (query-object)
 
-### DevOps (8%)
+### DevOps (6%)
 - ✅ Logging system (logging-setup)
 
-### Maintenance (23%)
+### Maintenance (18%)
 - ✅ Database maintenance (database-maintenance)
 - ✅ Security audit (security-audit)
 - ✅ Performance check (performance-check)
 
-### Quality (7%) 🆕 **NEW CATEGORY!**
-- ✅ Code review (code-review) **NEW!** - 통합 코드 검수
+### Quality (6%)
+- ✅ Code review (code-review) - 통합 코드 검수
 
-### Frontend (15%)
+### Frontend (18%)
 - ✅ UI components (ui-component)
 - ✅ Interactivity (stimulus-controller)
+- ✅ Frontend design (frontend-design) 🆕 **NEW!** - 고품질 디자인
 
-### UI Workflow (7%) **NEW CATEGORY!**
-- ✅ Drawbridge integration (bridge) **NEW!** - UI 주석 자동 처리
+### Rails Expert (6%) 🆕 **NEW CATEGORY!**
+- ✅ Rails development router (rails-dev) 🆕 **NEW!** - 13개 전문 스킬 라우터
 
-### Documentation (7%)
+### UI Workflow (6%)
+- ✅ Drawbridge integration (bridge) - UI 주석 자동 처리
+
+### Documentation (6%)
 - ✅ Doc synchronization (doc-sync)
 
 ---
 
 **Last Updated**: 2026-01-01
 **Project**: Startup Community Rails
-**Claude Skills Version**: 7.0.0
-**Total Skills**: 15 (6 Backend + 1 DevOps + 3 Maintenance + 1 Quality + 2 Frontend + 1 UI Workflow + 1 Documentation)
+**Claude Skills Version**: 8.0.0
+**Total Skills**: 17 (6 Backend + 1 DevOps + 3 Maintenance + 1 Quality + 3 Frontend + 1 Rails Expert + 1 UI Workflow + 1 Documentation)
 
 ## 🚀 Recent Updates
 
-### v7.0.0 - Drawbridge Integration 🆕 **MAJOR UPDATE**
+### v8.0.0 - External Skills Integration 🆕 **MAJOR UPDATE**
+
+**New Skills Added (2)**
+
+#### frontend-design
+**고품질 프론트엔드 디자인 (Anthropic 공식)**
+
+Anthropic 공식 frontend-design 플러그인을 기반으로 한 스킬입니다.
+
+- 제네릭한 "AI 슬롭" 방지
+- 대담한 미학적 방향 선택
+- 독특한 타이포그래피, 지배적 색상
+- 고영향 애니메이션 순간
+
+**Source**: [anthropics/claude-code/plugins/frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design)
+
+#### rails-dev
+**Rails 개발 통합 스킬 라우터**
+
+alec-c4의 claude-skills-rails-dev 저장소를 참조하는 통합 스킬입니다.
+
+- 13개 전문 스킬 라우팅 (testing, security, api, graphql, devops 등)
+- 자동 스킬 선택
+- TDD 강제, 보안 기본 설계
+- 기존 프로젝트 스킬과 보완 관계
+
+**Source**: [alec-c4/claude-skills-rails-dev](https://github.com/alec-c4/claude-skills-rails-dev)
+
+**Documentation Updates**
+
+- 🎯 Quick Decision Guide 추가 - 작업 유형별 스킬 선택 가이드
+- 🔄 워크플로우별 스킬 조합 가이드 추가
+- 📁 Standards/Workflows 문서 연결
+- 📊 통계 업데이트 (17개 스킬, ~4,097줄)
+
+---
+
+### v7.0.0 - Drawbridge Integration
 
 **New Category: UI Workflow (1 skill)**
 

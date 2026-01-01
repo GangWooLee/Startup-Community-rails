@@ -323,6 +323,55 @@ main          # 프로덕션 브랜치
 - **PERFORMANCE.md** - 성능 최적화 가이드
 - **SECURITY_GUIDE.md** - 보안 및 암호화 가이드 (회원 탈퇴 데이터 복호화)
 
+### Claude Skills (17개)
+- **[skills/README.md](skills/README.md)** - 전체 스킬 가이드 및 사용법
+
+| 카테고리 | 스킬 | 트리거 키워드 |
+|----------|------|--------------|
+| **Backend** | rails-resource, test-gen, api-endpoint, background-job, service-object, query-object | "모델 생성", "테스트 추가", "API 만들어줘" |
+| **Frontend** | ui-component, stimulus-controller, frontend-design | "컴포넌트 만들어줘", "인터랙션 추가", "예쁘게" |
+| **DevOps** | logging-setup | "로깅 설정" |
+| **Maintenance** | database-maintenance, security-audit, performance-check, code-review | "DB 체크", "보안 감사", "성능 분석" |
+| **UI Workflow** | bridge | `/bridge`, `/bridge yolo` |
+| **Rails Expert** | rails-dev | "Rails 아키텍처", "rails security" |
+| **Documentation** | doc-sync | "문서 업데이트" |
+
+---
+
+## .claude 폴더 구조
+
+```
+.claude/
+├── CLAUDE.md                    # 이 파일 (메인 컨텍스트)
+├── PROJECT_OVERVIEW.md          # 프로젝트 전체 구조
+├── ARCHITECTURE_DETAIL.md       # 상세 아키텍처
+├── DESIGN_SYSTEM.md             # 디자인 시스템
+│
+├── standards/                   # 코드 품질 기준 (Agent OS 스타일)
+│   ├── rails-backend.md         # Rails 백엔드 규칙
+│   ├── tailwind-frontend.md     # Tailwind/Stimulus 규칙
+│   └── testing.md               # 테스트 표준
+│
+├── workflows/                   # 작업 프로세스 (Design OS 스타일)
+│   └── feature-development.md   # 기능 개발 5단계
+│
+└── skills/                      # Claude Skills (17개)
+    ├── README.md                # 스킬 가이드 및 사용법
+    ├── rails-resource/          # 리소스 생성
+    ├── test-gen/                # 테스트 생성
+    ├── frontend-design/         # 고품질 디자인 (NEW)
+    ├── rails-dev/               # Rails 전문가 (NEW)
+    └── ... (13개 더)
+```
+
+### 문서 역할 구분
+
+| 유형 | 목적 | 사용 시점 |
+|------|------|----------|
+| **Standards** | 코드 작성 시 준수할 규칙 | 코드 작성 중 참조 |
+| **Workflows** | 작업 단계별 프로세스 | 새 기능 개발 시작 시 |
+| **Skills** | 자동화된 작업 수행 | 키워드로 자동 활성화 |
+
 ---
 
 ## Claude 작업 지침
