@@ -26,31 +26,30 @@
   </div>
 
   <!-- 처리 대기 신고 -->
-  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+  <%= link_to admin_reports_path(status: 'pending'), class: "bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow block" do %>
     <div class="flex items-center justify-between">
       <div>
         <p class="text-sm font-medium text-gray-500">신고 대기</p>
         <p class="text-2xl font-bold text-gray-900 mt-1">
-          <% pending_reports = 0 %>
-          <% if pending_reports > 0 %>
-            <span class="text-red-600"><%= pending_reports %></span>
+          <% if @pending_reports > 0 %>
+            <span class="text-red-600"><%= @pending_reports %></span>
           <% else %>
             <span class="text-gray-400">0</span>
           <% end %>
         </p>
         <p class="text-xs mt-1">
-          <% if pending_reports > 0 %>
+          <% if @pending_reports > 0 %>
             <span class="text-red-600 font-medium">처리 필요!</span>
           <% else %>
             <span class="text-green-600 font-medium">모두 처리됨</span>
           <% end %>
         </p>
       </div>
-      <div class="w-12 h-12 rounded-xl <%= pending_reports > 0 ? 'bg-red-50' : 'bg-gray-50' %> flex items-center justify-center">
-        <%= icon "flag", variant: :solid, class: "w-6 h-6 #{pending_reports > 0 ? 'text-red-600' : 'text-gray-400'}" %>
+      <div class="w-12 h-12 rounded-xl <%= @pending_reports > 0 ? 'bg-red-50' : 'bg-gray-50' %> flex items-center justify-center">
+        <%= icon "flag", variant: :solid, class: "w-6 h-6 #{@pending_reports > 0 ? 'text-red-600' : 'text-gray-400'}" %>
       </div>
     </div>
-  </div>
+  <% end %>
 
   <!-- 정산 요청 -->
   <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -345,11 +344,25 @@
           <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-gray-300 ml-auto" %>
         <% end %>
 
-        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+        <%= link_to admin_reports_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors" do %>
           <%= icon "flag", variant: :outline, class: "w-5 h-5 text-gray-400" %>
           <span class="text-sm text-gray-700">신고 관리</span>
-          <span class="text-xs text-gray-400 ml-auto">준비 중</span>
-        </a>
+          <% if @pending_reports > 0 %>
+            <span class="text-xs font-medium text-red-600 ml-auto"><%= @pending_reports %> 대기</span>
+          <% else %>
+            <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-gray-300 ml-auto" %>
+          <% end %>
+        <% end %>
+
+        <%= link_to admin_inquiries_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors" do %>
+          <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-gray-400" %>
+          <span class="text-sm text-gray-700">문의 관리</span>
+          <% if @pending_inquiries > 0 %>
+            <span class="text-xs font-medium text-yellow-600 ml-auto"><%= @pending_inquiries %> 대기</span>
+          <% else %>
+            <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-gray-300 ml-auto" %>
+          <% end %>
+        <% end %>
 
         <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
           <%= icon "banknotes", variant: :outline, class: "w-5 h-5 text-gray-400" %>

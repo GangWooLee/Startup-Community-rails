@@ -16,6 +16,10 @@ class Admin::DashboardController < Admin::BaseController
     @total_posts = Post.count
     @today_posts = Post.where("created_at >= ?", Time.current.beginning_of_day).count
 
+    # 신고/문의 통계
+    @pending_reports = Report.pending.count
+    @pending_inquiries = Inquiry.pending.count
+
     # 최근 가입 사용자 (10명 - 테이블용)
     @recent_users = User.includes(:chat_rooms).order(created_at: :desc).limit(10)
 

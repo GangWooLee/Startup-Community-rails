@@ -29,11 +29,24 @@
         모니터링
       </p>
 
-      <%= link_to "#",
-                  class: "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 cursor-not-allowed" do %>
-        <%= icon "document-text", variant: :outline, class: "w-5 h-5" %>
+      <%= link_to admin_reports_path,
+                  class: "flex items-center gap-3 px-3 py-2 rounded-lg transition #{controller_name == 'reports' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}" do %>
+        <%= icon "flag", variant: :outline, class: "w-5 h-5" %>
         <span>신고 관리</span>
-        <span class="text-xs text-gray-600">(준비 중)</span>
+        <% pending_reports = Report.pending.count rescue 0 %>
+        <% if pending_reports > 0 %>
+          <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-red-600 text-white rounded-full"><%= pending_reports %></span>
+        <% end %>
+      <% end %>
+
+      <%= link_to admin_inquiries_path,
+                  class: "flex items-center gap-3 px-3 py-2 rounded-lg transition #{controller_name == 'inquiries' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}" do %>
+        <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5" %>
+        <span>문의 관리</span>
+        <% pending_inquiries = Inquiry.pending.count rescue 0 %>
+        <% if pending_inquiries > 0 %>
+          <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-yellow-600 text-white rounded-full"><%= pending_inquiries %></span>
+        <% end %>
       <% end %>
 
       <%= link_to "#",
