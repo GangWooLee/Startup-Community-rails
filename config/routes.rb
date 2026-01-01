@@ -102,6 +102,12 @@ Rails.application.routes.draw do
   # Settings
   get "settings", to: "settings#show", as: :settings
 
+  # Reports (신고)
+  resources :reports, only: [:create]
+
+  # Inquiries (문의)
+  resources :inquiries, only: [:index, :new, :create, :show]
+
   # shadcn UI Test Page (development only)
   get "shadcn_test", to: "pages#shadcn_test" if Rails.env.development?
 
@@ -161,5 +167,8 @@ Rails.application.routes.draw do
         post :reveal  # 암호화된 개인정보 열람 (로깅 필수)
       end
     end
+
+    resources :reports, only: [:index, :show, :update]
+    resources :inquiries, only: [:index, :show, :update]
   end
 end

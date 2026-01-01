@@ -1,0 +1,43 @@
+<%# 신고 접수 완료 메시지 %>
+<div id="report-modal"
+     data-controller="report-modal"
+     class="fixed inset-0 z-50 overflow-y-auto"
+     aria-labelledby="report-success-title"
+     role="dialog"
+     aria-modal="true">
+
+  <%# 배경 오버레이 %>
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+       data-action="click->report-modal#close"></div>
+
+  <%# 모달 컨테이너 %>
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
+      <div class="bg-white px-4 pb-4 pt-5 sm:p-6">
+        <div class="flex flex-col items-center">
+          <%# 성공 아이콘 %>
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          </div>
+
+          <h3 class="mt-4 text-lg font-semibold text-gray-900" id="report-success-title">
+            신고 접수 완료
+          </h3>
+
+          <p class="mt-2 text-sm text-gray-500 text-center">
+            신고가 접수되었습니다.<br>
+            운영진이 검토 후 조치할 예정입니다.
+          </p>
+
+          <button type="button"
+                  class="mt-6 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  data-action="click->report-modal#close">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

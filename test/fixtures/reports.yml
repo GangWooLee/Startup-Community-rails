@@ -1,0 +1,55 @@
+# == Schema Information
+# Table name: reports
+#
+#  id              :integer          not null, primary key
+#  reporter_id     :integer          not null
+#  reportable_type :string           not null
+#  reportable_id   :integer          not null
+#  reason          :string           not null
+#  description     :text
+#  status          :string           not null
+#  admin_note      :text
+#  resolved_by_id  :integer
+#  resolved_at     :datetime
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#
+
+# 게시글 신고 - 대기 중
+post_spam_report:
+  reporter: two
+  reportable: one (Post)
+  reason: spam
+  description: 광고성 게시글입니다.
+  status: pending
+
+# 사용자 신고 - 검토됨
+user_harassment_report:
+  reporter: three
+  reportable: two (User)
+  reason: harassment
+  description: 욕설과 비방을 합니다.
+  status: reviewed
+  admin_note: 검토 중입니다.
+
+# 게시글 신고 - 처리완료
+post_scam_report:
+  reporter: one
+  reportable: promotion_post (Post)
+  reason: scam
+  description: 사기 의심됩니다.
+  status: resolved
+  admin_note: 사용자 경고 조치
+  resolved_by: admin
+  resolved_at: <%= 1.day.ago %>
+
+# 게시글 신고 - 기각
+dismissed_report:
+  reporter: three
+  reportable: two (Post)
+  reason: inappropriate
+  description: 부적절한 내용입니다.
+  status: dismissed
+  admin_note: 해당 사유에 해당하지 않음
+  resolved_by: admin
+  resolved_at: <%= 2.days.ago %>

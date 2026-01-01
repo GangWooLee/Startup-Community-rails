@@ -1,0 +1,111 @@
+<%# 신고 모달 - 어디서든 사용 가능한 공통 컴포넌트 %>
+<%# 사용법: render "reports/modal" %>
+<div id="report-modal"
+     data-controller="report-modal"
+     class="hidden fixed inset-0 z-50 overflow-y-auto"
+     aria-labelledby="report-modal-title"
+     role="dialog"
+     aria-modal="true">
+
+  <%# 배경 오버레이 %>
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+       data-action="click->report-modal#close"></div>
+
+  <%# 모달 컨테이너 %>
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+
+      <%# 모달 헤더 %>
+      <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center">
+            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            </div>
+            <h3 class="ml-3 text-lg font-semibold leading-6 text-gray-900" id="report-modal-title">
+              신고하기
+            </h3>
+          </div>
+          <button type="button"
+                  class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none"
+                  data-action="click->report-modal#close">
+            <span class="sr-only">닫기</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <%# 신고 대상 정보 %>
+        <div class="mt-4 p-3 bg-gray-50 rounded-md" data-report-modal-target="targetInfo">
+          <p class="text-sm text-gray-500">신고 대상: <span data-report-modal-target="targetLabel" class="font-medium text-gray-900"></span></p>
+        </div>
+
+        <%# 신고 폼 %>
+        <div id="report-form" class="mt-4">
+          <%= form_with url: reports_path, method: :post, data: { action: "submit->report-modal#submit" } do |f| %>
+            <%# 신고 대상 정보 (hidden) %>
+            <input type="hidden" name="reportable_type" data-report-modal-target="reportableType">
+            <input type="hidden" name="reportable_id" data-report-modal-target="reportableId">
+
+            <%# 신고 사유 선택 %>
+            <fieldset class="mt-4">
+              <legend class="text-sm font-medium text-gray-900">신고 사유</legend>
+              <div class="mt-2 space-y-2">
+                <% Report::REASONS.each do |key, label| %>
+                  <div class="flex items-center">
+                    <input type="radio"
+                           id="reason_<%= key %>"
+                           name="report[reason]"
+                           value="<%= key %>"
+                           class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                           <%= "checked" if key == "spam" %>>
+                    <label for="reason_<%= key %>" class="ml-3 block text-sm font-medium leading-6 text-gray-900">
+                      <%= label %>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+            </fieldset>
+
+            <%# 상세 설명 %>
+            <div class="mt-4">
+              <label for="report_description" class="block text-sm font-medium leading-6 text-gray-900">
+                상세 설명 <span class="text-gray-500">(선택)</span>
+              </label>
+              <div class="mt-2">
+                <textarea id="report_description"
+                          name="report[description]"
+                          rows="3"
+                          class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          placeholder="신고 사유에 대해 추가로 설명해주세요..."></textarea>
+              </div>
+            </div>
+
+            <%# 안내 문구 %>
+            <p class="mt-4 text-xs text-gray-500">
+              허위 신고 시 서비스 이용이 제한될 수 있습니다.
+              신고 내용은 운영진만 확인할 수 있습니다.
+            </p>
+
+            <%# 버튼 %>
+            <div class="mt-6 flex justify-end gap-3">
+              <button type="button"
+                      class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      data-action="click->report-modal#close">
+                취소
+              </button>
+              <button type="submit"
+                      class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                      data-report-modal-target="submitBtn">
+                신고하기
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
