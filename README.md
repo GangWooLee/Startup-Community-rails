@@ -145,7 +145,7 @@ db/
 ├── migrate/              # 30개 마이그레이션
 └── schema.rb             # 현재 스키마
 
-.claude/                  # Claude AI 문서 (14개 Skills 포함)
+.claude/                  # Claude AI 문서 (17개 Skills 포함)
 ├── CLAUDE.md             # 메인 컨텍스트 ⭐
 ├── PROJECT_OVERVIEW.md   # 프로젝트 개요 ⭐
 ├── ARCHITECTURE_DETAIL.md # 상세 아키텍처 ⭐
@@ -162,7 +162,7 @@ db/
 │   └── testing.md
 ├── workflows/            # Design OS 스타일 워크플로우
 │   └── feature-development.md
-└── skills/               # 14개 Claude Skills
+└── skills/               # 17개 Claude Skills
 ```
 
 ---
@@ -259,6 +259,8 @@ brakeman
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-01-01 | 외부 스킬 통합 v8.0.0 (frontend-design, rails-dev 추가) |
+| 2026-01-01 | /bridge Skill 추가 (Drawbridge UI 주석 자동화) |
 | 2025-12-31 | Agent OS/Design OS 기반 .claude 폴더 구조 개선 |
 | 2025-12-31 | Remember Me (로그인 상태 유지) 기능 구현 |
 | 2025-12-31 | Gemini 3 Flash 모델 업그레이드 (AI 분석 정확도 향상) |
@@ -306,7 +308,7 @@ brakeman
 | [standards/](.claude/standards/) | Agent OS 스타일 표준 규칙 |
 | [workflows/](.claude/workflows/) | Design OS 스타일 워크플로우 |
 
-### Claude Skills (14개)
+### Claude Skills (17개)
 
 | 카테고리 | 스킬 |
 |----------|------|
@@ -314,8 +316,12 @@ brakeman
 | DevOps | logging-setup |
 | Maintenance | database-maintenance, security-audit, performance-check |
 | Quality | code-review |
-| Frontend | ui-component, stimulus-controller |
+| Frontend | ui-component, stimulus-controller, **frontend-design** 🆕 |
+| Rails Expert | **rails-dev** 🆕 (13개 전문 스킬 라우터) |
+| UI Workflow | **bridge** (Drawbridge UI 주석 자동화) |
 | Documentation | doc-sync |
+
+> **v8.0.0 업데이트**: frontend-design (Anthropic 공식), rails-dev (alec-c4/claude-skills-rails-dev 기반) 추가
 
 ---
 
