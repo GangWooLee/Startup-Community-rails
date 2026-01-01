@@ -147,9 +147,29 @@ N+1 쿼리 감지, 느린 쿼리 분석, 메모리 프로파일링 등 성능 �
 - **Includes**: Controller file, Data attributes, Turbo integration
 - **Common patterns**: Modal, Tab, Dropdown, Toggle, Form validation
 
+### UI Workflow Skills
+
+#### 15. bridge
+**Drawbridge UI 주석 처리 자동화**
+
+브라우저에서 Drawbridge 확장 프로그램으로 생성한 UI 주석을 코드로 변환합니다.
+
+- **Trigger keywords**: "bridge", "drawbridge", "moat tasks", "process UI", "UI annotations"
+- **Modes**: Step (증분), Batch (그룹), YOLO (자동)
+- **Includes**: 스크린샷 로드, 의존성 분석, 상태 관리, 프레임워크 감지
+- **Files**: `moat-tasks.md`, `moat-tasks-detail.json`, `.moat/screenshots/`
+- **Reference**: [reference/workflow.md](bridge/reference/workflow.md) - 상세 워크플로우
+
+**Usage**:
+```bash
+/bridge          # Step 모드 (기본)
+/bridge batch    # Batch 모드
+/bridge yolo     # YOLO 모드
+```
+
 ### Documentation Skills
 
-#### 14. doc-sync
+#### 16. doc-sync
 **코드 변경사항으로 문서 자동 동기화**
 
 코드베이스 변경사항을 `.claude/` 문서에 자동으로 반영합니다.
@@ -263,7 +283,8 @@ skill-name/
 | ui-component | Frontend | ~200 | 5 reference docs + 2 examples | - |
 | stimulus-controller | Frontend | ~180 | 2 examples | - |
 | doc-sync | Documentation | 226 | - | 2 sync scripts |
-| **Total** | **14 skills** | **~3,527** | **19 docs** | **10 scripts** |
+| bridge | UI Workflow | ~150 | 1 reference doc | - |
+| **Total** | **15 skills** | **~3,677** | **20 docs** | **10 scripts** |
 
 ## 🎯 Skill Coverage
 
@@ -290,19 +311,51 @@ skill-name/
 - ✅ UI components (ui-component)
 - ✅ Interactivity (stimulus-controller)
 
-### Documentation (8%)
+### UI Workflow (7%) **NEW CATEGORY!**
+- ✅ Drawbridge integration (bridge) **NEW!** - UI 주석 자동 처리
+
+### Documentation (7%)
 - ✅ Doc synchronization (doc-sync)
 
 ---
 
-**Last Updated**: 2025-12-23
+**Last Updated**: 2026-01-01
 **Project**: Startup Community Rails
-**Claude Skills Version**: 6.0.0
-**Total Skills**: 14 (6 Backend + 1 DevOps + 3 Maintenance + 1 Quality + 2 Frontend + 1 Documentation)
+**Claude Skills Version**: 7.0.0
+**Total Skills**: 15 (6 Backend + 1 DevOps + 3 Maintenance + 1 Quality + 2 Frontend + 1 UI Workflow + 1 Documentation)
 
 ## 🚀 Recent Updates
 
-### v6.0.0 - Integrated Code Review 🆕 **MAJOR UPDATE**
+### v7.0.0 - Drawbridge Integration 🆕 **MAJOR UPDATE**
+
+**New Category: UI Workflow (1 skill)**
+
+#### bridge
+**Drawbridge UI 주석 처리 자동화**
+
+Drawbridge Chrome 확장 프로그램과 통합하여 브라우저에서 직접 UI 피드백을 코드로 변환합니다.
+
+- 3가지 처리 모드: Step (증분), Batch (그룹), YOLO (자동)
+- 스크린샷 기반 시각적 컨텍스트 분석
+- 의존성 자동 감지 및 순서 처리
+- 상태 순환 관리 (to do → doing → done)
+- 프레임워크별 구현 패턴 (Rails/Tailwind, React, Vue)
+
+**Usage**:
+```bash
+/bridge          # Step 모드 (기본값)
+/bridge batch    # 관련 태스크 그룹화
+/bridge yolo     # 전체 자동 처리
+```
+
+**Impact**:
+- 🎯 **정확한 컨텍스트**: 스크린샷 + DOM 선택자로 정확한 UI 위치 파악
+- ⚡ **효율적 워크플로우**: 시각적 피드백 → 자동 코드 수정
+- 📋 **태스크 추적**: markdown 기반 작업 관리
+
+---
+
+### v6.0.0 - Integrated Code Review
 
 **New Category: Quality (1 skill)**
 

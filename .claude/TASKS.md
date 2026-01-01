@@ -245,6 +245,180 @@
 
 ---
 
+## 기능 완성도 현황 (업데이트: 2026-01-01)
+
+| 기능 | 완성도 | 상태 | 완성된 기능 | 미완성 기능 |
+|------|--------|------|------------|------------|
+| 커뮤니티 | 95% | ✅ | Post CRUD, 이미지(5개/5MB), 댓글, 대댓글, 좋아요, 스크랩, Turbo Stream | 댓글 수정, 신고/차단 |
+| 채팅 | 95% | ✅ | 1:1 채팅, 실시간(Solid Cable), 프로필/연락처/거래 카드, 읽음 표시 | 파일 첨부, 타이핑 표시 |
+| 프로필/OAuth | 90% | ✅ | Google/GitHub OAuth, 프로필 편집, 아바타, Remember Me | 포트폴리오 첨부, 팔로우 |
+| AI 온보딩 | 95% | ✅ | 5개 에이전트, Gemini Grounding, 추가질문, 전문가 매칭, 백그라운드 Job | 결과 공유, 분석 이력, PDF |
+| 알림 시스템 | 85% | ✅ | 댓글/좋아요/메시지 알림, 읽음 처리, 드롭다운 | 실시간 WebSocket, 이메일/푸시 |
+| 검색 | 90% | ✅ | 실시간 라이브 검색, 사용자/게시글, 카테고리 필터, 페이지네이션 | 자동완성, 고급 필터 |
+| 외주 | 75% | ⚠️ | Post 통합(hiring/seeking), Toss 결제, Order/Payment, 채팅 거래 | 지원 버튼, 정산, 리뷰 |
+| 회원 탈퇴 | 95% | ✅ | 즉시 익명화, AES-256 암호화, 5년 보관, 자동 파기, 관리자 열람 로그 | 복구 옵션, 데이터 내보내기 |
+
+### 완성도 산정 기준
+
+- **95-100%**: 핵심 기능 완료 + 대부분의 부가 기능 완료
+- **85-94%**: 핵심 기능 완료 + 일부 부가 기능 완료
+- **70-84%**: 핵심 기능 대부분 완료
+- **50-69%**: 핵심 기능 일부만 완료
+- **<50%**: 초기 개발 단계
+
+---
+
+## 완성도 상세 근거
+
+### 커뮤니티 (95%)
+
+**완성된 기능**:
+- [x] Post CRUD (create, read, update, delete)
+- [x] 이미지 업로드 (Active Storage, 최대 5개, 5MB)
+- [x] 댓글 시스템 (create, delete, counter_cache)
+- [x] 대댓글 (parent_id 기반, 깊이 1)
+- [x] 좋아요 (polymorphic, Post + Comment)
+- [x] 스크랩 (polymorphic, Bookmark 모델)
+- [x] Turbo Stream 실시간 UI
+
+**미완성 기능** (5%):
+- [ ] 댓글 수정 기능
+- [ ] 게시글 신고/차단
+- [ ] 수정 이력 추적
+
+---
+
+### 채팅 (95%)
+
+**완성된 기능**:
+- [x] 1:1 채팅방 (find_or_create_between)
+- [x] Solid Cable 실시간 메시지
+- [x] 메시지 타입 (text, profile_card, contact_card, offer_card)
+- [x] 읽음 표시 (unread_count, read_at)
+- [x] 거래 확정/취소 (채팅 내 Order 생성)
+- [x] 사용자 검색 (채팅 시작)
+- [x] 채팅방 숨기기/복구
+
+**미완성 기능** (5%):
+- [ ] 파일/이미지 첨부
+- [ ] 타이핑 표시
+- [ ] 메시지 수정/삭제
+
+---
+
+### 프로필/OAuth (90%)
+
+**완성된 기능**:
+- [x] Google OAuth2 로그인
+- [x] GitHub OAuth 로그인
+- [x] 프로필 편집 (name, bio, role_title, affiliation, skills)
+- [x] 아바타 업로드 (Active Storage)
+- [x] Remember Me (영구 쿠키, BCrypt)
+- [x] 활동 상태 다중 선택
+- [x] 소셜 링크 (LinkedIn, GitHub, Portfolio, OpenChat)
+
+**미완성 기능** (10%):
+- [ ] 포트폴리오 파일 첨부
+- [ ] 팔로우 기능
+- [ ] 프로필 공개/비공개 설정
+
+---
+
+### AI 온보딩 (95%)
+
+**완성된 기능**:
+- [x] 5개 전문 에이전트 (Summary, TargetUser, MarketAnalysis, Strategy, Scoring)
+- [x] AnalysisOrchestrator (병렬 실행)
+- [x] Gemini Grounding 실시간 웹 검색
+- [x] 추가 질문 생성 (FollowUpGenerator)
+- [x] 전문가 점수 예측 (ExpertScorePredictor)
+- [x] IdeaAnalysis 모델 (JSON 저장)
+- [x] AiAnalysisJob (Solid Queue 백그라운드)
+- [x] 진행률 브로드캐스트 (5단계)
+- [x] 사용 횟수 제한 (5회)
+
+**미완성 기능** (5%):
+- [ ] 결과 URL 공유
+- [ ] 분석 이력 조회
+- [ ] PDF/Excel 내보내기
+
+---
+
+### 알림 시스템 (85%)
+
+**완성된 기능**:
+- [x] Notification 모델 (polymorphic)
+- [x] 댓글 알림 (댓글, 대댓글)
+- [x] 좋아요 알림
+- [x] 메시지 알림
+- [x] 읽음/안읽음 처리
+- [x] 드롭다운 헤더 알림
+- [x] unread 카운트
+
+**미완성 기능** (15%):
+- [ ] 실시간 WebSocket 알림
+- [ ] 이메일 알림 (Action Mailer)
+- [ ] 푸시 알림
+- [ ] 알림 설정 (수신 거부)
+
+---
+
+### 검색 (90%)
+
+**완성된 기능**:
+- [x] 실시간 라이브 검색 (150ms debounce)
+- [x] 게시글 검색 (title, content)
+- [x] 사용자 검색 (name, role_title, bio)
+- [x] 카테고리 필터 (all, community, hiring, seeking)
+- [x] 탭 시스템 (all, users, posts)
+- [x] 페이지네이션
+- [x] 최근 검색어 (쿠키, 최대 10개)
+- [x] SQL Injection 방지 (sanitize_like)
+
+**미완성 기능** (10%):
+- [ ] 검색어 자동완성
+- [ ] 고급 필터 (날짜, 가격)
+- [ ] 검색 결과 하이라이트
+
+---
+
+### 외주 (75%)
+
+**완성된 기능**:
+- [x] Post 모델 통합 (hiring, seeking 카테고리)
+- [x] 외주 전용 필드 (service_type, price, work_type, portfolio_url, skills)
+- [x] Order 모델 (주문 생성, 상태 관리)
+- [x] Payment 모델 (Toss Payments 연동)
+- [x] 채팅 기반 거래 (offer_card → Order)
+- [x] 플랫폼 수수료 계산 (10%)
+- [x] 거래 확정/취소
+
+**미완성 기능** (25%):
+- [ ] 지원 버튼 (구직 글에 지원하기)
+- [ ] 지원자 목록 (구인자 전용)
+- [ ] 실제 정산 로직 (송금)
+- [ ] 리뷰/평점 시스템
+- [ ] 분쟁 해결 프로세스
+
+---
+
+### 회원 탈퇴 (95%)
+
+**완성된 기능**:
+- [x] Users::DeletionService (즉시 익명화)
+- [x] UserDeletion 모델 (암호화 보관)
+- [x] AES-256-GCM 암호화 (Rails 7 encrypts)
+- [x] 5년 보관 + 자동 파기
+- [x] DestroyExpiredDeletionsJob (Solid Queue)
+- [x] AdminViewLog (관리자 열람 감사)
+- [x] 재가입 방지 (email_hash)
+
+**미완성 기능** (5%):
+- [ ] 탈퇴 복구 옵션 (유예 기간)
+- [ ] 데이터 내보내기 (GDPR)
+
+---
+
 ## 관련 문서
 
 - **메인 컨텍스트**: `.claude/CLAUDE.md`

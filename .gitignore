@@ -48,3 +48,8 @@
 .claude-swarm/
 claude-swarm.log
 node_modules/
+
+# Drawbridge (UI annotation tool)
+.moat/
+moat-tasks.md
+moat-tasks-detail.json
