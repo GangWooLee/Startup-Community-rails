@@ -1,0 +1,65 @@
+# == Schema Information
+# Table name: inquiries
+#
+#  id              :integer          not null, primary key
+#  user_id         :integer          not null
+#  category        :string           not null
+#  title           :string           not null
+#  content         :text             not null
+#  status          :string           not null
+#  admin_response  :text
+#  responded_by_id :integer
+#  responded_at    :datetime
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#
+
+# 버그 신고 - 대기 중
+bug_inquiry:
+  user: one
+  category: bug
+  title: 로그인 오류가 발생합니다
+  content: |
+    Chrome 브라우저에서 로그인 시 계속 세션이 끊깁니다.
+    재현 방법:
+    1. 로그인 페이지 접속
+    2. 이메일/비밀번호 입력
+    3. 로그인 버튼 클릭
+    4. 간헐적으로 세션 만료 메시지 표시
+  status: pending
+
+# 기능 제안 - 처리 중
+feature_inquiry:
+  user: two
+  category: feature
+  title: 다크모드 기능 요청
+  content: 다크모드 기능이 있으면 좋겠습니다. 밤에 눈이 아파요.
+  status: in_progress
+
+# 개선 요청 - 답변 완료
+improvement_inquiry:
+  user: three
+  category: improvement
+  title: 검색 기능 개선 제안
+  content: 검색 결과에 날짜 필터가 있으면 좋겠습니다.
+  status: resolved
+  admin_response: |
+    안녕하세요, 소중한 의견 감사합니다.
+
+    검색 기능 개선은 다음 업데이트에서 반영될 예정입니다.
+    날짜 필터 외에도 카테고리 필터도 추가할 계획입니다.
+
+    감사합니다.
+  responded_by: admin
+  responded_at: <%= 3.days.ago %>
+
+# 기타 문의 - 종료
+other_inquiry:
+  user: one
+  category: other
+  title: 계정 관련 문의
+  content: 계정 이메일을 변경하고 싶습니다.
+  status: closed
+  admin_response: 이메일 변경은 설정 > 계정에서 가능합니다.
+  responded_by: admin
+  responded_at: <%= 1.week.ago %>

@@ -1,0 +1,112 @@
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
+      <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: inquiries_path, action: "click->navigation#goBack" } do %>
+        <%= render partial: "shared/icons/arrow_left", locals: { css_class: "h-5 w-5" } %>
+      <% end %>
+      <h1 class="text-xl font-bold">문의하기</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6">
+    <div class="rounded-xl border bg-card text-card-foreground p-6">
+      <!-- 안내 문구 -->
+      <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+        <div class="flex items-start gap-3">
+          <svg class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="text-sm text-blue-800">
+            <p class="font-medium mb-1">커뮤니티 개선에 참여해주세요!</p>
+            <p class="text-blue-700">버그 신고, 기능 제안, 개선 요청 등 다양한 의견을 남겨주시면 검토 후 답변드리겠습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <%= form_with model: @inquiry, url: inquiries_path, method: :post, class: "space-y-6" do |f| %>
+        <% if @inquiry.errors.any? %>
+          <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center gap-2 text-red-800">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-medium">입력 오류가 있습니다</span>
+            </div>
+            <ul class="mt-2 list-disc list-inside text-sm text-red-700">
+              <% @inquiry.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <!-- 카테고리 선택 -->
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-2">카테고리</label>
+          <div class="grid grid-cols-2 gap-3">
+            <% Inquiry::CATEGORIES.each do |key, label| %>
+              <label class="relative flex items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-primary/50"
+                     data-controller="radio-card">
+                <%= f.radio_button :category, key, class: "peer sr-only", data: { action: "change->radio-card#select" } %>
+                <div class="text-center peer-checked:text-primary">
+                  <% case key %>
+                  <% when "bug" %>
+                    <svg class="h-6 w-6 mx-auto mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  <% when "feature" %>
+                    <svg class="h-6 w-6 mx-auto mb-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  <% when "improvement" %>
+                    <svg class="h-6 w-6 mx-auto mb-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  <% when "other" %>
+                    <svg class="h-6 w-6 mx-auto mb-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  <% end %>
+                  <span class="text-sm font-medium"><%= label %></span>
+                </div>
+                <span class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-primary pointer-events-none"></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- 제목 -->
+        <div>
+          <label for="inquiry_title" class="block text-sm font-medium text-foreground mb-2">제목</label>
+          <%= f.text_field :title,
+                           class: "block w-full rounded-md border-0 py-2 px-3 text-foreground shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6",
+                           placeholder: "문의 제목을 입력하세요" %>
+        </div>
+
+        <!-- 내용 -->
+        <div>
+          <label for="inquiry_content" class="block text-sm font-medium text-foreground mb-2">내용</label>
+          <%= f.text_area :content,
+                          rows: 6,
+                          class: "block w-full rounded-md border-0 py-2 px-3 text-foreground shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6",
+                          placeholder: "문의 내용을 자세히 작성해주세요.\n\n버그 신고 시: 어떤 상황에서 어떤 문제가 발생했는지\n기능 제안 시: 어떤 기능이 필요한지, 왜 필요한지" %>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div class="flex justify-end gap-3">
+          <%= link_to "취소", inquiries_path, class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+          <%= f.submit "문의 등록",
+                       class: "rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>

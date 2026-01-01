@@ -1,0 +1,166 @@
+<% content_for :page_title, "문의 상세" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <span>/</span>
+  <%= link_to "문의 관리", admin_inquiries_path, class: "hover:text-gray-700" %>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">#<%= @inquiry.id %></span>
+</nav>
+
+<div class="grid grid-cols-3 gap-6">
+  <!-- 왼쪽: 문의 내용 -->
+  <div class="col-span-2 space-y-6">
+    <!-- 문의 정보 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium <%= inquiry_category_badge_class(@inquiry.category) %>">
+            <%= @inquiry.category_label %>
+          </span>
+          <h2 class="text-lg font-semibold text-gray-900"><%= @inquiry.title %></h2>
+        </div>
+        <span class="inline-flex items-center gap-1.5 text-sm">
+          <% case @inquiry.status %>
+          <% when 'pending' %>
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            <span class="text-yellow-600 font-medium">대기 중</span>
+          <% when 'in_progress' %>
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span class="text-blue-600">처리 중</span>
+          <% when 'resolved' %>
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            <span class="text-green-600">답변 완료</span>
+          <% when 'closed' %>
+            <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+            <span class="text-gray-600">종료</span>
+          <% end %>
+        </span>
+      </div>
+      <div class="p-6">
+        <!-- 문의자 정보 -->
+        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white text-lg font-medium">
+            <%= @inquiry.user.name&.first&.upcase || "?" %>
+          </div>
+          <div>
+            <p class="font-medium text-gray-900"><%= @inquiry.user.name %></p>
+            <p class="text-sm text-gray-500"><%= @inquiry.user.email %></p>
+          </div>
+          <div class="ml-auto text-right">
+            <p class="text-sm text-gray-900"><%= @inquiry.created_at.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+            <p class="text-xs text-gray-500"><%= time_ago_in_words(@inquiry.created_at) %> 전</p>
+          </div>
+        </div>
+
+        <!-- 문의 내용 -->
+        <div class="prose prose-sm max-w-none">
+          <p class="text-gray-700 whitespace-pre-wrap"><%= @inquiry.content %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 관리자 답변 -->
+    <% if @inquiry.admin_response.present? %>
+      <div class="bg-blue-50 rounded-xl border border-blue-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-blue-200 bg-blue-100/50">
+          <div class="flex items-center gap-2">
+            <%= icon "chat-bubble-left-ellipsis", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+            <h2 class="text-lg font-semibold text-blue-900">관리자 답변</h2>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+              <%= @inquiry.responded_by&.name&.first&.upcase || "A" %>
+            </div>
+            <div>
+              <p class="font-medium text-blue-900"><%= @inquiry.responded_by&.name || "관리자" %></p>
+              <p class="text-sm text-blue-600"><%= @inquiry.responded_at&.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+            </div>
+          </div>
+          <p class="text-blue-800 whitespace-pre-wrap"><%= @inquiry.admin_response %></p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 오른쪽: 답변 작성 + 상태 변경 통합 -->
+  <div class="space-y-6">
+    <!-- 답변 작성 & 상태 변경 통합 카드 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-6">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">
+          <%= @inquiry.admin_response.present? ? "답변 수정" : "답변 작성" %>
+        </h2>
+      </div>
+      <div class="p-6">
+        <%= form_with model: [:admin, @inquiry], method: :patch, class: "space-y-6" do |f| %>
+          <!-- 답변 입력 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">답변 내용</label>
+            <%= f.text_area :admin_response, rows: 6,
+                            class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                            placeholder: "문의에 대한 답변을 작성해주세요..." %>
+          </div>
+
+          <!-- 상태 선택 (동적 하이라이트 적용) -->
+          <div data-controller="radio-highlight">
+            <label class="block text-sm font-medium text-gray-700 mb-2">처리 상태</label>
+            <div class="space-y-2">
+              <% Inquiry::STATUSES.each do |key, label| %>
+                <label data-radio-highlight-target="option"
+                       class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                              <%= @inquiry.status == key ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white' %>">
+                  <%= f.radio_button :status, key,
+                                     class: "h-4 w-4 text-blue-600",
+                                     data: { action: "change->radio-highlight#highlight" } %>
+                  <span class="text-sm font-medium text-gray-900"><%= label %></span>
+                </label>
+              <% end %>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">답변 등록 시 선택한 상태로 변경됩니다. (기본: 답변 완료)</p>
+          </div>
+
+          <!-- 제출 버튼 -->
+          <div class="flex gap-3">
+            <%= f.submit "답변 등록", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer" %>
+            <%= link_to "목록", admin_inquiries_path, class: "py-2.5 px-4 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition text-center" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 문의자 정보 -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">문의자 정보</h2>
+      </div>
+      <div class="p-6 space-y-3">
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">이름</span>
+          <span class="text-sm font-medium text-gray-900"><%= @inquiry.user.name %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">이메일</span>
+          <span class="text-sm font-medium text-gray-900"><%= @inquiry.user.email %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">가입일</span>
+          <span class="text-sm font-medium text-gray-900"><%= @inquiry.user.created_at.strftime("%Y-%m-%d") %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-500">총 문의</span>
+          <span class="text-sm font-medium text-gray-900"><%= @inquiry.user.inquiries.count %>건</span>
+        </div>
+        <div class="pt-3 border-t border-gray-100">
+          <%= link_to admin_user_path(@inquiry.user), class: "w-full inline-flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition" do %>
+            <%= icon "user", variant: :outline, class: "w-4 h-4" %>
+            사용자 상세
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

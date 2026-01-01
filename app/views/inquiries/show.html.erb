@@ -1,0 +1,119 @@
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
+<div class="min-h-screen bg-background pb-20">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
+      <%= render_button variant: :ghost, class: "h-9 w-9 p-0 text-muted-foreground hover:text-foreground", data: { controller: "navigation", navigation_fallback_value: inquiries_path, action: "click->navigation#goBack" } do %>
+        <%= render partial: "shared/icons/arrow_left", locals: { css_class: "h-5 w-5" } %>
+      <% end %>
+      <h1 class="text-xl font-bold">문의 상세</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+    <!-- 문의 카드 -->
+    <div class="rounded-xl border bg-card text-card-foreground p-6">
+      <!-- 헤더 -->
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div class="flex items-center gap-2">
+          <%# 카테고리 뱃지 %>
+          <span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium <%= inquiry_category_badge_class(@inquiry.category) %>">
+            <%= @inquiry.category_label %>
+          </span>
+
+          <%# 상태 뱃지 %>
+          <span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium <%= inquiry_status_badge_class(@inquiry.status) %>">
+            <%= @inquiry.status_label %>
+          </span>
+        </div>
+
+        <span class="text-sm text-muted-foreground">
+          <%= @inquiry.created_at.strftime("%Y.%m.%d %H:%M") %>
+        </span>
+      </div>
+
+      <!-- 제목 -->
+      <h2 class="text-xl font-bold text-foreground mb-4"><%= @inquiry.title %></h2>
+
+      <!-- 내용 -->
+      <div class="prose max-w-none">
+        <p class="text-foreground leading-relaxed whitespace-pre-wrap"><%= @inquiry.content %></p>
+      </div>
+    </div>
+
+    <!-- 답변/상태 카드 -->
+    <% if @inquiry.answered? %>
+      <%# 답변이 있는 경우 - 답변 내용 표시 %>
+      <div class="rounded-xl border-2 border-green-200 bg-green-50 p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+            <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-green-800">운영진 답변</h3>
+            <p class="text-xs text-green-600">
+              <%= @inquiry.responded_at&.strftime("%Y.%m.%d %H:%M") %>
+            </p>
+          </div>
+        </div>
+
+        <div class="prose max-w-none">
+          <p class="text-green-900 leading-relaxed whitespace-pre-wrap"><%= @inquiry.admin_response %></p>
+        </div>
+      </div>
+    <% elsif @inquiry.resolved? || @inquiry.closed? %>
+      <%# 상태가 완료/종료지만 답변 내용이 없는 경우 %>
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
+        <svg class="h-12 w-12 mx-auto mb-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="font-semibold text-gray-800 mb-1"><%= @inquiry.status_label %></h3>
+        <p class="text-sm text-gray-600">
+          문의가 처리되었습니다.
+        </p>
+      </div>
+    <% elsif @inquiry.in_progress? %>
+      <%# 처리 중인 경우 %>
+      <div class="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
+        <svg class="h-12 w-12 mx-auto mb-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <h3 class="font-semibold text-blue-800 mb-1">처리 중</h3>
+        <p class="text-sm text-blue-700">
+          운영진이 문의를 확인하고 있습니다.<br>
+          답변이 등록되면 알림으로 알려드리겠습니다.
+        </p>
+      </div>
+    <% else %>
+      <%# 대기 중 (기본) %>
+      <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-6 text-center">
+        <svg class="h-12 w-12 mx-auto mb-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="font-semibold text-yellow-800 mb-1">답변 대기 중</h3>
+        <p class="text-sm text-yellow-700">
+          운영진이 확인 후 답변을 드릴 예정입니다.<br>
+          답변이 등록되면 알림으로 알려드리겠습니다.
+        </p>
+      </div>
+    <% end %>
+
+    <!-- 목록으로 -->
+    <div class="text-center">
+      <%= link_to inquiries_path, class: "inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        목록으로 돌아가기
+      <% end %>
+    </div>
+  </main>
+
+  <%= render "shared/bottom_nav" %>
+</div>
