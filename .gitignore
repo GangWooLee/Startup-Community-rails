@@ -53,3 +53,4 @@ node_modules/
 .moat/
 moat-tasks.md
 moat-tasks-detail.json
+.moat
