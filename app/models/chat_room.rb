@@ -3,6 +3,7 @@ class ChatRoom < ApplicationRecord
   has_many :users, through: :participants
   has_many :messages, dependent: :destroy
   has_many :orders, dependent: :nullify
+  has_many :reports, as: :reportable, dependent: :destroy
 
   # 현재 활성화된 주문 (취소/환불 제외)
   has_one :active_order, -> { where.not(status: [:cancelled, :refunded]).order(created_at: :desc) }, class_name: "Order"

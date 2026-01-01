@@ -69,6 +69,8 @@ class SessionsController < ApplicationController
 
   # DELETE /logout
   def destroy
+    # current_user를 호출하여 @current_user 설정 (log_out에서 forget 호출 시 필요)
+    current_user
     log_out
     flash[:notice] = "로그아웃되었습니다."
     redirect_to root_path

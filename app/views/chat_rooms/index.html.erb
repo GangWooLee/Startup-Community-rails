@@ -1,5 +1,5 @@
 <!-- PC: 2단 분할 레이아웃, 모바일: 1단 레이아웃 -->
-<div class="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-background">
+<div class="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-background" data-controller="navigation" data-navigation-reset-on-connect-value="true">
 
   <!-- 좌측: 채팅 목록 패널 (모바일: 전체, PC: 360px 고정) -->
   <%= render "chat_rooms/chat_list_panel",

@@ -4,7 +4,7 @@
     <div class="max-w-screen-xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
         <!-- 뒤로가기 버튼 - shadcn Button ghost -->
-        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
+        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: my_page_path, action: "click->navigation#goBack" } do %>
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -50,18 +50,31 @@
         <h3 class="font-semibold text-sm text-muted-foreground">고객 지원</h3>
       </div>
       <div class="divide-y divide-border">
-        <!-- Contact / Report -->
-        <a href="mailto:support@example.com" class="px-4 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
+        <!-- 문의하기 -->
+        <%= link_to new_inquiry_path, class: "px-4 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors" do %>
           <div class="flex items-center gap-3">
             <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="text-sm font-medium">문의하기 / 신고하기</span>
+            <span class="text-sm font-medium">문의하기</span>
           </div>
           <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
-        </a>
+        <% end %>
+
+        <!-- 내 문의 내역 -->
+        <%= link_to inquiries_path, class: "px-4 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors" do %>
+          <div class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <span class="text-sm font-medium">내 문의 내역</span>
+          </div>
+          <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        <% end %>
 
         <!-- Terms of Service -->
         <a href="#" class="px-4 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors">

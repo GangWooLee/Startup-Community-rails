@@ -60,6 +60,11 @@ class User < ApplicationRecord
   # 회원 탈퇴 기록
   has_many :user_deletions, dependent: :destroy
 
+  # 신고/문의
+  has_many :reports, foreign_key: :reporter_id, dependent: :destroy  # 내가 한 신고
+  has_many :received_reports, class_name: "Report", as: :reportable, dependent: :destroy  # 나를 신고
+  has_many :inquiries, dependent: :destroy  # 내 문의
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
   # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)

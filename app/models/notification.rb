@@ -8,7 +8,7 @@ class Notification < ApplicationRecord
   belongs_to :notifiable, polymorphic: true, optional: true
 
   # 액션 타입
-  ACTIONS = %w[comment like reply follow apply message].freeze
+  ACTIONS = %w[comment like reply follow apply message inquiry_response].freeze
 
   # Validations
   validates :action, presence: true, inclusion: { in: ACTIONS }
@@ -47,6 +47,8 @@ class Notification < ApplicationRecord
       "#{actor.name}님이 회원님의 공고에 지원했습니다."
     when "message"
       "#{actor.name}님이 메시지를 보냈습니다."
+    when "inquiry_response"
+      "회원님의 문의에 답변이 등록되었습니다."
     else
       "새로운 알림이 있습니다."
     end
@@ -79,6 +81,8 @@ class Notification < ApplicationRecord
       if message&.chat_room_id
         "/chat_rooms/#{message.chat_room_id}"
       end
+    when "Inquiry"
+      "/inquiries/#{notifiable_id}"
     end
 
     # nil이면 기본 경로 반환

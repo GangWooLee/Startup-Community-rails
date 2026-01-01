@@ -8,6 +8,7 @@ class Post < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :notifications, as: :notifiable, dependent: :destroy
   has_many :orders, dependent: :destroy
+  has_many :reports, as: :reportable, dependent: :destroy
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images
