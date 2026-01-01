@@ -1,11 +1,22 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# frozen_string_literal: true
+# 스크랩 테스트 픽스처
 
-one:
-  user: one
-  bookmarkable: one
-  bookmarkable_type: Bookmarkable
-
-two:
+# 게시글 스크랩
+post_bookmark_one:
   user: two
-  bookmarkable: two
-  bookmarkable_type: Bookmarkable
+  bookmarkable: one (Post)
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
+
+post_bookmark_two:
+  user: three
+  bookmarkable: two (Post)
+  created_at: <%= 12.hours.ago %>
+  updated_at: <%= 12.hours.ago %>
+
+# 외주 글 스크랩
+hiring_bookmark:
+  user: one
+  bookmarkable: hiring_post (Post)
+  created_at: <%= 6.hours.ago %>
+  updated_at: <%= 6.hours.ago %>

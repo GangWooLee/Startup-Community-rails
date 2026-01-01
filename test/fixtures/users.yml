@@ -1,29 +1,88 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# frozen_string_literal: true
 # 비밀번호: test1234 (영문+숫자 8자 이상)
+# BCrypt cost: 4 (테스트 속도 최적화)
 
 one:
   email: user1@test.com
-  password_digest: <%= BCrypt::Password.create('test1234') %>
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
   name: User One
   role_title: Developer
-  bio: Test user one bio
+  bio: Test user one bio - 풀스택 개발자입니다.
+  skills: Ruby, Rails, JavaScript
+  affiliation: 스타트업A
   avatar_url:
-  last_sign_in_at: 2025-11-26 06:00:54
+  is_admin: false
+  last_sign_in_at: <%= 1.day.ago %>
+  created_at: <%= 1.month.ago %>
+  updated_at: <%= 1.day.ago %>
 
 two:
   email: user2@test.com
-  password_digest: <%= BCrypt::Password.create('test1234') %>
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
   name: User Two
   role_title: Designer
-  bio: Test user two bio
+  bio: Test user two bio - UI/UX 디자이너입니다.
+  skills: Figma, Sketch, Adobe XD
+  affiliation: 디자인스튜디오
   avatar_url:
-  last_sign_in_at: 2025-11-26 06:00:54
+  is_admin: false
+  last_sign_in_at: <%= 2.days.ago %>
+  created_at: <%= 2.months.ago %>
+  updated_at: <%= 2.days.ago %>
 
 three:
   email: user3@test.com
-  password_digest: <%= BCrypt::Password.create('test1234') %>
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
   name: User Three
   role_title: PM
-  bio: Test user three bio
+  bio: Test user three bio - 프로덕트 매니저입니다.
+  skills: Product Management, Agile
+  affiliation: 테크기업
   avatar_url:
-  last_sign_in_at: 2025-11-26 06:00:54
+  is_admin: false
+  last_sign_in_at: <%= 3.days.ago %>
+  created_at: <%= 3.months.ago %>
+  updated_at: <%= 3.days.ago %>
+
+admin:
+  email: admin@test.com
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
+  name: Admin User
+  role_title: Administrator
+  bio: 관리자 계정입니다.
+  skills:
+  affiliation: Startup Community
+  avatar_url:
+  is_admin: true
+  last_sign_in_at: <%= Time.current %>
+  created_at: <%= 1.year.ago %>
+  updated_at: <%= Time.current %>
+
+oauth_user:
+  email: oauth@gmail.com
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
+  name: OAuth User
+  role_title: Developer
+  bio: OAuth로 가입한 사용자입니다.
+  skills: Python, Django
+  affiliation:
+  avatar_url: https://example.com/avatar.jpg
+  is_admin: false
+  last_sign_in_at: <%= 1.hour.ago %>
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+deleted_user:
+  email: deleted@test.com
+  password_digest: <%= BCrypt::Password.create('test1234', cost: 4) %>
+  name: "[탈퇴한 사용자]"
+  role_title:
+  bio:
+  skills:
+  affiliation:
+  avatar_url:
+  is_admin: false
+  deleted_at: <%= 1.week.ago %>
+  last_sign_in_at: <%= 2.weeks.ago %>
+  created_at: <%= 1.year.ago %>
+  updated_at: <%= 1.week.ago %>

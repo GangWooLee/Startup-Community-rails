@@ -1,11 +1,34 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# frozen_string_literal: true
+# OAuth 인증 테스트 픽스처
 
-one:
+# User one의 Google OAuth
+google_one:
   provider: google
-  uid: google_user_1
+  uid: google_123456789
   user: one
+  created_at: <%= 1.month.ago %>
+  updated_at: <%= 1.month.ago %>
 
-two:
+# User two의 GitHub OAuth
+github_two:
   provider: github
-  uid: github_user_2
+  uid: github_987654321
   user: two
+  created_at: <%= 2.months.ago %>
+  updated_at: <%= 2.months.ago %>
+
+# OAuth 전용 사용자의 Google OAuth
+oauth_user_google:
+  provider: google
+  uid: google_oauth_user_001
+  user: oauth_user
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>
+
+# 같은 사용자의 여러 OAuth 연결 테스트
+oauth_user_github:
+  provider: github
+  uid: github_oauth_user_001
+  user: oauth_user
+  created_at: <%= 3.days.ago %>
+  updated_at: <%= 3.days.ago %>

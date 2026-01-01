@@ -1,11 +1,22 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# frozen_string_literal: true
+# 좋아요 테스트 픽스처
 
-one:
-  user: one
-  likeable: one
-  likeable_type: Likeable
-
-two:
+# 게시글 좋아요
+post_like_one:
   user: two
-  likeable: two
-  likeable_type: Likeable
+  likeable: one (Post)
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
+
+post_like_two:
+  user: three
+  likeable: one (Post)
+  created_at: <%= 12.hours.ago %>
+  updated_at: <%= 12.hours.ago %>
+
+# 댓글 좋아요
+comment_like_one:
+  user: one
+  likeable: two (Comment)
+  created_at: <%= 6.hours.ago %>
+  updated_at: <%= 6.hours.ago %>

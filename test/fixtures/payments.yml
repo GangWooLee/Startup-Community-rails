@@ -1,0 +1,76 @@
+# frozen_string_literal: true
+# 결제 테스트 픽스처
+
+# 결제 완료 (카드)
+card_payment:
+  order: paid_order
+  user: three
+  toss_order_id: PAY-1704067200-ABCD1234
+  payment_key: pk_test_1234567890
+  amount: 2000000
+  status: done
+  method: CARD
+  card_company: 삼성카드
+  card_number: "************1234"
+  card_type: CREDIT
+  approved_at: <%= 30.minutes.ago %>
+  created_at: <%= 2.hours.ago %>
+  updated_at: <%= 30.minutes.ago %>
+
+# 가상계좌 입금 대기
+virtual_account_payment:
+  order: pending_order
+  user: two
+  toss_order_id: PAY-1704067300-EFGH5678
+  amount: 3000000
+  status: ready
+  method: VIRTUAL_ACCOUNT
+  bank_code: "004"
+  bank_name: 국민은행
+  account_number: "12345678901234"
+  account_holder: User Two
+  due_date: <%= 3.days.from_now %>
+  created_at: <%= 1.hour.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+# 진행 중인 주문의 결제
+in_progress_payment:
+  order: in_progress_order
+  user: two
+  toss_order_id: PAY-1703980800-IJKL9012
+  payment_key: pk_test_9876543210
+  amount: 500000
+  status: done
+  method: CARD
+  card_company: 현대카드
+  card_number: "************5678"
+  card_type: CREDIT
+  approved_at: <%= 2.days.ago %>
+  created_at: <%= 3.days.ago %>
+  updated_at: <%= 2.days.ago %>
+
+# 완료된 주문의 결제
+completed_payment:
+  order: completed_order
+  user: one
+  toss_order_id: PAY-1703548800-MNOP3456
+  payment_key: pk_test_completed_123
+  amount: 800000
+  status: done
+  method: TRANSFER
+  approved_at: <%= 1.week.ago %>
+  created_at: <%= 2.weeks.ago %>
+  updated_at: <%= 1.week.ago %>
+
+# 결제 실패
+failed_payment:
+  order: cancelled_order
+  user: three
+  toss_order_id: PAY-1703376000-QRST7890
+  amount: 3000000
+  status: failed
+  method: CARD
+  failure_code: REJECT_CARD
+  failure_message: 카드 한도 초과
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>
