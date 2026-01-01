@@ -10,7 +10,7 @@
 
 | 항목 | 값 |
 |------|-----|
-| **버전** | MVP v0.8 |
+| **버전** | MVP v0.8.1 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
 | **마지막 업데이트** | 2025-12-31 |
@@ -30,6 +30,7 @@
 | 알림 시스템 | 70% | ✅ 기본 완성 | 댓글, 좋아요, 채팅 알림 |
 | 검색 | 80% | ✅ 완성 | 실시간 검색, 탭 필터링 |
 | 외주 | 50% | ⚠️ 진행중 | 구인/구직, Post 모델 통합 중 |
+| 회원 탈퇴 | 85% | ✅ 완성 | 즉시 익명화, 암호화 보관, 5년 후 자동 파기 |
 
 ---
 
@@ -122,7 +123,7 @@ app/
 │   ├── search/           # 검색
 │   └── onboarding/       # AI 온보딩
 ├── javascript/
-│   └── controllers/      # 33개 Stimulus 컨트롤러
+│   └── controllers/      # 39개 Stimulus 컨트롤러
 ├── services/
 │   ├── ai/               # AI 멀티에이전트 시스템
 │   │   ├── agents/       # 5개 전문 에이전트
@@ -146,10 +147,19 @@ db/
 ├── CLAUDE.md             # 메인 컨텍스트 ⭐
 ├── PROJECT_OVERVIEW.md   # 프로젝트 개요 ⭐
 ├── ARCHITECTURE_DETAIL.md # 상세 아키텍처 ⭐
+├── DESIGN_SYSTEM.md      # 디자인 시스템 (색상, 컴포넌트)
 ├── PRD.md                # 제품 요구사항
 ├── DATABASE.md           # ERD 및 스키마
 ├── API.md                # API 설계
+├── TASKS.md              # 작업 목록 및 진행상황
 ├── PERFORMANCE.md        # 성능 가이드
+├── SECURITY_GUIDE.md     # 보안 및 암호화 가이드
+├── standards/            # Agent OS 스타일 표준 규칙
+│   ├── rails-backend.md
+│   ├── tailwind-frontend.md
+│   └── testing.md
+├── workflows/            # Design OS 스타일 워크플로우
+│   └── feature-development.md
 └── skills/               # 14개 Claude Skills
 ```
 
@@ -247,6 +257,8 @@ brakeman
 
 | 날짜 | 내용 |
 |------|------|
+| 2025-12-31 | Agent OS/Design OS 기반 .claude 폴더 구조 개선 |
+| 2025-12-31 | Remember Me (로그인 상태 유지) 기능 구현 |
 | 2025-12-31 | Gemini 3 Flash 모델 업그레이드 (AI 분석 정확도 향상) |
 | 2025-12-31 | Undrew 브랜딩 적용 (로고, 헤더 통일) |
 | 2025-12-30 | 회원 탈퇴 시스템 구현 (암호화 보관, 5년 후 자동 파기) |
@@ -282,10 +294,15 @@ brakeman
 | [CLAUDE.md](.claude/CLAUDE.md) | 메인 프로젝트 컨텍스트 |
 | [PROJECT_OVERVIEW.md](.claude/PROJECT_OVERVIEW.md) | 프로젝트 전체 구조 |
 | [ARCHITECTURE_DETAIL.md](.claude/ARCHITECTURE_DETAIL.md) | 상세 아키텍처 및 패턴 |
+| [DESIGN_SYSTEM.md](.claude/DESIGN_SYSTEM.md) | 디자인 시스템 (색상, 컴포넌트) |
 | [PRD.md](.claude/PRD.md) | 제품 요구사항 |
 | [DATABASE.md](.claude/DATABASE.md) | ERD 및 스키마 |
 | [API.md](.claude/API.md) | API 라우팅 설계 |
+| [TASKS.md](.claude/TASKS.md) | 작업 목록 및 진행상황 |
 | [PERFORMANCE.md](.claude/PERFORMANCE.md) | 성능 최적화 가이드 |
+| [SECURITY_GUIDE.md](.claude/SECURITY_GUIDE.md) | 보안 및 암호화 가이드 |
+| [standards/](.claude/standards/) | Agent OS 스타일 표준 규칙 |
+| [workflows/](.claude/workflows/) | Design OS 스타일 워크플로우 |
 
 ### Claude Skills (14개)
 

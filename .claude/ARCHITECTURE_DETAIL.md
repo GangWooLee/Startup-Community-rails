@@ -219,7 +219,7 @@ _input.html.erb    - 입력 필드
 _textarea.html.erb - 텍스트 영역
 ```
 
-### 2.2 Stimulus Controllers (33개)
+### 2.2 Stimulus Controllers (39개)
 
 #### 핵심 컨트롤러 패턴
 
@@ -368,16 +368,16 @@ OnboardingController#ai_result
 Ai::Orchestrators::AnalysisOrchestrator
     ├─ Step 1: SummaryAgent (gemini-2.0-flash-lite)
     │   → summary, core_value, problem_statement
-    ├─ Step 2: TargetUserAgent (gemini-2.0-flash)
+    ├─ Step 2: TargetUserAgent (gemini-3-flash-preview)
     │   → target_users, personas, pain_points, goals
-    ├─ Step 3: MarketAnalysisAgent (gemini-2.0-flash)
+    ├─ Step 3: MarketAnalysisAgent (gemini-3-flash-preview)
     │   ├─ Mode 1: GeminiGroundingTool (실시간 웹 검색)
     │   ├─ Mode 2: MarketDataTool + CompetitorDatabaseTool
     │   └─ Mode 3: LLM 직접 호출 (fallback)
     │   → market_size, trends, competitors, differentiation
-    ├─ Step 4: StrategyAgent (gemini-2.0-flash)
+    ├─ Step 4: StrategyAgent (gemini-3-flash-preview)
     │   → mvp_features, challenges, next_steps, actions
-    └─ Step 5: ScoringAgent (gemini-2.0-flash)
+    └─ Step 5: ScoringAgent (gemini-3-flash-preview)
         → overall score, weak_areas, strong_areas, required_expertise
 ```
 
@@ -389,10 +389,10 @@ module LangchainConfig
   # 에이전트별 최적화된 모델 설정
   AGENT_MODEL_CONFIGS = {
     summary: { model: "gemini-2.0-flash-lite", temperature: 0.5 },
-    target_user: { model: "gemini-2.0-flash", temperature: 0.7 },
-    market_analysis: { model: "gemini-2.0-flash", temperature: 0.7 },
-    strategy: { model: "gemini-2.0-flash", temperature: 0.7 },
-    scoring: { model: "gemini-2.0-flash", temperature: 0.5 }
+    target_user: { model: "gemini-3-flash-preview", temperature: 0.7 },
+    market_analysis: { model: "gemini-3-flash-preview", temperature: 0.7 },
+    strategy: { model: "gemini-3-flash-preview", temperature: 0.7 },
+    scoring: { model: "gemini-3-flash-preview", temperature: 0.5 }
   }.freeze
 
   def self.llm_for_agent(agent_type)
@@ -414,10 +414,10 @@ end
 | 에이전트 | 역할 | 모델 | 출력 |
 |---------|------|------|------|
 | **SummaryAgent** | 아이디어 핵심 요약 | gemini-2.0-flash-lite | summary, core_value, problem_statement |
-| **TargetUserAgent** | 타겟 사용자 분석 | gemini-2.0-flash | target_users, personas, pain_points, goals |
-| **MarketAnalysisAgent** | 시장 분석 | gemini-2.0-flash | market_size, trends, competitors, differentiation |
-| **StrategyAgent** | 실행 전략 | gemini-2.0-flash | mvp_features, challenges, next_steps, actions |
-| **ScoringAgent** | 종합 평가 | gemini-2.0-flash | overall, weak_areas, strong_areas, required_expertise |
+| **TargetUserAgent** | 타겟 사용자 분석 | gemini-3-flash-preview | target_users, personas, pain_points, goals |
+| **MarketAnalysisAgent** | 시장 분석 | gemini-3-flash-preview | market_size, trends, competitors, differentiation |
+| **StrategyAgent** | 실행 전략 | gemini-3-flash-preview | mvp_features, challenges, next_steps, actions |
+| **ScoringAgent** | 종합 평가 | gemini-3-flash-preview | overall, weak_areas, strong_areas, required_expertise |
 
 ### 3.4 LangchainRB 도구
 
@@ -605,7 +605,74 @@ reset_session
 session[:user_id] = user.id
 ```
 
-### 5.2 OAuth 플로우
+### 5.2 Remember Me (로그인 상태 유지)
+
+```ruby
+# User 모델
+class User < ApplicationRecord
+  attr_accessor :remember_token
+
+  # remember_digest 저장 (BCrypt 암호화)
+  def remember
+    self.remember_token = SecureRandom.urlsafe_base64
+    update_column(:remember_digest, BCrypt::Password.create(remember_token))
+  end
+
+  # remember_digest 삭제
+  def forget
+    update_column(:remember_digest, nil)
+  end
+
+  # 토큰 검증
+  def authenticated?(remember_token)
+    return false if remember_digest.nil?
+    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  end
+end
+
+# SessionsController
+def create
+  user = User.find_by(email: params[:email].downcase)
+
+  if user&.authenticate(params[:password])
+    log_in(user)
+    # Remember Me 체크 시 영구 쿠키 저장 (20년)
+    params[:remember_me] == "1" ? remember(user) : forget(user)
+    redirect_to community_path
+  else
+    flash.now[:alert] = "이메일 또는 비밀번호가 올바르지 않습니다."
+    render :new, status: :unprocessable_entity
+  end
+end
+
+# ApplicationController - 자동 로그인
+def current_user
+  if session[:user_id]
+    @current_user ||= User.find_by(id: session[:user_id])
+  elsif cookies.signed[:user_id]
+    user = User.find_by(id: cookies.signed[:user_id])
+    if user&.authenticated?(cookies[:remember_token])
+      log_in(user)
+      @current_user = user
+    end
+  end
+end
+```
+
+**Remember Me 플로우**:
+```
+1. 로그인 폼에서 "로그인 상태 유지" 체크박스 선택
+2. POST /login (remember_me=1)
+3. User#remember 호출 → remember_digest 저장
+4. 영구 쿠키 설정: user_id, remember_token (20년 유효)
+5. 브라우저 재시작 후 접속 시:
+   - session[:user_id] 없음
+   - cookies.signed[:user_id] 확인
+   - User#authenticated? 검증
+   - 자동 로그인
+```
+
+### 5.3 OAuth 플로우
 ```
 1. GET /oauth/:provider (OauthController#passthru)
 2. 리다이렉트 → Provider 인증 페이지
@@ -634,6 +701,86 @@ end
 # Rack Attack
 Rack::Attack.throttle("req/ip", limit: 300, period: 5.minutes) do |req|
   req.ip
+end
+```
+
+### 5.5 회원 탈퇴 시스템
+
+**아키텍처 개요**:
+```
+사용자 탈퇴 요청
+    ↓
+UserDeletionsController#create
+    ↓
+Users::DeletionService
+    ├─ 1. 즉시 익명화 (User 모델)
+    │   └─ name → "탈퇴한 사용자", email → "deleted_#{id}@..."
+    ├─ 2. 원본 정보 암호화 보관 (UserDeletion 모델)
+    │   └─ AES-256-GCM 암호화 (Rails encrypts)
+    └─ 3. 5년 후 자동 파기 예약
+        └─ destroy_scheduled_at 설정
+
+관리자 조회
+    ↓
+Admin::UserDeletionsController
+    ├─ reveal_personal_info (복호화)
+    └─ AdminViewLog 자동 기록 (감사 로그)
+
+5년 후 자동 파기
+    ↓
+DestroyExpiredDeletionsJob
+    └─ Solid Queue 스케줄러로 매일 실행
+```
+
+**암호화 구현**:
+```ruby
+# app/models/user_deletion.rb
+class UserDeletion < ApplicationRecord
+  # Rails 7 Active Record Encryption
+  encrypts :email_original
+  encrypts :name_original
+  encrypts :phone_original
+  encrypts :snapshot_data
+  encrypts :email_hash, deterministic: true  # 검색 가능
+
+  RETENTION_PERIOD = 5.years
+end
+
+# config/credentials.yml.enc
+active_record_encryption:
+  primary_key: [32바이트 키]
+  deterministic_key: [32바이트 키]
+  key_derivation_salt: [32바이트 솔트]
+```
+
+**탈퇴 서비스**:
+```ruby
+# app/services/users/deletion_service.rb
+class Users::DeletionService
+  def call
+    ActiveRecord::Base.transaction do
+      # 1. 탈퇴 기록 생성 (원본 정보 암호화 보관)
+      create_deletion_record
+
+      # 2. 즉시 익명화
+      anonymize_user
+
+      # 3. 관련 데이터 처리 (게시글/댓글은 유지)
+      process_related_data
+    end
+  end
+
+  private
+
+  def anonymize_user
+    @user.update!(
+      name: "탈퇴한 사용자",
+      email: "deleted_#{@user.id}@deleted.local",
+      bio: nil,
+      avatar_url: nil,
+      deleted_at: Time.current
+    )
+  end
 end
 ```
 

@@ -2,361 +2,256 @@
 
 ## 문서 정보
 - **프로젝트**: Startup Community Platform
-- **업데이트**: 2025-11-26
+- **업데이트**: 2025-12-31
 
 ---
 
-## 작업 상태
+## 작업 상태 범례
 
 ```
-📋 Todo       - 계획됨
+✅ Done        - 완료됨
 🔄 In Progress - 진행 중
-✅ Done       - 완료
-⏸️ On Hold    - 보류
-❌ Cancelled  - 취소
+📋 Todo        - 계획됨
+⏸️ On Hold     - 보류
 ```
 
 ---
 
-## MVP Phase 1: 커뮤니티 + 프로필 + 외주 기본 흐름 (4주)
+## MVP Phase 1: 커뮤니티 + 프로필 + 외주 기본 흐름 ✅ 완료
 
-### Week 1: 프로젝트 셋업 & 인증 시스템
+### Week 1-2: 프로젝트 셋업 & 인증 & 커뮤니티
 
-#### 프로젝트 초기화
-- [x] ✅ Rails 프로젝트 생성
+#### 프로젝트 초기화 ✅
+- [x] ✅ Rails 8.1.1 프로젝트 생성
 - [x] ✅ Git 저장소 초기화
 - [x] ✅ .claude/ 디렉토리 문서 작성
-- [ ] 📋 README.md 업데이트
+- [x] ✅ Gemfile 정리 (pagy, langchainrb, omniauth 등)
+- [x] ✅ Tailwind CSS v4 적용
 
-#### 개발 환경 설정
-- [ ] 📋 Gemfile 정리 (필요한 gem 추가)
-  - pagy (페이지네이션)
-  - rubocop-rails-omakase (린팅)
-  - annotate (모델 주석)
-- [ ] 📋 Rubocop 설정
-- [ ] 📋 Git hooks 설정 (pre-commit)
+#### 인증 시스템 ✅
+- [x] ✅ User 모델 생성 (email, password_digest, name, bio 등)
+- [x] ✅ has_secure_password 기반 인증
+- [x] ✅ SessionsController (로그인/로그아웃)
+- [x] ✅ UsersController (회원가입)
+- [x] ✅ OAuth 소셜 로그인 (Google, GitHub)
+- [x] ✅ OmniAuth Callbacks Controller
+- [x] ✅ oauth_identities 테이블 (동일 이메일 계정 통합)
+- [x] ✅ Remember Me (로그인 상태 유지) - BCrypt 기반 영구 쿠키
 
-#### 사용자 인증 (Authentication)
-- [ ] 📋 User 모델 생성
-  ```bash
-  rails g model User email:string password_digest:string name:string role_title:string bio:text avatar_url:string last_sign_in_at:datetime
-  ```
-- [ ] 📋 User 모델 검증 및 관계 설정
-- [ ] 📋 User 모델 테스트 작성
-- [ ] 📋 SessionsController 생성 (로그인/로그아웃)
-- [ ] 📋 UsersController 생성 (회원가입)
-- [ ] 📋 인증 헬퍼 메서드 (ApplicationController)
-- [ ] 📋 회원가입 뷰 작성
-- [ ] 📋 로그인 뷰 작성
-- [ ] 📋 인증 시스템 테스트
+#### 커뮤니티 게시판 ✅
+- [x] ✅ Post 모델 (category enum: free/question/promo/hiring/seeking)
+- [x] ✅ Comment 모델 (counter_cache)
+- [x] ✅ Like 모델 (polymorphic)
+- [x] ✅ Bookmark 모델 (polymorphic)
+- [x] ✅ PostsController CRUD
+- [x] ✅ CommentsController (Turbo Stream)
+- [x] ✅ LikesController (Turbo Stream)
+- [x] ✅ BookmarksController (Turbo Stream)
+- [x] ✅ Active Storage 이미지 업로드
+- [x] ✅ Stimulus 컨트롤러 (like_button, bookmark_button, image_upload)
 
-#### 기본 레이아웃
-- [ ] 📋 application.html.erb 레이아웃 구성
-- [ ] 📋 내비게이션 바 (로그인/로그아웃 상태별)
-- [ ] 📋 Flash 메시지 표시
-- [ ] 📋 기본 CSS 스타일 (또는 Tailwind CSS 도입)
+### Week 3-4: 프로필 & 채팅 & 검색
 
-**Week 1 목표**: 사용자가 회원가입/로그인/로그아웃을 할 수 있다.
+#### 프로필 페이지 ✅
+- [x] ✅ ProfilesController (3개 탭: 소개/커뮤니티 글/외주 공고)
+- [x] ✅ 프로필 이미지 업로드 (Active Storage)
+- [x] ✅ 활동 상태 다중 선택 (외주 가능, 팀 구하는 중 등)
+- [x] ✅ 연락처 링크 (open_chat_url, github_url, portfolio_url)
+- [x] ✅ MyPageController (프로필 수정)
 
----
+#### 실시간 채팅 ✅
+- [x] ✅ ChatRoom 모델
+- [x] ✅ Message 모델
+- [x] ✅ ChatRoomsController
+- [x] ✅ MessagesController
+- [x] ✅ Solid Cable WebSocket 설정
+- [x] ✅ Turbo Streams 실시간 메시지
+- [x] ✅ 읽음 표시 (read_at)
+- [x] ✅ Stimulus 컨트롤러 (new_message, chat_room, chat_list)
 
-### Week 2: 커뮤니티 게시판 (Posts)
+#### 알림 시스템 ✅
+- [x] ✅ Notification 모델 (polymorphic)
+- [x] ✅ NotificationsController
+- [x] ✅ 댓글, 좋아요, 채팅 알림
+- [x] ✅ 읽지 않은 알림 카운트
 
-#### Post 모델
-- [ ] 📋 Post 모델 생성
-  ```bash
-  rails g model Post user:references title:string content:text status:integer views_count:integer likes_count:integer comments_count:integer
-  ```
-- [ ] 📋 Post 모델 검증 및 관계 설정
-- [ ] 📋 Post 모델 scope 추가 (published, recent, popular)
-- [ ] 📋 Post 모델 테스트 작성
-
-#### Comment 모델
-- [ ] 📋 Comment 모델 생성
-  ```bash
-  rails g model Comment post:references user:references content:text
-  ```
-- [ ] 📋 Comment 모델 검증 및 관계 설정
-- [ ] 📋 counter_cache 설정 (Post의 comments_count)
-- [ ] 📋 Comment 모델 테스트 작성
-
-#### Like 모델 (Polymorphic)
-- [ ] 📋 Like 모델 생성
-  ```bash
-  rails g model Like user:references likeable:references{polymorphic}
-  ```
-- [ ] 📋 Like 모델 검증 및 관계 설정
-- [ ] 📋 counter_cache 설정
-- [ ] 📋 Like 모델 테스트 작성
-
-#### PostsController
-- [ ] 📋 PostsController 생성 (CRUD)
-- [ ] 📋 index 액션 (페이지네이션 적용)
-- [ ] 📋 show 액션 (조회수 증가)
-- [ ] 📋 new/create 액션 (작성 권한 확인)
-- [ ] 📋 edit/update 액션 (수정 권한 확인)
-- [ ] 📋 destroy 액션 (삭제 권한 확인)
-- [ ] 📋 컨트롤러 테스트 작성
-
-#### CommentsController
-- [ ] 📋 CommentsController 생성
-- [ ] 📋 create 액션 (Turbo Stream 응답)
-- [ ] 📋 destroy 액션 (Turbo Stream 응답)
-- [ ] 📋 컨트롤러 테스트 작성
-
-#### LikesController
-- [ ] 📋 LikesController 생성
-- [ ] 📋 create 액션 (Turbo Stream 응답)
-- [ ] 📋 destroy 액션 (Turbo Stream 응답)
-- [ ] 📋 컨트롤러 테스트 작성
-
-#### 뷰 작성
-- [ ] 📋 posts/index.html.erb (게시글 목록)
-- [ ] 📋 posts/show.html.erb (게시글 상세 + 댓글)
-- [ ] 📋 posts/new.html.erb (게시글 작성 폼)
-- [ ] 📋 posts/edit.html.erb (게시글 수정 폼)
-- [ ] 📋 posts/_post.html.erb (게시글 카드 partial)
-- [ ] 📋 comments/_comment.html.erb (댓글 partial)
-- [ ] 📋 comments/_form.html.erb (댓글 폼 partial)
-- [ ] 📋 Turbo Stream 뷰 작성 (댓글, 좋아요)
-
-**Week 2 목표**: 사용자가 게시글을 작성하고, 댓글과 좋아요를 달 수 있다.
+#### 검색 기능 ✅
+- [x] ✅ SearchController
+- [x] ✅ 실시간 검색 (Stimulus live_search)
+- [x] ✅ 탭 필터링 (게시글/사용자/외주)
+- [x] ✅ UTF-8 인코딩 처리 (og_meta_tags)
 
 ---
 
-### Week 3: 프로필 & 외주 기능
+## MVP Phase 2: AI & 보안 강화 ✅ 완료
 
-#### 프로필 페이지 (Profiles)
-- [ ] 📋 ProfilesController 생성 (UsersController alias)
-- [ ] 📋 show 액션 (기본: Posts 탭)
-- [ ] 📋 posts, job_posts, talent_listings 액션 (탭별 데이터)
-- [ ] 📋 edit/update 액션 (프로필 수정)
-- [ ] 📋 profiles/show.html.erb (탭 UI)
-- [ ] 📋 profiles/edit.html.erb (프로필 수정 폼)
-- [ ] 📋 프로필 페이지 테스트
+### AI 멀티에이전트 시스템 (2025-12-25 ~ 12-27) ✅
+- [x] ✅ LangchainRB 프레임워크 통합
+- [x] ✅ Google Gemini 3 Flash API 연동
+- [x] ✅ BaseAgent 클래스 (app/services/ai/base_agent.rb)
+- [x] ✅ AnalysisOrchestrator (멀티에이전트 오케스트레이션)
+- [x] ✅ 5개 전문 에이전트:
+  - SummaryAgent (아이디어 요약)
+  - TargetUserAgent (타겟 사용자 분석)
+  - MarketAnalysisAgent (시장 분석)
+  - StrategyAgent (전략 제안)
+  - ScoringAgent (점수 평가)
+- [x] ✅ 3개 도구:
+  - GeminiGroundingTool (실시간 웹 검색)
+  - MarketDataTool (정적 시장 데이터)
+  - CompetitorDatabaseTool (경쟁사 데이터)
+- [x] ✅ FollowUpGenerator (추가 질문 생성)
+- [x] ✅ ExpertScorePredictor (전문가 점수 예측)
+- [x] ✅ ExpertMatcher (전문가 매칭)
+- [x] ✅ OnboardingController (AI 온보딩 플로우)
+- [x] ✅ IdeaAnalysis 모델 (분석 결과 저장)
 
-#### JobPost 모델
-- [ ] 📋 JobPost 모델 생성
-  ```bash
-  rails g model JobPost user:references title:string description:text category:integer project_type:integer budget:string status:integer views_count:integer
-  ```
-- [ ] 📋 JobPost 모델 검증 및 관계 설정
-- [ ] 📋 JobPost enum 설정 (category, project_type, status)
-- [ ] 📋 JobPost 모델 scope 추가
-- [ ] 📋 JobPost 모델 테스트 작성
+### 회원 탈퇴 시스템 (2025-12-30) ✅
+- [x] ✅ UserDeletion 모델 (탈퇴 기록)
+- [x] ✅ Users::DeletionService (탈퇴 처리)
+- [x] ✅ 즉시 익명화 (이름, 이메일 → "탈퇴한 사용자")
+- [x] ✅ AES-256-GCM 암호화 (원본 정보 보관)
+- [x] ✅ UserDeletionsController (사용자 탈퇴 요청)
+- [x] ✅ Admin::UserDeletionsController (관리자 조회)
+- [x] ✅ AdminViewLog (열람 감사 로그)
+- [x] ✅ DestroyExpiredDeletionsJob (5년 후 자동 파기)
 
-#### TalentListing 모델
-- [ ] 📋 TalentListing 모델 생성
-  ```bash
-  rails g model TalentListing user:references title:string description:text category:integer project_type:integer rate:string status:integer views_count:integer
-  ```
-- [ ] 📋 TalentListing 모델 검증 및 관계 설정
-- [ ] 📋 TalentListing enum 설정
-- [ ] 📋 TalentListing 모델 테스트 작성
+### 문서화 개선 (2025-12-31) ✅
+- [x] ✅ Agent OS/Design OS 기반 .claude 폴더 구조 개선
+- [x] ✅ DESIGN_SYSTEM.md 생성 (색상, 컴포넌트, UI 패턴)
+- [x] ✅ SECURITY_GUIDE.md 생성 (암호화 가이드)
+- [x] ✅ standards/ 폴더 추가:
+  - rails-backend.md
+  - tailwind-frontend.md
+  - testing.md
+- [x] ✅ workflows/ 폴더 추가:
+  - feature-development.md
+- [x] ✅ 14개 Claude Skills 작성
 
-#### JobPostsController
-- [ ] 📋 JobPostsController 생성 (CRUD)
-- [ ] 📋 index 액션 (카테고리/타입 필터링)
-- [ ] 📋 show 액션
-- [ ] 📋 new/create/edit/update/destroy 액션
-- [ ] 📋 job_posts/index.html.erb
-- [ ] 📋 job_posts/show.html.erb
-- [ ] 📋 job_posts/new.html.erb & edit.html.erb
-- [ ] 📋 job_posts/_job_post.html.erb (카드 partial)
-- [ ] 📋 컨트롤러 테스트
-
-#### TalentListingsController
-- [ ] 📋 TalentListingsController 생성 (CRUD)
-- [ ] 📋 index 액션 (카테고리/타입 필터링)
-- [ ] 📋 show 액션
-- [ ] 📋 new/create/edit/update/destroy 액션
-- [ ] 📋 talent_listings/index.html.erb
-- [ ] 📋 talent_listings/show.html.erb
-- [ ] 📋 talent_listings/_talent_listing.html.erb (카드 partial)
-- [ ] 📋 컨트롤러 테스트
-
-**Week 3 목표**: 프로필 페이지에서 사용자의 활동을 3개 탭으로 확인할 수 있고, 구인/구직 글을 작성할 수 있다.
-
----
-
-### Week 4: 마이페이지 & 북마크 & 통합 테스트
-
-#### Bookmark 모델 (Polymorphic)
-- [ ] 📋 Bookmark 모델 생성
-  ```bash
-  rails g model Bookmark user:references bookmarkable:references{polymorphic}
-  ```
-- [ ] 📋 Bookmark 모델 검증 및 관계 설정
-- [ ] 📋 Bookmark 모델 테스트 작성
-
-#### BookmarksController
-- [ ] 📋 BookmarksController 생성
-- [ ] 📋 create 액션 (Turbo Stream)
-- [ ] 📋 destroy 액션 (Turbo Stream)
-- [ ] 📋 북마크 버튼 partial 작성
-- [ ] 📋 컨트롤러 테스트
-
-#### My Page (namespace :my)
-- [ ] 📋 My::ProfilesController (프로필 수정)
-- [ ] 📋 My::BookmarksController (내 스크랩)
-- [ ] 📋 My::PostsController (내 게시글)
-- [ ] 📋 My::JobPostsController (내 구인 글)
-- [ ] 📋 My::TalentListingsController (내 구직 글)
-- [ ] 📋 my/bookmarks/index.html.erb
-- [ ] 📋 my/posts/index.html.erb
-- [ ] 📋 마이페이지 내비게이션 구성
-- [ ] 📋 마이페이지 테스트
-
-#### Seed 데이터
-- [ ] 📋 db/seeds.rb 작성 (테스트 데이터 생성)
-- [ ] 📋 샘플 사용자 10명
-- [ ] 📋 샘플 게시글 30개
-- [ ] 📋 샘플 댓글 50개
-- [ ] 📋 샘플 구인/구직 글 각 15개
-- [ ] 📋 샘플 좋아요 & 북마크
-- [ ] 📋 Seed 실행 확인
-
-#### 통합 테스트 & 리팩토링
-- [ ] 📋 System 테스트 작성 (E2E)
-  - 회원가입 → 로그인 → 게시글 작성 → 댓글 → 좋아요
-  - 프로필 페이지 탭 전환
-  - 구인 글 작성 → 북마크
-- [ ] 📋 N+1 쿼리 제거 (Bullet gem 사용)
-- [ ] 📋 DB 인덱스 최적화 확인
-- [ ] 📋 Rubocop 실행 및 수정
-- [ ] 📋 테스트 커버리지 확인
-- [ ] 📋 보안 스캔 (Brakeman)
-
-#### 배포 준비
-- [ ] 📋 프로덕션 환경 설정 (database.yml, credentials)
-- [ ] 📋 환경변수 설정
-- [ ] 📋 Kamal 배포 설정 (선택)
-- [ ] 📋 README.md 업데이트 (설치, 실행 방법)
-
-**Week 4 목표**: MVP 완성 - 커뮤니티 활동 → 프로필 → 외주 공고 흐름이 자연스럽게 연결된다.
+### 기타 완료된 작업 ✅
+- [x] ✅ Admin 패널 (사용자/채팅방 관리)
+- [x] ✅ GA4 (Google Analytics 4) 연동
+- [x] ✅ Undrew 브랜딩 적용 (로고, 헤더)
+- [x] ✅ .env → Rails credentials 전환
+- [x] ✅ Seed 데이터 (테스트 계정 10개)
 
 ---
 
-## MVP 체크리스트
+## 현재 진행 중인 작업 🔄
 
-### 핵심 기능 (Must Have)
-- [ ] 회원가입/로그인/로그아웃
-- [ ] 게시글 CRUD (커뮤니티)
-- [ ] 댓글 CRUD
-- [ ] 좋아요 기능
-- [ ] 프로필 페이지 (3개 탭: Posts, Job Posts, Talent Listings)
-- [ ] 구인 공고 CRUD
-- [ ] 구직 정보 CRUD
-- [ ] 북마크/스크랩 기능
-- [ ] 마이페이지 (프로필 수정, 스크랩 관리)
+### 외주 시스템 Post 모델 통합 (50% → 80%)
+- [x] ✅ Post 모델에 hiring/seeking 카테고리 추가
+- [ ] 🔄 job_posts/index에서 Post 모델 사용
+- [ ] 📋 구인/구직 전용 필드 추가 (budget, duration, skills_required)
+- [ ] 📋 지원/문의 기능
+- [ ] 📋 외주 글 필터링 UI 개선
 
-### 비기능 요구사항
-- [ ] 반응형 디자인 (모바일 최적화)
-- [ ] 페이지 로딩 속도 < 2초
-- [ ] N+1 쿼리 제거
-- [ ] 테스트 커버리지 > 70%
-- [ ] 보안 (Strong Parameters, CSRF, XSS 방지)
+### N+1 쿼리 최적화
+- [ ] 📋 Bullet gem 적용
+- [ ] 📋 posts#index includes 최적화
+- [ ] 📋 chat_rooms#index includes 최적화
+- [ ] 📋 검색 쿼리 최적화
 
 ---
 
-## Phase 2: Enhancement (향후 계획)
+## 향후 계획 📋
 
-### 기능 개선
-- [ ] ⏸️ 검색 기능 (게시글, 사용자, 구인/구직)
-- [ ] ⏸️ 필터링 고도화 (다중 필터, 정렬 옵션)
-- [ ] ⏸️ 태그 시스템 (acts-as-taggable-on)
-- [ ] ⏸️ 알림 시스템 (댓글, 좋아요 알림)
-- [ ] ⏸️ 실시간 채팅 (Action Cable)
-- [ ] ⏸️ 이메일 인증
-- [ ] ⏸️ 비밀번호 재설정
-- [ ] ⏸️ 소셜 로그인 (OAuth - Google, GitHub)
+### 프로덕션 배포 준비
+- [ ] 📋 SQLite → PostgreSQL 전환
+- [ ] 📋 환경변수 설정 (production)
+- [ ] 📋 Kamal 배포 설정
+- [ ] 📋 도메인 연결
+- [ ] 📋 SSL 인증서
 
-### 외주 기능 강화
-- [ ] ⏸️ 지원/문의 기능 (JobPost에 지원하기)
-- [ ] ⏸️ 매칭 알고리즘 (AI 기반 추천)
-- [ ] ⏸️ 평판 시스템 (리뷰, 평점)
-- [ ] ⏸️ 포트폴리오 첨부 (Active Storage + S3)
-- [ ] ⏸️ 결제/정산 기능 (Stripe/토스페이먼츠)
-
-### UX 개선
-- [ ] ⏸️ 무한 스크롤 (Turbo Frames)
-- [ ] ⏸️ 실시간 업데이트 (Turbo Streams)
+### Phase 3: 기능 확장
+- [ ] ⏸️ 실시간 알림 (WebSocket)
+- [ ] ⏸️ 이메일 알림 (Action Mailer)
 - [ ] ⏸️ 다크모드
-- [ ] ⏸️ 접근성 개선 (ARIA, 키보드 내비게이션)
-- [ ] ⏸️ 온보딩 튜토리얼
+- [ ] ⏸️ PWA 지원
+- [ ] ⏸️ 무한 스크롤
+- [ ] ⏸️ 이미지 최적화 (variant)
+- [ ] ⏸️ 평판 시스템 (리뷰, 평점)
+- [ ] ⏸️ 포트폴리오 첨부
 
 ### 인프라 & DevOps
-- [ ] ⏸️ PostgreSQL 전환
-- [ ] ⏸️ Redis 캐시
-- [ ] ⏸️ CDN 설정 (CloudFlare)
 - [ ] ⏸️ CI/CD 파이프라인 (GitHub Actions)
-- [ ] ⏸️ 모니터링 (New Relic, Sentry)
+- [ ] ⏸️ 모니터링 (Sentry, New Relic)
+- [ ] ⏸️ CDN 설정 (CloudFlare)
 - [ ] ⏸️ 백업 자동화
 
-### 관리자 기능
-- [ ] ⏸️ Admin 대시보드 (사용자, 게시글 관리)
-- [ ] ⏸️ 신고 시스템 (스팸, 부적절한 콘텐츠)
-- [ ] ⏸️ 통계 대시보드 (가입자, 활동 지표)
+---
+
+## 최근 작업 로그
+
+### 2025-12-31
+- ✅ Agent OS/Design OS 기반 .claude 폴더 구조 개선
+- ✅ Remember Me (로그인 상태 유지) 기능 구현
+- ✅ Gemini 3 Flash 모델 업그레이드
+
+### 2025-12-30
+- ✅ 회원 탈퇴 시스템 완성 (즉시 익명화, 암호화 보관)
+- ✅ 관리자 회원관리 개선 (탈퇴 회원 필터, 열람 로그)
+- ✅ GA4 연동
+
+### 2025-12-27
+- ✅ AI 멀티에이전트 시스템 완성 (5개 전문 에이전트)
+- ✅ Gemini Grounding 실시간 웹 검색 연동
+- ✅ Admin 패널 추가
+
+### 2025-12-26
+- ✅ 검색 페이지 UTF-8 인코딩 오류 수정
+- ✅ 검색 결과 클릭 문제 해결 (onmousedown)
+- ✅ render_avatar 메서드명 충돌 해결
+- ✅ .env → Rails credentials 전환
+
+### 2025-12-25
+- ✅ AI 아이디어 분석 Gemini API 연동
+
+### 2025-12-24
+- ✅ 채팅 기능 완성 (실시간 메시지, 읽음 표시)
+
+### 2025-12-23
+- ✅ OAuth 소셜 로그인 추가 (Google, GitHub)
 
 ---
 
-## 일일 작업 로그
+## 주요 결정사항
 
-### 2025-11-26
-**작업 내용**:
-- ✅ one-pager.md 기반 .claude/ 디렉토리 문서 작성
-- ✅ CLAUDE.md - 프로젝트 비전 및 컨텍스트
-- ✅ PRD.md - 상세 제품 요구사항
-- ✅ DATABASE.md - ERD 및 스키마 설계
-- ✅ API.md - RESTful 라우팅 및 컨트롤러 설계
-- ✅ ARCHITECTURE.md - 시스템 아키텍처
-- ✅ TASKS.md - MVP 작업 목록
-
-**다음 작업**:
-- User 모델 생성 및 인증 시스템 구축
-- 기본 레이아웃 및 내비게이션 구성
-
-**메모**:
-- Rails 8.1 + Hotwire 환경 활용
-- Pagy로 페이지네이션 구현
-- Turbo Streams로 실시간 업데이트
-- 모바일 우선 반응형 디자인
+| 날짜 | 결정 | 이유 |
+|------|------|------|
+| 2025-12-31 | Agent OS/Design OS 폴더 구조 | 문서 유지보수 용이성 |
+| 2025-12-30 | AES-256-GCM 암호화 | 5년 보관 법적 요구사항 |
+| 2025-12-27 | 멀티에이전트 시스템 | 복잡한 분석을 병렬 처리 |
+| 2025-12-26 | onmousedown 사용 | blur 이벤트 충돌 해결 |
+| 2025-12-26 | render_user_avatar | shadcn 메서드 충돌 회피 |
+| 2025-12-25 | Gemini 3 Flash | 최신 모델, 더 나은 분석 |
+| 2025-12-24 | Solid Cable | Redis 불필요, Rails 8 내장 |
 
 ---
 
-## 참고 링크
+## 기술 스택 현황
 
-### 프로젝트 문서
-- **One-pager**: `/one-pager.md` - 제품 비전 및 핵심 기능
-- **PRD**: `.claude/PRD.md` - 제품 요구사항
-- **DATABASE**: `.claude/DATABASE.md` - ERD 및 스키마
-- **API**: `.claude/API.md` - 라우팅 및 API 설계
-- **ARCHITECTURE**: `.claude/ARCHITECTURE.md` - 시스템 아키텍처
-
-### 개발 도구
-- Rails Guides: https://guides.rubyonrails.org
-- Hotwire: https://hotwired.dev
-- Pagy: https://github.com/ddnexus/pagy
+| 카테고리 | 기술 | 버전 |
+|---------|------|------|
+| Framework | Rails | 8.1.1 |
+| Language | Ruby | 3.4.7 |
+| Database | SQLite3 (dev) | - |
+| Frontend | Hotwire (Turbo + Stimulus) | Rails 8 내장 |
+| Styling | Tailwind CSS | v4 |
+| AI | LangchainRB + Gemini 3 Flash | - |
+| WebSocket | Solid Cable | Rails 8 내장 |
+| Background Jobs | Solid Queue | Rails 8 내장 |
+| Auth | has_secure_password + OmniAuth | - |
 
 ---
 
-## 팀 노트
+## 관련 문서
 
-### 주요 결정사항
-- **2025-11-26**: Hotwire (Turbo + Stimulus) 사용, JSON API는 필요 시 추가
-- **2025-11-26**: Pagy로 페이지네이션 구현 (Kaminari 대신)
-- **2025-11-26**: Polymorphic 관계 사용 (Likes, Bookmarks)
-
-### 기술 스택 확정
-- Backend: Rails 8.1.1, Ruby 3.4.7
-- Frontend: Hotwire (Turbo + Stimulus)
-- Database: SQLite3 (dev) → PostgreSQL (prod)
-- Deployment: Kamal (Docker)
-- Testing: Minitest
-
-### 개발 원칙
-- **모바일 우선** 반응형 디자인
-- **N+1 쿼리 방지** (includes, counter_cache)
-- **RESTful 라우팅** 준수
-- **TDD** (테스트 작성 후 구현)
-- **심플함 유지** (오버엔지니어링 지양)
+- **메인 컨텍스트**: `.claude/CLAUDE.md`
+- **프로젝트 개요**: `.claude/PROJECT_OVERVIEW.md`
+- **상세 아키텍처**: `.claude/ARCHITECTURE_DETAIL.md`
+- **디자인 시스템**: `.claude/DESIGN_SYSTEM.md`
+- **데이터베이스**: `.claude/DATABASE.md`
+- **API 설계**: `.claude/API.md`
+- **보안 가이드**: `.claude/SECURITY_GUIDE.md`
+- **성능 최적화**: `.claude/PERFORMANCE.md`

@@ -4,7 +4,7 @@
 - **프로젝트**: Startup Community Platform
 - **DBMS**: SQLite3 (dev) / PostgreSQL (prod)
 - **ORM**: ActiveRecord (Rails 8.1)
-- **업데이트**: 2025-12-30
+- **업데이트**: 2025-12-31
 
 ---
 
@@ -536,6 +536,224 @@ end
 
 ---
 
+### 2.10 oauth_identities (OAuth 소셜 로그인)
+
+```ruby
+create_table :oauth_identities do |t|
+  t.references :user, null: false, foreign_key: true
+  t.string :provider, null: false              # google_oauth2, github
+  t.string :uid, null: false                   # OAuth 제공자의 사용자 ID
+  t.string :email                               # OAuth 이메일
+
+  t.timestamps
+end
+
+add_index :oauth_identities, [:provider, :uid], unique: true
+add_index :oauth_identities, :user_id
+```
+
+**컬럼 설명**:
+- `provider`: OAuth 제공자 (google_oauth2, github)
+- `uid`: OAuth 제공자가 부여한 고유 ID
+- `email`: OAuth 계정 이메일 (동일 이메일 계정 통합에 사용)
+
+**모델 관계**:
+```ruby
+class OauthIdentity < ApplicationRecord
+  belongs_to :user
+
+  validates :provider, presence: true
+  validates :uid, presence: true, uniqueness: { scope: :provider }
+end
+```
+
+---
+
+### 2.11 chat_rooms (채팅방)
+
+```ruby
+create_table :chat_rooms do |t|
+  t.references :sender, null: false, foreign_key: { to_table: :users }
+  t.references :receiver, null: false, foreign_key: { to_table: :users }
+
+  t.timestamps
+end
+
+add_index :chat_rooms, [:sender_id, :receiver_id], unique: true
+```
+
+**컬럼 설명**:
+- `sender_id`: 채팅방을 생성한 사용자 (FK → users)
+- `receiver_id`: 채팅 상대방 (FK → users)
+
+**모델 관계**:
+```ruby
+class ChatRoom < ApplicationRecord
+  belongs_to :sender, class_name: "User"
+  belongs_to :receiver, class_name: "User"
+  has_many :messages, dependent: :destroy
+
+  # 두 사용자 간 채팅방 찾기 또는 생성
+  def self.find_or_create_between(user1, user2)
+    room = where(sender: user1, receiver: user2)
+           .or(where(sender: user2, receiver: user1))
+           .first
+    room || create!(sender: user1, receiver: user2)
+  end
+end
+```
+
+---
+
+### 2.12 messages (채팅 메시지)
+
+```ruby
+create_table :messages do |t|
+  t.references :chat_room, null: false, foreign_key: true
+  t.references :sender, null: false, foreign_key: { to_table: :users }
+  t.text :content, null: false
+  t.datetime :read_at                           # 읽음 표시
+
+  t.timestamps
+end
+
+add_index :messages, [:chat_room_id, :created_at]
+add_index :messages, :sender_id
+add_index :messages, :read_at
+```
+
+**컬럼 설명**:
+- `chat_room_id`: 채팅방 (FK)
+- `sender_id`: 메시지 발신자 (FK → users)
+- `content`: 메시지 내용
+- `read_at`: 읽음 시각 (NULL이면 안 읽음)
+
+**모델 관계**:
+```ruby
+class Message < ApplicationRecord
+  belongs_to :chat_room
+  belongs_to :sender, class_name: "User"
+
+  validates :content, presence: true
+
+  scope :unread, -> { where(read_at: nil) }
+  scope :recent, -> { order(created_at: :desc) }
+
+  after_create_commit { broadcast_message }
+end
+```
+
+---
+
+### 2.13 notifications (알림)
+
+```ruby
+create_table :notifications do |t|
+  t.references :user, null: false, foreign_key: true
+  t.references :actor, null: false, foreign_key: { to_table: :users }
+  t.references :notifiable, polymorphic: true, null: false
+  t.string :action, null: false                 # liked, commented, messaged
+  t.datetime :read_at                           # 읽음 표시
+
+  t.timestamps
+end
+
+add_index :notifications, [:user_id, :read_at]
+add_index :notifications, [:user_id, :created_at]
+add_index :notifications, [:notifiable_type, :notifiable_id]
+```
+
+**컬럼 설명**:
+- `user_id`: 알림을 받는 사용자 (FK)
+- `actor_id`: 알림을 발생시킨 사용자 (FK → users)
+- `notifiable_type/id`: 알림 대상 (polymorphic - Post, Comment, Message 등)
+- `action`: 알림 유형 (liked, commented, messaged)
+- `read_at`: 읽음 시각
+
+**모델 관계**:
+```ruby
+class Notification < ApplicationRecord
+  belongs_to :user
+  belongs_to :actor, class_name: "User"
+  belongs_to :notifiable, polymorphic: true
+
+  validates :action, presence: true
+
+  scope :unread, -> { where(read_at: nil) }
+  scope :recent, -> { order(created_at: :desc) }
+end
+```
+
+---
+
+### 2.14 idea_analyses (AI 아이디어 분석)
+
+```ruby
+create_table :idea_analyses do |t|
+  t.references :user, null: false, foreign_key: true
+  t.text :idea, null: false                     # 입력된 아이디어
+  t.json :follow_up_answers                     # 추가 질문에 대한 답변
+  t.json :analysis_result                       # 5개 에이전트 분석 결과
+  t.string :status, default: "pending"          # pending, analyzing, completed, failed
+  t.string :current_stage                       # 현재 분석 단계 (summary, target_user, market 등)
+  t.string :error_message                       # 실패 시 에러 메시지
+
+  t.timestamps
+end
+
+add_index :idea_analyses, :user_id
+add_index :idea_analyses, :status
+add_index :idea_analyses, :created_at
+```
+
+**컬럼 설명**:
+- `idea`: 사용자가 입력한 아이디어 텍스트
+- `follow_up_answers`: 추가 질문에 대한 답변 (JSON)
+- `analysis_result`: 5개 에이전트 분석 결과 (JSON)
+  ```json
+  {
+    "summary": { "content": "...", "status": "completed" },
+    "target_user": { "content": "...", "status": "completed" },
+    "market_analysis": { "content": "...", "status": "completed" },
+    "strategy": { "content": "...", "status": "completed" },
+    "scoring": { "score": 85, "breakdown": {...}, "status": "completed" }
+  }
+  ```
+- `status`: 분석 상태
+  - `pending`: 대기 중
+  - `analyzing`: 분석 중
+  - `completed`: 완료
+  - `failed`: 실패
+- `current_stage`: 현재 진행 중인 분석 단계
+
+**모델 관계**:
+```ruby
+class IdeaAnalysis < ApplicationRecord
+  belongs_to :user
+
+  validates :idea, presence: true
+
+  enum status: {
+    pending: "pending",
+    analyzing: "analyzing",
+    completed: "completed",
+    failed: "failed"
+  }
+
+  STAGES = %w[summary target_user market_analysis strategy scoring].freeze
+
+  def completed?
+    status == "completed" && analysis_result.present?
+  end
+
+  def score
+    analysis_result&.dig("scoring", "score")
+  end
+end
+```
+
+---
+
 ## 3. 인덱스 전략
 
 ### 3.1 Primary Index
@@ -790,6 +1008,7 @@ end
 
 | 날짜 | 변경사항 | 작성자 |
 |------|----------|--------|
+| 2025-12-31 | idea_analyses, chat_rooms, messages, notifications, oauth_identities 테이블 문서화 | Claude |
 | 2025-12-30 | user_deletions, admin_view_logs 테이블 추가 (회원 탈퇴 시스템) | Claude |
 | 2025-12-30 | users 테이블에 deleted_at 컬럼 추가 (Soft Delete) | Claude |
 | 2025-12-27 | User 테이블에 is_admin, 프로필 확장 필드 추가 | Claude |

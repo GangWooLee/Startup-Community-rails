@@ -5,7 +5,7 @@
 - **API 스타일**: RESTful + Hotwire (Turbo)
 - **버전**: v1 (MVP)
 - **응답 형식**: HTML (Turbo) / JSON (API)
-- **업데이트**: 2025-12-27
+- **업데이트**: 2025-12-31
 
 ---
 
@@ -42,12 +42,41 @@ delete 'logout',  to: 'sessions#destroy'
 - `GET /signup` - 회원가입 폼
 - `POST /signup` - 회원가입 처리
 - `GET /login` - 로그인 폼
-- `POST /login` - 로그인 처리
+- `POST /login` - 로그인 처리 (Remember Me 지원)
 - `DELETE /logout` - 로그아웃
+
+**Remember Me (로그인 상태 유지)**:
+- `POST /login` 시 `remember_me=1` 파라미터 전달
+- 영구 쿠키 저장: `user_id`, `remember_token` (20년 유효)
+- BCrypt 기반 `remember_digest` 검증
+- 로그아웃 시 `remember_digest` 삭제 및 쿠키 제거
 
 ---
 
-### 2.2 커뮤니티 게시판 (Posts)
+### 2.2 OAuth 소셜 로그인
+
+```ruby
+# OmniAuth 콜백 라우트 (자동 생성)
+get '/auth/:provider/callback', to: 'omniauth_callbacks#create'
+get '/auth/failure', to: 'omniauth_callbacks#failure'
+```
+
+**엔드포인트**:
+- `GET /auth/google_oauth2` - Google 로그인 리다이렉트
+- `GET /auth/github` - GitHub 로그인 리다이렉트
+- `GET /auth/:provider/callback` - OAuth 콜백 처리
+  - 동일 이메일 계정 자동 통합 (oauth_identities 테이블)
+  - 신규 사용자 자동 회원가입
+
+**OAuth 제공자**:
+| 제공자 | provider 값 | 설명 |
+|--------|------------|------|
+| Google | google_oauth2 | Google 계정 로그인 |
+| GitHub | github | GitHub 계정 로그인 |
+
+---
+
+### 2.3 커뮤니티 게시판 (Posts)
 
 ```ruby
 resources :posts do
@@ -227,13 +256,125 @@ end
 
 ---
 
-### 2.9 기타 Static 페이지
+### 2.9 채팅 (Chat)
+
+```ruby
+resources :chat_rooms, only: [:index, :show, :create] do
+  resources :messages, only: [:create]
+  member do
+    post :mark_as_read
+  end
+end
+```
+
+**엔드포인트**:
+- `GET /chat_rooms` - 채팅방 목록 (최근 순)
+- `GET /chat_rooms/:id` - 채팅방 상세 (메시지 목록)
+- `POST /chat_rooms` - 채팅방 생성 (또는 기존 채팅방으로 리다이렉트)
+- `POST /chat_rooms/:id/messages` - 메시지 전송 (Turbo Stream)
+- `POST /chat_rooms/:id/mark_as_read` - 읽음 표시
+
+**채팅 플로우**:
+1. 프로필 페이지에서 "메시지 보내기" 클릭
+2. `POST /chat_rooms` (receiver_id 전달)
+3. 기존 채팅방 있으면 리다이렉트, 없으면 생성
+4. 채팅방 페이지에서 실시간 메시지 (Solid Cable, Turbo Streams)
+
+---
+
+### 2.10 검색 (Search)
+
+```ruby
+get 'search', to: 'search#index'
+```
+
+**엔드포인트**:
+- `GET /search` - 검색 결과 페이지
+- `GET /search?q=검색어` - 검색어로 검색
+- `GET /search?q=검색어&tab=posts` - 게시글 탭
+- `GET /search?q=검색어&tab=users` - 사용자 탭
+- `GET /search?q=검색어&tab=outsourcing` - 외주 탭
+
+**파라미터**:
+- `q`: 검색어
+- `tab`: 탭 필터 (posts, users, outsourcing)
+
+**Stimulus 연동**:
+- `live_search_controller.js` - 실시간 검색
+- 검색 결과 클릭: `onmousedown` 사용 (blur 이벤트 충돌 방지)
+
+---
+
+### 2.11 알림 (Notifications)
+
+```ruby
+resources :notifications, only: [:index] do
+  collection do
+    post :mark_all_as_read
+  end
+  member do
+    post :mark_as_read
+  end
+end
+```
+
+**엔드포인트**:
+- `GET /notifications` - 알림 목록
+- `POST /notifications/:id/mark_as_read` - 개별 알림 읽음 처리
+- `POST /notifications/mark_all_as_read` - 전체 알림 읽음 처리
+
+**알림 유형**:
+| action | 설명 |
+|--------|------|
+| liked | 게시글/댓글 좋아요 |
+| commented | 게시글에 댓글 |
+| messaged | 새 채팅 메시지 |
+
+---
+
+### 2.12 회원 탈퇴 (User Deletion)
+
+```ruby
+# 사용자 탈퇴
+resource :withdrawal, only: [:new, :create], controller: 'user_deletions'
+
+# 관리자 탈퇴 기록 조회
+namespace :admin do
+  resources :user_deletions, only: [:index, :show] do
+    member do
+      post :reveal_personal_info  # 원본 정보 조회 (로그 기록)
+    end
+  end
+end
+```
+
+**사용자 엔드포인트**:
+- `GET /withdrawal/new` - 탈퇴 폼 (사유 선택)
+- `POST /withdrawal` - 탈퇴 처리
+
+**관리자 엔드포인트**:
+- `GET /admin/user_deletions` - 탈퇴 기록 목록
+- `GET /admin/user_deletions/:id` - 탈퇴 기록 상세
+- `POST /admin/user_deletions/:id/reveal_personal_info` - 암호화된 원본 정보 복호화
+  - 필수 파라미터: `reason` (열람 사유)
+  - 자동 로그 기록: `AdminViewLog`
+
+**탈퇴 프로세스**:
+1. `POST /withdrawal` - 탈퇴 요청
+2. 즉시 익명화 (이름, 이메일 → "탈퇴한 사용자")
+3. 원본 정보 AES-256-GCM 암호화 보관
+4. 5년 후 자동 파기 (`DestroyExpiredDeletionsJob`)
+
+---
+
+### 2.13 기타 Static 페이지
 
 ```ruby
 # Static pages (선택)
 get 'about', to: 'pages#about'
 get 'terms', to: 'pages#terms'
 get 'privacy', to: 'pages#privacy'
+get 'settings', to: 'settings#show'  # 설정 페이지 (탈퇴 버튼)
 ```
 
 ---
@@ -755,5 +896,6 @@ end
 
 | 날짜 | 변경사항 | 작성자 |
 |------|----------|--------|
+| 2025-12-31 | OAuth, Remember Me, 채팅, 검색, 알림, 회원 탈퇴 엔드포인트 추가 | Claude |
 | 2025-12-27 | AI 온보딩, Admin 패널 라우트 추가 | Claude |
 | 2025-11-26 | One-pager 기반 API 설계 (Hotwire 중심) | Claude |

@@ -7,10 +7,10 @@
 | 항목 | 값 |
 |------|-----|
 | **프로젝트명** | Startup Community Platform |
-| **버전** | MVP v0.8 |
+| **버전** | MVP v0.8.1 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
-| **마지막 업데이트** | 2025-12-30 |
+| **마지막 업데이트** | 2025-12-31 |
 
 **핵심 비전**: "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
 
@@ -50,7 +50,7 @@ Startup-Community-rails/
 │   │   ├── onboarding/       # AI 온보딩
 │   │   └── ...
 │   ├── javascript/
-│   │   └── controllers/      # 33개 Stimulus 컨트롤러
+│   │   └── controllers/      # 39개 Stimulus 컨트롤러
 │   ├── services/
 │   │   ├── ai/               # AI 멀티에이전트 시스템
 │   │   │   ├── agents/       # 5개 전문 에이전트
@@ -73,14 +73,24 @@ Startup-Community-rails/
 │   ├── migrate/              # 30개 마이그레이션
 │   └── schema.rb             # 현재 스키마
 │
-└── .claude/                  # Claude 프로젝트 문서
-    ├── CLAUDE.md             # 메인 컨텍스트
-    ├── PROJECT_OVERVIEW.md   # 이 문서
-    ├── ARCHITECTURE_DETAIL.md # 상세 아키텍처
+└── .claude/                  # Claude 프로젝트 문서 (14개 Skills 포함)
+    ├── CLAUDE.md             # 메인 컨텍스트 ⭐
+    ├── PROJECT_OVERVIEW.md   # 이 문서 ⭐
+    ├── ARCHITECTURE_DETAIL.md # 상세 아키텍처 ⭐
+    ├── DESIGN_SYSTEM.md      # 디자인 시스템 (색상, 컴포넌트)
     ├── PRD.md                # 제품 요구사항
     ├── DATABASE.md           # ERD, 스키마
     ├── API.md                # API 설계
-    └── TASKS.md              # 작업 목록
+    ├── TASKS.md              # 작업 목록
+    ├── PERFORMANCE.md        # 성능 가이드
+    ├── SECURITY_GUIDE.md     # 보안 및 암호화 가이드
+    ├── standards/            # Agent OS 스타일 표준 규칙
+    │   ├── rails-backend.md
+    │   ├── tailwind-frontend.md
+    │   └── testing.md
+    ├── workflows/            # Design OS 스타일 워크플로우
+    │   └── feature-development.md
+    └── skills/               # 14개 Claude Skills
 ```
 
 ---
@@ -122,7 +132,7 @@ Startup-Community-rails/
 | `notification.rb` | 알림 | polymorphic (notifiable) |
 | `oauth_identity.rb` | OAuth | belongs_to: user |
 
-### Stimulus Controllers (33개) - 핵심
+### Stimulus Controllers (39개) - 핵심
 
 | 파일 | 기능 |
 |------|------|
@@ -186,8 +196,8 @@ Startup-Community-rails/
 
 ### AI
 - **LangchainRB** - AI 에이전트 프레임워크
-- **Google Gemini 2.0** - LLM (5개 전문 에이전트)
-  - gemini-2.0-flash, gemini-2.0-flash-lite
+- **Google Gemini 3 Flash** - LLM (5개 전문 에이전트)
+  - gemini-3-flash-preview, gemini-2.0-flash-lite
   - Gemini Grounding (실시간 웹 검색)
 
 ### Auth
@@ -275,9 +285,22 @@ GET    /notifications      → notifications#index
 
 ## 관련 문서
 
+### 핵심 문서
 - **상세 아키텍처**: `.claude/ARCHITECTURE_DETAIL.md`
+- **디자인 시스템**: `.claude/DESIGN_SYSTEM.md`
 - **데이터베이스 설계**: `.claude/DATABASE.md`
 - **API 설계**: `.claude/API.md`
+
+### 표준 규칙 (Agent OS 스타일)
+- **Rails 백엔드**: `.claude/standards/rails-backend.md`
+- **Tailwind 프론트엔드**: `.claude/standards/tailwind-frontend.md`
+- **테스트 표준**: `.claude/standards/testing.md`
+
+### 워크플로우 (Design OS 스타일)
+- **기능 개발**: `.claude/workflows/feature-development.md`
+
+### 기타
 - **작업 목록**: `.claude/TASKS.md`
 - **제품 요구사항**: `.claude/PRD.md`
 - **보안 및 암호화 가이드**: `.claude/SECURITY_GUIDE.md`
+- **성능 최적화**: `.claude/PERFORMANCE.md`
