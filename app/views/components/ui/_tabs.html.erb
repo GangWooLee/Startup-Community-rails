@@ -1,0 +1,39 @@
+<%# Tabs 컴포넌트 - undrew-design 스타일 %>
+<%# locals: tabs_id, default_tab, variant, list_content, panels %>
+
+<div id="<%= tabs_id %>"
+     class="w-full"
+     data-controller="tabs"
+     data-tabs-default-value="<%= default_tab %>">
+
+  <%# 탭 리스트 %>
+  <%
+    list_wrapper_classes = case variant.to_sym
+    when :default
+      "flex gap-1 p-1 bg-muted rounded-lg w-fit"
+    when :pills
+      "flex gap-2"
+    when :underline
+      "flex gap-4 border-b border-border"
+    end
+  %>
+  <div class="<%= list_wrapper_classes %>"
+       role="tablist"
+       data-tabs-target="list">
+    <%= raw list_content %>
+  </div>
+
+  <%# 탭 패널 %>
+  <div class="mt-4" data-tabs-target="panelContainer">
+    <% panels.each do |panel| %>
+      <div id="panel-<%= panel[:id] %>"
+           class="<%= panel[:active] ? '' : 'hidden' %>"
+           data-tabs-target="panel"
+           data-tab-id="<%= panel[:id] %>"
+           role="tabpanel"
+           aria-labelledby="trigger-<%= panel[:id] %>">
+        <%= raw panel[:content] %>
+      </div>
+    <% end %>
+  </div>
+</div>

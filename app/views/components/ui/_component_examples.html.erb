@@ -1,0 +1,232 @@
+<%#
+  UI Component Examples - Phase 7.1
+
+  이 파일은 Sheet, Toast, Popover 컴포넌트의 사용 예시를 보여줍니다.
+  실제 프로덕션에서는 삭제하거나 주석 처리하세요.
+-%>
+
+<div class="container mx-auto p-8 space-y-12">
+  <h1 class="text-3xl font-bold text-foreground">Phase 7.1 UI Components</h1>
+
+  <%# ==================== Sheet Component ==================== %>
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-foreground">1. Sheet (Slide Panel)</h2>
+    <p class="text-muted-foreground">슬라이드 패널 - 프로필, 설정, 채팅 사이드바에 활용</p>
+
+    <div class="flex gap-4">
+      <button data-controller="sheet-trigger"
+              data-action="click->sheet#open"
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+        오른쪽에서 열기
+      </button>
+    </div>
+
+    <%# Sheet 컴포넌트 %>
+    <%= render "components/ui/sheet",
+               title: "프로필 상세",
+               side: "right",
+               id: "profile-sheet" do %>
+      <div class="space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-primary/10 rounded-full"></div>
+          <div>
+            <h3 class="font-semibold text-foreground">홍길동</h3>
+            <p class="text-sm text-muted-foreground">개발자</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-medium text-foreground">소개</h4>
+          <p class="text-sm text-muted-foreground">
+            10년차 풀스택 개발자입니다. Rails, React, TypeScript를 주로 사용합니다.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-medium text-foreground">기술 스택</h4>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">Rails</span>
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">React</span>
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">TypeScript</span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <%# 코드 예시 %>
+    <pre class="bg-muted p-4 rounded-lg text-sm overflow-x-auto"><code>&lt;%= render "components/ui/sheet",
+           title: "프로필 상세",
+           side: "right" do %&gt;
+  &lt;p&gt;콘텐츠...&lt;/p&gt;
+&lt;% end %&gt;</code></pre>
+  </section>
+
+  <%# ==================== Toast Component ==================== %>
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-foreground">2. Toast (Notifications)</h2>
+    <p class="text-muted-foreground">토스트 알림 - 4가지 variant, 스택 관리</p>
+
+    <div class="flex gap-4 flex-wrap">
+      <button onclick="ToastManager.show('success', '저장되었습니다!')"
+              class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Success Toast
+      </button>
+
+      <button onclick="ToastManager.show('error', '오류가 발생했습니다')"
+              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+        Error Toast
+      </button>
+
+      <button onclick="ToastManager.show('warning', '주의가 필요합니다')"
+              class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
+        Warning Toast
+      </button>
+
+      <button onclick="ToastManager.show('info', '정보를 확인하세요')"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        Info Toast
+      </button>
+
+      <button onclick="ToastManager.show('success', '작업 완료', { action: '실행취소', onAction: () => console.log('Undo clicked') })"
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+        Toast with Action
+      </button>
+    </div>
+
+    <%# 코드 예시 %>
+    <pre class="bg-muted p-4 rounded-lg text-sm overflow-x-auto"><code>// JavaScript에서 사용
+ToastManager.show("success", "저장되었습니다!", {
+  duration: 3000,
+  action: "실행취소",
+  onAction: () => {
+    console.log("Undo clicked")
+  }
+})</code></pre>
+  </section>
+
+  <%# ==================== Popover Component ==================== %>
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-foreground">3. Popover</h2>
+    <p class="text-muted-foreground">팝오버 - 유저 카드, 액션 메뉴, 폼 도움말</p>
+
+    <div class="flex gap-4 items-center flex-wrap">
+      <%# Auto Placement %>
+      <%= render "components/ui/popover",
+                 trigger_text: "Auto Placement",
+                 placement: "auto" do %>
+        <div class="space-y-2">
+          <h4 class="font-medium text-foreground">자동 위치 조정</h4>
+          <p class="text-sm text-muted-foreground">
+            Viewport 경계를 감지하여 최적의 위치에 표시됩니다.
+          </p>
+        </div>
+      <% end %>
+
+      <%# Bottom Placement %>
+      <%= render "components/ui/popover",
+                 trigger_text: "Bottom",
+                 placement: "bottom" do %>
+        <ul class="space-y-2 text-sm">
+          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer">편집</li>
+          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer">공유</li>
+          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer text-destructive">삭제</li>
+        </ul>
+      <% end %>
+
+      <%# User Card Popover %>
+      <%= render "components/ui/popover",
+                 trigger_text: "User Card",
+                 placement: "bottom" do %>
+        <div class="space-y-3 min-w-[240px]">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-primary/10 rounded-full"></div>
+            <div>
+              <h4 class="font-semibold text-foreground">김철수</h4>
+              <p class="text-xs text-muted-foreground">@kimcheolsu</p>
+            </div>
+          </div>
+          <p class="text-sm text-muted-foreground">
+            UI/UX 디자이너 | 5년 경력
+          </p>
+          <button class="w-full px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
+            팔로우
+          </button>
+        </div>
+      <% end %>
+    </div>
+
+    <%# 코드 예시 %>
+    <pre class="bg-muted p-4 rounded-lg text-sm overflow-x-auto"><code>&lt;%= render "components/ui/popover",
+           trigger_text: "더보기",
+           placement: "auto" do %&gt;
+  &lt;ul class="space-y-2"&gt;
+    &lt;li&gt;편집&lt;/li&gt;
+    &lt;li&gt;삭제&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;% end %&gt;</code></pre>
+  </section>
+
+  <%# ==================== Component Comparison ==================== %>
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-foreground">Component Comparison</h2>
+
+    <table class="w-full border border-border rounded-lg overflow-hidden">
+      <thead class="bg-muted">
+        <tr>
+          <th class="px-4 py-3 text-left text-foreground">Component</th>
+          <th class="px-4 py-3 text-left text-foreground">Use Case</th>
+          <th class="px-4 py-3 text-left text-foreground">Position</th>
+          <th class="px-4 py-3 text-left text-foreground">Dismissal</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        <tr class="hover:bg-muted/50">
+          <td class="px-4 py-3 font-medium text-foreground">Sheet</td>
+          <td class="px-4 py-3 text-muted-foreground">상세 정보, 설정</td>
+          <td class="px-4 py-3 text-muted-foreground">화면 측면/하단</td>
+          <td class="px-4 py-3 text-muted-foreground">Backdrop, Escape</td>
+        </tr>
+        <tr class="hover:bg-muted/50">
+          <td class="px-4 py-3 font-medium text-foreground">Toast</td>
+          <td class="px-4 py-3 text-muted-foreground">일시적 알림</td>
+          <td class="px-4 py-3 text-muted-foreground">우측 상단 (고정)</td>
+          <td class="px-4 py-3 text-muted-foreground">자동 (3초), 수동</td>
+        </tr>
+        <tr class="hover:bg-muted/50">
+          <td class="px-4 py-3 font-medium text-foreground">Popover</td>
+          <td class="px-4 py-3 text-muted-foreground">컨텍스트 메뉴, 카드</td>
+          <td class="px-4 py-3 text-muted-foreground">트리거 근처 (동적)</td>
+          <td class="px-4 py-3 text-muted-foreground">외부 클릭, Escape</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <%# ==================== Accessibility Features ==================== %>
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-foreground">Accessibility Features</h2>
+
+    <ul class="space-y-2 text-muted-foreground">
+      <li class="flex items-start gap-2">
+        <%= icon "check", size: "md", class: "text-green-500 mt-0.5 flex-shrink-0" %>
+        <span>키보드 네비게이션 (Escape, Tab)</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <%= icon "check", size: "md", class: "text-green-500 mt-0.5 flex-shrink-0" %>
+        <span>ARIA 속성 (role, aria-modal, aria-hidden)</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <%= icon "check", size: "md", class: "text-green-500 mt-0.5 flex-shrink-0" %>
+        <span>포커스 관리 (자동 포커스, 복원)</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <%= icon "check", size: "md", class: "text-green-500 mt-0.5 flex-shrink-0" %>
+        <span>prefers-reduced-motion 지원</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <%= icon "check", size: "md", class: "text-green-500 mt-0.5 flex-shrink-0" %>
+        <span>스크린 리더 호환 (aria-live)</span>
+      </li>
+    </ul>
+  </section>
+</div>

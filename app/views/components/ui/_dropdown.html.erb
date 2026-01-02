@@ -1,0 +1,22 @@
+<%# Dropdown 메뉴 컴포넌트 - undrew-design 스타일 %>
+<%# locals: trigger_content, menu_content, align_classes, side_classes %>
+
+<div class="relative inline-block"
+     data-controller="dropdown-menu"
+     data-action="click@window->dropdown-menu#closeOnClickOutside keydown.esc->dropdown-menu#close">
+
+  <%# 트리거 버튼 %>
+  <div data-action="click->dropdown-menu#toggle"
+       data-dropdown-menu-target="trigger">
+    <%= raw trigger_content %>
+  </div>
+
+  <%# 드롭다운 메뉴 %>
+  <div class="absolute z-50 <%= align_classes %> <%= side_classes %> hidden"
+       data-dropdown-menu-target="menu">
+    <div class="min-w-[180px] bg-card rounded-lg border border-border shadow-lg p-1 animate-fade-in-up"
+         style="animation-duration: 0.15s;">
+      <%= raw menu_content %>
+    </div>
+  </div>
+</div>

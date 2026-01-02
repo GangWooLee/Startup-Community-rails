@@ -22,38 +22,22 @@
   <!-- Main Content -->
   <main class="max-w-screen-xl mx-auto px-4 py-6">
     <%= form_with model: @user, url: my_page_path, method: :patch, local: true, class: "space-y-6" do |f| %>
-      <!-- Error Messages -->
+      <%# Error Messages - render_alert 헬퍼 사용 %>
       <% if @user.errors.any? %>
-        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-4">
-          <div class="flex items-start gap-3">
-            <svg class="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div class="flex-1">
-              <h3 class="text-sm font-medium text-destructive mb-2">오류가 발생했습니다:</h3>
-              <ul class="list-disc list-inside text-sm text-destructive space-y-1">
-                <% @user.errors.full_messages.each do |message| %>
-                  <li><%= message %></li>
-                <% end %>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <%= render_alert variant: :error, title: "오류가 발생했습니다:" do %>
+          <ul class="list-disc list-inside text-sm space-y-1">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        <% end %>
       <% end %>
 
-      <!-- Profile Image -->
+      <!-- Profile Image - render_user_avatar 헬퍼 사용 -->
       <div class="rounded-xl border bg-card text-card-foreground p-6">
         <h3 class="text-lg font-semibold mb-4">프로필 사진</h3>
         <div class="flex items-center gap-6">
-          <div class="h-24 w-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
-            <% if @user.avatar.attached? %>
-              <%= image_tag @user.avatar, alt: @user.name, class: "h-full w-full object-cover" %>
-            <% elsif @user.avatar_url.present? %>
-              <%= image_tag @user.avatar_url, alt: @user.name, class: "h-full w-full object-cover" %>
-            <% else %>
-              <span class="text-3xl font-semibold text-muted-foreground"><%= @user.name[0] %></span>
-            <% end %>
-          </div>
+          <%= render_user_avatar(@user, size: :xl, class: "flex-shrink-0") %>
           <div class="flex-1">
             <label class="block mb-2">
               <span class="text-sm font-medium text-foreground">새 프로필 사진 업로드</span>

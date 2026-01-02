@@ -1,0 +1,35 @@
+<%# Alert/Toast 컴포넌트 - undrew-design 스타일 %>
+<%# locals: text, alert_classes, dismissible, icon, title, variant %>
+
+<div class="<%= alert_classes %>"
+     role="alert"
+     <% if dismissible %>data-controller="dismissible"<% end %>>
+
+  <div class="flex gap-3">
+    <% if icon %>
+      <div class="flex-shrink-0 mt-0.5">
+        <%= raw alert_icon_for(variant) %>
+      </div>
+    <% end %>
+
+    <div class="flex-1 min-w-0">
+      <% if title.present? %>
+        <h5 class="font-semibold mb-1"><%= title %></h5>
+      <% end %>
+      <div class="text-sm leading-relaxed">
+        <%= raw text %>
+      </div>
+    </div>
+
+    <% if dismissible %>
+      <button type="button"
+              class="flex-shrink-0 -mt-1 -mr-1 p-1.5 rounded-md opacity-70 hover:opacity-100 btn-hover"
+              data-action="dismissible#dismiss">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        <span class="sr-only">닫기</span>
+      </button>
+    <% end %>
+  </div>
+</div>

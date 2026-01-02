@@ -2,7 +2,7 @@
 <html lang="ko" data-environment="<%= Rails.env %>">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><%= content_for(:title) || "Undrew - 창업자 커뮤니티" %></title>
     <meta name="description" content="아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,18 +20,28 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <%# Google Fonts - IBM Plex Serif (undrew-design) %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
     <%# Tailwind CSS CDN (개발/테스트용) %>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <%# Tailwind Config %>
+    <%# Tailwind Config - undrew-design %>
     <script>
       tailwind.config = {
         theme: {
           extend: {
+            fontFamily: {
+              sans: ["'IBM Plex Serif'", 'serif'],
+              serif: ["'IBM Plex Serif'", 'serif'],
+            },
             borderRadius: {
               lg: 'var(--radius)',
               md: 'calc(var(--radius) - 2px)',
               sm: 'calc(var(--radius) - 4px)',
+              xl: 'calc(var(--radius) + 4px)',
             },
             colors: {
               background: 'hsl(var(--background))',
@@ -66,44 +76,89 @@
               },
               border: 'hsl(var(--border))',
               input: 'hsl(var(--input))',
+              'input-background': 'hsl(var(--input-background))',
+              'switch-background': 'hsl(var(--switch-background))',
               ring: 'hsl(var(--ring))',
+              sidebar: {
+                DEFAULT: 'hsl(var(--sidebar))',
+                foreground: 'hsl(var(--sidebar-foreground))',
+                primary: 'hsl(var(--sidebar-primary))',
+                'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+                accent: 'hsl(var(--sidebar-accent))',
+                'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+                border: 'hsl(var(--sidebar-border))',
+                ring: 'hsl(var(--sidebar-ring))',
+              },
             },
           },
         },
       }
     </script>
 
-    <%# CSS Variables and Base Styles %>
+    <%# CSS Variables and Base Styles - undrew-design %>
     <style>
       :root {
+        /* Typography - IBM Plex Serif */
+        --font-sans: 'IBM Plex Serif', serif;
+        --font-size: 16px;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+
+        /* Base Colors - undrew-design 기준 */
         --background: 0 0% 100%;
-        --foreground: 0 0% 14.5%;
+        --foreground: 0 0% 9%;
         --card: 0 0% 100%;
-        --card-foreground: 0 0% 14.5%;
+        --card-foreground: 0 0% 9%;
         --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 14.5%;
-        --primary: 0 0% 20.5%;
-        --primary-foreground: 0 0% 98.5%;
-        --secondary: 0 0% 97%;
-        --secondary-foreground: 0 0% 20.5%;
-        --muted: 0 0% 97%;
-        --muted-foreground: 0 0% 55.6%;
-        --accent: 0 0% 97%;
-        --accent-foreground: 0 0% 20.5%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 92.2%;
-        --input: 0 0% 92.2%;
-        --ring: 0 0% 70.8%;
+        --popover-foreground: 0 0% 9%;
+
+        /* Primary - #030213 (거의 검정) */
+        --primary: 248 76% 5%;
+        --primary-foreground: 0 0% 100%;
+
+        /* Secondary - 밝은 보라빛 회색 */
+        --secondary: 265 6% 95%;
+        --secondary-foreground: 248 76% 5%;
+
+        /* Muted - #ececf0 */
+        --muted: 240 10% 94%;
+        --muted-foreground: 240 5% 50%;
+
+        /* Accent - #e9ebef */
+        --accent: 220 14% 93%;
+        --accent-foreground: 248 76% 5%;
+
+        /* Destructive - #d4183d */
+        --destructive: 349 82% 46%;
+        --destructive-foreground: 0 0% 100%;
+
+        /* Border & Input */
+        --border: 0 0% 0% / 0.1;
+        --input: 0 0% 0% / 0;
+        --input-background: 240 6% 96%;
+        --switch-background: 220 7% 81%;
+        --ring: 0 0% 71%;
+
+        /* Radius - 0.625rem (10px) */
         --radius: 0.625rem;
+
+        /* Sidebar */
+        --sidebar: 0 0% 98.5%;
+        --sidebar-foreground: 0 0% 9%;
+        --sidebar-primary: 248 76% 5%;
+        --sidebar-primary-foreground: 0 0% 98.5%;
+        --sidebar-accent: 0 0% 97%;
+        --sidebar-accent-foreground: 0 0% 20.5%;
+        --sidebar-border: 0 0% 92.2%;
+        --sidebar-ring: 0 0% 70.8%;
       }
 
       .dark {
-        --background: 0 0% 14.5%;
+        --background: 0 0% 9%;
         --foreground: 0 0% 98.5%;
-        --card: 0 0% 14.5%;
+        --card: 0 0% 9%;
         --card-foreground: 0 0% 98.5%;
-        --popover: 0 0% 14.5%;
+        --popover: 0 0% 9%;
         --popover-foreground: 0 0% 98.5%;
         --primary: 0 0% 98.5%;
         --primary-foreground: 0 0% 20.5%;
@@ -117,7 +172,17 @@
         --destructive-foreground: 0 0% 98.5%;
         --border: 0 0% 26.9%;
         --input: 0 0% 26.9%;
+        --input-background: 0 0% 12%;
+        --switch-background: 0 0% 25%;
         --ring: 0 0% 43.9%;
+        --sidebar: 0 0% 12%;
+        --sidebar-foreground: 0 0% 98.5%;
+        --sidebar-primary: 262 83% 58%;
+        --sidebar-primary-foreground: 0 0% 98.5%;
+        --sidebar-accent: 0 0% 26.9%;
+        --sidebar-accent-foreground: 0 0% 98.5%;
+        --sidebar-border: 0 0% 26.9%;
+        --sidebar-ring: 0 0% 43.9%;
       }
 
       * {
@@ -125,6 +190,7 @@
       }
 
       body {
+        font-family: var(--font-sans);
         background-color: hsl(var(--background));
         color: hsl(var(--foreground));
       }

@@ -25,7 +25,7 @@
             </svg>
             <% unread_count = current_user.total_unread_messages %>
             <% if unread_count > 0 %>
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 font-medium">
+              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 font-medium animate-pulse-glow">
                 <%= unread_count > 99 ? "99+" : unread_count %>
               </span>
             <% end %>

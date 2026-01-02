@@ -11,22 +11,25 @@
     <div class="w-full">
       <!-- Tab Headers -->
       <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
-        <button data-tab="hiring" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
+        <button data-tab="hiring" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
           <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 mr-2" } %>
           구인 (<%= @hiring_posts.count %>)
         </button>
-        <button data-tab="seeking" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
+        <button data-tab="seeking" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
           <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 mr-2" } %>
           구직 (<%= @seeking_posts.count %>)
         </button>
       </div>
 
       <!-- Hiring Tab (구인 공고) -->
-      <div id="tab-hiring" class="tab-content-freelance space-y-4">
+      <div id="tab-hiring" class="tab-content-freelance">
         <% if @hiring_posts.any? %>
-          <% @hiring_posts.each do |post| %>
-            <%= render partial: "posts/outsourcing_post_card", locals: { post: post } %>
-          <% end %>
+          <%# 반응형 그리드: 1열(모바일) → 2열(태블릿) → 3열(데스크톱) %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% @hiring_posts.each do |post| %>
+              <%= render_post_card(post, variant: :outsourcing) %>
+            <% end %>
+          </div>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
             <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
@@ -37,11 +40,14 @@
       </div>
 
       <!-- Seeking Tab (구직 정보) -->
-      <div id="tab-seeking" class="tab-content-freelance space-y-4 hidden">
+      <div id="tab-seeking" class="tab-content-freelance hidden">
         <% if @seeking_posts.any? %>
-          <% @seeking_posts.each do |post| %>
-            <%= render partial: "posts/outsourcing_post_card", locals: { post: post } %>
-          <% end %>
+          <%# 반응형 그리드: 1열(모바일) → 2열(태블릿) → 3열(데스크톱) %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% @seeking_posts.each do |post| %>
+              <%= render_post_card(post, variant: :outsourcing) %>
+            <% end %>
+          </div>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
             <%= render partial: "shared/icons/user", locals: { css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>

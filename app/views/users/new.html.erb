@@ -92,7 +92,7 @@
             <button type="button"
                     data-email-verification-target="sendButton"
                     data-action="click->email-verification#sendCode"
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4">
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:text-accent-foreground h-10 px-4">
               인증 코드 받기
             </button>
           </div>
@@ -110,7 +110,7 @@
               <button type="button"
                       data-email-verification-target="verifyButton"
                       data-action="click->email-verification#verifyCode"
-                      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4">
+                      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground h-10 px-4">
                 인증
               </button>
               <span data-email-verification-target="verifiedBadge" class="hidden text-green-600 flex items-center gap-1">
@@ -174,15 +174,15 @@
         <div class="flex items-start gap-2">
           <input type="checkbox" id="terms" required class="mt-1 rounded border-input h-4 w-4">
           <label for="terms" class="text-sm text-muted-foreground">
-            <a href="#" class="text-primary hover:underline">이용약관</a> 및
-            <a href="#" class="text-primary hover:underline">개인정보 처리방침</a>에 동의합니다 *
+            <a href="#" class="text-primary link-hover relative">이용약관</a> 및
+            <a href="#" class="text-primary link-hover relative">개인정보 처리방침</a>에 동의합니다 *
           </label>
         </div>
 
         <!-- Submit Button - shadcn Button -->
         <button type="submit"
                 data-email-verification-target="submitButton"
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 w-full">
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground h-11 px-8 w-full">
           회원가입
         </button>
       <% end %>
@@ -190,13 +190,13 @@
       <!-- Login Link -->
       <div class="mt-6 text-center text-sm text-muted-foreground">
         이미 계정이 있으신가요?
-        <%= link_to "로그인", login_path, class: "text-primary font-medium hover:underline ml-1" %>
+        <%= link_to "로그인", login_path, class: "text-primary font-medium link-hover relative ml-1" %>
       </div>
     </div>
 
     <!-- Back to Home -->
     <div class="mt-4 text-center">
-      <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground hover:text-foreground transition-colors" %>
+      <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground hover:text-foreground link-hover relative" %>
     </div>
   </div>
 </div>

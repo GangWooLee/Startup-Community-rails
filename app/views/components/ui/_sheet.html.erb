@@ -1,0 +1,101 @@
+<%#
+  Sheet (Slide Panel) Component
+
+  프로덕션급 슬라이드 패널 - undrew-design 스타일
+
+  사용법:
+    <%= render "components/ui/sheet",
+               title: "프로필 상세",
+               side: "right",
+               id: "profile-sheet" do %>
+      <p>콘텐츠...</p>
+    <% end %>
+
+  Parameters:
+    - title: 헤더 제목 (required)
+    - side: "right" (default), "left", "top", "bottom"
+    - id: unique identifier (required for accessibility)
+    - closable: true (default)
+-%>
+
+<%
+  side ||= "right"
+  closable ||= true
+  id ||= "sheet-#{SecureRandom.hex(4)}"
+
+  # Side별 변환 클래스
+  transform_classes = {
+    "right" => "translate-x-full",
+    "left" => "-translate-x-full",
+    "top" => "-translate-y-full",
+    "bottom" => "translate-y-full"
+  }
+
+  # Side별 위치 클래스
+  position_classes = {
+    "right" => "right-0 top-0 h-full",
+    "left" => "left-0 top-0 h-full",
+    "top" => "top-0 left-0 w-full",
+    "bottom" => "bottom-0 left-0 w-full"
+  }
+
+  # Side별 최대 크기
+  size_classes = {
+    "right" => "w-full max-w-md",
+    "left" => "w-full max-w-md",
+    "top" => "h-auto max-h-[80vh]",
+    "bottom" => "h-auto max-h-[80vh]"
+  }
+
+  transform = transform_classes[side] || transform_classes["right"]
+  position = position_classes[side] || position_classes["right"]
+  size = size_classes[side] || size_classes["right"]
+%>
+
+<div data-controller="sheet"
+     data-sheet-side-value="<%= side %>"
+     data-sheet-closable-value="<%= closable %>">
+
+  <%# Backdrop - Blur 효과 %>
+  <div data-sheet-target="backdrop"
+       data-action="click->sheet#backdropClick"
+       class="fixed inset-0 z-40 hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+  </div>
+
+  <%# Panel - 슬라이드 패널 %>
+  <div data-sheet-target="panel"
+       data-action="click->sheet#stopPropagation"
+       id="<%= id %>"
+       class="fixed <%= position %> <%= size %> z-50 hidden bg-card border-border shadow-2xl transition-transform duration-300 ease-out <%= transform %>
+              <%= side == 'right' || side == 'left' ? 'border-l' : 'border-t' %> overflow-hidden">
+
+    <%# 그라디언트 헤더 배경 %>
+    <div class="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+
+    <%# 헤더 %>
+    <div class="relative z-10 flex items-center justify-between px-6 py-4 border-b border-border bg-card/80 backdrop-blur-sm">
+      <h2 class="text-lg font-semibold text-foreground" id="<%= id %>-title">
+        <%= title %>
+      </h2>
+
+      <% if closable %>
+        <button type="button"
+                data-sheet-target="closeButton"
+                data-action="click->sheet#close"
+                class="p-2 -mr-2 text-muted-foreground hover:text-foreground rounded-lg btn-hover"
+                aria-label="닫기">
+          <%= icon "x-mark", size: "md" %>
+        </button>
+      <% end %>
+    </div>
+
+    <%# 콘텐츠 영역 %>
+    <div class="relative z-10 p-6 overflow-y-auto"
+         style="max-height: <%= side == 'right' || side == 'left' ? 'calc(100vh - 72px)' : 'calc(80vh - 72px)' %>;">
+      <%= yield if block_given? %>
+    </div>
+
+    <%# Subtle 장식적 요소 - 우측 하단 그라디언트 %>
+    <div class="absolute bottom-0 <%= side == 'right' ? 'right-0' : 'left-0' %> w-64 h-64 bg-gradient-to-tl from-primary/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+  </div>
+</div>

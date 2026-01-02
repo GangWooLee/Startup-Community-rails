@@ -1,0 +1,71 @@
+<%#
+  Popover Component
+
+  프로덕션급 팝오버 - undrew-design 스타일
+
+  사용법:
+    <%= render "components/ui/popover",
+               trigger_text: "더보기",
+               placement: "auto",
+               id: "user-popover" do %>
+      <p>팝오버 콘텐츠...</p>
+    <% end %>
+
+  Parameters:
+    - trigger_text: 트리거 버튼 텍스트 (required)
+    - placement: "auto" (default), "top", "bottom", "left", "right"
+    - offset: 트리거와 팝오버 간격 (default: 8px)
+    - id: unique identifier (required for accessibility)
+    - close_on_outside_click: true (default)
+    - trigger_class: 추가 트리거 버튼 클래스 (optional)
+-%>
+
+<%
+  placement ||= "auto"
+  offset ||= 8
+  close_on_outside_click ||= true
+  id ||= "popover-#{SecureRandom.hex(4)}"
+  trigger_class ||= ""
+%>
+
+<div data-controller="popover"
+     data-popover-placement-value="<%= placement %>"
+     data-popover-offset-value="<%= offset %>"
+     data-popover-close-on-outside-click-value="<%= close_on_outside_click %>"
+     class="inline-block">
+
+  <%# Trigger Button %>
+  <button type="button"
+          data-action="click->popover#toggle"
+          class="<%= trigger_class.presence || 'inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-lg btn-hover' %>"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="<%= id %>">
+    <%= trigger_text %>
+
+    <%# Chevron Icon %>
+    <%= icon "chevron-down", size: "sm", class: "transition-transform" %>
+  </button>
+
+  <%# Popover Content %>
+  <div data-popover-target="content"
+       id="<%= id %>"
+       role="dialog"
+       aria-hidden="true"
+       class="hidden popover-base min-w-[200px] max-w-sm bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+
+    <%# Gradient Background Overlay %>
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
+
+    <%# Arrow Pointer %>
+    <div data-popover-target="arrow" class="popover-arrow absolute w-3 h-3 bg-card border-border"></div>
+
+    <%# Content Container %>
+    <div class="relative z-10 p-4">
+      <%= yield if block_given? %>
+    </div>
+
+    <%# Decorative Bottom Gradient %>
+    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"></div>
+  </div>
+</div>

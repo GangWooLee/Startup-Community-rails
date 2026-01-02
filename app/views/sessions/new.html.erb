@@ -40,7 +40,7 @@
             <input type="checkbox" name="remember_me" class="rounded border-input h-4 w-4">
             <span>로그인 상태 유지</span>
           </label>
-          <%= link_to "비밀번호 찾기", forgot_password_form_path, class: "text-sm text-primary hover:underline" %>
+          <%= link_to "비밀번호 찾기", forgot_password_form_path, class: "text-sm text-primary link-hover relative" %>
         </div>
 
         <!-- Submit Button - shadcn Button -->
@@ -89,7 +89,7 @@
 
     <!-- Back to Home -->
     <div class="mt-4 text-center">
-      <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground hover:text-foreground transition-colors" %>
+      <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground hover:text-foreground link-hover relative inline-block" %>
     </div>
   </div>
 </div>
