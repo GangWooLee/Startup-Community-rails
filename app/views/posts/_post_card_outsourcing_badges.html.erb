@@ -1,0 +1,20 @@
+<%# Post Card - 외주 카테고리 뱃지 (구인/구직) %>
+<%# locals: post %>
+
+<div class="flex flex-wrap items-center gap-2 mb-3">
+  <% if post.hiring? %>
+    <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 text-blue-500" } %>
+    <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-2.5 py-0.5 text-xs font-semibold">
+      구인
+    </span>
+  <% elsif post.seeking? %>
+    <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 text-green-500" } %>
+    <span class="inline-flex items-center rounded-md bg-green-500/10 text-green-600 px-2.5 py-0.5 text-xs font-semibold">
+      구직
+    </span>
+  <% end %>
+
+  <% if post.respond_to?(:service_type) && post.service_type.present? %>
+    <%= render_badge Post::SERVICE_TYPES[post.service_type], variant: :secondary, class: "text-xs" %>
+  <% end %>
+</div>

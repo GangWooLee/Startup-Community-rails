@@ -1,0 +1,40 @@
+<%# Post Card - 이미지 썸네일 %>
+<%# locals: post, position %>
+
+<% position ||= :right %>
+
+<%
+  wrapper_classes = case position.to_sym
+  when :right
+    "flex-shrink-0"
+  when :top
+    "w-full"
+  end
+
+  image_classes = case position.to_sym
+  when :right
+    "relative w-16 h-16 rounded-lg overflow-hidden bg-secondary"
+  when :top
+    "relative w-full aspect-[16/9] bg-secondary"
+  end
+%>
+
+<div class="<%= wrapper_classes %>">
+  <div class="<%= image_classes %>">
+    <%= image_tag post.images.first,
+                  class: "w-full h-full object-cover #{'group-hover:scale-105 transition-transform duration-300' if position == :top}",
+                  alt: "첨부 이미지",
+                  loading: "lazy" %>
+    <% if post.images.count > 1 %>
+      <div class="absolute <%= position == :top ? 'bottom-2 right-2 px-2 py-1 rounded-md' : 'inset-0' %> bg-black/50 flex items-center justify-center">
+        <span class="text-white text-sm font-bold">
+          <% if position == :top %>
+            +<%= post.images.count - 1 %>장
+          <% else %>
+            +<%= post.images.count - 1 %>
+          <% end %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+</div>

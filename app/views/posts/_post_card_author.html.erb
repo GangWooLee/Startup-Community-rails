@@ -1,0 +1,24 @@
+<%# Post Card - 작성자 정보 %>
+<%# locals: post, compact %>
+
+<% compact ||= false %>
+
+<%= link_to profile_path(post.user_id), class: "flex items-center gap-3 group mb-<%= compact ? '3' : '4' %>" do %>
+  <%= render_user_avatar(post.user, size: compact ? "sm" : "md", ring: "ring-2 ring-background group-hover:ring-primary/20 transition-all") %>
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2">
+      <h3 class="font-semibold <%= compact ? 'text-sm' : '' %> group-hover:text-primary transition-colors truncate">
+        <%= post.user.name %>
+      </h3>
+      <% if post.user.role_title.present? && !compact %>
+        <%= render_badge post.user.role_title, variant: :secondary, class: "text-xs flex-shrink-0" %>
+      <% end %>
+    </div>
+    <p class="text-xs text-muted-foreground">
+      <% if compact && post.user.role_title.present? %>
+        <%= post.user.role_title %> ·
+      <% end %>
+      <%= time_ago_in_words(post.created_at) %> 전
+    </p>
+  </div>
+<% end %>

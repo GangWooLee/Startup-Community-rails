@@ -7,7 +7,7 @@
      data-comment-like-button-liked-value="<%= liked %>">
   <button type="button"
           data-action="click->comment-like-button#toggle"
-          class="flex items-center gap-1 text-xs hover:opacity-70 transition-opacity">
+          class="flex items-center gap-1 text-xs btn-hover">
     <span data-comment-like-button-target="icon"
           class="<%= liked ? 'text-red-500' : 'text-muted-foreground' %> transition-all duration-150">
       <% if liked %>

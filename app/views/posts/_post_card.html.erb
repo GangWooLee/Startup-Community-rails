@@ -1,0 +1,79 @@
+<%# 통합 Post Card 컴포넌트 - undrew-design 스타일 %>
+<%# locals: post, variant, show_author, show_actions, show_image, image_position %>
+<%# Variants: :community, :outsourcing, :compact, :grid %>
+
+<%
+  # 카드 스타일 설정
+  card_classes = case variant.to_sym
+  when :community
+    "rounded-xl border bg-card text-card-foreground p-6 card-hover"
+  when :outsourcing
+    "rounded-xl border bg-card text-card-foreground p-6 card-hover hover:border-primary/50"
+  when :compact
+    "rounded-lg border bg-card text-card-foreground p-4 card-hover"
+  when :grid
+    "rounded-xl border bg-card text-card-foreground overflow-hidden card-hover hover:border-primary/30 group flex flex-col h-full"
+  else
+    "rounded-xl border bg-card text-card-foreground p-6 card-hover"
+  end
+
+  is_grid = variant.to_sym == :grid
+  is_compact = variant.to_sym == :compact
+  is_outsourcing = variant.to_sym == :outsourcing
+%>
+
+<article class="<%= card_classes %>">
+  <% if is_grid && show_image && post.images.attached? %>
+    <%# 그리드: 상단 이미지 %>
+    <%= render "posts/post_card_image", post: post, position: :top %>
+  <% end %>
+
+  <div class="<%= is_grid ? 'p-5 flex flex-col flex-grow' : '' %>">
+    <% if show_author %>
+      <%= render "posts/post_card_author", post: post, compact: is_compact %>
+    <% end %>
+
+    <% if is_outsourcing %>
+      <%# 외주: 카테고리 뱃지 %>
+      <%= render "posts/post_card_outsourcing_badges", post: post %>
+    <% end %>
+
+    <%# 메인 콘텐츠 링크 %>
+    <%= link_to post_path(post), class: "block #{'flex-grow' if is_grid}" do %>
+      <div class="<%= !is_grid && show_image && post.images.attached? ? 'flex gap-4' : '' %>">
+        <div class="<%= !is_grid && show_image && post.images.attached? ? 'flex-1 min-w-0' : '' %>">
+          <%# 제목 %>
+          <h2 class="<%= is_compact ? 'text-base' : 'text-lg' %> font-semibold mb-2 text-foreground group-hover:text-primary transition-colors <%= is_grid ? 'line-clamp-2' : '' %>">
+            <%= post.title %>
+          </h2>
+
+          <%# 내용 %>
+          <p class="text-<%= is_compact ? 'sm' : 'base' %> text-muted-foreground leading-relaxed <%= is_grid ? 'line-clamp-2' : 'line-clamp-3' %> mb-3">
+            <%= post.content %>
+          </p>
+
+          <% if is_outsourcing %>
+            <%# 외주: 메타 정보 (가격, 기간, 조회수) %>
+            <%= render "posts/post_card_outsourcing_meta", post: post %>
+          <% end %>
+        </div>
+
+        <% if !is_grid && show_image && post.images.attached? && image_position == :right %>
+          <%# 기본: 우측 이미지 %>
+          <%= render "posts/post_card_image", post: post, position: :right %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if show_actions %>
+      <%= render "posts/post_card_actions", post: post, compact: is_compact %>
+    <% else %>
+      <%# 간단한 통계 (프로필 페이지용) %>
+      <div class="flex items-center gap-4 text-sm text-muted-foreground <%= is_compact ? '' : 'mt-3' %>">
+        <span><%= post.likes_count %> 좋아요</span>
+        <span><%= post.comments_count %> 댓글</span>
+        <span class="ml-auto"><%= time_ago_in_words(post.created_at) %> 전</span>
+      </div>
+    <% end %>
+  </div>
+</article>

@@ -25,7 +25,7 @@
           <% if parent_id %>
             <button type="button"
                     data-action="click->reply-toggle#hide"
-                    class="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    class="px-3 py-1.5 text-xs font-medium text-muted-foreground link-hover relative">
               취소
             </button>
           <% end %>
@@ -33,7 +33,7 @@
                   data-comment-form-target="submit"
                   data-action="click->comment-form#submit"
                   disabled
-                  class="px-4 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="px-4 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-md btn-hover disabled:opacity-50 disabled:cursor-not-allowed">
             작성
           </button>
         </div>

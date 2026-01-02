@@ -17,7 +17,7 @@
 
       <div class="ml-auto flex items-center gap-2">
         <% if logged_in? && @post.user == current_user %>
-          <%= link_to edit_post_path(@post), class: "text-sm text-muted-foreground hover:text-foreground" do %>
+          <%= link_to edit_post_path(@post), class: "text-sm text-muted-foreground hover:text-foreground link-hover relative" do %>
             수정
           <% end %>
         <% elsif logged_in? && @post.user != current_user %>
@@ -177,7 +177,7 @@
           <% if images.size == 1 %>
             <!-- 단일 이미지: 심플하게 표시 -->
             <div class="flex justify-center">
-              <%= image_tag images.first, class: "max-w-[50%] rounded-lg cursor-pointer hover:opacity-90 transition-opacity", alt: "첨부 이미지", data: { action: "click->image-lightbox#open", index: 0 } %>
+              <%= image_tag images.first, class: "max-w-[50%] rounded-lg cursor-pointer btn-hover", alt: "첨부 이미지", data: { action: "click->image-lightbox#open", index: 0 } %>
             </div>
           <% else %>
             <!-- 다중 이미지: 캐러셀 -->
@@ -187,14 +187,14 @@
                 <div class="relative overflow-hidden rounded-lg bg-secondary">
                   <% images.each_with_index do |image, index| %>
                     <div class="<%= index == 0 ? 'block' : 'hidden' %>" data-image-carousel-target="slide">
-                      <%= image_tag image, class: "w-full cursor-pointer hover:opacity-90 transition-opacity", alt: "첨부 이미지 #{index + 1}", data: { action: "click->image-lightbox#open", index: index } %>
+                      <%= image_tag image, class: "w-full cursor-pointer btn-hover", alt: "첨부 이미지 #{index + 1}", data: { action: "click->image-lightbox#open", index: index } %>
                     </div>
                   <% end %>
 
                   <!-- 이전/다음 버튼 -->
                   <button
                     type="button"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 rounded-full text-white transition-colors z-10"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 rounded-full text-white btn-hover z-10"
                     data-image-carousel-target="prevButton"
                     data-action="click->image-carousel#prev"
                   >
@@ -204,7 +204,7 @@
                   </button>
                   <button
                     type="button"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 rounded-full text-white transition-colors z-10"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 rounded-full text-white btn-hover z-10"
                     data-image-carousel-target="nextButton"
                     data-action="click->image-carousel#next"
                   >
@@ -218,7 +218,7 @@
                     <% images.each_with_index do |_, index| %>
                       <button
                         type="button"
-                        class="w-1.5 h-1.5 rounded-full <%= index == 0 ? 'bg-white' : 'bg-white/50' %> transition-colors"
+                        class="w-1.5 h-1.5 rounded-full <%= index == 0 ? 'bg-white' : 'bg-white/50' %> btn-hover"
                         data-image-carousel-target="indicator"
                         data-action="click->image-carousel#goToSlide"
                         data-index="<%= index %>"
@@ -244,7 +244,7 @@
             <!-- 닫기 버튼 -->
             <button
               type="button"
-              class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+              class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-white/10 rounded-full text-white btn-hover"
               data-action="click->image-lightbox#close"
             >
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,7 +263,7 @@
             <% if images.size > 1 %>
               <button
                 type="button"
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white btn-hover"
                 data-action="click->image-lightbox#prev"
               >
                 <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,7 +285,7 @@
             <% if images.size > 1 %>
               <button
                 type="button"
-                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white btn-hover"
                 data-action="click->image-lightbox#next"
               >
                 <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +302,7 @@
         <div class="mb-6">
           <%= button_to start_chat_from_post_path(@post),
                         method: :post,
-                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8" do %>
+                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow h-11 px-8" do %>
             <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
             문의하기
           <% end %>
@@ -310,7 +310,7 @@
       <% elsif @post.outsourcing? && !logged_in? %>
         <div class="mb-6">
           <%= link_to login_path(return_to: post_path(@post)),
-                      class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8" do %>
+                      class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow h-11 px-8" do %>
             <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
             로그인하고 문의하기
           <% end %>
@@ -334,7 +334,7 @@
             <% elsif current_user.has_pending_order_for?(@post) %>
               <%# 대기 중인 주문이 있음 %>
               <%= link_to new_payment_path(post_id: @post),
-                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-amber-500 text-white shadow hover:bg-amber-600 h-11 px-8" do %>
+                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-amber-500 text-white shadow h-11 px-8" do %>
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
@@ -343,7 +343,7 @@
             <% else %>
               <%# 새 결제 %>
               <%= link_to new_payment_path(post_id: @post),
-                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow hover:bg-blue-700 h-11 px-8" do %>
+                          class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow h-11 px-8" do %>
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
@@ -353,7 +353,7 @@
           <% else %>
             <%# 비로그인 상태 %>
             <%= link_to login_path(return_to: post_path(@post)),
-                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow hover:bg-blue-700 h-11 px-8" do %>
+                        class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-blue-600 text-white shadow h-11 px-8" do %>
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
               </svg>
