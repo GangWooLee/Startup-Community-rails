@@ -20,7 +20,7 @@
   <button
     type="button"
     data-action="click->bookmark-button#toggle"
-    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md <%= button_class %>"
+    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 rounded-md <%= button_class %>"
   >
     <span data-bookmark-button-target="icon" class="<%= bookmarked ? 'text-yellow-500' : 'text-muted-foreground' %> transition-transform">
       <% if bookmarked %>
