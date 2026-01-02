@@ -16,7 +16,7 @@
     <div class="flex gap-4">
       <button data-controller="sheet-trigger"
               data-action="click->sheet#open"
-              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg btn-hover">
         오른쪽에서 열기
       </button>
     </div>
@@ -68,27 +68,27 @@
 
     <div class="flex gap-4 flex-wrap">
       <button onclick="ToastManager.show('success', '저장되었습니다!')"
-              class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+              class="px-4 py-2 bg-green-500 text-white rounded-lg btn-hover">
         Success Toast
       </button>
 
       <button onclick="ToastManager.show('error', '오류가 발생했습니다')"
-              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+              class="px-4 py-2 bg-red-500 text-white rounded-lg btn-hover">
         Error Toast
       </button>
 
       <button onclick="ToastManager.show('warning', '주의가 필요합니다')"
-              class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
+              class="px-4 py-2 bg-yellow-500 text-white rounded-lg btn-hover">
         Warning Toast
       </button>
 
       <button onclick="ToastManager.show('info', '정보를 확인하세요')"
-              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg btn-hover">
         Info Toast
       </button>
 
       <button onclick="ToastManager.show('success', '작업 완료', { action: '실행취소', onAction: () => console.log('Undo clicked') })"
-              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg btn-hover">
         Toast with Action
       </button>
     </div>
@@ -127,9 +127,9 @@ ToastManager.show("success", "저장되었습니다!", {
                  trigger_text: "Bottom",
                  placement: "bottom" do %>
         <ul class="space-y-2 text-sm">
-          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer">편집</li>
-          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer">공유</li>
-          <li class="px-2 py-1 hover:bg-muted rounded cursor-pointer text-destructive">삭제</li>
+          <li class="px-2 py-1 rounded cursor-pointer card-hover">편집</li>
+          <li class="px-2 py-1 rounded cursor-pointer card-hover">공유</li>
+          <li class="px-2 py-1 rounded cursor-pointer text-destructive card-hover">삭제</li>
         </ul>
       <% end %>
 
@@ -148,7 +148,7 @@ ToastManager.show("success", "저장되었습니다!", {
           <p class="text-sm text-muted-foreground">
             UI/UX 디자이너 | 5년 경력
           </p>
-          <button class="w-full px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
+          <button class="w-full px-3 py-2 bg-primary text-primary-foreground rounded-lg btn-hover text-sm">
             팔로우
           </button>
         </div>
@@ -180,19 +180,19 @@ ToastManager.show("success", "저장되었습니다!", {
         </tr>
       </thead>
       <tbody class="divide-y divide-border">
-        <tr class="hover:bg-muted/50">
+        <tr class="card-hover">
           <td class="px-4 py-3 font-medium text-foreground">Sheet</td>
           <td class="px-4 py-3 text-muted-foreground">상세 정보, 설정</td>
           <td class="px-4 py-3 text-muted-foreground">화면 측면/하단</td>
           <td class="px-4 py-3 text-muted-foreground">Backdrop, Escape</td>
         </tr>
-        <tr class="hover:bg-muted/50">
+        <tr class="card-hover">
           <td class="px-4 py-3 font-medium text-foreground">Toast</td>
           <td class="px-4 py-3 text-muted-foreground">일시적 알림</td>
           <td class="px-4 py-3 text-muted-foreground">우측 상단 (고정)</td>
           <td class="px-4 py-3 text-muted-foreground">자동 (3초), 수동</td>
         </tr>
-        <tr class="hover:bg-muted/50">
+        <tr class="card-hover">
           <td class="px-4 py-3 font-medium text-foreground">Popover</td>
           <td class="px-4 py-3 text-muted-foreground">컨텍스트 메뉴, 카드</td>
           <td class="px-4 py-3 text-muted-foreground">트리거 근처 (동적)</td>
