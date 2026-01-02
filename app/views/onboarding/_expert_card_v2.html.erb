@@ -1,5 +1,5 @@
-<%# 추천 전문가 카드 v2 (Figma 디자인 - 그라디언트 헤더 스타일) %>
-<%# locals: prediction %>
+<%# 추천 전문가 카드 v2 - Undrew Design System Style %>
+<%# locals: prediction, card_index %>
 
 <%
   # prediction 구조: { user:, score_boost:, boost_area:, why: }
@@ -7,6 +7,7 @@
   score_boost = prediction[:score_boost] || 10
   boost_area = prediction[:boost_area] || "전문성"
   why = prediction[:why] || "#{boost_area} 보완에 적합"
+  card_index ||= 0
 
   # 역할별 이모지 매핑
   role_emojis = {
@@ -21,92 +22,99 @@
   # 사용자 역할에서 이모지 찾기
   user_role = user.role_title&.downcase || ""
   role_emoji = role_emojis.find { |key, _| user_role.include?(key) }&.last || "🚀"
+
+  # 4가지 색상 변형 (undrew-design 스타일)
+  card_colors = [
+    { bg: "from-blue-50 to-blue-100/50", border: "border-blue-300", badge_bg: "from-blue-500 to-blue-600", skill_bg: "bg-blue-100", skill_text: "text-blue-700" },
+    { bg: "from-purple-50 to-purple-100/50", border: "border-purple-300", badge_bg: "from-purple-500 to-purple-600", skill_bg: "bg-purple-100", skill_text: "text-purple-700" },
+    { bg: "from-emerald-50 to-emerald-100/50", border: "border-emerald-300", badge_bg: "from-emerald-500 to-emerald-600", skill_bg: "bg-emerald-100", skill_text: "text-emerald-700" },
+    { bg: "from-amber-50 to-amber-100/50", border: "border-amber-300", badge_bg: "from-amber-500 to-amber-600", skill_bg: "bg-amber-100", skill_text: "text-amber-700" }
+  ]
+  c = card_colors[card_index % 4]
 %>
 
 <button type="button"
-        class="relative bg-card rounded-xl border border-border overflow-hidden text-left hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group w-full"
+        class="group text-left cursor-pointer w-full animate-card-lift"
         data-action="click->expert-overlay#show"
         data-expert-overlay-user-id-param="<%= user.id %>"
         data-expert-overlay-score-boost-param="<%= score_boost %>"
         data-expert-overlay-boost-area-param="<%= boost_area %>"
         data-expert-overlay-why-param="<%= why %>">
 
-  <!-- 그라디언트 헤더 (파란색 → 보라색) -->
-  <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-1.5">
-        <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-        </svg>
-        <span class="text-sm font-bold text-white">+<%= score_boost %>점 예상</span>
-      </div>
-    </div>
-    <p class="text-xs text-white/80 mt-0.5"><%= boost_area %> 점수 향상</p>
-  </div>
+  <div class="bg-gradient-to-br <%= c[:bg] %> rounded-xl p-5 border-2 <%= c[:border] %> shadow-lg card-hover">
 
-  <!-- 카드 본문 -->
-  <div class="p-4">
-    <!-- 이모지 아바타 + 이름 + 역할 -->
-    <div class="flex items-center gap-3 mb-3">
-      <div class="h-12 w-12 rounded-full overflow-hidden bg-secondary flex items-center justify-center ring-2 ring-white shadow">
+    <%# 헤더: 아바타 + 점수 배지 %>
+    <div class="flex justify-between items-start mb-4">
+      <%# 아바타 (16x16 = 64px) %>
+      <div class="w-16 h-16 rounded-full bg-white shadow-md overflow-hidden border-2 border-white flex-shrink-0">
         <% if user.avatar.attached? %>
-          <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
-        <% elsif user.avatar_url.present? %>
-          <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
-          <span class="text-2xl hidden items-center justify-center"><%= role_emoji %></span>
+          <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+        <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
+          <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+          <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 hidden items-center justify-center">
+            <span class="text-2xl"><%= role_emoji %></span>
+          </div>
         <% else %>
-          <span class="text-2xl"><%= role_emoji %></span>
+          <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+            <span class="text-2xl"><%= role_emoji %></span>
+          </div>
         <% end %>
       </div>
-      <div class="flex-1 min-w-0">
-        <p class="font-semibold text-foreground text-sm truncate group-hover:text-primary transition-colors"><%= user.name %></p>
-        <% if user.role_title.present? %>
-          <span class="inline-block px-2 py-0.5 bg-secondary rounded text-xs text-muted-foreground truncate max-w-full"><%= user.role_title %></span>
-        <% end %>
+
+      <%# 점수 상승 배지 %>
+      <div class="bg-gradient-to-br <%= c[:badge_bg] %> rounded-lg px-3 py-2 shadow-md">
+        <div class="flex items-center gap-2 mb-0.5">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+          </svg>
+          <span class="font-bold text-white">+<%= score_boost %>점</span>
+        </div>
+        <div class="text-white/80 text-xs"><%= boost_area %> 향상</div>
       </div>
     </div>
 
-    <!-- 추천 이유 섹션 -->
+    <%# 기본 정보 %>
     <div class="mb-3">
-      <p class="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
-        <span>💡</span> 추천 이유
-      </p>
-      <p class="text-sm text-foreground leading-relaxed line-clamp-2"><%= why %></p>
+      <h3 class="font-bold text-slate-800 mb-1 text-lg group-hover:text-blue-600 transition-colors"><%= user.name %></h3>
+      <% if user.role_title.present? %>
+        <p class="text-slate-600 font-medium"><%= user.role_title %></p>
+      <% end %>
     </div>
 
-    <!-- 스킬 태그 (최대 3개) -->
-    <% skills = user.skills_array.first(3) %>
+    <%# 스킬 태그 (최대 4개) %>
+    <% skills = user.respond_to?(:skills_array) ? user.skills_array.first(4) : [] %>
     <% if skills.any? %>
-      <div class="flex flex-wrap gap-1 mb-3">
+      <div class="flex flex-wrap gap-2 mb-4">
         <% skills.each do |skill| %>
-          <span class="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary truncate max-w-[80px]" title="<%= skill %>">
-            <%= truncate(skill, length: 12) %>
+          <span class="bg-white/70 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-md text-sm font-medium">
+            <%= truncate(skill, length: 15) %>
           </span>
         <% end %>
       </div>
     <% end %>
 
-    <!-- 활동 상태 뱃지 -->
-    <% if user.has_availability_status? %>
+    <%# 추천 이유 %>
+    <p class="text-slate-700 leading-relaxed mb-3 line-clamp-2"><%= why %></p>
+
+    <%# 활동 상태 뱃지 %>
+    <% if user.respond_to?(:has_availability_status?) && user.has_availability_status? %>
       <% badge = user.availability_badges.first %>
       <% if badge %>
         <div class="mb-3">
-          <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-white <%= badge[:color] %>">
-            <span class="h-1 w-1 rounded-full bg-white animate-pulse"></span>
+          <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white <%= badge[:color] %> shadow-sm">
+            <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
             <%= badge[:label] %>
           </span>
         </div>
       <% end %>
     <% end %>
 
-    <!-- CTA 링크 -->
-    <div class="pt-2 border-t border-border">
-      <span class="text-xs text-primary font-medium flex items-center gap-1 group-hover:underline">
-        클릭하여 자세히 보기
-        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-      </span>
+    <%# 자세히 보기 CTA %>
+    <div class="flex items-center justify-between pt-3 border-t border-white/50">
+      <span class="text-slate-600 font-medium">자세히 보기</span>
+      <svg class="w-5 h-5 text-slate-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
     </div>
   </div>
 </button>

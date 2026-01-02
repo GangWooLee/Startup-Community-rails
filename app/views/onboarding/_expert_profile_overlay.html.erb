@@ -1,4 +1,4 @@
-<%# 추천 전문가 프로필 오버레이 (Figma 디자인 v2) %>
+<%# 추천 전문가 프로필 오버레이 - Undrew Design System Style (macOS Window) %>
 <%# locals: user, prediction %>
 
 <%
@@ -24,36 +24,53 @@
 %>
 
 <div id="expert-profile-overlay"
-     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6"
      data-controller="profile-overlay"
      data-action="keydown.esc->profile-overlay#close click->profile-overlay#backdropClick">
 
-  <!-- 반투명 배경 -->
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-profile-overlay-target="backdrop"></div>
+  <%# 모달 카드 (macOS 스타일) %>
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-slide-up"
+       data-profile-overlay-target="card"
+       data-action="click->profile-overlay#stopPropagation">
 
-  <!-- 프로필 카드 -->
-  <div class="relative bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden animate-slide-up"
-       data-profile-overlay-target="card">
+    <%# macOS 윈도우 헤더 (트래픽 라이트) %>
+    <div class="bg-gradient-to-b from-slate-200 to-slate-100 border-b border-slate-300/70 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <%# 트래픽 라이트 %>
+        <div class="flex gap-2">
+          <div class="w-3 h-3 rounded-full bg-red-500 border border-red-600/30"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500 border border-yellow-600/30"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500 border border-green-600/30"></div>
+        </div>
 
-    <!-- 닫기 버튼 -->
-    <button type="button"
-            class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
-            data-action="click->profile-overlay#close">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-      </svg>
-    </button>
+        <%# 주소창 (데스크톱만) %>
+        <div class="flex-1 mx-4 hidden md:block">
+          <div class="bg-white rounded-md px-3 py-1.5 text-sm text-slate-500 border border-slate-200 text-center">
+            undrew.ai/expert/<%= user.id %>
+          </div>
+        </div>
 
-    <!-- 카드 내용 (스크롤 가능) -->
-    <div class="overflow-y-auto max-h-[90vh]">
+        <%# 닫기 버튼 %>
+        <button type="button"
+                class="p-1.5 rounded-lg btn-hover"
+                data-action="click->profile-overlay#close">
+          <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
 
-      <!-- 그라디언트 헤더 (파랑 → 보라) -->
-      <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8 text-center text-white">
-        <!-- 이모지 아바타 -->
-        <div class="h-20 w-20 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mx-auto mb-4 ring-4 ring-white/30 shadow-lg">
+    <%# 모달 콘텐츠 (스크롤 가능) %>
+    <div class="overflow-y-auto max-h-[calc(80vh-56px)]">
+
+      <%# 그라디언트 헤더 섹션 %>
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 px-8 py-10 text-center text-white">
+        <%# 아바타 (24x24 = 96px) %>
+        <div class="w-24 h-24 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mx-auto mb-5 ring-4 ring-white/30 shadow-xl">
           <% if user.avatar.attached? %>
             <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
-          <% elsif user.avatar_url.present? %>
+          <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
             <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
             <span class="text-4xl hidden items-center justify-center"><%= role_emoji %></span>
           <% else %>
@@ -61,94 +78,99 @@
           <% end %>
         </div>
 
-        <!-- 이름 -->
-        <h2 class="text-xl font-bold mb-2"><%= user.name %></h2>
+        <%# 이름 %>
+        <h2 class="text-2xl font-bold mb-2"><%= user.name %></h2>
 
-        <!-- 역할 뱃지 -->
+        <%# 역할 뱃지 %>
         <% if user.role_title.present? %>
-          <span class="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+          <span class="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-4 py-1.5 text-sm font-medium">
             <%= user.role_title %>
           </span>
         <% end %>
 
-        <!-- 소속 -->
-        <% if user.affiliation.present? %>
-          <p class="text-white/80 text-sm mt-2"><%= user.affiliation %></p>
+        <%# 소속 %>
+        <% if user.respond_to?(:affiliation) && user.affiliation.present? %>
+          <p class="text-white/70 text-sm mt-3"><%= user.affiliation %></p>
         <% end %>
+
+        <%# 점수 상승 배지 %>
+        <div class="mt-5 inline-block">
+          <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-2.5 rounded-full font-bold shadow-lg animate-glow-pulse">
+            예상 점수 상승: +<%= score_boost %>점
+          </div>
+        </div>
       </div>
 
-      <!-- 본문 섹션들 -->
-      <div class="px-6 py-5 space-y-5">
+      <%# 본문 섹션들 %>
+      <div class="px-8 py-6 space-y-6">
 
-        <!-- 📈 기대 효과 섹션 -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-lg">📈</span>
-            <h3 class="font-semibold text-foreground">기대 효과</h3>
-          </div>
-          <div class="flex items-baseline gap-2 mb-1">
-            <span class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+        <%# 💡 AI 추천 상세 이유 %>
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+          <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-lg">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            AI 추천 이유
+          </h3>
+          <p class="text-slate-700 leading-relaxed"><%= why %></p>
+        </div>
+
+        <%# 📈 기대 효과 %>
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-200">
+          <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-lg">
+            <span class="text-xl">📈</span>
+            기대 효과
+          </h3>
+          <div class="flex items-baseline gap-3 mb-2">
+            <span class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
               +<%= score_boost %>점
             </span>
-            <span class="text-sm text-muted-foreground">예상</span>
+            <span class="text-slate-600">예상 상승</span>
           </div>
-          <p class="text-sm text-muted-foreground">
-            이 전문가와 협업하면 <span class="font-medium text-foreground"><%= boost_area %></span> 점수가 크게 향상될 것으로 예상됩니다.
+          <p class="text-slate-700">
+            이 전문가와 협업하면 <span class="font-semibold text-emerald-700"><%= boost_area %></span> 점수가 크게 향상될 것으로 예상됩니다.
           </p>
         </div>
 
-        <!-- 💡 AI 추천 상세 이유 섹션 -->
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-lg">💡</span>
-            <h3 class="font-semibold text-foreground">AI 추천 상세 이유</h3>
-          </div>
-          <p class="text-sm text-muted-foreground leading-relaxed">
-            <%= why %>
-          </p>
-        </div>
-
-        <!-- 📊 경험 및 전문성 섹션 -->
-        <% if user.bio.present? %>
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">📊</span>
-              <h3 class="font-semibold text-foreground">경험 및 전문성</h3>
-            </div>
-            <p class="text-sm text-muted-foreground leading-relaxed">
-              <%= user.bio %>
-            </p>
+        <%# 📊 경험 및 전문성 %>
+        <% if user.respond_to?(:bio) && user.bio.present? %>
+          <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-lg">
+              <span class="text-xl">📊</span>
+              경험 및 전문성
+            </h3>
+            <p class="text-slate-700 leading-relaxed"><%= user.bio %></p>
           </div>
         <% end %>
 
-        <!-- 🏆 주요 포트폴리오 섹션 -->
+        <%# 🏆 주요 포트폴리오 %>
         <% if user.respond_to?(:achievements_array) && user.achievements_array.any? %>
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">🏆</span>
-              <h3 class="font-semibold text-foreground">주요 포트폴리오</h3>
-            </div>
-            <ul class="space-y-2">
+          <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-200">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
+              <span class="text-xl">🏆</span>
+              주요 포트폴리오
+            </h3>
+            <ul class="space-y-3">
               <% user.achievements_array.first(5).each do |achievement| %>
-                <li class="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span class="text-primary mt-0.5">•</span>
-                  <span><%= achievement %></span>
+                <li class="flex items-start gap-3">
+                  <span class="text-amber-500 mt-0.5">•</span>
+                  <span class="text-slate-700"><%= achievement %></span>
                 </li>
               <% end %>
             </ul>
           </div>
         <% end %>
 
-        <!-- 🛠️ 핵심 보유 기술 섹션 -->
+        <%# 🛠️ 핵심 보유 기술 %>
         <% if user.respond_to?(:skills_array) && user.skills_array.any? %>
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">🛠️</span>
-              <h3 class="font-semibold text-foreground">핵심 보유 기술</h3>
-            </div>
+          <div class="bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-6 border border-purple-200">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
+              <span class="text-xl">🛠️</span>
+              핵심 보유 기술
+            </h3>
             <div class="flex flex-wrap gap-2">
               <% user.skills_array.each do |skill| %>
-                <span class="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium">
+                <span class="px-4 py-2 rounded-lg bg-purple-100 text-purple-700 font-medium border border-purple-200">
                   <%= skill %>
                 </span>
               <% end %>
@@ -156,12 +178,12 @@
           </div>
         <% end %>
 
-        <!-- 활동 상태 뱃지 -->
+        <%# 활동 상태 뱃지 %>
         <% if user.respond_to?(:has_availability_status?) && user.has_availability_status? %>
           <div class="flex items-center gap-2 flex-wrap">
             <% user.availability_badges.each do |badge| %>
-              <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-white <%= badge[:color] %>">
-                <span class="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white <%= badge[:color] %> shadow-md">
+                <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
                 <%= badge[:label] %>
               </span>
             <% end %>
@@ -170,14 +192,15 @@
 
       </div>
 
-      <!-- 하단 CTA 버튼 영역 -->
-      <div class="px-6 py-4 bg-secondary/30 border-t border-border">
-        <div class="flex gap-3">
-          <!-- 메시지 보내기 -->
-          <% if logged_in? && current_user.id != user.id %>
-            <% chat_btn_class = "flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all shadow-md" %>
-            <%= link_to start_chat_path(user), class: chat_btn_class, data: { turbo_method: :post } do %>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <%# 하단 CTA 버튼 영역 %>
+      <div class="px-8 py-6 bg-slate-50 border-t border-slate-200">
+        <div class="flex gap-4">
+          <%# 메시지 보내기 %>
+          <% if defined?(logged_in?) && logged_in? && current_user.id != user.id %>
+            <%= link_to start_chat_path(user),
+                class: "flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white btn-hover shadow-lg",
+                data: { turbo_method: :post } do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
               </svg>
               메시지 보내기
@@ -186,11 +209,11 @@
             <div class="flex-1"></div>
           <% end %>
 
-          <!-- 이메일 문의 -->
+          <%# 이메일 문의 %>
           <% if user.email.present? %>
-            <% email_btn_class = "flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-background border border-border text-foreground hover:bg-secondary transition-colors" %>
-            <%= link_to "mailto:#{user.email}", class: email_btn_class do %>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <%= link_to "mailto:#{user.email}",
+                class: "flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-semibold bg-white border-2 border-slate-300 text-slate-700 btn-hover" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
               이메일 문의
@@ -198,10 +221,11 @@
           <% end %>
         </div>
 
-        <!-- 전체 프로필 보기 (서브) -->
-        <% profile_link_class = "mt-3 w-full inline-flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors" %>
-        <%= link_to profile_path(user), class: profile_link_class, data: { turbo_frame: "_top" } do %>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <%# 전체 프로필 보기 %>
+        <%= link_to profile_path(user),
+            class: "mt-4 w-full inline-flex items-center justify-center gap-2 text-sm text-slate-600 link-hover relative font-medium",
+            data: { turbo_frame: "_top" } do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
           전체 프로필 보기 →

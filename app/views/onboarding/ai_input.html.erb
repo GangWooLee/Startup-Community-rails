@@ -75,13 +75,13 @@
       <div class="mb-4">
         <p class="text-xs text-muted-foreground mb-3">예시 아이디어</p>
         <div class="flex flex-wrap gap-2">
-          <button type="button" data-action="click->ai-input#fillExample" data-example="대학생들이 서로 스터디 그룹을 만들고 관리할 수 있는 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+          <button type="button" data-action="click->ai-input#fillExample" data-example="대학생들이 서로 스터디 그룹을 만들고 관리할 수 있는 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
             스터디 매칭 앱
           </button>
-          <button type="button" data-action="click->ai-input#fillExample" data-example="프리랜서 개발자와 디자이너를 연결해주는 외주 플랫폼" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+          <button type="button" data-action="click->ai-input#fillExample" data-example="프리랜서 개발자와 디자이너를 연결해주는 외주 플랫폼" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
             외주 매칭 플랫폼
           </button>
-          <button type="button" data-action="click->ai-input#fillExample" data-example="AI가 사용자의 일정을 분석하고 최적의 할 일 순서를 추천해주는 투두 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+          <button type="button" data-action="click->ai-input#fillExample" data-example="AI가 사용자의 일정을 분석하고 최적의 할 일 순서를 추천해주는 투두 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
             AI 일정 관리
           </button>
         </div>
@@ -89,7 +89,7 @@
 
       <!-- Submit Button (Step 1) -->
       <button type="button"
-              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium disabled:opacity-50 disabled:pointer-events-none"
+              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground btn-hover font-medium disabled:opacity-50 disabled:pointer-events-none"
               data-ai-input-target="submitButton"
               data-action="click->ai-input#submitIdea"
               disabled>
@@ -107,7 +107,7 @@
 
       <!-- Submit Button (Step 2) -->
       <button type="button"
-              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium disabled:opacity-50 disabled:pointer-events-none"
+              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground btn-hover font-medium disabled:opacity-50 disabled:pointer-events-none"
               data-ai-input-target="analyzeButton"
               data-action="click->ai-input#submitForAnalysis"
               disabled>
