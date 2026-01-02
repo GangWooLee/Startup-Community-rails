@@ -111,7 +111,7 @@
             <div class="space-y-2">
               <% Inquiry::STATUSES.each do |key, label| %>
                 <label data-radio-highlight-target="option"
-                       class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                       class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer card-hover
                               <%= @inquiry.status == key ? 'border-blue-500 bg-blue-50' : 'border-border bg-card' %>">
                   <%= f.radio_button :status, key,
                                      class: "h-4 w-4 text-blue-600",
@@ -125,8 +125,8 @@
 
           <!-- 제출 버튼 -->
           <div class="flex gap-3">
-            <%= f.submit "답변 등록", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer" %>
-            <%= link_to "목록", admin_inquiries_path, class: "py-2.5 px-4 bg-muted text-foreground font-medium rounded-lg hover:bg-gray-200 transition text-center" %>
+            <%= f.submit "답변 등록", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg btn-hover cursor-pointer" %>
+            <%= link_to "목록", admin_inquiries_path, class: "py-2.5 px-4 bg-muted text-foreground font-medium rounded-lg btn-hover text-center" %>
           </div>
         <% end %>
       </div>
@@ -155,7 +155,7 @@
           <span class="text-sm font-medium text-foreground"><%= @inquiry.user.inquiries.count %>건</span>
         </div>
         <div class="pt-3 border-t border-border">
-          <%= link_to admin_user_path(@inquiry.user), class: "w-full inline-flex items-center justify-center gap-2 py-2 px-4 bg-muted text-foreground font-medium rounded-lg hover:bg-gray-200 transition" do %>
+          <%= link_to admin_user_path(@inquiry.user), class: "w-full inline-flex items-center justify-center gap-2 py-2 px-4 bg-muted text-foreground font-medium rounded-lg btn-hover" do %>
             <%= icon "user", variant: :outline, class: "w-4 h-4" %>
             사용자 상세
           <% end %>

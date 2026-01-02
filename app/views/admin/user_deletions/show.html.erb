@@ -4,7 +4,7 @@
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <%= link_to "탈퇴 회원 관리", admin_user_deletions_path, class: "hover:text-foreground" %>
+  <%= link_to "탈퇴 회원 관리", admin_user_deletions_path, class: "link-hover relative" %>
   <span>/</span>
   <span class="text-foreground font-medium">#<%= @deletion.user_id %></span>
 </nav>
@@ -162,7 +162,7 @@
 
     <!-- 원본 JSON (개발/디버깅용) -->
     <details class="bg-card rounded-xl border border-border overflow-hidden">
-      <summary class="px-5 py-4 cursor-pointer hover:bg-muted text-sm font-medium text-foreground">
+      <summary class="px-5 py-4 cursor-pointer card-hover text-sm font-medium text-foreground">
         원본 스냅샷 JSON 보기
       </summary>
       <div class="px-5 pb-5">
@@ -272,7 +272,7 @@
 
     <!-- 뒤로 가기 -->
     <div>
-      <%= link_to admin_user_deletions_path, class: "flex items-center justify-center gap-2 w-full px-4 py-2 bg-muted hover:bg-muted text-foreground rounded-lg transition" do %>
+      <%= link_to admin_user_deletions_path, class: "flex items-center justify-center gap-2 w-full px-4 py-2 bg-muted text-foreground rounded-lg btn-hover" do %>
         <%= icon "arrow-left", variant: :outline, class: "w-4 h-4" %>
         목록으로 돌아가기
       <% end %>

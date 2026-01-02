@@ -102,12 +102,12 @@
     <!-- 카테고리 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_inquiries_path(status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:category].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <% Inquiry::CATEGORIES.each do |key, label| %>
         <%= link_to admin_inquiries_path(category: key, status: params[:status]),
-                    class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category] == key ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground hover:bg-gray-200'}" do %>
+                    class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:category] == key ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
           <%= label %>
         <% end %>
       <% end %>
@@ -130,7 +130,7 @@
     </thead>
     <tbody class="divide-y divide-border">
       <% @inquiries.each do |inquiry| %>
-        <tr class="hover:bg-muted transition-colors">
+        <tr class="card-hover">
           <!-- 문의자 -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-3">
@@ -185,7 +185,7 @@
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_inquiry_path(inquiry),
-                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition" do %>
+                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary btn-hover" do %>
               <%= icon "eye", variant: :outline, class: "w-4 h-4 mr-1" %>
               상세
             <% end %>

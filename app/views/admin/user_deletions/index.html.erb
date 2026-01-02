@@ -95,7 +95,7 @@
     </thead>
     <tbody class="divide-y divide-gray-100">
       <% @deletions.each do |deletion| %>
-        <tr class="hover:bg-muted transition-colors">
+        <tr class="card-hover">
           <!-- ID -->
           <td class="px-5 py-4">
             <span class="text-sm font-mono text-muted-foreground">#<%= deletion.user_id %></span>
@@ -145,7 +145,7 @@
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_user_deletion_path(deletion),
-                        class: "p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition inline-block",
+                        class: "p-2 text-muted-foreground btn-hover rounded-lg inline-block",
                         title: "상세 보기" do %>
               <%= icon "eye", variant: :outline, class: "w-5 h-5" %>
             <% end %>

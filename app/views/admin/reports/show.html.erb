@@ -106,7 +106,7 @@
               <span>작성자: <%= post.user.name %></span>
               <span>작성일: <%= post.created_at.strftime("%Y-%m-%d") %></span>
             </div>
-            <%= link_to post_path(post), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700" do %>
+            <%= link_to post_path(post), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 link-hover relative" do %>
               <%= icon "arrow-top-right-on-square", variant: :outline, class: "w-4 h-4" %>
               게시글 보기
             <% end %>
@@ -130,7 +130,7 @@
                 <p class="text-sm text-muted-foreground">가입일: <%= user.created_at.strftime("%Y-%m-%d") %></p>
               </div>
             </div>
-            <%= link_to profile_path(user), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700" do %>
+            <%= link_to profile_path(user), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 link-hover relative" do %>
               <%= icon "arrow-top-right-on-square", variant: :outline, class: "w-4 h-4" %>
               프로필 보기
             <% end %>
@@ -182,7 +182,7 @@
             <label class="block text-sm font-medium text-foreground mb-2">상태 변경</label>
             <div class="space-y-2">
               <% Report::STATUSES.each do |key, label| %>
-                <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer card-hover
                              <%= @report.status == key ? 'border-blue-500 bg-blue-50' : 'border-border' %>">
                   <%= f.radio_button :status, key, class: "h-4 w-4 text-blue-600" %>
                   <span class="text-sm font-medium text-foreground"><%= label %></span>
@@ -201,8 +201,8 @@
 
           <!-- 제출 버튼 -->
           <div class="flex gap-3">
-            <%= f.submit "저장", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer" %>
-            <%= link_to "목록", admin_reports_path, class: "py-2.5 px-4 bg-gray-100 text-foreground font-medium rounded-lg hover:bg-gray-200 transition text-center" %>
+            <%= f.submit "저장", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg btn-hover cursor-pointer" %>
+            <%= link_to "목록", admin_reports_path, class: "py-2.5 px-4 bg-gray-100 text-foreground font-medium rounded-lg btn-hover text-center" %>
           </div>
         <% end %>
       </div>
@@ -217,14 +217,14 @@
         <% if @report.pending? %>
           <%= button_to admin_report_path(@report, report: { status: 'resolved' }),
                         method: :patch,
-                        class: "w-full py-2.5 px-4 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2",
+                        class: "w-full py-2.5 px-4 bg-green-600 text-white font-medium rounded-lg btn-hover flex items-center justify-center gap-2",
                         form: { data: { turbo_confirm: "정말 처리완료로 변경하시겠습니까?" } } do %>
             <%= icon "check-circle", variant: :solid, class: "w-5 h-5" %>
             처리완료
           <% end %>
           <%= button_to admin_report_path(@report, report: { status: 'dismissed' }),
                         method: :patch,
-                        class: "w-full py-2.5 px-4 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2",
+                        class: "w-full py-2.5 px-4 bg-gray-600 text-white font-medium rounded-lg btn-hover flex items-center justify-center gap-2",
                         form: { data: { turbo_confirm: "정말 기각하시겠습니까?" } } do %>
             <%= icon "x-circle", variant: :solid, class: "w-5 h-5" %>
             기각

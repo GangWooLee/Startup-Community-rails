@@ -102,19 +102,19 @@
     <!-- 유형 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_reports_path(status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <%= link_to admin_reports_path(type: 'Post', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'Post' ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type] == 'Post' ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         게시글
       <% end %>
       <%= link_to admin_reports_path(type: 'User', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'User' ? 'bg-purple-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type] == 'User' ? 'bg-purple-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         사용자
       <% end %>
       <%= link_to admin_reports_path(type: 'ChatRoom', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'ChatRoom' ? 'bg-teal-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type] == 'ChatRoom' ? 'bg-teal-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         채팅방
       <% end %>
     </div>
@@ -136,7 +136,7 @@
     </thead>
     <tbody class="divide-y divide-border">
       <% @reports.each do |report| %>
-        <tr class="hover:bg-muted transition-colors">
+        <tr class="card-hover">
           <!-- 신고자 -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-3">
@@ -204,7 +204,7 @@
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_report_path(report),
-                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition" do %>
+                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary btn-hover" do %>
               <%= icon "eye", variant: :outline, class: "w-4 h-4 mr-1" %>
               상세
             <% end %>
