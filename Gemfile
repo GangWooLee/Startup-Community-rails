@@ -98,6 +98,12 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Adds assigns() and assert_template to controller tests [https://github.com/rails/rails-controller-testing]
+  gem "rails-controller-testing"
+
+  # Code coverage analysis [https://github.com/simplecov-ruby/simplecov]
+  gem "simplecov", require: false
 end
 
 gem "rails_icons", "~> 1.5"

@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <span class="text-foreground font-medium">문의 관리</span>
 </nav>
@@ -12,7 +12,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-        <%= icon "chat-bubble-left-right", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
+        <%= icon "chat-bubble-left-right", variant: :solid, css_class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@stats[:total]) %></p>
@@ -24,7 +24,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-        <%= icon "clock", variant: :solid, class: "w-5 h-5 text-yellow-600" %>
+        <%= icon "clock", variant: :solid, css_class: "w-5 h-5 text-yellow-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-yellow-600"><%= @stats[:pending] %></p>
@@ -36,7 +36,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-        <%= icon "arrow-path", variant: :solid, class: "w-5 h-5 text-primary" %>
+        <%= icon "arrow-path", variant: :solid, css_class: "w-5 h-5 text-primary" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= @stats[:in_progress] %></p>
@@ -48,7 +48,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-        <%= icon "check-circle", variant: :solid, class: "w-5 h-5 text-green-600" %>
+        <%= icon "check-circle", variant: :solid, css_class: "w-5 h-5 text-green-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= @stats[:resolved] %></p>
@@ -60,7 +60,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-        <%= icon "archive-box", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
+        <%= icon "archive-box", variant: :solid, css_class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= @stats[:closed] %></p>
@@ -186,7 +186,7 @@
           <td class="px-5 py-4 text-right">
             <%= link_to admin_inquiry_path(inquiry),
                         class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary btn-hover" do %>
-              <%= icon "eye", variant: :outline, class: "w-4 h-4 mr-1" %>
+              <%= icon "eye", variant: :outline, css_class: "w-4 h-4 mr-1" %>
               상세
             <% end %>
           </td>
@@ -197,7 +197,7 @@
 
   <% if @inquiries.empty? %>
     <div class="py-12 text-center">
-      <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
+      <%= icon "chat-bubble-left-right", variant: :outline, css_class: "mx-auto h-12 w-12 text-gray-300" %>
       <h3 class="mt-2 text-sm font-medium text-foreground">문의 없음</h3>
       <p class="mt-1 text-sm text-muted-foreground">조건에 맞는 문의가 없습니다.</p>
     </div>

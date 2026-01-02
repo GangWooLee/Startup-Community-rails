@@ -11,6 +11,8 @@ Rails.application.configure do
   config.active_record.encryption.primary_key = "test-primary-key-must-be-32-bytes!"
   config.active_record.encryption.deterministic_key = "test-deterministic-key-32-bytes!"
   config.active_record.encryption.key_derivation_salt = "test-key-derivation-salt-value!"
+  # Allow reading unencrypted data from fixtures (safe for test environment only)
+  config.active_record.encryption.support_unencrypted_data = true
 
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false

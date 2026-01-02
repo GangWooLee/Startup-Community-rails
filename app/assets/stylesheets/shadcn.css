@@ -1,64 +1,113 @@
+/* ==========================================================================
+   Undrew Design System - CSS Variables (HSL fallback)
+   Ported from: https://github.com/GangWooLee/Undrew-design
+   ========================================================================== */
+
 :root {
-  --font-sans: "Inter var";
+  /* Typography - IBM Plex Serif */
+  --font-sans: 'IBM Plex Serif', serif;
+  --font-serif: 'IBM Plex Serif', serif;
+  --font-size: 16px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
 
+  /* Base Colors - undrew-design 기준 */
   --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  --foreground: 0 0% 9%;
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 0 0% 9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5% 64.9%;
-  --radius: 0.5rem;
+  --popover-foreground: 0 0% 9%;
 
-  --success: 132, 95.3%, 33.3%, 0.74;
+  /* Primary - #030213 (거의 검정) */
+  --primary: 248 76% 5%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary - oklch(0.95 0.0058 264.53) ≈ 밝은 보라빛 회색 */
+  --secondary: 265 6% 95%;
+  --secondary-foreground: 248 76% 5%;
+
+  /* Muted - #ececf0 */
+  --muted: 240 10% 94%;
+  --muted-foreground: 240 5% 50%;
+
+  /* Accent - #e9ebef */
+  --accent: 220 14% 93%;
+  --accent-foreground: 248 76% 5%;
+
+  /* Destructive - #d4183d */
+  --destructive: 349 82% 46%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Border & Input */
+  --border: 0 0% 0% / 0.1;
+  --input: 0 0% 0% / 0;
+  --input-background: 240 6% 96%;
+  --switch-background: 220 7% 81%;
+  --ring: 0 0% 71%;
+
+  /* Radius - 0.625rem (10px) */
+  --radius: 0.625rem;
+
+  /* Sidebar */
+  --sidebar: 0 0% 98.5%;
+  --sidebar-foreground: 0 0% 9%;
+  --sidebar-primary: 248 76% 5%;
+  --sidebar-primary-foreground: 0 0% 98.5%;
+  --sidebar-accent: 0 0% 97%;
+  --sidebar-accent-foreground: 0 0% 20.5%;
+  --sidebar-border: 0 0% 92.2%;
+  --sidebar-ring: 0 0% 70.8%;
+
+  /* Semantic Colors */
+  --success: 132 95.3% 33.3%;
   --success-foreground: 109 55% 28%;
-
   --info: 223 78% 42%;
   --info-foreground: 225 100% 50%;
-
   --attention: 45 90% 45%;
-  --attention-foreground: 60 98.4% 48.8% 0.82;
+  --attention-foreground: 60 98.4% 48.8%;
 }
 @layer base {
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    /* Dark Mode - undrew-design 기준 */
+    --background: 0 0% 9%;
+    --foreground: 0 0% 98.5%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98.5%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98.5%;
+    --primary: 0 0% 98.5%;
+    --primary-foreground: 0 0% 20.5%;
+    --secondary: 0 0% 26.9%;
+    --secondary-foreground: 0 0% 98.5%;
+    --muted: 0 0% 26.9%;
+    --muted-foreground: 0 0% 70.8%;
+    --accent: 0 0% 26.9%;
+    --accent-foreground: 0 0% 98.5%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.5rem;
+    --destructive-foreground: 0 0% 98.5%;
+    --border: 0 0% 26.9%;
+    --input: 0 0% 26.9%;
+    --input-background: 0 0% 12%;
+    --switch-background: 0 0% 25%;
+    --ring: 0 0% 43.9%;
+    --radius: 0.625rem;
 
+    /* Sidebar Dark */
+    --sidebar: 0 0% 12%;
+    --sidebar-foreground: 0 0% 98.5%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 98.5%;
+    --sidebar-accent: 0 0% 26.9%;
+    --sidebar-accent-foreground: 0 0% 98.5%;
+    --sidebar-border: 0 0% 26.9%;
+    --sidebar-ring: 0 0% 43.9%;
+
+    /* Semantic Colors Dark */
     --success: 109 55% 28%;
     --success-foreground: 109 55% 28%;
-
-    --attention: 45, 90%, 45%, 0.8;
-    --attention-foreground: 60 98.4% 48.8% 0.82;
+    --attention: 45 90% 45%;
+    --attention-foreground: 60 98.4% 48.8%;
   }
 }
 

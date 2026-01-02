@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <%= link_to "대시보드", admin_root_path, class: "link-hover relative" %>
   <span>/</span>
@@ -13,7 +13,7 @@
 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-      <%= icon "eye", variant: :solid, class: "h-5 w-5 text-amber-600" %>
+      <%= icon "eye", variant: :solid, css_class: "h-5 w-5 text-amber-600" %>
     </div>
     <div>
       <h3 class="text-sm font-semibold text-amber-800">감청 모드 (Read Only)</h3>
@@ -44,7 +44,7 @@
                 <p class="text-sm font-medium text-foreground truncate"><%= user.name %></p>
                 <p class="text-xs text-muted-foreground truncate"><%= user.email %></p>
               </div>
-              <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-muted-foreground" %>
+              <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground" %>
             <% end %>
           <% end %>
         </div>
@@ -93,10 +93,10 @@
         </div>
         <div class="flex items-center gap-2">
           <button class="p-2 text-muted-foreground btn-hover rounded-lg" title="검색">
-            <%= icon "magnifying-glass", variant: :outline, class: "w-5 h-5" %>
+            <%= icon "magnifying-glass", variant: :outline, css_class: "w-5 h-5" %>
           </button>
           <button class="p-2 text-muted-foreground btn-hover rounded-lg" title="내보내기">
-            <%= icon "arrow-down-tray", variant: :outline, class: "w-5 h-5" %>
+            <%= icon "arrow-down-tray", variant: :outline, css_class: "w-5 h-5" %>
           </button>
         </div>
       </div>
@@ -106,7 +106,7 @@
         <% if @messages.empty? %>
           <div class="flex items-center justify-center h-full">
             <div class="text-center">
-              <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-16 w-16 text-muted-foreground" %>
+              <%= icon "chat-bubble-left-right", variant: :outline, css_class: "mx-auto h-16 w-16 text-muted-foreground" %>
               <p class="mt-3 text-sm text-muted-foreground">대화 내용이 없습니다.</p>
             </div>
           </div>
@@ -145,7 +145,7 @@
                   <% end %>
                 <% else %>
                   <div class="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <%= icon "computer-desktop", variant: :solid, class: "w-4 h-4 text-white" %>
+                    <%= icon "computer-desktop", variant: :solid, css_class: "w-4 h-4 text-white" %>
                   </div>
                 <% end %>
 
@@ -162,7 +162,7 @@
                     <%# 견적 카드 %>
                     <div class="bg-card border border-border rounded-2xl <%= is_first_user ? 'rounded-tl-sm' : 'rounded-tr-sm' %> p-4 shadow-sm">
                       <div class="flex items-center gap-2 mb-2">
-                        <%= icon "currency-dollar", variant: :solid, class: "w-5 h-5 text-green-600" %>
+                        <%= icon "currency-dollar", variant: :solid, css_class: "w-5 h-5 text-green-600" %>
                         <span class="font-semibold text-foreground text-sm">견적 제안</span>
                       </div>
                       <% if message.metadata.present? %>
@@ -177,7 +177,7 @@
                     <%# 거래 확정 %>
                     <div class="bg-purple-50 border border-purple-200 rounded-2xl <%= is_first_user ? 'rounded-tl-sm' : 'rounded-tr-sm' %> p-4 shadow-sm">
                       <div class="flex items-center gap-2 mb-2">
-                        <%= icon "check-badge", variant: :solid, class: "w-5 h-5 text-purple-600" %>
+                        <%= icon "check-badge", variant: :solid, css_class: "w-5 h-5 text-purple-600" %>
                         <span class="font-semibold text-purple-900 text-sm">거래 확정</span>
                       </div>
                       <p class="text-sm text-purple-700"><%= message.content %></p>
@@ -187,7 +187,7 @@
                     <%# 프로필 카드 %>
                     <div class="bg-blue-50 border border-blue-200 rounded-2xl <%= is_first_user ? 'rounded-tl-sm' : 'rounded-tr-sm' %> p-4 shadow-sm">
                       <div class="flex items-center gap-2 mb-2">
-                        <%= icon "user-circle", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+                        <%= icon "user-circle", variant: :solid, css_class: "w-5 h-5 text-blue-600" %>
                         <span class="font-semibold text-blue-900 text-sm">프로필 공유</span>
                       </div>
                       <p class="text-sm text-blue-700"><%= message.content %></p>
@@ -220,7 +220,7 @@
       <!-- 하단 안내 -->
       <div class="px-4 py-3 border-t border-border bg-card rounded-b-xl flex-shrink-0">
         <div class="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <%= icon "lock-closed", variant: :solid, class: "w-4 h-4" %>
+          <%= icon "lock-closed", variant: :solid, css_class: "w-4 h-4" %>
           <span>감청 모드 - 메시지 전송 불가</span>
         </div>
       </div>

@@ -21,8 +21,9 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on AWS S3 (see config/storage.yml for options).
+  # ✅ 프로덕션: S3 사용 (이미지, 아바타 등)
+  config.active_storage.service = :amazon
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = ENV.fetch("RAILS_ASSUME_SSL", "true") == "true"
@@ -53,21 +54,28 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # ===== 이메일 설정 =====
+  # 이메일 발송 활성화 (회원가입, 알림 등)
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("MAILER_HOST", "example.com") }
+  # 호스트 설정 (이메일 링크용)
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("MAILER_HOST") { ENV.fetch("ALLOWED_HOSTS", "").split(",").first || "example.com" },
+    protocol: 'https'
+  }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # SMTP 서버 설정 (credentials에서 로드)
+  config.action_mailer.smtp_settings = {
+    address: Rails.application.credentials.dig(:production, :smtp, :address),
+    port: Rails.application.credentials.dig(:production, :smtp, :port) || 587,
+    domain: Rails.application.credentials.dig(:production, :smtp, :domain),
+    user_name: Rails.application.credentials.dig(:production, :smtp, :user_name),
+    password: Rails.application.credentials.dig(:production, :smtp, :password),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

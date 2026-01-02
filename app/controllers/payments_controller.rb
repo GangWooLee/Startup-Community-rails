@@ -127,6 +127,14 @@ class PaymentsController < ApplicationController
     end
 
     payload = JSON.parse(raw_body, symbolize_names: true)
+
+    # 방어 코드: payload 타입 검증
+    unless payload.is_a?(Hash)
+      Rails.logger.error "[PaymentsController#webhook] Unexpected payload format: #{payload.class}"
+      head :bad_request
+      return
+    end
+
     event_type = payload[:eventType]
 
     Rails.logger.info "[PaymentsController#webhook] Received: #{event_type}"

@@ -4,7 +4,7 @@
   <div class="p-4 border-b border-gray-700">
     <div class="flex items-center gap-2">
       <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-        <%= icon "shield-check", variant: :outline, class: "w-5 h-5 text-white" %>
+        <%= icon "shield-check", variant: :outline, css_class: "w-5 h-5 text-white" %>
       </div>
       <span class="font-bold text-lg">Admin</span>
     </div>
@@ -14,13 +14,13 @@
   <nav class="flex-1 p-4 space-y-1">
     <%= link_to admin_root_path,
                 class: "flex items-center gap-3 px-3 py-2 rounded-lg #{request.path == admin_root_path ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
-      <%= icon "home", variant: :outline, class: "w-5 h-5" %>
+      <%= icon "home", variant: :outline, css_class: "w-5 h-5" %>
       <span>대시보드</span>
     <% end %>
 
     <%= link_to admin_users_path,
                 class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'users' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
-      <%= icon "users", variant: :outline, class: "w-5 h-5" %>
+      <%= icon "users", variant: :outline, css_class: "w-5 h-5" %>
       <span>회원 관리</span>
     <% end %>
 
@@ -31,7 +31,7 @@
 
       <%= link_to admin_reports_path,
                   class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'reports' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
-        <%= icon "flag", variant: :outline, class: "w-5 h-5" %>
+        <%= icon "flag", variant: :outline, css_class: "w-5 h-5" %>
         <span>신고 관리</span>
         <% pending_reports = Report.pending.count rescue 0 %>
         <% if pending_reports > 0 %>
@@ -41,7 +41,7 @@
 
       <%= link_to admin_inquiries_path,
                   class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'inquiries' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
-        <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5" %>
+        <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-5 h-5" %>
         <span>문의 관리</span>
         <% pending_inquiries = Inquiry.pending.count rescue 0 %>
         <% if pending_inquiries > 0 %>
@@ -51,7 +51,7 @@
 
       <%= link_to "#",
                   class: "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 cursor-not-allowed" do %>
-        <%= icon "credit-card", variant: :outline, class: "w-5 h-5" %>
+        <%= icon "credit-card", variant: :outline, css_class: "w-5 h-5" %>
         <span>결제 관리</span>
         <span class="text-xs text-gray-600">(준비 중)</span>
       <% end %>
@@ -62,13 +62,13 @@
   <div class="px-4 pb-2">
     <%= link_to "#",
                 class: "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 btn-hover" do %>
-      <%= icon "question-mark-circle", variant: :outline, class: "w-5 h-5" %>
+      <%= icon "question-mark-circle", variant: :outline, css_class: "w-5 h-5" %>
       <span>Help & support</span>
     <% end %>
 
     <%= link_to "#",
                 class: "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 btn-hover" do %>
-      <%= icon "cog-6-tooth", variant: :outline, class: "w-5 h-5" %>
+      <%= icon "cog-6-tooth", variant: :outline, css_class: "w-5 h-5" %>
       <span>Settings</span>
     <% end %>
   </div>

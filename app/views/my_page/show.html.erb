@@ -108,7 +108,7 @@
             <% end %>
           <% end %>
 
-          <% if @user.github_url.present? %>
+          <% if @user.github_url.present? && safe_url?(@user.github_url) %>
             <%= link_to @user.github_url, target: "_blank", rel: "noopener noreferrer",
                 class: "inline-flex items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background btn-hover" do %>
               <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@
             <% end %>
           <% end %>
 
-          <% if @user.portfolio_url.present? %>
+          <% if @user.portfolio_url.present? && safe_url?(@user.portfolio_url) %>
             <%= link_to @user.portfolio_url, target: "_blank", rel: "noopener noreferrer",
                 class: "inline-flex items-center gap-1.5 rounded-md bg-teal-500 px-3 py-1.5 text-xs font-medium text-white btn-hover" do %>
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <span class="text-foreground font-medium">대시보드</span>
 </nav>
@@ -20,7 +20,7 @@
         </p>
       </div>
       <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-        <%= icon "users", variant: :solid, class: "w-6 h-6 text-primary" %>
+        <%= icon "users", variant: :solid, css_class: "w-6 h-6 text-primary" %>
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
         </p>
       </div>
       <div class="w-12 h-12 rounded-xl <%= @pending_reports > 0 ? 'bg-destructive/10' : 'bg-muted' %> flex items-center justify-center">
-        <%= icon "flag", variant: :solid, class: "w-6 h-6 #{@pending_reports > 0 ? 'text-destructive' : 'text-muted-foreground'}" %>
+        <%= icon "flag", variant: :solid, css_class: "w-6 h-6 #{@pending_reports > 0 ? 'text-destructive' : 'text-muted-foreground'}" %>
       </div>
     </div>
   <% end %>
@@ -73,7 +73,7 @@
         </p>
       </div>
       <div class="w-12 h-12 rounded-xl <%= pending_settlements > 0 ? 'bg-orange-50' : 'bg-muted' %> flex items-center justify-center">
-        <%= icon "banknotes", variant: :solid, class: "w-6 h-6 #{pending_settlements > 0 ? 'text-orange-600' : 'text-muted-foreground'}" %>
+        <%= icon "banknotes", variant: :solid, css_class: "w-6 h-6 #{pending_settlements > 0 ? 'text-orange-600' : 'text-muted-foreground'}" %>
       </div>
     </div>
   </div>
@@ -89,7 +89,7 @@
         </p>
       </div>
       <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-        <%= icon "chat-bubble-left-right", variant: :solid, class: "w-6 h-6 text-green-600" %>
+        <%= icon "chat-bubble-left-right", variant: :solid, css_class: "w-6 h-6 text-green-600" %>
       </div>
     </div>
   </div>
@@ -143,7 +143,7 @@
 
       <% if @recent_users.empty? %>
         <div class="py-12 text-center">
-          <%= icon "user-plus", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+          <%= icon "user-plus", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
           <p class="mt-2 text-sm text-muted-foreground">최근 가입한 회원이 없습니다</p>
         </div>
       <% end %>
@@ -164,7 +164,7 @@
           <%= link_to admin_chat_room_path(room), class: "flex items-center gap-4 px-5 py-3 card-hover" do %>
             <!-- 아이콘 -->
             <div class="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-              <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+              <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             </div>
 
             <!-- 참여자 -->
@@ -192,7 +192,7 @@
 
       <% if @recent_chat_rooms.empty? %>
         <div class="py-12 text-center">
-          <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+          <%= icon "chat-bubble-left-right", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
           <p class="mt-2 text-sm text-muted-foreground">채팅방이 없습니다</p>
         </div>
       <% end %>
@@ -210,7 +210,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <%= icon "users", variant: :solid, class: "w-4 h-4 text-primary" %>
+              <%= icon "users", variant: :solid, css_class: "w-4 h-4 text-primary" %>
             </div>
             <span class="text-sm text-muted-foreground">총 회원</span>
           </div>
@@ -221,7 +221,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <%= icon "chat-bubble-left-right", variant: :solid, class: "w-4 h-4 text-green-600" %>
+              <%= icon "chat-bubble-left-right", variant: :solid, css_class: "w-4 h-4 text-green-600" %>
             </div>
             <span class="text-sm text-muted-foreground">채팅방</span>
           </div>
@@ -232,7 +232,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <%= icon "chat-bubble-left", variant: :solid, class: "w-4 h-4 text-purple-600" %>
+              <%= icon "chat-bubble-left", variant: :solid, css_class: "w-4 h-4 text-purple-600" %>
             </div>
             <span class="text-sm text-muted-foreground">메시지</span>
           </div>
@@ -243,7 +243,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <%= icon "document-text", variant: :solid, class: "w-4 h-4 text-orange-600" %>
+              <%= icon "document-text", variant: :solid, css_class: "w-4 h-4 text-orange-600" %>
             </div>
             <span class="text-sm text-muted-foreground">게시글</span>
           </div>
@@ -337,33 +337,33 @@
 
       <div class="space-y-2">
         <%= link_to admin_users_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg card-hover" do %>
-          <%= icon "users", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+          <%= icon "users", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
           <span class="text-sm text-foreground">회원 관리</span>
-          <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
+          <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
         <% end %>
 
         <%= link_to admin_reports_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg card-hover" do %>
-          <%= icon "flag", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+          <%= icon "flag", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
           <span class="text-sm text-foreground">신고 관리</span>
           <% if @pending_reports > 0 %>
             <span class="text-xs font-medium text-destructive ml-auto"><%= @pending_reports %> 대기</span>
           <% else %>
-            <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
+            <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
           <% end %>
         <% end %>
 
         <%= link_to admin_inquiries_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg card-hover" do %>
-          <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+          <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
           <span class="text-sm text-foreground">문의 관리</span>
           <% if @pending_inquiries > 0 %>
             <span class="text-xs font-medium text-yellow-600 ml-auto"><%= @pending_inquiries %> 대기</span>
           <% else %>
-            <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
+            <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
           <% end %>
         <% end %>
 
         <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg card-hover opacity-50 cursor-not-allowed">
-          <%= icon "banknotes", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+          <%= icon "banknotes", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
           <span class="text-sm text-foreground">정산 관리</span>
           <span class="text-xs text-muted-foreground ml-auto">준비 중</span>
         </a>

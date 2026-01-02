@@ -338,7 +338,7 @@ export default class extends Controller {
                 data-user-id="${user.id}"
                 data-user-name="${this.escapeHtml(user.name)}"
                 data-user-role="${this.escapeHtml(user.role_title || '')}">
-          ${user.avatar_url
+          ${user.avatar_url && this.validateImageUrl(user.avatar_url)
             ? `<img src="${user.avatar_url}" class="w-10 h-10 rounded-full object-cover border border-gray-200" alt="${this.escapeHtml(user.name)}">`
             : `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-semibold">
                  ${user.name ? user.name.charAt(0).toUpperCase() : '?'}
@@ -494,5 +494,18 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.textContent = text
     return div.innerHTML
+  }
+
+  // XSS 방지: 이미지 URL 검증
+  validateImageUrl(url) {
+    if (!url) return false
+
+    try {
+      const parsed = new URL(url, window.location.origin)
+      // http 또는 https 프로토콜만 허용 (javascript:, data: 등 차단)
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    } catch {
+      return false
+    }
   }
 }

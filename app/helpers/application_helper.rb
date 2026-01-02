@@ -28,10 +28,10 @@ module ApplicationHelper
     opts = defaults.merge(options)
 
     tags = []
-    tags << tag.meta(property: "og:title", content: opts[:title].to_s.force_encoding("UTF-8"))
-    tags << tag.meta(property: "og:description", content: opts[:description].to_s.force_encoding("UTF-8"))
+    tags << tag.meta(property: "og:title", content: opts[:title].to_s.dup.force_encoding("UTF-8"))
+    tags << tag.meta(property: "og:description", content: opts[:description].to_s.dup.force_encoding("UTF-8"))
     tags << tag.meta(property: "og:type", content: opts[:type])
-    tags << tag.meta(property: "og:url", content: opts[:url].to_s.force_encoding("UTF-8"))
+    tags << tag.meta(property: "og:url", content: opts[:url].to_s.dup.force_encoding("UTF-8"))
     tags << tag.meta(property: "og:site_name", content: "Undrew")
     tags << tag.meta(property: "og:locale", content: "ko_KR")
 
@@ -43,8 +43,8 @@ module ApplicationHelper
 
     # Twitter Card 태그
     tags << tag.meta(name: "twitter:card", content: opts[:image].present? ? "summary_large_image" : "summary")
-    tags << tag.meta(name: "twitter:title", content: opts[:title].to_s.force_encoding("UTF-8"))
-    tags << tag.meta(name: "twitter:description", content: opts[:description].to_s.force_encoding("UTF-8"))
+    tags << tag.meta(name: "twitter:title", content: opts[:title].to_s.dup.force_encoding("UTF-8"))
+    tags << tag.meta(name: "twitter:description", content: opts[:description].to_s.dup.force_encoding("UTF-8"))
     tags << tag.meta(name: "twitter:image", content: opts[:image]) if opts[:image].present?
 
     safe_join(tags, "\n    ".dup.force_encoding("UTF-8"))
@@ -247,5 +247,21 @@ module ApplicationHelper
     end
 
     content_tag(:div, content, class: container_class)
+  end
+
+  # URL 안전성 검증 (XSS 방지)
+  # javascript:, data: 스킴 등 위험한 URL 차단
+  # @param url [String] 검증할 URL
+  # @return [Boolean] 안전한 URL이면 true
+  def safe_url?(url)
+    return false if url.blank?
+
+    begin
+      uri = URI.parse(url)
+      # http, https 프로토콜만 허용
+      %w[http https].include?(uri.scheme&.downcase)
+    rescue URI::InvalidURIError
+      false
+    end
   end
 end

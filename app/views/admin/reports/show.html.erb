@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <%= link_to "신고 관리", admin_reports_path, class: "link-hover relative" %>
   <span>/</span>
@@ -107,7 +107,7 @@
               <span>작성일: <%= post.created_at.strftime("%Y-%m-%d") %></span>
             </div>
             <%= link_to post_path(post), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 link-hover relative" do %>
-              <%= icon "arrow-top-right-on-square", variant: :outline, class: "w-4 h-4" %>
+              <%= icon "arrow-top-right-on-square", variant: :outline, css_class: "w-4 h-4" %>
               게시글 보기
             <% end %>
           </div>
@@ -131,7 +131,7 @@
               </div>
             </div>
             <%= link_to profile_path(user), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 link-hover relative" do %>
-              <%= icon "arrow-top-right-on-square", variant: :outline, class: "w-4 h-4" %>
+              <%= icon "arrow-top-right-on-square", variant: :outline, css_class: "w-4 h-4" %>
               프로필 보기
             <% end %>
           </div>
@@ -219,14 +219,14 @@
                         method: :patch,
                         class: "w-full py-2.5 px-4 bg-green-600 text-white font-medium rounded-lg btn-hover flex items-center justify-center gap-2",
                         form: { data: { turbo_confirm: "정말 처리완료로 변경하시겠습니까?" } } do %>
-            <%= icon "check-circle", variant: :solid, class: "w-5 h-5" %>
+            <%= icon "check-circle", variant: :solid, css_class: "w-5 h-5" %>
             처리완료
           <% end %>
           <%= button_to admin_report_path(@report, report: { status: 'dismissed' }),
                         method: :patch,
                         class: "w-full py-2.5 px-4 bg-gray-600 text-white font-medium rounded-lg btn-hover flex items-center justify-center gap-2",
                         form: { data: { turbo_confirm: "정말 기각하시겠습니까?" } } do %>
-            <%= icon "x-circle", variant: :solid, class: "w-5 h-5" %>
+            <%= icon "x-circle", variant: :solid, css_class: "w-5 h-5" %>
             기각
           <% end %>
         <% else %>

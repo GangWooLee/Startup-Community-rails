@@ -9,7 +9,7 @@
       data-action="click->write-bottomsheet#open"
       class="fixed bottom-24 right-4 z-50 h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-primary text-primary-foreground shadow-lg btn-hover flex items-center justify-center hover:scale-105 active:scale-95 touch-manipulation"
     >
-      <%= icon "plus", size: "lg", class: "sm:w-7 sm:h-7" %>
+      <%= icon "plus", size: "lg", css_class: "sm:w-7 sm:h-7" %>
     </button>
 
     <!-- Bottom Sheet Overlay -->
@@ -40,26 +40,26 @@
         <%= link_to new_post_path(type: 'community'),
             class: "flex items-center gap-4 p-4 rounded-xl border border-border btn-hover touch-manipulation" do %>
           <div class="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-            <%= icon "message", size: "lg", class: "text-blue-600 dark:text-blue-400" %>
+            <%= icon "message", size: "lg", css_class: "text-blue-600 dark:text-blue-400" %>
           </div>
           <div class="flex-1 min-w-0">
             <p class="font-medium text-foreground">일반 커뮤니티 글</p>
             <p class="text-sm text-muted-foreground truncate">자유, 질문, 홍보</p>
           </div>
-          <%= icon "chevron-right", size: "md", class: "text-muted-foreground flex-shrink-0" %>
+          <%= icon "chevron-right", size: "md", css_class: "text-muted-foreground flex-shrink-0" %>
         <% end %>
 
         <!-- 외주/마켓 등록 -->
         <%= link_to new_post_path(type: 'outsourcing'),
             class: "flex items-center gap-4 p-4 rounded-xl border border-border btn-hover touch-manipulation" do %>
           <div class="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-            <%= icon "shopping-cart", size: "lg", class: "text-green-600 dark:text-green-400" %>
+            <%= icon "shopping-cart", size: "lg", css_class: "text-green-600 dark:text-green-400" %>
           </div>
           <div class="flex-1 min-w-0">
             <p class="font-medium text-foreground">외주/마켓 등록</p>
             <p class="text-sm text-muted-foreground truncate">일 구해요, 사람 구해요</p>
           </div>
-          <%= icon "chevron-right", size: "md", class: "text-muted-foreground flex-shrink-0" %>
+          <%= icon "chevron-right", size: "md", css_class: "text-muted-foreground flex-shrink-0" %>
         <% end %>
       </div>
 

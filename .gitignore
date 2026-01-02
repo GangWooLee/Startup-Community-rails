@@ -41,7 +41,14 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Ignore all environment files
 /.env
+/.env.production
+/.env.local
+/.env.*.local
+
+# Kamal deployment secrets
+/.kamal/secrets
 
 # ClaudeOnRails
 .claude-on-rails/sessions/
@@ -54,3 +61,6 @@ node_modules/
 moat-tasks.md
 moat-tasks-detail.json
 .moat
+
+# Test coverage
+coverage/

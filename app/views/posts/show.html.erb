@@ -11,7 +11,7 @@
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
 <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: root_path, action: "click->navigation#goBack" } do %>
-        <%= render partial: "shared/icons/arrow_left", locals: { css_class: "h-5 w-5" } %>
+        <%= render partial: "shared/icons/arrow_left", locals: { css_css_class: "h-5 w-5" } %>
       <% end %>
       <h1 class="text-xl font-bold"><%= @post.outsourcing? ? (@post.hiring? ? '구인 공고' : '구직 공고') : '게시글' %></h1>
 
@@ -84,12 +84,12 @@
       <% if @post.outsourcing? %>
         <div class="flex flex-wrap items-center gap-2 mb-4">
           <% if @post.hiring? %>
-            <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 text-blue-500" } %>
+            <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-4 w-4 text-blue-500" } %>
             <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-3 py-1 text-xs font-semibold">
               구인 공고
             </span>
           <% else %>
-            <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 text-green-500" } %>
+            <%= render partial: "shared/icons/user", locals: { css_css_class: "h-4 w-4 text-green-500" } %>
             <span class="inline-flex items-center rounded-md bg-green-500/10 text-green-600 px-3 py-1 text-xs font-semibold">
               구직 공고
             </span>
@@ -150,7 +150,11 @@
           <% if @post.portfolio_url.present? %>
             <div class="mb-6">
               <span class="text-xs text-muted-foreground block mb-2">포트폴리오</span>
-              <%= link_to @post.portfolio_url, @post.portfolio_url, target: "_blank", rel: "noopener noreferrer", class: "text-sm text-primary hover:underline break-all" %>
+              <% if safe_url?(@post.portfolio_url) %>
+                <%= link_to @post.portfolio_url, @post.portfolio_url, target: "_blank", rel: "noopener noreferrer", class: "text-sm text-primary hover:underline break-all" %>
+              <% else %>
+                <span class="text-sm text-muted-foreground">유효하지 않은 URL입니다</span>
+              <% end %>
             </div>
           <% end %>
 
@@ -303,7 +307,7 @@
           <%= button_to start_chat_from_post_path(@post),
                         method: :post,
                         class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow h-11 px-8" do %>
-            <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+            <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-4 w-4" } %>
             문의하기
           <% end %>
         </div>
@@ -311,7 +315,7 @@
         <div class="mb-6">
           <%= link_to login_path(return_to: post_path(@post)),
                       class: "w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow h-11 px-8" do %>
-            <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+            <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-4 w-4" } %>
             로그인하고 문의하기
           <% end %>
         </div>
@@ -367,7 +371,7 @@
       <div class="flex items-center gap-4 pt-4 border-t border-border">
         <%= render partial: "shared/like_button", locals: { post: @post, liked: logged_in? ? @post.liked_by?(current_user) : false } %>
         <div class="inline-flex items-center gap-2 px-4 py-2 text-muted-foreground">
-          <%= render partial: "shared/icons/message_square", locals: { css_class: "h-5 w-5" } %>
+          <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-5 w-5" } %>
           <span class="text-sm font-medium"><%= @post.comments_count %></span>
         </div>
         <div class="ml-auto">
@@ -384,7 +388,7 @@
     <!-- Comments Section -->
     <div class="rounded-xl border bg-card text-card-foreground pt-6 px-6">
       <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-        <%= render partial: "shared/icons/message_square", locals: { css_class: "h-5 w-5" } %>
+        <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-5 w-5" } %>
         <span>댓글 <span id="comments-count"><%= @post.comments_count %></span>개</span>
       </h2>
 
@@ -418,7 +422,7 @@
 
       <% if @comments.empty? %>
         <div id="comments-empty" class="text-center py-12 text-muted-foreground">
-          <%= render partial: "shared/icons/message_square", locals: { css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
+          <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-12 w-12 mx-auto mb-3 opacity-50" } %>
           <p>아직 댓글이 없습니다</p>
           <p class="text-sm mt-1">첫 댓글을 작성해보세요!</p>
         </div>

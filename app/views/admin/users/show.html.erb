@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <%= link_to "회원 관리", admin_users_path, class: "link-hover relative" %>
   <span>/</span>
@@ -108,7 +108,7 @@
           <div class="pt-4 border-t border-red-200">
             <div class="bg-red-50 border border-red-200 rounded-xl p-4">
               <h4 class="text-sm font-bold text-red-700 flex items-center gap-2 mb-3">
-                <%= icon "lock-closed", variant: :solid, class: "w-4 h-4" %>
+                <%= icon "lock-closed", variant: :solid, css_class: "w-4 h-4" %>
                 탈퇴 전 원본 데이터
               </h4>
               <p class="text-xs text-red-500 mb-4">
@@ -157,12 +157,12 @@
         <!-- 액션 버튼 -->
         <div class="pt-4 border-t border-border space-y-2">
           <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium btn-hover">
-            <%= icon "envelope", variant: :outline, class: "w-4 h-4" %>
+            <%= icon "envelope", variant: :outline, css_class: "w-4 h-4" %>
             메시지 보내기
           </button>
           <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium btn-hover"
                   onclick="confirm('정말 이 사용자를 정지하시겠습니까?') && alert('정지 기능은 준비 중입니다.')">
-            <%= icon "no-symbol", variant: :outline, class: "w-4 h-4" %>
+            <%= icon "no-symbol", variant: :outline, css_class: "w-4 h-4" %>
             사용자 정지
           </button>
         </div>
@@ -178,17 +178,17 @@
         <nav class="flex -mb-px">
           <button class="px-6 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5"
                   data-tab="chatrooms">
-            <%= icon "chat-bubble-left-right", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             채팅방 (<%= @chat_rooms.count %>)
           </button>
           <button class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover"
                   data-tab="posts" disabled>
-            <%= icon "document-text", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            <%= icon "document-text", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             게시글 (<%= @posts_count %>)
           </button>
           <button class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover"
                   data-tab="payments" disabled>
-            <%= icon "credit-card", variant: :outline, class: "w-4 h-4 inline mr-1.5" %>
+            <%= icon "credit-card", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             결제 내역
           </button>
         </nav>
@@ -222,7 +222,7 @@
                     <!-- 열람 버튼 -->
                     <%= link_to admin_chat_room_path(room),
                                 class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg btn-hover" do %>
-                      <%= icon "eye", variant: :outline, class: "w-4 h-4" %>
+                      <%= icon "eye", variant: :outline, css_class: "w-4 h-4" %>
                       대화 열람
                     <% end %>
                   </div>
@@ -267,7 +267,7 @@
           </div>
         <% else %>
           <div class="py-12 text-center">
-            <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+            <%= icon "chat-bubble-left-right", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
             <h3 class="mt-2 text-sm font-medium text-foreground">채팅방 없음</h3>
             <p class="mt-1 text-sm text-muted-foreground">이 사용자는 참여 중인 채팅방이 없습니다.</p>
           </div>

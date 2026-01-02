@@ -2,12 +2,14 @@
 <%# locals: post, compact %>
 
 <% compact ||= false %>
+<% mb_class = compact ? 'mb-3' : 'mb-4' %>
+<% text_class = compact ? 'text-sm' : '' %>
 
-<%= link_to profile_path(post.user_id), class: "flex items-center gap-3 group mb-<%= compact ? '3' : '4' %>" do %>
+<%= link_to profile_path(post.user), class: "flex items-center gap-3 group #{mb_class}" do %>
   <%= render_user_avatar(post.user, size: compact ? "sm" : "md", ring: "ring-2 ring-background group-hover:ring-primary/20 transition-all") %>
   <div class="flex-1 min-w-0">
     <div class="flex items-center gap-2">
-      <h3 class="font-semibold <%= compact ? 'text-sm' : '' %> group-hover:text-primary transition-colors truncate">
+      <h3 class="font-semibold <%= text_class %> group-hover:text-primary transition-colors truncate">
         <%= post.user.name %>
       </h3>
       <% if post.user.role_title.present? && !compact %>

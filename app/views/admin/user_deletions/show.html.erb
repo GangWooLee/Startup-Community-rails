@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <%= link_to "탈퇴 회원 관리", admin_user_deletions_path, class: "link-hover relative" %>
   <span>/</span>
@@ -17,7 +17,7 @@
       <div class="px-5 py-4 border-b border-border bg-red-50">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
+            <%= icon "user-minus", variant: :solid, css_class: "w-5 h-5 text-red-600" %>
           </div>
           <div>
             <h2 class="text-lg font-semibold text-foreground">탈퇴 회원 #<%= @deletion.user_id %></h2>
@@ -58,12 +58,12 @@
               <% case @deletion.status %>
               <% when "completed" %>
                 <span class="inline-flex items-center gap-1 text-green-600">
-                  <%= icon "check-circle", variant: :solid, class: "w-4 h-4" %>
+                  <%= icon "check-circle", variant: :solid, css_class: "w-4 h-4" %>
                   완료 (익명화됨)
                 </span>
               <% when "pending" %>
                 <span class="inline-flex items-center gap-1 text-yellow-600">
-                  <%= icon "clock", variant: :solid, class: "w-4 h-4" %>
+                  <%= icon "clock", variant: :solid, css_class: "w-4 h-4" %>
                   대기 중
                 </span>
               <% else %>
@@ -185,7 +185,7 @@
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <%= icon "document-text", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+            <%= icon "document-text", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             <span class="text-sm text-muted-foreground">게시글</span>
           </div>
           <span class="text-lg font-semibold text-foreground"><%= stats["total_posts"] || 0 %></span>
@@ -193,7 +193,7 @@
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <%= icon "chat-bubble-left", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+            <%= icon "chat-bubble-left", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             <span class="text-sm text-muted-foreground">댓글</span>
           </div>
           <span class="text-lg font-semibold text-foreground"><%= stats["total_comments"] || 0 %></span>
@@ -201,7 +201,7 @@
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <%= icon "heart", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+            <%= icon "heart", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             <span class="text-sm text-muted-foreground">받은 좋아요</span>
           </div>
           <span class="text-lg font-semibold text-foreground"><%= stats["total_likes_received"] || 0 %></span>
@@ -209,7 +209,7 @@
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <%= icon "chat-bubble-left-right", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+            <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             <span class="text-sm text-muted-foreground">채팅방</span>
           </div>
           <span class="text-lg font-semibold text-foreground"><%= stats["total_chat_rooms"] || 0 %></span>
@@ -217,7 +217,7 @@
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <%= icon "light-bulb", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+            <%= icon "light-bulb", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
             <span class="text-sm text-muted-foreground">AI 분석</span>
           </div>
           <span class="text-lg font-semibold text-foreground"><%= stats["total_idea_analyses"] || 0 %></span>
@@ -227,7 +227,7 @@
           <div class="pt-3 border-t border-border">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <%= icon "shopping-cart", variant: :outline, class: "w-5 h-5 text-muted-foreground" %>
+                <%= icon "shopping-cart", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
                 <span class="text-sm text-muted-foreground">주문</span>
               </div>
               <span class="text-lg font-semibold text-foreground"><%= stats["total_orders"] || 0 %></span>
@@ -273,7 +273,7 @@
     <!-- 뒤로 가기 -->
     <div>
       <%= link_to admin_user_deletions_path, class: "flex items-center justify-center gap-2 w-full px-4 py-2 bg-muted text-foreground rounded-lg btn-hover" do %>
-        <%= icon "arrow-left", variant: :outline, class: "w-4 h-4" %>
+        <%= icon "arrow-left", variant: :outline, css_class: "w-4 h-4" %>
         목록으로 돌아가기
       <% end %>
     </div>

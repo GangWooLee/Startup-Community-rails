@@ -11,6 +11,10 @@ module TossPayments
         @actual_amount = actual_amount
         super("금액이 일치하지 않습니다. 예상: #{expected_amount}원, 실제: #{actual_amount}원")
       end
+
+      def code
+        "AMOUNT_MISMATCH"
+      end
     end
 
     # 결제 승인 처리

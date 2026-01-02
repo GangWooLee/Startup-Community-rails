@@ -62,6 +62,16 @@ completed_payment:
   created_at: <%= 2.weeks.ago %>
   updated_at: <%= 1.week.ago %>
 
+# 결제 대기 중
+pending_payment:
+  order: pending_order
+  user: two
+  toss_order_id: PAY-1704067400-PEND1234
+  amount: 3000000
+  status: pending
+  created_at: <%= 1.hour.ago %>
+  updated_at: <%= 1.hour.ago %>
+
 # 결제 실패
 failed_payment:
   order: cancelled_order

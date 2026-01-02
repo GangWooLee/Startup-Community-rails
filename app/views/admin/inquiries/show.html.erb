@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <%= link_to "문의 관리", admin_inquiries_path, class: "link-hover relative" %>
   <span>/</span>
@@ -66,7 +66,7 @@
       <div class="bg-blue-50 rounded-xl border border-blue-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-blue-200 bg-blue-100/50">
           <div class="flex items-center gap-2">
-            <%= icon "chat-bubble-left-ellipsis", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+            <%= icon "chat-bubble-left-ellipsis", variant: :solid, css_class: "w-5 h-5 text-blue-600" %>
             <h2 class="text-lg font-semibold text-blue-900">관리자 답변</h2>
           </div>
         </div>
@@ -156,7 +156,7 @@
         </div>
         <div class="pt-3 border-t border-border">
           <%= link_to admin_user_path(@inquiry.user), class: "w-full inline-flex items-center justify-center gap-2 py-2 px-4 bg-muted text-foreground font-medium rounded-lg btn-hover" do %>
-            <%= icon "user", variant: :outline, class: "w-4 h-4" %>
+            <%= icon "user", variant: :outline, css_class: "w-4 h-4" %>
             사용자 상세
           <% end %>
         </div>

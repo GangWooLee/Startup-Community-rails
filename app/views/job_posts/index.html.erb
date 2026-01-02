@@ -12,11 +12,11 @@
       <!-- Tab Headers -->
       <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
         <button data-tab="hiring" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
-          <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 mr-2" } %>
+          <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-4 w-4 mr-2" } %>
           구인 (<%= @hiring_posts.count %>)
         </button>
         <button data-tab="seeking" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
-          <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 mr-2" } %>
+          <%= render partial: "shared/icons/user", locals: { css_css_class: "h-4 w-4 mr-2" } %>
           구직 (<%= @seeking_posts.count %>)
         </button>
       </div>
@@ -32,7 +32,7 @@
           </div>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
-            <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
+            <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
             <p class="text-lg font-medium mb-2">아직 등록된 구인 공고가 없습니다</p>
             <p class="text-sm">첫 번째 구인 공고를 등록해보세요!</p>
           </div>
@@ -50,7 +50,7 @@
           </div>
         <% else %>
           <div class="text-center py-20 text-muted-foreground">
-            <%= render partial: "shared/icons/user", locals: { css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
+            <%= render partial: "shared/icons/user", locals: { css_css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
             <p class="text-lg font-medium mb-2">아직 등록된 구직 정보가 없습니다</p>
             <p class="text-sm">첫 번째 구직 정보를 등록해보세요!</p>
           </div>

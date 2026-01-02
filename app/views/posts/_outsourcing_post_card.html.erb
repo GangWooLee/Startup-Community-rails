@@ -31,12 +31,12 @@
     <!-- Category & Service Type Badges -->
     <div class="flex flex-wrap items-center gap-2 mb-3">
       <% if post.hiring? %>
-        <%= render partial: "shared/icons/briefcase", locals: { css_class: "h-4 w-4 text-blue-500" } %>
+        <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-4 w-4 text-blue-500" } %>
         <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-2.5 py-0.5 text-xs font-semibold">
           구인
         </span>
       <% else %>
-        <%= render partial: "shared/icons/user", locals: { css_class: "h-4 w-4 text-green-500" } %>
+        <%= render partial: "shared/icons/user", locals: { css_css_class: "h-4 w-4 text-green-500" } %>
         <span class="inline-flex items-center rounded-md bg-green-500/10 text-green-600 px-2.5 py-0.5 text-xs font-semibold">
           구직
         </span>
@@ -81,7 +81,7 @@
   <div class="flex items-center gap-4 pt-3 border-t border-border">
     <%= render partial: "shared/like_button", locals: { post: post, liked: defined?(current_user) && current_user ? post.liked_by?(current_user) : false, size: "sm" } %>
     <%= link_to post_path(post), class: "inline-flex items-center gap-2 text-sm text-muted-foreground link-hover relative" do %>
-      <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
+      <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-4 w-4" } %>
       <span><%= post.comments_count %></span>
     <% end %>
     <%= render partial: "shared/share_button", locals: {

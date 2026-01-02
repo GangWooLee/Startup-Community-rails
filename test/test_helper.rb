@@ -1,5 +1,27 @@
 # frozen_string_literal: true
 
+# SimpleCov must be loaded before Rails environment
+require "simplecov"
+SimpleCov.start "rails" do
+  # Exclude non-application code
+  add_filter "/test/"
+  add_filter "/config/"
+  add_filter "/vendor/"
+  add_filter "/bin/"
+
+  # Group results for better visibility
+  add_group "Models", "app/models"
+  add_group "Controllers", "app/controllers"
+  add_group "Helpers", "app/helpers"
+  add_group "Services", "app/services"
+  add_group "Jobs", "app/jobs"
+  add_group "Mailers", "app/mailers"
+
+  # Set minimum coverage threshold
+  minimum_coverage 80
+  minimum_coverage_by_file 50
+end
+
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
@@ -146,10 +168,15 @@ module TossPaymentsMockHelpers
       "approvedAt" => Time.current.iso8601,
       "card" => {
         "issuerCode" => "11",
-        "number" => "************1234"
+        "company" => "신한카드",
+        "number" => "************1234",
+        "cardType" => "CREDIT"
       },
       "totalAmount" => amount,
-      "method" => "카드"
+      "method" => "CARD",
+      "receipt" => {
+        "url" => "https://receipt.example.com/#{payment_key}"
+      }
     }
   end
 

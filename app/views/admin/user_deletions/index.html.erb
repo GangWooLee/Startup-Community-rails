@@ -2,7 +2,7 @@
 
 <!-- 브레드크럼 -->
 <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-  <%= icon "home", variant: :solid, class: "w-4 h-4" %>
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
   <span>/</span>
   <span class="text-foreground font-medium">탈퇴 회원 관리</span>
 </nav>
@@ -12,7 +12,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-        <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
+        <%= icon "user-minus", variant: :solid, css_class: "w-5 h-5 text-red-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@stats[:total]) %></p>
@@ -24,7 +24,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
-        <%= icon "calendar", variant: :solid, class: "w-5 h-5 text-orange-600" %>
+        <%= icon "calendar", variant: :solid, css_class: "w-5 h-5 text-orange-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= @stats[:this_month] %></p>
@@ -37,7 +37,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-        <%= icon "chart-bar", variant: :solid, class: "w-5 h-5 text-purple-600" %>
+        <%= icon "chart-bar", variant: :solid, css_class: "w-5 h-5 text-purple-600" %>
       </div>
       <div>
         <p class="text-lg font-bold text-foreground truncate">
@@ -51,7 +51,7 @@
   <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-        <%= icon "archive-box", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+        <%= icon "archive-box", variant: :solid, css_class: "w-5 h-5 text-blue-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-foreground"><%= User.deleted.count %></p>
@@ -122,15 +122,15 @@
           <td class="px-5 py-4">
             <div class="flex items-center gap-3 text-xs text-muted-foreground">
               <span title="게시글">
-                <%= icon "document-text", variant: :outline, class: "w-4 h-4 inline" %>
+                <%= icon "document-text", variant: :outline, css_class: "w-4 h-4 inline" %>
                 <%= deletion.activity_stats["total_posts"] || 0 %>
               </span>
               <span title="댓글">
-                <%= icon "chat-bubble-left", variant: :outline, class: "w-4 h-4 inline" %>
+                <%= icon "chat-bubble-left", variant: :outline, css_class: "w-4 h-4 inline" %>
                 <%= deletion.activity_stats["total_comments"] || 0 %>
               </span>
               <span title="채팅방">
-                <%= icon "chat-bubble-left-right", variant: :outline, class: "w-4 h-4 inline" %>
+                <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-4 h-4 inline" %>
                 <%= deletion.activity_stats["total_chat_rooms"] || 0 %>
               </span>
             </div>
@@ -147,7 +147,7 @@
             <%= link_to admin_user_deletion_path(deletion),
                         class: "p-2 text-muted-foreground btn-hover rounded-lg inline-block",
                         title: "상세 보기" do %>
-              <%= icon "eye", variant: :outline, class: "w-5 h-5" %>
+              <%= icon "eye", variant: :outline, css_class: "w-5 h-5" %>
             <% end %>
           </td>
         </tr>
@@ -157,7 +157,7 @@
 
   <% if @deletions.empty? %>
     <div class="py-12 text-center">
-      <%= icon "user-minus", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground" %>
+      <%= icon "user-minus", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground" %>
       <h3 class="mt-2 text-sm font-medium text-foreground">탈퇴 회원 없음</h3>
       <p class="mt-1 text-sm text-muted-foreground">아직 탈퇴한 회원이 없습니다.</p>
     </div>

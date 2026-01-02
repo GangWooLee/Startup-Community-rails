@@ -16,6 +16,7 @@ class ChatRoomsController < ApplicationController
 
     if query.present? && query.length >= 1
       @users = User.where.not(id: current_user.id)
+                   .with_attached_avatar  # ✅ 최적화: Active Storage N+1 방지
                    .where("name LIKE ? OR email LIKE ?", "%#{query}%", "%#{query}%")
                    .limit(10)
     else
@@ -242,9 +243,24 @@ class ChatRoomsController < ApplicationController
     @chat_rooms = @chat_rooms.order(last_message_at: :desc)
 
     # 읽지 않은 메시지 수도 삭제되지 않은 채팅방만 계산
-    all_rooms = current_user.active_chat_rooms.includes(:participants, :source_post, messages: :sender)
-    @total_unread = all_rooms.sum { |room| room.unread_count_for(current_user) }
-    @received_unread = all_rooms.select { |room| room.source_post&.user_id == current_user.id && room.initiator_id != current_user.id }.sum { |room| room.unread_count_for(current_user) }
-    @sent_unread = all_rooms.select { |room| room.initiator_id == current_user.id }.sum { |room| room.unread_count_for(current_user) }
+    # ✅ 최적화: SQL 집계 사용 (N+1 쿼리 방지)
+    # BEFORE: Ruby 배열 반복 (1 + N 쿼리)
+    # AFTER: SQL SUM 사용 (3 쿼리로 고정)
+    @total_unread = current_user.chat_room_participants
+                                .where(hidden: false)
+                                .sum(:unread_count)
+
+    @received_unread = current_user.chat_room_participants
+                                   .where(hidden: false)
+                                   .joins(chat_room: :source_post)
+                                   .where("posts.user_id = ? AND chat_rooms.initiator_id != ?",
+                                          current_user.id, current_user.id)
+                                   .sum(:unread_count)
+
+    @sent_unread = current_user.chat_room_participants
+                               .where(hidden: false)
+                               .joins(:chat_room)
+                               .where("chat_rooms.initiator_id = ?", current_user.id)
+                               .sum(:unread_count)
   end
 end
