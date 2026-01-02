@@ -20,15 +20,15 @@
     <section class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-medium text-muted-foreground">최근 검색어</h2>
-        <%= button_to clear_recent_searches_path, method: :delete, class: "text-xs text-muted-foreground hover:text-foreground transition-colors", data: { turbo_confirm: "모든 최근 검색어를 삭제하시겠습니까?" } do %>
+        <%= button_to clear_recent_searches_path, method: :delete, class: "text-xs text-muted-foreground btn-hover", data: { turbo_confirm: "모든 최근 검색어를 삭제하시겠습니까?" } do %>
           전체 삭제
         <% end %>
       </div>
       <div class="flex flex-wrap gap-2">
         <% recent_searches.each do |recent_query| %>
-          <div class="group flex items-center gap-1 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors">
+          <div class="group flex items-center gap-1 px-3 py-1.5 rounded-full bg-secondary card-hover">
             <%= link_to recent_query, search_path(q: recent_query), class: "text-sm text-foreground", data: { turbo: false } %>
-            <%= button_to destroy_recent_search_path(query: recent_query), method: :delete, class: "ml-1 p-0.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100" do %>
+            <%= button_to destroy_recent_search_path(query: recent_query), method: :delete, class: "ml-1 p-0.5 rounded-full text-muted-foreground opacity-0 group-hover:opacity-100 btn-hover" do %>
               <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
@@ -83,14 +83,14 @@
             <span class="text-xs text-muted-foreground/70">(<%= users_total_count %>)</span>
           </h2>
           <% if tab == "all" && users_total_count > SearchController::USERS_LIMIT %>
-            <button type="button" class="text-xs text-primary hover:underline" data-action="click->live-search#switchTab" data-tab="users">
+            <button type="button" class="text-xs text-primary link-hover relative" data-action="click->live-search#switchTab" data-tab="users">
               +<%= users_total_count - SearchController::USERS_LIMIT %>명 더 보기
             </button>
           <% end %>
         </div>
         <div class="space-y-2">
           <% users.each do |user| %>
-            <div class="block p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors h-[88px] cursor-pointer"
+            <div class="block p-4 bg-card rounded-xl border border-border hover:border-primary/50 card-hover h-[88px] cursor-pointer"
                  role="link"
                  tabindex="0"
                  data-href="<%= profile_path(user) %>"
@@ -166,7 +166,7 @@
             <%# 이전 페이지 버튼 %>
             <button
               type="button"
-              class="p-2 rounded-lg <%= users_page > 1 ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              class="p-2 rounded-lg <%= users_page > 1 ? 'bg-secondary text-foreground btn-hover' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
               data-action="click->live-search#prevPage"
               <%= 'disabled' if users_page <= 1 %>
             >
@@ -184,7 +184,7 @@
                 <% else %>
                   <button
                     type="button"
-                    class="min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors <%= page_num == users_page ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-foreground' %>"
+                    class="min-w-[36px] h-9 rounded-lg text-sm font-medium btn-hover <%= page_num == users_page ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground' %>"
                     data-action="click->live-search#goToPage"
                     data-page="<%= page_num %>"
                   >
@@ -197,7 +197,7 @@
             <%# 다음 페이지 버튼 %>
             <button
               type="button"
-              class="p-2 rounded-lg <%= users_page < users_total_pages ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              class="p-2 rounded-lg <%= users_page < users_total_pages ? 'bg-secondary text-foreground btn-hover' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
               data-action="click->live-search#nextPage"
               <%= 'disabled' if users_page >= users_total_pages %>
             >
@@ -226,7 +226,7 @@
             <span class="text-xs text-muted-foreground/70">(<%= posts_total_count %>)</span>
           </h2>
           <% if tab == "all" && posts_total_count > SearchController::POSTS_LIMIT %>
-            <button type="button" class="text-xs text-primary hover:underline" data-action="click->live-search#switchTab" data-tab="posts">
+            <button type="button" class="text-xs text-primary link-hover relative" data-action="click->live-search#switchTab" data-tab="posts">
               더 보기
             </button>
           <% end %>
@@ -244,7 +244,7 @@
             <%# 이전 페이지 버튼 %>
             <button
               type="button"
-              class="p-2 rounded-lg <%= posts_page > 1 ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              class="p-2 rounded-lg <%= posts_page > 1 ? 'bg-secondary text-foreground btn-hover' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
               data-action="click->live-search#prevPage"
               <%= 'disabled' if posts_page <= 1 %>
             >
@@ -262,7 +262,7 @@
                 <% else %>
                   <button
                     type="button"
-                    class="min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors <%= page_num == posts_page ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-foreground' %>"
+                    class="min-w-[36px] h-9 rounded-lg text-sm font-medium btn-hover <%= page_num == posts_page ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground' %>"
                     data-action="click->live-search#goToPage"
                     data-page="<%= page_num %>"
                   >
@@ -275,7 +275,7 @@
             <%# 다음 페이지 버튼 %>
             <button
               type="button"
-              class="p-2 rounded-lg <%= posts_page < posts_total_pages ? 'bg-secondary hover:bg-secondary/80 text-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
+              class="p-2 rounded-lg <%= posts_page < posts_total_pages ? 'bg-secondary text-foreground btn-hover' : 'bg-muted text-muted-foreground cursor-not-allowed' %>"
               data-action="click->live-search#nextPage"
               <%= 'disabled' if posts_page >= posts_total_pages %>
             >

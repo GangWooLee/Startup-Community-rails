@@ -16,7 +16,7 @@
 
       <% if @notifications.any? %>
         <%= button_to mark_all_read_notifications_path, method: :post,
-            class: "text-sm text-primary hover:underline",
+            class: "text-sm text-primary link-hover relative",
             data: { turbo_method: :post } do %>
           모두 읽음
         <% end %>

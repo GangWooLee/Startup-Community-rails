@@ -50,7 +50,7 @@
             <!-- X 버튼 (커스텀) -->
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors text-muted-foreground <%= @query.present? ? '' : 'hidden' %>"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground btn-hover <%= @query.present? ? '' : 'hidden' %>"
               data-live-search-target="clearButton"
               data-action="click->live-search#clear"
             >
@@ -66,7 +66,7 @@
       <div class="flex gap-2 mt-3" data-live-search-target="tabs">
         <button
           type="button"
-          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'all' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          class="px-4 py-1.5 rounded-full text-sm font-medium btn-hover <%= @tab == 'all' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground' %>"
           data-tab="all"
           data-action="click->live-search#switchTab"
         >
@@ -74,7 +74,7 @@
         </button>
         <button
           type="button"
-          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'users' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          class="px-4 py-1.5 rounded-full text-sm font-medium btn-hover <%= @tab == 'users' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground' %>"
           data-tab="users"
           data-action="click->live-search#switchTab"
         >
@@ -82,7 +82,7 @@
         </button>
         <button
           type="button"
-          class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <%= @tab == 'posts' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground' %>"
+          class="px-4 py-1.5 rounded-full text-sm font-medium btn-hover <%= @tab == 'posts' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground' %>"
           data-tab="posts"
           data-action="click->live-search#switchTab"
         >
@@ -94,7 +94,7 @@
       <div class="flex gap-2 mt-2 <%= @tab == 'posts' ? '' : 'hidden' %>" data-live-search-target="categoryFilters">
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'all' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          class="px-3 py-1 rounded-full text-xs font-medium btn-hover <%= @category == 'all' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground' %>"
           data-category="all"
           data-action="click->live-search#switchCategory"
         >
@@ -102,7 +102,7 @@
         </button>
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'community' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          class="px-3 py-1 rounded-full text-xs font-medium btn-hover <%= @category == 'community' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground' %>"
           data-category="community"
           data-action="click->live-search#switchCategory"
         >
@@ -110,7 +110,7 @@
         </button>
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'hiring' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          class="px-3 py-1 rounded-full text-xs font-medium btn-hover <%= @category == 'hiring' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground' %>"
           data-category="hiring"
           data-action="click->live-search#switchCategory"
         >
@@ -118,7 +118,7 @@
         </button>
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-medium transition-colors <%= @category == 'seeking' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground' %>"
+          class="px-3 py-1 rounded-full text-xs font-medium btn-hover <%= @category == 'seeking' ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground' %>"
           data-category="seeking"
           data-action="click->live-search#switchCategory"
         >

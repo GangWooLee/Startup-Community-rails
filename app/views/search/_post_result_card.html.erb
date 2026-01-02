@@ -1,7 +1,7 @@
 <%# 검색 결과용 게시글 카드 - 하이라이팅 적용 %>
 <%# 사용법: render partial: "search/post_result_card", locals: { post: @post, query: "검색어" } %>
 
-<div class="block bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-colors h-[140px] cursor-pointer"
+<div class="block bg-card rounded-xl p-4 border border-border card-hover hover:border-primary/50 h-[140px] cursor-pointer"
      role="link"
      tabindex="0"
      data-href="<%= post_path(post) %>"
