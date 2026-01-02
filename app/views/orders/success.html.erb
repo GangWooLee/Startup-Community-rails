@@ -103,13 +103,12 @@
           </div>
           <%= link_to "프로필 보기",
                       profile_path(@order.seller),
-                      class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+                      class: "text-sm text-blue-600 link-hover relative font-medium" %>
         </div>
         <%# 판매자와 채팅 시작 버튼 %>
         <%= button_to start_chat_path(@order.seller),
                       method: :post,
-                      class: "w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-semibold rounded-lg
-                             hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2",
+                      class: "w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-semibold rounded-lg btn-hover flex items-center justify-center space-x-2",
                       data: { turbo: false } do %>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -125,7 +124,7 @@
           <%= link_to @payment.receipt_url,
                       target: "_blank",
                       rel: "noopener",
-                      class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors" do %>
+                      class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl btn-hover" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -135,7 +134,7 @@
         <% end %>
 
         <%= link_to order_path(@order),
-                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors" do %>
+                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-900 text-white font-semibold rounded-xl btn-hover" do %>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -144,7 +143,7 @@
         <% end %>
 
         <%= link_to job_posts_path,
-                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors" do %>
+                    class: "flex items-center justify-center space-x-2 w-full py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-xl btn-hover" do %>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 6h16M4 10h16M4 14h16M4 18h16"/>

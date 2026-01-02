@@ -35,7 +35,7 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
       <h2 class="text-lg font-semibold text-gray-900 mb-4">상품 정보</h2>
 
-      <%= link_to post_path(@order.post), class: "flex items-start space-x-4 p-4 -mx-4 rounded-xl hover:bg-gray-50 transition-colors" do %>
+      <%= link_to post_path(@order.post), class: "flex items-start space-x-4 p-4 -mx-4 rounded-xl card-hover" do %>
         <div class="flex-1 min-w-0">
           <h3 class="font-medium text-gray-900"><%= @order.post.title %></h3>
           <p class="text-sm text-gray-500 mt-1 line-clamp-2"><%= @order.post.content.truncate(100) %></p>
@@ -63,7 +63,7 @@
       </h2>
 
       <% other_user = @order.user_id == current_user.id ? @order.seller : @order.user %>
-      <%= link_to profile_path(other_user), class: "flex items-center justify-between p-4 -mx-4 rounded-xl hover:bg-gray-50 transition-colors" do %>
+      <%= link_to profile_path(other_user), class: "flex items-center justify-between p-4 -mx-4 rounded-xl card-hover" do %>
         <div class="flex items-center space-x-4">
           <%= render_user_avatar(other_user, size: :lg) %>
           <div>
@@ -151,16 +151,14 @@
                         cancel_order_path(@order),
                         method: :post,
                         data: { confirm: "정말 주문을 취소하시겠습니까?" },
-                        class: "w-full py-3 px-6 bg-red-600 text-white font-semibold rounded-xl
-                               hover:bg-red-700 transition-colors" %>
+                        class: "w-full py-3 px-6 bg-red-600 text-white font-semibold rounded-xl btn-hover" %>
           <p class="text-xs text-gray-500 text-center mt-3">
             결제 후 7일 이내에만 취소가 가능합니다.
           </p>
         <% elsif @order.pending? %>
           <%= link_to "결제 진행하기",
                       new_payment_path(post_id: @order.post_id),
-                      class: "block w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-xl text-center
-                             hover:bg-blue-700 transition-colors" %>
+                      class: "block w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-xl text-center btn-hover" %>
         <% elsif @order.cancelled? || @order.refunded? %>
           <p class="text-center text-gray-500">
             <%= @order.cancelled? ? '취소된 주문입니다.' : '환불된 주문입니다.' %>

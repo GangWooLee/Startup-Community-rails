@@ -12,10 +12,10 @@
       <div class="flex border-b border-gray-200">
         <%= link_to "구매 내역",
                     orders_path(tab: "purchases"),
-                    class: "flex-1 py-4 px-6 text-center font-medium transition-colors #{@tab == 'purchases' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500 hover:text-gray-700'}" %>
+                    class: "flex-1 py-4 px-6 text-center font-medium btn-hover #{@tab == 'purchases' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500'}" %>
         <%= link_to "판매 내역",
                     orders_path(tab: "sales"),
-                    class: "flex-1 py-4 px-6 text-center font-medium transition-colors #{@tab == 'sales' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500 hover:text-gray-700'}" %>
+                    class: "flex-1 py-4 px-6 text-center font-medium btn-hover #{@tab == 'sales' ? 'text-blue-600 border-b-2 border-blue-600 -mb-px' : 'text-gray-500'}" %>
       </div>
     </div>
 
@@ -23,7 +23,7 @@
     <% if @orders.any? %>
       <div class="space-y-4">
         <% @orders.each do |order| %>
-          <%= link_to order_path(order), class: "block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow" do %>
+          <%= link_to order_path(order), class: "block bg-white rounded-xl shadow-sm border border-gray-200 p-4 card-hover" do %>
             <div class="flex items-start justify-between">
               <div class="flex items-start space-x-4 flex-1 min-w-0">
                 <%# 상대방 아바타 %>
@@ -81,7 +81,7 @@
         </p>
         <%= link_to "외주 둘러보기",
                     job_posts_path,
-                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg btn-hover" %>
       </div>
     <% end %>
   </div>
