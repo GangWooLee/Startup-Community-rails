@@ -1,125 +1,125 @@
 <% content_for :page_title, "회원 관리" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">회원 관리</span>
+  <span class="text-foreground font-medium">회원 관리</span>
 </nav>
 
 <!-- 상단 통계 -->
 <div class="grid grid-cols-5 gap-4 mb-6">
   <% active_count = User.active.count %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-        <%= icon "users", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+      <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <%= icon "users", variant: :solid, class: "w-5 h-5 text-primary" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(active_count) %></p>
-        <p class="text-xs text-gray-500">활동 회원</p>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(active_count) %></p>
+        <p class="text-xs text-muted-foreground">활동 회원</p>
       </div>
     </div>
   </div>
 
   <% withdrawn_count = User.deleted.count %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-        <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
+      <div class="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+        <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-destructive" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= withdrawn_count %></p>
-        <p class="text-xs text-gray-500">탈퇴 회원</p>
+        <p class="text-2xl font-bold text-foreground"><%= withdrawn_count %></p>
+        <p class="text-xs text-muted-foreground">탈퇴 회원</p>
       </div>
     </div>
   </div>
 
   <% admin_count = User.where(is_admin: true).count %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
         <%= icon "shield-check", variant: :solid, class: "w-5 h-5 text-amber-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= admin_count %></p>
-        <p class="text-xs text-gray-500">관리자</p>
+        <p class="text-2xl font-bold text-foreground"><%= admin_count %></p>
+        <p class="text-xs text-muted-foreground">관리자</p>
       </div>
     </div>
   </div>
 
   <% oauth_count = User.joins(:oauth_identities).distinct.count rescue 0 %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
         <%= icon "key", variant: :solid, class: "w-5 h-5 text-purple-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= oauth_count %></p>
-        <p class="text-xs text-gray-500">OAuth 회원</p>
+        <p class="text-2xl font-bold text-foreground"><%= oauth_count %></p>
+        <p class="text-xs text-muted-foreground">OAuth 회원</p>
       </div>
     </div>
   </div>
 
   <% today_count = User.where("created_at >= ?", Time.current.beginning_of_day).count %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
         <%= icon "user-plus", variant: :solid, class: "w-5 h-5 text-green-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= today_count %></p>
-        <p class="text-xs text-gray-500">오늘 가입</p>
+        <p class="text-2xl font-bold text-foreground"><%= today_count %></p>
+        <p class="text-xs text-muted-foreground">오늘 가입</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 검색 및 필터 -->
-<div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+<div class="bg-card rounded-xl border border-border p-4 mb-6">
   <div class="flex items-center gap-4">
     <!-- 검색 -->
     <%= form_with url: admin_users_path, method: :get, local: true, class: "flex-1" do %>
       <div class="relative">
-        <%= icon "magnifying-glass", variant: :outline, class: "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" %>
+        <%= icon "magnifying-glass", variant: :outline, class: "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" %>
         <input type="text"
                name="q"
                value="<%= params[:q] %>"
                placeholder="이메일 또는 이름으로 검색..."
-               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition">
+               class="w-full pl-10 pr-4 py-2.5 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary focus:bg-background transition">
       </div>
     <% end %>
 
     <!-- 상태 필터 탭 -->
-    <div class="flex items-center gap-2 border-l border-gray-200 pl-4">
+    <div class="flex items-center gap-2 border-l border-border pl-4">
       <%= link_to admin_users_path(type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status].blank? ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <%= link_to admin_users_path(status: 'active', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'active' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'active' ? 'bg-green-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         <%= icon "check-circle", variant: :solid, class: "w-4 h-4 inline mr-1" %>
         활동 중
       <% end %>
       <%= link_to admin_users_path(status: 'withdrawn', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'withdrawn' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'withdrawn' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}" do %>
         <%= icon "x-circle", variant: :solid, class: "w-4 h-4 inline mr-1" %>
         탈퇴
       <% end %>
     </div>
 
     <!-- 타입 필터 버튼들 -->
-    <div class="flex items-center gap-2 border-l border-gray-200 pl-4">
+    <div class="flex items-center gap-2 border-l border-border pl-4">
       <%= link_to admin_users_path(status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type].blank? ? 'bg-foreground/80 text-background' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <%= link_to admin_users_path(type: 'admin', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'admin' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type] == 'admin' ? 'bg-amber-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         관리자
       <% end %>
       <%= link_to admin_users_path(type: 'oauth', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'oauth' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:type] == 'oauth' ? 'bg-purple-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         OAuth
       <% end %>
     </div>
@@ -127,11 +127,11 @@
 
   <% if params[:q].present? %>
     <div class="mt-3 flex items-center gap-2">
-      <span class="text-sm text-gray-600">
-        "<span class="font-medium text-gray-900"><%= params[:q] %></span>" 검색 결과:
-        <span class="font-bold text-blue-600"><%= @total_count %></span>명
+      <span class="text-sm text-muted-foreground">
+        "<span class="font-medium text-foreground"><%= params[:q] %></span>" 검색 결과:
+        <span class="font-bold text-primary"><%= @total_count %></span>명
       </span>
-      <%= link_to admin_users_path, class: "text-sm text-gray-500 hover:text-gray-700 underline" do %>
+      <%= link_to admin_users_path, class: "text-sm text-muted-foreground link-hover relative underline" do %>
         초기화
       <% end %>
     </div>
@@ -139,30 +139,30 @@
 </div>
 
 <!-- 회원 목록 테이블 -->
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+<div class="bg-card rounded-xl border border-border overflow-hidden">
   <table class="w-full">
     <thead>
-      <tr class="bg-gray-50 border-b border-gray-200">
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">회원</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">타입</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">상태</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">활동</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">가입일</th>
-        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">액션</th>
+      <tr class="bg-muted border-b border-border">
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">회원</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">타입</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">상태</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">활동</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">가입일</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-100">
+    <tbody class="divide-y divide-border">
       <% @users.each do |user| %>
-        <tr class="<%= user.deleted? ? 'bg-red-50/50 hover:bg-red-100/50' : 'hover:bg-gray-50' %> transition-colors">
+        <tr class="<%= user.deleted? ? 'bg-destructive/5' : '' %> card-hover">
           <!-- 회원 정보 -->
           <td class="px-5 py-4">
             <%= link_to admin_user_path(user), class: "flex items-center gap-3" do %>
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0">
                 <%= user.name&.first&.upcase || "?" %>
               </div>
               <div class="min-w-0">
-                <p class="font-medium text-gray-900 truncate hover:text-blue-600"><%= user.name %></p>
-                <p class="text-sm text-gray-500 truncate"><%= user.email %></p>
+                <p class="font-medium text-foreground truncate"><%= user.name %></p>
+                <p class="text-sm text-muted-foreground truncate"><%= user.email %></p>
               </div>
             <% end %>
           </td>
@@ -170,19 +170,17 @@
           <!-- 타입 -->
           <td class="px-5 py-4">
             <% if user.admin? %>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              <%= render_badge variant: :destructive, class: "text-xs" do %>
                 <%= icon "shield-check", variant: :solid, class: "w-3.5 h-3.5 mr-1" %>
                 관리자
-              </span>
+              <% end %>
             <% elsif user.oauth_user? %>
               <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                 <%= icon "key", variant: :solid, class: "w-3.5 h-3.5 mr-1" %>
                 OAuth
               </span>
             <% else %>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                일반
-              </span>
+              <%= render_badge "일반", variant: :secondary, class: "text-xs" %>
             <% end %>
           </td>
 
@@ -190,13 +188,13 @@
           <td class="px-5 py-4">
             <% if user.deleted? %>
               <span class="inline-flex items-center gap-1.5 text-sm">
-                <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                <span class="text-red-600 font-medium">Withdrawn</span>
+                <span class="w-2 h-2 rounded-full bg-destructive"></span>
+                <span class="text-destructive font-medium">Withdrawn</span>
               </span>
             <% else %>
               <span class="inline-flex items-center gap-1.5 text-sm">
                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                <span class="text-gray-600">Active</span>
+                <span class="text-muted-foreground">Active</span>
               </span>
             <% end %>
           </td>
@@ -204,11 +202,11 @@
           <!-- 활동 -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-4 text-sm">
-              <span class="text-gray-500">
+              <span class="text-muted-foreground">
                 <%= icon "chat-bubble-left-right", variant: :outline, class: "w-4 h-4 inline mr-1" %>
                 <%= user.chat_rooms.count %>
               </span>
-              <span class="text-gray-500">
+              <span class="text-muted-foreground">
                 <%= icon "document-text", variant: :outline, class: "w-4 h-4 inline mr-1" %>
                 <%= user.posts.count rescue 0 %>
               </span>
@@ -217,19 +215,19 @@
 
           <!-- 가입일 -->
           <td class="px-5 py-4">
-            <p class="text-sm text-gray-900"><%= user.created_at.strftime("%Y-%m-%d") %></p>
-            <p class="text-xs text-gray-400"><%= time_ago_in_words(user.created_at) %> 전</p>
+            <p class="text-sm text-foreground"><%= user.created_at.strftime("%Y-%m-%d") %></p>
+            <p class="text-xs text-muted-foreground"><%= time_ago_in_words(user.created_at) %> 전</p>
           </td>
 
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <div class="flex items-center justify-end gap-1">
               <%= link_to admin_user_path(user),
-                          class: "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition",
+                          class: "p-2 text-muted-foreground rounded-lg btn-hover",
                           title: "상세 보기" do %>
                 <%= icon "eye", variant: :outline, class: "w-5 h-5" %>
               <% end %>
-              <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="더보기">
+              <button class="p-2 text-muted-foreground rounded-lg btn-hover" title="더보기">
                 <%= icon "ellipsis-horizontal", variant: :outline, class: "w-5 h-5" %>
               </button>
             </div>
@@ -241,9 +239,9 @@
 
   <% if @users.empty? %>
     <div class="py-12 text-center">
-      <%= icon "users", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">회원 없음</h3>
-      <p class="mt-1 text-sm text-gray-500">검색 결과가 없습니다.</p>
+      <%= icon "users", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+      <h3 class="mt-2 text-sm font-medium text-foreground">회원 없음</h3>
+      <p class="mt-1 text-sm text-muted-foreground">검색 결과가 없습니다.</p>
     </div>
   <% end %>
 </div>
@@ -251,15 +249,15 @@
 <!-- 페이지네이션 -->
 <% if @total_pages > 1 %>
   <div class="mt-6 flex items-center justify-between">
-    <p class="text-sm text-gray-500">
-      총 <span class="font-medium text-gray-900"><%= @total_count %></span>명 중
-      <span class="font-medium text-gray-900"><%= (@page - 1) * @per_page + 1 %>-<%= [(@page * @per_page), @total_count].min %></span>명 표시
+    <p class="text-sm text-muted-foreground">
+      총 <span class="font-medium text-foreground"><%= @total_count %></span>명 중
+      <span class="font-medium text-foreground"><%= (@page - 1) * @per_page + 1 %>-<%= [(@page * @per_page), @total_count].min %></span>명 표시
     </p>
 
     <nav class="flex items-center gap-1">
       <% if @page > 1 %>
         <%= link_to admin_users_path(page: @page - 1, q: params[:q], type: params[:type]),
-                    class: "p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition" do %>
+                    class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
           <%= icon "chevron-left", variant: :mini, class: "w-5 h-5" %>
         <% end %>
       <% end %>
@@ -267,16 +265,16 @@
       <% visible_pages = ([@page - 2, 1].max..[@page + 2, @total_pages].min) %>
       <% visible_pages.each do |page_num| %>
         <% if page_num == @page %>
-          <span class="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium"><%= page_num %></span>
+          <span class="px-4 py-2 rounded-lg bg-foreground text-background text-sm font-medium"><%= page_num %></span>
         <% else %>
           <%= link_to page_num, admin_users_path(page: page_num, q: params[:q], type: params[:type]),
-                      class: "px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition" %>
+                      class: "px-4 py-2 rounded-lg border border-border text-muted-foreground text-sm btn-hover" %>
         <% end %>
       <% end %>
 
       <% if @page < @total_pages %>
         <%= link_to admin_users_path(page: @page + 1, q: params[:q], type: params[:type]),
-                    class: "p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition" do %>
+                    class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
           <%= icon "chevron-right", variant: :mini, class: "w-5 h-5" %>
         <% end %>
       <% end %>
