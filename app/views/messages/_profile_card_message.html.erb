@@ -30,7 +30,7 @@
     <%# 카드와 시간/읽음 표시를 같은 줄에 %>
     <div class="flex items-end gap-1.5 <%= is_mine ? 'flex-row-reverse' : '' %>">
       <%= link_to profile_path(profile_user_id), class: "block flex-1" do %>
-        <div class="bg-background border border-border rounded-xl p-3 hover:bg-secondary transition">
+        <div class="bg-background border border-border rounded-xl p-3 card-hover">
           <!-- 카드 헤더 -->
           <div class="flex items-center gap-2 mb-2">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

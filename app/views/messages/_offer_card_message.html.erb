@@ -94,7 +94,7 @@
             <% if payment_enabled? && !is_mine %>
               <%# 상대방이 보낸 제안: 결제 버튼 표시 (결제 시스템 활성화 시) %>
               <%= link_to new_payment_path(offer_message_id: message.id),
-                          class: "block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors",
+                          class: "block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold btn-hover",
                           data: { turbo: false } do %>
                 결제하러 가기
               <% end %>

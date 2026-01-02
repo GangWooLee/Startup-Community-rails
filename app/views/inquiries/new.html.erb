@@ -51,7 +51,7 @@
           <label class="block text-sm font-medium text-foreground mb-2">카테고리</label>
           <div class="grid grid-cols-2 gap-3">
             <% Inquiry::CATEGORIES.each do |key, label| %>
-              <label class="relative flex items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-primary/50"
+              <label class="relative flex items-center justify-center p-4 rounded-lg border-2 cursor-pointer card-hover"
                      data-controller="radio-card">
                 <%= f.radio_button :category, key, class: "peer sr-only", data: { action: "change->radio-card#select" } %>
                 <div class="text-center peer-checked:text-primary">
@@ -100,9 +100,9 @@
 
         <!-- 제출 버튼 -->
         <div class="flex justify-end gap-3">
-          <%= link_to "취소", inquiries_path, class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+          <%= link_to "취소", inquiries_path, class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 btn-hover" %>
           <%= f.submit "문의 등록",
-                       class: "rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 cursor-pointer" %>
+                       class: "rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm btn-hover cursor-pointer" %>
         </div>
       <% end %>
     </div>
