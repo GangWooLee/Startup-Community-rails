@@ -1,113 +1,113 @@
 <% content_for :page_title, "문의 관리" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">문의 관리</span>
+  <span class="text-foreground font-medium">문의 관리</span>
 </nav>
 
 <!-- 상단 통계 -->
 <div class="grid grid-cols-5 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-        <%= icon "chat-bubble-left-right", variant: :solid, class: "w-5 h-5 text-gray-600" %>
+      <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <%= icon "chat-bubble-left-right", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:total]) %></p>
-        <p class="text-xs text-gray-500">전체 문의</p>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@stats[:total]) %></p>
+        <p class="text-xs text-muted-foreground">전체 문의</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
         <%= icon "clock", variant: :solid, class: "w-5 h-5 text-yellow-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-yellow-600"><%= @stats[:pending] %></p>
-        <p class="text-xs text-gray-500">대기 중</p>
+        <p class="text-xs text-muted-foreground">대기 중</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-        <%= icon "arrow-path", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+        <%= icon "arrow-path", variant: :solid, class: "w-5 h-5 text-primary" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:in_progress] %></p>
-        <p class="text-xs text-gray-500">처리 중</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:in_progress] %></p>
+        <p class="text-xs text-muted-foreground">처리 중</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
         <%= icon "check-circle", variant: :solid, class: "w-5 h-5 text-green-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:resolved] %></p>
-        <p class="text-xs text-gray-500">답변 완료</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:resolved] %></p>
+        <p class="text-xs text-muted-foreground">답변 완료</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-        <%= icon "archive-box", variant: :solid, class: "w-5 h-5 text-gray-600" %>
+      <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <%= icon "archive-box", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:closed] %></p>
-        <p class="text-xs text-gray-500">종료</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:closed] %></p>
+        <p class="text-xs text-muted-foreground">종료</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 필터 -->
-<div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+<div class="bg-card rounded-xl border border-border p-4 mb-6">
   <div class="flex items-center gap-4">
     <!-- 상태 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_inquiries_path(category: params[:category]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <%= link_to admin_inquiries_path(status: 'pending', category: params[:category]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'pending' ? 'bg-yellow-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         대기 중
       <% end %>
       <%= link_to admin_inquiries_path(status: 'in_progress', category: params[:category]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'in_progress' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'in_progress' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         처리 중
       <% end %>
       <%= link_to admin_inquiries_path(status: 'resolved', category: params[:category]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'resolved' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'resolved' ? 'bg-green-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         답변 완료
       <% end %>
       <%= link_to admin_inquiries_path(status: 'closed', category: params[:category]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'closed' ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'closed' ? 'bg-gray-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         종료
       <% end %>
     </div>
 
-    <div class="border-l border-gray-200 h-6"></div>
+    <div class="border-l border-border h-6"></div>
 
     <!-- 카테고리 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_inquiries_path(status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category].blank? ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground hover:bg-gray-200'}" do %>
         전체
       <% end %>
       <% Inquiry::CATEGORIES.each do |key, label| %>
         <%= link_to admin_inquiries_path(category: key, status: params[:status]),
-                    class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category] == key ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                    class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:category] == key ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground hover:bg-gray-200'}" do %>
           <%= label %>
         <% end %>
       <% end %>
@@ -116,21 +116,21 @@
 </div>
 
 <!-- 문의 목록 테이블 -->
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+<div class="bg-card rounded-xl border border-border overflow-hidden">
   <table class="w-full">
     <thead>
-      <tr class="bg-gray-50 border-b border-gray-200">
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">문의자</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">카테고리</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">제목</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">상태</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">접수일</th>
-        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">액션</th>
+      <tr class="bg-muted border-b border-border">
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">문의자</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">카테고리</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">제목</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">상태</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">접수일</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-100">
+    <tbody class="divide-y divide-border">
       <% @inquiries.each do |inquiry| %>
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="hover:bg-muted transition-colors">
           <!-- 문의자 -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-3">
@@ -138,8 +138,8 @@
                 <%= inquiry.user.name&.first&.upcase || "?" %>
               </div>
               <div>
-                <p class="font-medium text-gray-900 text-sm"><%= inquiry.user.name %></p>
-                <p class="text-xs text-gray-500"><%= inquiry.user.email %></p>
+                <p class="font-medium text-foreground text-sm"><%= inquiry.user.name %></p>
+                <p class="text-xs text-muted-foreground"><%= inquiry.user.email %></p>
               </div>
             </div>
           </td>
@@ -153,7 +153,7 @@
 
           <!-- 제목 -->
           <td class="px-5 py-4">
-            <p class="text-sm font-medium text-gray-900 truncate max-w-[250px]"><%= inquiry.title %></p>
+            <p class="text-sm font-medium text-foreground truncate max-w-[250px]"><%= inquiry.title %></p>
           </td>
 
           <!-- 상태 -->
@@ -165,27 +165,27 @@
                 <span class="text-yellow-600 font-medium">대기 중</span>
               <% when 'in_progress' %>
                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span class="text-blue-600">처리 중</span>
+                <span class="text-primary">처리 중</span>
               <% when 'resolved' %>
                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
                 <span class="text-green-600">답변 완료</span>
               <% when 'closed' %>
                 <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-                <span class="text-gray-600">종료</span>
+                <span class="text-muted-foreground">종료</span>
               <% end %>
             </span>
           </td>
 
           <!-- 접수일 -->
           <td class="px-5 py-4">
-            <p class="text-sm text-gray-900"><%= inquiry.created_at.strftime("%Y-%m-%d") %></p>
-            <p class="text-xs text-gray-400"><%= time_ago_in_words(inquiry.created_at) %> 전</p>
+            <p class="text-sm text-foreground"><%= inquiry.created_at.strftime("%Y-%m-%d") %></p>
+            <p class="text-xs text-muted-foreground"><%= time_ago_in_words(inquiry.created_at) %> 전</p>
           </td>
 
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_inquiry_path(inquiry),
-                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition" do %>
+                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition" do %>
               <%= icon "eye", variant: :outline, class: "w-4 h-4 mr-1" %>
               상세
             <% end %>
@@ -198,8 +198,8 @@
   <% if @inquiries.empty? %>
     <div class="py-12 text-center">
       <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">문의 없음</h3>
-      <p class="mt-1 text-sm text-gray-500">조건에 맞는 문의가 없습니다.</p>
+      <h3 class="mt-2 text-sm font-medium text-foreground">문의 없음</h3>
+      <p class="mt-1 text-sm text-muted-foreground">조건에 맞는 문의가 없습니다.</p>
     </div>
   <% end %>
 </div>

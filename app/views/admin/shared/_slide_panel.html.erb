@@ -7,15 +7,15 @@
          data-action="click->admin--slide-panel#close"></div>
 
     <!-- 슬라이드 패널 -->
-    <div class="absolute right-0 top-0 h-full w-full max-w-[480px] bg-white shadow-2xl
+    <div class="absolute right-0 top-0 h-full w-full max-w-[480px] bg-card shadow-2xl
                 transform translate-x-full transition-transform duration-300 ease-out"
          data-admin--slide-panel-target="panel">
 
       <!-- 패널 헤더 -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-        <h2 class="text-lg font-semibold text-gray-900"><%= local_assigns[:title] || "상세 정보" %></h2>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border bg-card sticky top-0 z-10">
+        <h2 class="text-lg font-semibold text-foreground"><%= local_assigns[:title] || "상세 정보" %></h2>
         <button type="button"
-                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                class="p-2 text-muted-foreground hover:text-muted-foreground rounded-lg btn-hover"
                 data-action="click->admin--slide-panel#close">
           <%= icon "x-mark", variant: :outline, class: "w-5 h-5" %>
         </button>

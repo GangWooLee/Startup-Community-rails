@@ -1,12 +1,12 @@
 <% content_for :page_title, "채팅방 열람" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <%= link_to "대시보드", admin_root_path, class: "hover:text-gray-700" %>
+  <%= link_to "대시보드", admin_root_path, class: "hover:text-foreground" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">채팅방 #<%= @chat_room.id %></span>
+  <span class="text-foreground font-medium">채팅방 #<%= @chat_room.id %></span>
 </nav>
 
 <!-- 경고 배너 -->
@@ -25,53 +25,53 @@
 <div class="flex gap-6 h-[calc(100vh-280px)]">
   <!-- 왼쪽: 참여자 정보 (고정) -->
   <div class="w-72 flex-shrink-0">
-    <div class="bg-white rounded-xl border border-gray-200 h-full flex flex-col">
+    <div class="bg-card rounded-xl border border-border h-full flex flex-col">
       <!-- 헤더 -->
-      <div class="px-4 py-3 border-b border-gray-100">
-        <h3 class="font-semibold text-gray-900">채팅방 정보</h3>
+      <div class="px-4 py-3 border-b border-border">
+        <h3 class="font-semibold text-foreground">채팅방 정보</h3>
       </div>
 
       <!-- 참여자 목록 -->
       <div class="p-4 flex-1 overflow-auto">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">참여자</p>
+        <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">참여자</p>
         <div class="space-y-2">
           <% @participants.each_with_index do |user, index| %>
-            <%= link_to admin_user_path(user), class: "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors" do %>
+            <%= link_to admin_user_path(user), class: "flex items-center gap-3 p-2 rounded-lg btn-hover-colors" do %>
               <div class="w-10 h-10 rounded-full <%= index == 0 ? 'bg-gradient-to-br from-blue-500 to-purple-600' : 'bg-gradient-to-br from-green-500 to-teal-600' %> flex items-center justify-center text-white font-medium flex-shrink-0">
                 <%= user.name&.first&.upcase || "?" %>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate"><%= user.name %></p>
-                <p class="text-xs text-gray-500 truncate"><%= user.email %></p>
+                <p class="text-sm font-medium text-foreground truncate"><%= user.name %></p>
+                <p class="text-xs text-muted-foreground truncate"><%= user.email %></p>
               </div>
-              <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-gray-300" %>
+              <%= icon "chevron-right", variant: :mini, class: "w-4 h-4 text-muted-foreground" %>
             <% end %>
           <% end %>
         </div>
 
         <!-- 통계 -->
-        <div class="mt-6 pt-4 border-t border-gray-100 space-y-3">
+        <div class="mt-6 pt-4 border-t border-border space-y-3">
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">채팅방 ID</span>
-            <span class="font-medium text-gray-900">#<%= @chat_room.id %></span>
+            <span class="text-muted-foreground">채팅방 ID</span>
+            <span class="font-medium text-foreground">#<%= @chat_room.id %></span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">총 메시지</span>
-            <span class="font-medium text-gray-900"><%= @messages_count %>개</span>
+            <span class="text-muted-foreground">총 메시지</span>
+            <span class="font-medium text-foreground"><%= @messages_count %>개</span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">첫 메시지</span>
-            <span class="font-medium text-gray-900 text-xs"><%= @first_message_at&.strftime("%m/%d %H:%M") || "-" %></span>
+            <span class="text-muted-foreground">첫 메시지</span>
+            <span class="font-medium text-foreground text-xs"><%= @first_message_at&.strftime("%m/%d %H:%M") || "-" %></span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">마지막</span>
-            <span class="font-medium text-gray-900 text-xs"><%= @last_message_at&.strftime("%m/%d %H:%M") || "-" %></span>
+            <span class="text-muted-foreground">마지막</span>
+            <span class="font-medium text-foreground text-xs"><%= @last_message_at&.strftime("%m/%d %H:%M") || "-" %></span>
           </div>
         </div>
 
         <% if @chat_room.source_post.present? %>
-          <div class="mt-6 pt-4 border-t border-gray-100">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">관련 게시글</p>
+          <div class="mt-6 pt-4 border-t border-border">
+            <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">관련 게시글</p>
             <%= link_to @chat_room.source_post.title, post_path(@chat_room.source_post),
                         class: "text-sm text-blue-600 hover:text-blue-800 hover:underline", target: "_blank" %>
           </div>
@@ -82,20 +82,20 @@
 
   <!-- 오른쪽: 대화 내용 (메신저 스타일) -->
   <div class="flex-1 min-w-0">
-    <div class="bg-white rounded-xl border border-gray-200 h-full flex flex-col">
+    <div class="bg-card rounded-xl border border-border h-full flex flex-col">
       <!-- 채팅 헤더 -->
-      <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+      <div class="px-5 py-3 border-b border-border flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
-          <h2 class="font-semibold text-gray-900">대화 내용</h2>
-          <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+          <h2 class="font-semibold text-foreground">대화 내용</h2>
+          <span class="px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded-full">
             <%= @messages_count %>개
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="검색">
+          <button class="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-lg transition" title="검색">
             <%= icon "magnifying-glass", variant: :outline, class: "w-5 h-5" %>
           </button>
-          <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="내보내기">
+          <button class="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-lg transition" title="내보내기">
             <%= icon "arrow-down-tray", variant: :outline, class: "w-5 h-5" %>
           </button>
         </div>
@@ -106,8 +106,8 @@
         <% if @messages.empty? %>
           <div class="flex items-center justify-center h-full">
             <div class="text-center">
-              <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-16 w-16 text-gray-300" %>
-              <p class="mt-3 text-sm text-gray-500">대화 내용이 없습니다.</p>
+              <%= icon "chat-bubble-left-right", variant: :outline, class: "mx-auto h-16 w-16 text-muted-foreground" %>
+              <p class="mt-3 text-sm text-muted-foreground">대화 내용이 없습니다.</p>
             </div>
           </div>
         <% else %>
@@ -119,7 +119,7 @@
             <% if current_date != message_date %>
               <% current_date = message_date %>
               <div class="flex items-center justify-center my-4">
-                <span class="px-3 py-1 text-xs font-medium text-gray-500 bg-white rounded-full shadow-sm border border-gray-200">
+                <span class="px-3 py-1 text-xs font-medium text-muted-foreground bg-card rounded-full shadow-sm border border-border">
                   <%= message_date.strftime("%Y년 %m월 %d일") %>
                 </span>
               </div>
@@ -129,7 +129,7 @@
             <% if message.message_type == 'system' %>
               <div class="flex justify-center my-2">
                 <div class="px-4 py-2 bg-gray-200/80 rounded-full">
-                  <p class="text-xs text-gray-600"><%= message.content %></p>
+                  <p class="text-xs text-muted-foreground"><%= message.content %></p>
                 </div>
               </div>
             <% else %>
@@ -152,7 +152,7 @@
                 <%# 메시지 본문 %>
                 <div class="max-w-[65%]">
                   <%# 발신자 이름 (첫 번째 사용자만 왼쪽 정렬) %>
-                  <p class="text-xs text-gray-500 mb-1 px-1 <%= is_first_user ? '' : 'text-right' %>">
+                  <p class="text-xs text-muted-foreground mb-1 px-1 <%= is_first_user ? '' : 'text-right' %>">
                     <%= message.sender&.name || "시스템" %>
                   </p>
 
@@ -160,18 +160,18 @@
                   <% case message.message_type %>
                   <% when 'offer_card' %>
                     <%# 견적 카드 %>
-                    <div class="bg-white border border-gray-200 rounded-2xl <%= is_first_user ? 'rounded-tl-sm' : 'rounded-tr-sm' %> p-4 shadow-sm">
+                    <div class="bg-card border border-border rounded-2xl <%= is_first_user ? 'rounded-tl-sm' : 'rounded-tr-sm' %> p-4 shadow-sm">
                       <div class="flex items-center gap-2 mb-2">
                         <%= icon "currency-dollar", variant: :solid, class: "w-5 h-5 text-green-600" %>
-                        <span class="font-semibold text-gray-900 text-sm">견적 제안</span>
+                        <span class="font-semibold text-foreground text-sm">견적 제안</span>
                       </div>
                       <% if message.metadata.present? %>
-                        <p class="text-xl font-bold text-gray-900"><%= number_to_currency(message.metadata['amount'], unit: '₩', precision: 0) rescue message.metadata['amount'] %></p>
+                        <p class="text-xl font-bold text-foreground"><%= number_to_currency(message.metadata['amount'], unit: '₩', precision: 0) rescue message.metadata['amount'] %></p>
                         <% if message.metadata['description'].present? %>
-                          <p class="text-sm text-gray-600 mt-1"><%= message.metadata['description'] %></p>
+                          <p class="text-sm text-muted-foreground mt-1"><%= message.metadata['description'] %></p>
                         <% end %>
                       <% end %>
-                      <p class="text-xs text-gray-400 mt-2 text-right"><%= message.created_at.strftime("%H:%M") %></p>
+                      <p class="text-xs text-muted-foreground mt-2 text-right"><%= message.created_at.strftime("%H:%M") %></p>
                     </div>
                   <% when 'deal_confirm' %>
                     <%# 거래 확정 %>
@@ -195,10 +195,10 @@
                     </div>
                   <% else %>
                     <%# 일반 텍스트 메시지 %>
-                    <div class="<%= is_first_user ? 'bg-white border border-gray-200 rounded-tl-sm' : 'bg-blue-500 rounded-tr-sm' %> rounded-2xl px-4 py-2.5 shadow-sm">
-                      <p class="text-sm whitespace-pre-wrap break-words <%= is_first_user ? 'text-gray-900' : 'text-white' %>"><%= message.content %></p>
+                    <div class="<%= is_first_user ? 'bg-card border border-border rounded-tl-sm' : 'bg-blue-500 rounded-tr-sm' %> rounded-2xl px-4 py-2.5 shadow-sm">
+                      <p class="text-sm whitespace-pre-wrap break-words <%= is_first_user ? 'text-foreground' : 'text-white' %>"><%= message.content %></p>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1 px-1 <%= is_first_user ? '' : 'text-right' %>">
+                    <p class="text-xs text-muted-foreground mt-1 px-1 <%= is_first_user ? '' : 'text-right' %>">
                       <%= message.created_at.strftime("%H:%M") %>
                     </p>
                   <% end %>
@@ -206,8 +206,8 @@
                   <%# 메타데이터 (관리자 전용 - 접기) %>
                   <% if message.metadata.present? && !['offer_card'].include?(message.message_type) %>
                     <details class="mt-1 px-1">
-                      <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600">메타데이터</summary>
-                      <pre class="mt-1 p-2 bg-white border border-gray-200 rounded text-xs text-gray-600 overflow-x-auto max-w-full"><%= JSON.pretty_generate(message.metadata) %></pre>
+                      <summary class="text-xs text-muted-foreground cursor-pointer hover:text-muted-foreground">메타데이터</summary>
+                      <pre class="mt-1 p-2 bg-card border border-border rounded text-xs text-muted-foreground overflow-x-auto max-w-full"><%= JSON.pretty_generate(message.metadata) %></pre>
                     </details>
                   <% end %>
                 </div>
@@ -218,8 +218,8 @@
       </div>
 
       <!-- 하단 안내 -->
-      <div class="px-4 py-3 border-t border-gray-100 bg-white rounded-b-xl flex-shrink-0">
-        <div class="flex items-center justify-center gap-2 text-sm text-gray-500">
+      <div class="px-4 py-3 border-t border-border bg-card rounded-b-xl flex-shrink-0">
+        <div class="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <%= icon "lock-closed", variant: :solid, class: "w-4 h-4" %>
           <span>감청 모드 - 메시지 전송 불가</span>
         </div>

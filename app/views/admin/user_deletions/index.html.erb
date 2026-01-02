@@ -1,61 +1,61 @@
 <% content_for :page_title, "탈퇴 회원 관리" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">탈퇴 회원 관리</span>
+  <span class="text-foreground font-medium">탈퇴 회원 관리</span>
 </nav>
 
 <!-- 상단 통계 -->
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
         <%= icon "user-minus", variant: :solid, class: "w-5 h-5 text-red-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:total]) %></p>
-        <p class="text-xs text-gray-500">전체 탈퇴</p>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@stats[:total]) %></p>
+        <p class="text-xs text-muted-foreground">전체 탈퇴</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
         <%= icon "calendar", variant: :solid, class: "w-5 h-5 text-orange-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:this_month] %></p>
-        <p class="text-xs text-gray-500">이번 달 탈퇴</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:this_month] %></p>
+        <p class="text-xs text-muted-foreground">이번 달 탈퇴</p>
       </div>
     </div>
   </div>
 
   <% top_reason = @stats[:by_reason].max_by { |_, v| v }&.first %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
         <%= icon "chart-bar", variant: :solid, class: "w-5 h-5 text-purple-600" %>
       </div>
       <div>
-        <p class="text-lg font-bold text-gray-900 truncate">
+        <p class="text-lg font-bold text-foreground truncate">
           <%= top_reason ? UserDeletion::REASON_CATEGORIES[top_reason] || "기타" : "-" %>
         </p>
-        <p class="text-xs text-gray-500">주요 탈퇴 사유</p>
+        <p class="text-xs text-muted-foreground">주요 탈퇴 사유</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
         <%= icon "archive-box", variant: :solid, class: "w-5 h-5 text-blue-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= User.deleted.count %></p>
-        <p class="text-xs text-gray-500">익명화된 계정</p>
+        <p class="text-2xl font-bold text-foreground"><%= User.deleted.count %></p>
+        <p class="text-xs text-muted-foreground">익명화된 계정</p>
       </div>
     </div>
   </div>
@@ -63,13 +63,13 @@
 
 <!-- 탈퇴 사유 분포 -->
 <% if @stats[:by_reason].any? %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-    <h3 class="text-sm font-semibold text-gray-900 mb-3">탈퇴 사유 분포</h3>
+  <div class="bg-card rounded-xl border border-border p-4 mb-6">
+    <h3 class="text-sm font-semibold text-foreground mb-3">탈퇴 사유 분포</h3>
     <div class="flex flex-wrap gap-2">
       <% @stats[:by_reason].each do |reason, count| %>
-        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-gray-100 text-gray-700">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-muted text-foreground">
           <%= UserDeletion::REASON_CATEGORIES[reason] || reason || "미선택" %>
-          <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-600 text-xs font-medium"><%= count %></span>
+          <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-gray-200 text-muted-foreground text-xs font-medium"><%= count %></span>
         </span>
       <% end %>
     </div>
@@ -77,34 +77,34 @@
 <% end %>
 
 <!-- 탈퇴 회원 목록 테이블 -->
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-  <div class="px-5 py-4 border-b border-gray-200">
-    <h3 class="text-sm font-semibold text-gray-900">최근 탈퇴 회원</h3>
+<div class="bg-card rounded-xl border border-border overflow-hidden">
+  <div class="px-5 py-4 border-b border-border">
+    <h3 class="text-sm font-semibold text-foreground">최근 탈퇴 회원</h3>
   </div>
 
   <table class="w-full">
     <thead>
-      <tr class="bg-gray-50 border-b border-gray-200">
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">원본 이메일</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">탈퇴 사유</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">활동 통계</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">탈퇴일</th>
-        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">액션</th>
+      <tr class="bg-muted border-b border-border">
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">원본 이메일</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">탈퇴 사유</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">활동 통계</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">탈퇴일</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
       <% @deletions.each do |deletion| %>
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="hover:bg-muted transition-colors">
           <!-- ID -->
           <td class="px-5 py-4">
-            <span class="text-sm font-mono text-gray-600">#<%= deletion.user_id %></span>
+            <span class="text-sm font-mono text-muted-foreground">#<%= deletion.user_id %></span>
           </td>
 
           <!-- 원본 이메일 (스냅샷에서) -->
           <td class="px-5 py-4">
-            <p class="text-sm text-gray-900"><%= deletion.user_snapshot["email"] %></p>
-            <p class="text-xs text-gray-500"><%= deletion.user_snapshot["name"] %></p>
+            <p class="text-sm text-foreground"><%= deletion.user_snapshot["email"] %></p>
+            <p class="text-xs text-muted-foreground"><%= deletion.user_snapshot["name"] %></p>
           </td>
 
           <!-- 탈퇴 사유 -->
@@ -114,13 +114,13 @@
                 <%= deletion.reason_label %>
               </span>
             <% else %>
-              <span class="text-sm text-gray-400">미선택</span>
+              <span class="text-sm text-muted-foreground">미선택</span>
             <% end %>
           </td>
 
           <!-- 활동 통계 -->
           <td class="px-5 py-4">
-            <div class="flex items-center gap-3 text-xs text-gray-500">
+            <div class="flex items-center gap-3 text-xs text-muted-foreground">
               <span title="게시글">
                 <%= icon "document-text", variant: :outline, class: "w-4 h-4 inline" %>
                 <%= deletion.activity_stats["total_posts"] || 0 %>
@@ -138,14 +138,14 @@
 
           <!-- 탈퇴일 -->
           <td class="px-5 py-4">
-            <p class="text-sm text-gray-900"><%= deletion.requested_at.strftime("%Y-%m-%d %H:%M") %></p>
-            <p class="text-xs text-gray-400"><%= time_ago_in_words(deletion.requested_at) %> 전</p>
+            <p class="text-sm text-foreground"><%= deletion.requested_at.strftime("%Y-%m-%d %H:%M") %></p>
+            <p class="text-xs text-muted-foreground"><%= time_ago_in_words(deletion.requested_at) %> 전</p>
           </td>
 
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_user_deletion_path(deletion),
-                        class: "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition inline-block",
+                        class: "p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition inline-block",
                         title: "상세 보기" do %>
               <%= icon "eye", variant: :outline, class: "w-5 h-5" %>
             <% end %>
@@ -157,9 +157,9 @@
 
   <% if @deletions.empty? %>
     <div class="py-12 text-center">
-      <%= icon "user-minus", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">탈퇴 회원 없음</h3>
-      <p class="mt-1 text-sm text-gray-500">아직 탈퇴한 회원이 없습니다.</p>
+      <%= icon "user-minus", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground" %>
+      <h3 class="mt-2 text-sm font-medium text-foreground">탈퇴 회원 없음</h3>
+      <p class="mt-1 text-sm text-muted-foreground">아직 탈퇴한 회원이 없습니다.</p>
     </div>
   <% end %>
 </div>

@@ -1,120 +1,120 @@
 <% content_for :page_title, "신고 관리" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">신고 관리</span>
+  <span class="text-foreground font-medium">신고 관리</span>
 </nav>
 
 <!-- 상단 통계 -->
 <div class="grid grid-cols-5 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-        <%= icon "flag", variant: :solid, class: "w-5 h-5 text-gray-600" %>
+      <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <%= icon "flag", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@stats[:total]) %></p>
-        <p class="text-xs text-gray-500">전체 신고</p>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@stats[:total]) %></p>
+        <p class="text-xs text-muted-foreground">전체 신고</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
         <%= icon "clock", variant: :solid, class: "w-5 h-5 text-yellow-600" %>
       </div>
       <div>
         <p class="text-2xl font-bold text-yellow-600"><%= @stats[:pending] %></p>
-        <p class="text-xs text-gray-500">대기 중</p>
+        <p class="text-xs text-muted-foreground">대기 중</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-        <%= icon "eye", variant: :solid, class: "w-5 h-5 text-blue-600" %>
+        <%= icon "eye", variant: :solid, class: "w-5 h-5 text-primary" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:reviewed] %></p>
-        <p class="text-xs text-gray-500">검토됨</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:reviewed] %></p>
+        <p class="text-xs text-muted-foreground">검토됨</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
         <%= icon "check-circle", variant: :solid, class: "w-5 h-5 text-green-600" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:resolved] %></p>
-        <p class="text-xs text-gray-500">처리완료</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:resolved] %></p>
+        <p class="text-xs text-muted-foreground">처리완료</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
+  <div class="bg-card rounded-xl border border-border p-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-        <%= icon "x-circle", variant: :solid, class: "w-5 h-5 text-gray-600" %>
+      <div class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+        <%= icon "x-circle", variant: :solid, class: "w-5 h-5 text-muted-foreground" %>
       </div>
       <div>
-        <p class="text-2xl font-bold text-gray-900"><%= @stats[:dismissed] %></p>
-        <p class="text-xs text-gray-500">기각</p>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:dismissed] %></p>
+        <p class="text-xs text-muted-foreground">기각</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 필터 -->
-<div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+<div class="bg-card rounded-xl border border-border p-4 mb-6">
   <div class="flex items-center gap-4">
     <!-- 상태 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_reports_path(type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status].blank? ? 'bg-gray-900 text-white' : 'bg-muted text-muted-foreground'}" do %>
         전체
       <% end %>
       <%= link_to admin_reports_path(status: 'pending', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'pending' ? 'bg-yellow-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         대기 중
       <% end %>
       <%= link_to admin_reports_path(status: 'reviewed', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'reviewed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'reviewed' ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         검토됨
       <% end %>
       <%= link_to admin_reports_path(status: 'resolved', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'resolved' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'resolved' ? 'bg-green-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         처리완료
       <% end %>
       <%= link_to admin_reports_path(status: 'dismissed', type: params[:type]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:status] == 'dismissed' ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:status] == 'dismissed' ? 'bg-gray-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
         기각
       <% end %>
     </div>
 
-    <div class="border-l border-gray-200 h-6"></div>
+    <div class="border-l border-border h-6"></div>
 
     <!-- 유형 필터 -->
     <div class="flex items-center gap-2">
       <%= link_to admin_reports_path(status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type].blank? ? 'bg-gray-700 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
         전체
       <% end %>
       <%= link_to admin_reports_path(type: 'Post', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'Post' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'Post' ? 'bg-indigo-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
         게시글
       <% end %>
       <%= link_to admin_reports_path(type: 'User', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'User' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'User' ? 'bg-purple-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
         사용자
       <% end %>
       <%= link_to admin_reports_path(type: 'ChatRoom', status: params[:status]),
-                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'ChatRoom' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+                  class: "px-3 py-2 rounded-lg text-sm font-medium transition #{params[:type] == 'ChatRoom' ? 'bg-teal-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'}" do %>
         채팅방
       <% end %>
     </div>
@@ -122,21 +122,21 @@
 </div>
 
 <!-- 신고 목록 테이블 -->
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+<div class="bg-card rounded-xl border border-border overflow-hidden">
   <table class="w-full">
     <thead>
-      <tr class="bg-gray-50 border-b border-gray-200">
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">신고자</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">대상</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">사유</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">상태</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">접수일</th>
-        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">액션</th>
+      <tr class="bg-muted border-b border-border">
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">신고자</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">대상</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">사유</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">상태</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">접수일</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-100">
+    <tbody class="divide-y divide-border">
       <% @reports.each do |report| %>
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="hover:bg-muted transition-colors">
           <!-- 신고자 -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-3">
@@ -144,8 +144,8 @@
                 <%= report.reporter.name&.first&.upcase || "?" %>
               </div>
               <div>
-                <p class="font-medium text-gray-900 text-sm"><%= report.reporter.name %></p>
-                <p class="text-xs text-gray-500"><%= report.reporter.email %></p>
+                <p class="font-medium text-foreground text-sm"><%= report.reporter.name %></p>
+                <p class="text-xs text-muted-foreground"><%= report.reporter.email %></p>
               </div>
             </div>
           </td>
@@ -156,7 +156,7 @@
               <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium <%= report_type_badge_class(report.reportable_type) %>">
                 <%= report.reportable_type_label %>
               </span>
-              <span class="text-sm text-gray-600 truncate max-w-[150px]">
+              <span class="text-sm text-muted-foreground truncate max-w-[150px]">
                 <% if report.reportable.respond_to?(:title) %>
                   <%= report.reportable.title&.truncate(20) %>
                 <% elsif report.reportable.respond_to?(:name) %>
@@ -184,27 +184,27 @@
                 <span class="text-yellow-600 font-medium">대기 중</span>
               <% when 'reviewed' %>
                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span class="text-blue-600">검토됨</span>
+                <span class="text-primary">검토됨</span>
               <% when 'resolved' %>
                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
                 <span class="text-green-600">처리완료</span>
               <% when 'dismissed' %>
                 <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-                <span class="text-gray-600">기각</span>
+                <span class="text-muted-foreground">기각</span>
               <% end %>
             </span>
           </td>
 
           <!-- 접수일 -->
           <td class="px-5 py-4">
-            <p class="text-sm text-gray-900"><%= report.created_at.strftime("%Y-%m-%d") %></p>
-            <p class="text-xs text-gray-400"><%= time_ago_in_words(report.created_at) %> 전</p>
+            <p class="text-sm text-foreground"><%= report.created_at.strftime("%Y-%m-%d") %></p>
+            <p class="text-xs text-muted-foreground"><%= time_ago_in_words(report.created_at) %> 전</p>
           </td>
 
           <!-- 액션 -->
           <td class="px-5 py-4 text-right">
             <%= link_to admin_report_path(report),
-                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition" do %>
+                        class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition" do %>
               <%= icon "eye", variant: :outline, class: "w-4 h-4 mr-1" %>
               상세
             <% end %>
@@ -216,9 +216,9 @@
 
   <% if @reports.empty? %>
     <div class="py-12 text-center">
-      <%= icon "flag", variant: :outline, class: "mx-auto h-12 w-12 text-gray-300" %>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">신고 없음</h3>
-      <p class="mt-1 text-sm text-gray-500">조건에 맞는 신고가 없습니다.</p>
+      <%= icon "flag", variant: :outline, class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+      <h3 class="mt-2 text-sm font-medium text-foreground">신고 없음</h3>
+      <p class="mt-1 text-sm text-muted-foreground">조건에 맞는 신고가 없습니다.</p>
     </div>
   <% end %>
 </div>

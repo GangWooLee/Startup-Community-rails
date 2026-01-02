@@ -1,21 +1,21 @@
 <% content_for :page_title, "신고 상세" %>
 
 <!-- 브레드크럼 -->
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
   <%= icon "home", variant: :solid, class: "w-4 h-4" %>
   <span>/</span>
-  <%= link_to "신고 관리", admin_reports_path, class: "hover:text-gray-700" %>
+  <%= link_to "신고 관리", admin_reports_path, class: "link-hover relative" %>
   <span>/</span>
-  <span class="text-gray-900 font-medium">#<%= @report.id %></span>
+  <span class="text-foreground font-medium">#<%= @report.id %></span>
 </nav>
 
 <div class="grid grid-cols-3 gap-6">
   <!-- 왼쪽: 신고 정보 -->
   <div class="col-span-2 space-y-6">
     <!-- 신고 개요 -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900">신고 정보</h2>
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-foreground">신고 정보</h2>
         <span class="inline-flex items-center gap-1.5 text-sm">
           <% case @report.status %>
           <% when 'pending' %>
@@ -29,28 +29,28 @@
             <span class="text-green-600">처리완료</span>
           <% when 'dismissed' %>
             <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-            <span class="text-gray-600">기각</span>
+            <span class="text-muted-foreground">기각</span>
           <% end %>
         </span>
       </div>
       <div class="p-6 space-y-4">
         <!-- 신고자 -->
         <div class="flex items-start gap-4">
-          <div class="w-24 text-sm text-gray-500">신고자</div>
+          <div class="w-24 text-sm text-muted-foreground">신고자</div>
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
               <%= @report.reporter.name&.first&.upcase || "?" %>
             </div>
             <div>
-              <p class="font-medium text-gray-900"><%= @report.reporter.name %></p>
-              <p class="text-sm text-gray-500"><%= @report.reporter.email %></p>
+              <p class="font-medium text-foreground"><%= @report.reporter.name %></p>
+              <p class="text-sm text-muted-foreground"><%= @report.reporter.email %></p>
             </div>
           </div>
         </div>
 
         <!-- 신고 사유 -->
         <div class="flex items-start gap-4">
-          <div class="w-24 text-sm text-gray-500">신고 사유</div>
+          <div class="w-24 text-sm text-muted-foreground">신고 사유</div>
           <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
             <%= @report.reason_label %>
           </span>
@@ -59,35 +59,35 @@
         <!-- 상세 설명 -->
         <% if @report.description.present? %>
           <div class="flex items-start gap-4">
-            <div class="w-24 text-sm text-gray-500">상세 설명</div>
-            <p class="text-gray-700 flex-1"><%= @report.description %></p>
+            <div class="w-24 text-sm text-muted-foreground">상세 설명</div>
+            <p class="text-foreground flex-1"><%= @report.description %></p>
           </div>
         <% end %>
 
         <!-- 접수일 -->
         <div class="flex items-start gap-4">
-          <div class="w-24 text-sm text-gray-500">접수일</div>
-          <p class="text-gray-900"><%= @report.created_at.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+          <div class="w-24 text-sm text-muted-foreground">접수일</div>
+          <p class="text-foreground"><%= @report.created_at.strftime("%Y년 %m월 %d일 %H:%M") %></p>
         </div>
 
         <!-- 처리자/처리일 -->
         <% if @report.resolved_by.present? %>
           <div class="flex items-start gap-4">
-            <div class="w-24 text-sm text-gray-500">처리자</div>
-            <p class="text-gray-900"><%= @report.resolved_by.name %></p>
+            <div class="w-24 text-sm text-muted-foreground">처리자</div>
+            <p class="text-foreground"><%= @report.resolved_by.name %></p>
           </div>
           <div class="flex items-start gap-4">
-            <div class="w-24 text-sm text-gray-500">처리일</div>
-            <p class="text-gray-900"><%= @report.resolved_at&.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+            <div class="w-24 text-sm text-muted-foreground">처리일</div>
+            <p class="text-foreground"><%= @report.resolved_at&.strftime("%Y년 %m월 %d일 %H:%M") %></p>
           </div>
         <% end %>
       </div>
     </div>
 
     <!-- 신고 대상 상세 -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">신고 대상</h2>
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-6 py-4 border-b border-border">
+        <h2 class="text-lg font-semibold text-foreground">신고 대상</h2>
       </div>
       <div class="p-6">
         <% case @report.reportable_type %>
@@ -98,11 +98,11 @@
               <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-700">
                 게시글
               </span>
-              <span class="text-sm text-gray-500">ID: <%= post.id %></span>
+              <span class="text-sm text-muted-foreground">ID: <%= post.id %></span>
             </div>
-            <h3 class="text-lg font-medium text-gray-900"><%= post.title %></h3>
-            <p class="text-gray-600 line-clamp-3"><%= strip_tags(post.content).truncate(300) %></p>
-            <div class="flex items-center gap-4 text-sm text-gray-500">
+            <h3 class="text-lg font-medium text-foreground"><%= post.title %></h3>
+            <p class="text-muted-foreground line-clamp-3"><%= strip_tags(post.content).truncate(300) %></p>
+            <div class="flex items-center gap-4 text-sm text-muted-foreground">
               <span>작성자: <%= post.user.name %></span>
               <span>작성일: <%= post.created_at.strftime("%Y-%m-%d") %></span>
             </div>
@@ -118,16 +118,16 @@
               <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700">
                 사용자
               </span>
-              <span class="text-sm text-gray-500">ID: <%= user.id %></span>
+              <span class="text-sm text-muted-foreground">ID: <%= user.id %></span>
             </div>
             <div class="flex items-center gap-4">
               <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-medium">
                 <%= user.name&.first&.upcase || "?" %>
               </div>
               <div>
-                <h3 class="text-lg font-medium text-gray-900"><%= user.name %></h3>
-                <p class="text-gray-500"><%= user.email %></p>
-                <p class="text-sm text-gray-400">가입일: <%= user.created_at.strftime("%Y-%m-%d") %></p>
+                <h3 class="text-lg font-medium text-foreground"><%= user.name %></h3>
+                <p class="text-muted-foreground"><%= user.email %></p>
+                <p class="text-sm text-muted-foreground">가입일: <%= user.created_at.strftime("%Y-%m-%d") %></p>
               </div>
             </div>
             <%= link_to profile_path(user), target: "_blank", class: "inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700" do %>
@@ -142,12 +142,12 @@
               <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-teal-100 text-teal-700">
                 채팅방
               </span>
-              <span class="text-sm text-gray-500">ID: <%= chat_room.id %></span>
+              <span class="text-sm text-muted-foreground">ID: <%= chat_room.id %></span>
             </div>
-            <h3 class="text-lg font-medium text-gray-900">
+            <h3 class="text-lg font-medium text-foreground">
               <%= chat_room.users.map(&:name).join(", ") %> 채팅방
             </h3>
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-muted-foreground">
               참여자: <%= chat_room.users.map(&:name).join(", ") %>
             </div>
           </div>
@@ -157,12 +157,12 @@
 
     <!-- 관리자 메모 -->
     <% if @report.admin_note.present? %>
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">관리자 메모</h2>
+      <div class="bg-card rounded-xl border border-border overflow-hidden">
+        <div class="px-6 py-4 border-b border-border">
+          <h2 class="text-lg font-semibold text-foreground">관리자 메모</h2>
         </div>
         <div class="p-6">
-          <p class="text-gray-700 whitespace-pre-wrap"><%= @report.admin_note %></p>
+          <p class="text-foreground whitespace-pre-wrap"><%= @report.admin_note %></p>
         </div>
       </div>
     <% end %>
@@ -171,21 +171,21 @@
   <!-- 오른쪽: 상태 변경 -->
   <div class="space-y-6">
     <!-- 상태 변경 카드 -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-6">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">처리</h2>
+    <div class="bg-card rounded-xl border border-border overflow-hidden sticky top-6">
+      <div class="px-6 py-4 border-b border-border">
+        <h2 class="text-lg font-semibold text-foreground">처리</h2>
       </div>
       <div class="p-6">
         <%= form_with model: [:admin, @report], method: :patch, class: "space-y-4" do |f| %>
           <!-- 상태 선택 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">상태 변경</label>
+            <label class="block text-sm font-medium text-foreground mb-2">상태 변경</label>
             <div class="space-y-2">
               <% Report::STATUSES.each do |key, label| %>
                 <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
-                             <%= @report.status == key ? 'border-blue-500 bg-blue-50' : 'border-gray-200' %>">
+                             <%= @report.status == key ? 'border-blue-500 bg-blue-50' : 'border-border' %>">
                   <%= f.radio_button :status, key, class: "h-4 w-4 text-blue-600" %>
-                  <span class="text-sm font-medium text-gray-900"><%= label %></span>
+                  <span class="text-sm font-medium text-foreground"><%= label %></span>
                 </label>
               <% end %>
             </div>
@@ -193,25 +193,25 @@
 
           <!-- 관리자 메모 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">관리자 메모</label>
+            <label class="block text-sm font-medium text-foreground mb-2">관리자 메모</label>
             <%= f.text_area :admin_note, rows: 4,
-                            class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
+                            class: "w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none",
                             placeholder: "처리 관련 메모를 남겨주세요..." %>
           </div>
 
           <!-- 제출 버튼 -->
           <div class="flex gap-3">
             <%= f.submit "저장", class: "flex-1 py-2.5 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer" %>
-            <%= link_to "목록", admin_reports_path, class: "py-2.5 px-4 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition text-center" %>
+            <%= link_to "목록", admin_reports_path, class: "py-2.5 px-4 bg-gray-100 text-foreground font-medium rounded-lg hover:bg-gray-200 transition text-center" %>
           </div>
         <% end %>
       </div>
     </div>
 
     <!-- 빠른 처리 버튼 -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">빠른 처리</h2>
+    <div class="bg-card rounded-xl border border-border overflow-hidden">
+      <div class="px-6 py-4 border-b border-border">
+        <h2 class="text-lg font-semibold text-foreground">빠른 처리</h2>
       </div>
       <div class="p-6 space-y-3">
         <% if @report.pending? %>
@@ -230,7 +230,7 @@
             기각
           <% end %>
         <% else %>
-          <p class="text-sm text-gray-500 text-center">이미 처리된 신고입니다.</p>
+          <p class="text-sm text-muted-foreground text-center">이미 처리된 신고입니다.</p>
         <% end %>
       </div>
     </div>

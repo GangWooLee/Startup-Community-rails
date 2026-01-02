@@ -1,8 +1,8 @@
 <%# Admin 헤더 - 페이지 제목 + 사용자 정보 + 액션 버튼 %>
-<header class="bg-white border-b border-gray-200 px-6 flex items-center justify-between flex-shrink-0"
+<header class="bg-card border-b border-border px-6 flex items-center justify-between flex-shrink-0"
         style="height: var(--admin-header-height);">
   <div class="flex items-center gap-4">
-    <h1 class="text-lg font-semibold text-gray-800">
+    <h1 class="text-lg font-semibold text-foreground">
       <%= content_for?(:page_title) ? yield(:page_title) : "관리자 대시보드" %>
     </h1>
 
@@ -21,13 +21,13 @@
 
     <!-- 사용자 정보 -->
     <div class="flex items-center gap-3">
-      <span class="text-sm text-gray-600">
+      <span class="text-sm text-muted-foreground">
         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
           ADMIN
         </span>
         <%= current_user.name %>
       </span>
-      <%= link_to root_path, class: "p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" do %>
+      <%= link_to root_path, class: "p-2 text-muted-foreground hover:text-foreground rounded-lg btn-hover" do %>
         <%= icon "arrow-right-start-on-rectangle", variant: :outline, class: "w-5 h-5" %>
       <% end %>
     </div>
