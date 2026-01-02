@@ -61,7 +61,7 @@
     </div>
     <div class="space-y-3">
       <% User.order(created_at: :desc).limit(5).each do |user| %>
-        <%= link_to admin_user_path(user), class: "flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 -mx-1 transition" do %>
+        <%= link_to admin_user_path(user), class: "flex items-center gap-3 rounded-lg p-1 -mx-1 card-hover" do %>
           <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">
             <%= user.name&.first&.upcase || "?" %>
           </div>

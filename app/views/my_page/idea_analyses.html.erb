@@ -23,7 +23,7 @@
       <div class="space-y-3">
         <% @idea_analyses.each do |analysis| %>
           <%= link_to ai_result_path(analysis) do %>
-            <div class="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-all mb-3">
+            <div class="bg-card rounded-xl border border-border p-4 card-hover mb-3">
               <!-- 점수 뱃지 & 날짜 -->
               <div class="flex items-center justify-between mb-2">
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium <%= analysis.score.to_i >= 70 ? 'bg-green-500/10 text-green-600' : analysis.score.to_i >= 50 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-red-500/10 text-red-600' %>">

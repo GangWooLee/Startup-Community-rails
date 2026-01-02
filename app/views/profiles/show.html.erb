@@ -13,14 +13,14 @@
         <h1 class="text-xl font-bold">프로필</h1>
       </div>
       <% if @is_own_profile %>
-        <%= link_to edit_my_page_path, class: "text-sm text-muted-foreground hover:text-foreground link-hover relative" do %>
+        <%= link_to edit_my_page_path, class: "text-sm text-muted-foreground link-hover relative" do %>
           설정
         <% end %>
       <% elsif logged_in? %>
         <%# 신고 버튼 - render_dropdown 헬퍼 사용 %>
         <%= render_dropdown align: :right do |d| %>
           <% d.trigger do %>
-            <button type="button" class="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary">
+            <button type="button" class="p-2 rounded-md text-muted-foreground btn-hover">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
