@@ -17,14 +17,14 @@
 
       <div class="ml-auto flex items-center gap-2">
         <% if logged_in? && @post.user == current_user %>
-          <%= link_to edit_post_path(@post), class: "text-sm text-muted-foreground hover:text-foreground link-hover relative" do %>
+          <%= link_to edit_post_path(@post), class: "text-sm text-muted-foreground link-hover relative" do %>
             수정
           <% end %>
         <% elsif logged_in? && @post.user != current_user %>
           <%# 신고 버튼 (본인 글이 아닐 때) %>
           <div class="relative" data-controller="dropdown">
             <button type="button"
-                    class="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    class="p-2 rounded-md text-muted-foreground btn-hover"
                     data-action="click->dropdown#toggle">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -34,7 +34,7 @@
                  data-dropdown-target="menu">
               <div class="py-1" role="menu">
                 <button type="button"
-                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        class="w-full text-left px-4 py-2 text-sm text-red-600 btn-hover flex items-center gap-2"
                         data-action="click->report-modal#open"
                         data-reportable-type="Post"
                         data-reportable-id="<%= @post.id %>"

@@ -13,7 +13,7 @@
 
   <%# 댓글 링크 %>
   <%= link_to post_path(post),
-      class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground btn-hover" do %>
+      class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground btn-hover" do %>
     <%= render partial: "shared/icons/message_square", locals: { css_class: "h-4 w-4" } %>
     <span><%= post.comments_count %></span>
   <% end %>
