@@ -6,7 +6,7 @@
   is_post_author = room.post_author?(current_user)
 %>
 
-<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 hover:bg-secondary transition-colors #{unread_count > 0 ? 'bg-primary/5' : ''}" do %>
+<%= link_to chat_room_path(room), class: "flex items-start gap-3 p-4 card-hover #{unread_count > 0 ? 'bg-primary/5' : ''}" do %>
   <!-- 프로필 이미지 (이니셜 폴백 포함) -->
   <div class="relative flex-shrink-0">
     <% if other_user&.avatar&.attached? %>

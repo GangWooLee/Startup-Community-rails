@@ -4,7 +4,7 @@
     <% if chat_room.pending? %>
       <%= button_to confirm_deal_chat_room_path(chat_room),
                     method: :post,
-                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-600 transition",
+                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-500 text-white btn-hover",
                     data: { turbo_stream: true, turbo_confirm: "거래를 확정하시겠습니까?" } do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -14,7 +14,7 @@
 
       <%= button_to cancel_deal_chat_room_path(chat_room),
                     method: :post,
-                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-muted/20 text-foreground hover:bg-muted/30 transition",
+                    class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-muted/20 text-foreground btn-hover",
                     data: { turbo_stream: true, turbo_confirm: "거래를 취소하시겠습니까?" } do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

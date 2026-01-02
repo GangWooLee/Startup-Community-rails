@@ -18,7 +18,7 @@
         <%# 구매자에게 거래 확정 버튼 표시 %>
         <%= button_to confirm_order_path(active_order),
                       method: :post,
-                      class: "flex-shrink-0 px-4 py-1.5 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 transition-colors",
+                      class: "flex-shrink-0 px-4 py-1.5 bg-green-600 text-white text-sm font-medium rounded-full btn-hover",
                       data: { confirm: "작업이 완료되었나요? 거래 확정 시 판매자에게 #{active_order.formatted_settlement_amount}이 정산됩니다." } do %>
           거래 확정
         <% end %>
