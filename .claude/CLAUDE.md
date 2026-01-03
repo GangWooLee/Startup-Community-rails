@@ -58,6 +58,25 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 | `request.original_url` 직접 사용 | 한글 인코딩 오류 | `og_meta_tags()` 헬퍼 사용 |
 | `onclick` 검색 결과 | blur 시 재검색 | `onmousedown` 사용 |
 | `faraday_ssl.rb` 파일 삭제 | Mac에서 SSL 에러 | **절대 삭제 금지!** (Mac 필수) |
+| 레이아웃에서 애니메이션 CSS 삭제 | 랜딩 페이지 깨짐 | **삭제 금지!** (CDN은 커스텀 CSS 미포함) |
+
+### ⚠️ 애니메이션 CSS 아키텍처 (중요!)
+```
+현재 구조:
+- Tailwind CDN 사용 (application.html.erb Line 29)
+- 커스텀 애니메이션은 인라인 <style> 태그에 정의 (Line 198-270)
+- app/assets/tailwind/application.css는 백업용 (브라우저에 로드 안됨)
+
+왜 이렇게?
+- CDN은 커스텀 @keyframes를 모름
+- 빌드된 CSS (app/assets/builds/tailwind.css)는 로드되지 않음
+- 따라서 애니메이션은 반드시 레이아웃에 인라인으로 있어야 함
+
+관련 파일:
+- app/views/layouts/application.html.erb (애니메이션 정의)
+- app/javascript/controllers/scroll_animation_controller.js
+- app/views/onboarding/landing.html.erb (사용처)
+```
 
 ## 핵심 파일 Quick Reference
 

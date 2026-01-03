@@ -20,10 +20,10 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Google Fonts - IBM Plex Serif (undrew-design) %>
+    <%# Google Fonts - Montserrat (영문) + Nanum Gothic Coding (한글) %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
 
     <%# Tailwind CSS CDN (개발/테스트용) %>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,8 +34,8 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ["'IBM Plex Serif'", 'serif'],
-              serif: ["'IBM Plex Serif'", 'serif'],
+              sans: ["'Montserrat'", "'Nanum Gothic Coding'", 'sans-serif'],
+              serif: ["'Montserrat'", "'Nanum Gothic Coding'", 'serif'],
             },
             borderRadius: {
               lg: 'var(--radius)',
@@ -193,6 +193,83 @@
         font-family: var(--font-sans);
         background-color: hsl(var(--background));
         color: hsl(var(--foreground));
+      }
+
+      /* ==========================================================================
+         Landing Page Animations
+         ==========================================================================
+         ⚠️ IMPORTANT: DO NOT REMOVE OR MOVE THIS SECTION!
+
+         WHY IS THIS HERE?
+         - This project uses Tailwind CDN (Line 29: cdn.tailwindcss.com)
+         - Custom animations in app/assets/tailwind/application.css are built
+           into app/assets/builds/tailwind.css
+         - BUT the layout ONLY loads the CDN, NOT the built CSS file
+         - Therefore, custom animations MUST be defined inline here
+
+         ALTERNATIVES (if you want to change this setup):
+         1. Keep CDN + inline CSS (current approach - simple, works)
+         2. Replace CDN with built CSS: stylesheet_link_tag "tailwind"
+            (requires testing all pages for style compatibility)
+
+         WHAT'S DEFINED HERE:
+         - Entry animations: fade-slide-up, fade-slide-right, scale-in
+         - Scroll animations: animate-on-scroll, animate-on-scroll-card
+         - Animation delays: animate-delay-100 through animate-delay-500
+         - Accessibility: prefers-reduced-motion support
+
+         RELATED FILES:
+         - app/assets/tailwind/application.css (source definitions, backup)
+         - app/javascript/controllers/scroll_animation_controller.js
+         - app/views/onboarding/landing.html.erb (main usage)
+         ========================================================================== */
+
+      /* Entry Animations - Hero Section */
+      @keyframes fade-slide-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fade-slide-right {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes scale-in {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes scroll-fade-up-30 {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Animation Classes */
+      .animate-fade-slide-up { animation: fade-slide-up 0.6s ease-out forwards; }
+      .animate-fade-slide-right { animation: fade-slide-right 0.6s ease-out forwards; }
+      .animate-scale-in { animation: scale-in 0.6s ease-out forwards; }
+
+      /* Animation Delays */
+      .animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+      .animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+      .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+      .animate-delay-400 { animation-delay: 0.4s; opacity: 0; }
+      .animate-delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+      /* Scroll-Triggered Animations */
+      .animate-on-scroll { opacity: 0; transform: translateY(30px); }
+      .animate-on-scroll.is-visible { animation: scroll-fade-up-30 0.6s ease-out forwards; }
+      .animate-on-scroll-card { opacity: 0; transform: translateY(20px); }
+      .animate-on-scroll-card.is-visible { animation: fade-slide-up 0.5s ease-out forwards; }
+
+      /* Accessibility - Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        .animate-fade-slide-up, .animate-fade-slide-right, .animate-scale-in,
+        .animate-on-scroll, .animate-on-scroll-card {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .animate-delay-100, .animate-delay-200, .animate-delay-300,
+        .animate-delay-400, .animate-delay-500 { opacity: 1 !important; }
       }
     </style>
 

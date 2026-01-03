@@ -64,3 +64,6 @@ moat-tasks-detail.json
 
 # Test coverage
 coverage/
+
+# Design reference files
+design-sample/

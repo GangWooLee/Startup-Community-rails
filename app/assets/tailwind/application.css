@@ -58,6 +58,9 @@
   --color-chart-5: oklch(0.645 0.246 16.439);
 }
 
+/* ==========================================================================
+   @layer base - Base styles and @keyframes definitions
+   ========================================================================== */
 @layer base {
   * {
     border-color: var(--color-border);
@@ -67,62 +70,222 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Chat animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Profile overlay animations */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
+  /* ==========================================================================
+     Landing Page Animations - Onboarding Redesign
+     Reference: Framer Motion specs from design-sample/
+     ========================================================================== */
+
+  /* Fade + Slide Up - for hero text elements */
+  /* Reference: initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} duration: 0.6s */
+  @keyframes fade-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fade + Slide Right - for AI Studio mockup */
+  /* Reference: initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} duration: 0.6s */
+  @keyframes fade-slide-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Scale In - for macOS browser frame */
+  /* Reference: initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} duration: 0.6s */
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Section Header - y: 30px start, 0.6s duration */
+  /* Reference: initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} */
+  @keyframes scroll-fade-up-30 {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
-/* Chat animations */
-@keyframes fade-in {
-  from {
+/* ==========================================================================
+   @layer utilities - Utility classes for animations and landing page
+   ========================================================================== */
+@layer utilities {
+  /* Chat animation */
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+
+  /* Safe area for bottom navigation */
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;             /* Chrome, Safari and Opera */
+  }
+
+  /* Profile overlay animation */
+  .animate-slide-up {
+    animation: slide-up 0.2s ease-out;
+  }
+
+  /* ==========================================================================
+     Landing Page Animation Classes
+     ========================================================================== */
+
+  /* Fade + Slide Up animation class */
+  .animate-fade-slide-up {
+    animation: fade-slide-up 0.6s ease-out forwards;
+  }
+
+  /* Fade + Slide Right animation class */
+  .animate-fade-slide-right {
+    animation: fade-slide-right 0.6s ease-out forwards;
+  }
+
+  /* Scale In animation class */
+  .animate-scale-in {
+    animation: scale-in 0.6s ease-out forwards;
+  }
+
+  /* Animation Delays - for staggered entrance */
+  /* Reference: delay: 0.1s, 0.2s, 0.3s, 0.4s, 0.5s */
+  .animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .animate-delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .animate-delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+  /* ==========================================================================
+     Scroll-Triggered Animations (whileInView equivalent)
+     Reference: Framer Motion viewport={{ once: true }}
+     ========================================================================== */
+
+  /* Scroll animation - initial state */
+  .animate-on-scroll {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(30px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  /* Scroll animation - visible state */
+  .animate-on-scroll.is-visible {
+    animation: scroll-fade-up-30 0.6s ease-out forwards;
   }
-}
 
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out;
-}
-
-/* Safe area for bottom navigation */
-.safe-area-bottom {
-  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
-}
-
-/* Hide scrollbar for horizontal scroll */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;             /* Chrome, Safari and Opera */
-}
-
-/* Profile overlay animations */
-@keyframes slide-up {
-  from {
+  /* Cards - y: 20px start, 0.5s duration with stagger */
+  /* Reference: initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} delay: index * 0.1s */
+  .animate-on-scroll-card {
     opacity: 0;
     transform: translateY(20px);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes slide-down {
-  from {
-    opacity: 1;
-    transform: translateY(0);
+  .animate-on-scroll-card.is-visible {
+    animation: fade-slide-up 0.5s ease-out forwards;
   }
-  to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
 
-.animate-slide-up {
-  animation: slide-up 0.2s ease-out;
+  /* ==========================================================================
+     Landing page color utilities
+     ========================================================================== */
+  .landing-bg { background-color: #E8E3DC; }
+  .landing-text-primary { color: #2C4A6B; }
+  .landing-text-muted { color: rgba(44, 74, 107, 0.6); }
+  .landing-text-light { color: rgba(44, 74, 107, 0.4); }
+  .landing-btn-primary {
+    background-color: #1E3A5F;
+    color: white;
+  }
+  .landing-btn-primary:hover {
+    background-color: #152B47;
+  }
+  .landing-btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .landing-border { border-color: rgba(44, 74, 107, 0.1); }
+  .landing-border-hover:hover { border-color: rgba(44, 74, 107, 0.2); }
+
+  /* Reduce motion for accessibility - landing animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-slide-up,
+    .animate-fade-slide-right,
+    .animate-scale-in,
+    .animate-on-scroll,
+    .animate-on-scroll-card {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .animate-delay-100,
+    .animate-delay-200,
+    .animate-delay-300,
+    .animate-delay-400,
+    .animate-delay-500 {
+      opacity: 1 !important;
+    }
+  }
 }
