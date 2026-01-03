@@ -1,0 +1,312 @@
+<% content_for :page_title, "#{@user.name} AI 사용량" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
+  <span>/</span>
+  <%= link_to "AI 분석 관리", admin_ai_usages_path, class: "hover:text-foreground" %>
+  <span>/</span>
+  <span class="text-foreground font-medium"><%= @user.name %></span>
+</nav>
+
+<!-- 사용자 정보 헤더 -->
+<div class="bg-card rounded-xl border border-border p-6 mb-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+        <span class="text-2xl font-bold text-primary"><%= @user.name[0].upcase %></span>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-foreground"><%= @user.name %></h1>
+        <p class="text-sm text-muted-foreground"><%= @user.email %></p>
+      </div>
+    </div>
+    <%= link_to admin_user_path(@user), class: "px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium btn-hover" do %>
+      <%= icon "user", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
+      회원 정보
+    <% end %>
+  </div>
+</div>
+
+<!-- 사용량 요약 -->
+<div class="grid grid-cols-5 gap-4 mb-6">
+  <div class="bg-card rounded-xl border border-border p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+        <%= icon "chart-bar", variant: :solid, css_class: "w-5 h-5 text-blue-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-foreground"><%= @stats[:used] %></p>
+        <p class="text-xs text-muted-foreground">사용 횟수</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card rounded-xl border border-border p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+        <%= icon "adjustments-horizontal", variant: :solid, css_class: "w-5 h-5 text-purple-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-foreground">
+          <%= @stats[:limit] %>
+          <% if @stats[:is_custom_limit] %>
+            <span class="text-xs text-purple-600">(커스텀)</span>
+          <% end %>
+        </p>
+        <p class="text-xs text-muted-foreground">Limit</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card rounded-xl border border-border p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+        <%= icon "gift", variant: :solid, css_class: "w-5 h-5 text-yellow-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold <%= @stats[:has_bonus] ? 'text-yellow-600' : 'text-foreground' %>">
+          +<%= @stats[:bonus] %>
+        </p>
+        <p class="text-xs text-muted-foreground">보너스</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card rounded-xl border border-border p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+        <%= icon "arrow-trending-up", variant: :solid, css_class: "w-5 h-5 text-green-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold <%= @stats[:remaining] == 0 ? 'text-red-600' : 'text-foreground' %>">
+          <%= @stats[:remaining] %>
+        </p>
+        <p class="text-xs text-muted-foreground">잔여 횟수</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card rounded-xl border border-border p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg <%= @stats[:reached] ? 'bg-red-500/10' : 'bg-green-500/10' %> flex items-center justify-center">
+        <%= icon(@stats[:reached] ? "exclamation-triangle" : "check-circle", variant: :solid, css_class: "w-5 h-5 #{@stats[:reached] ? 'text-red-600' : 'text-green-600'}") %>
+      </div>
+      <div>
+        <p class="text-lg font-bold <%= @stats[:reached] ? 'text-red-600' : 'text-green-600' %>">
+          <%= @stats[:reached] ? "Limit 도달" : "정상" %>
+        </p>
+        <p class="text-xs text-muted-foreground">상태</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 설정 폼 (3열) -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <!-- Limit 수정 폼 -->
+  <div class="bg-card rounded-xl border border-border p-4">
+    <h3 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+      <%= icon "adjustments-horizontal", variant: :outline, css_class: "w-5 h-5" %>
+      Limit 수정
+    </h3>
+    <%= form_with url: update_limit_admin_ai_usage_path(@user), method: :patch, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">현재 Limit</label>
+        <p class="text-lg font-medium text-foreground">
+          <%= @stats[:limit] %>회
+          <% if @stats[:is_custom_limit] %>
+            <span class="text-xs text-purple-600">(사용자 지정)</span>
+          <% else %>
+            <span class="text-xs text-muted-foreground">(기본값)</span>
+          <% end %>
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">새 Limit (0 = 기본값)</label>
+        <%= f.number_field :limit,
+            value: @user.ai_analysis_limit || 0,
+            min: 0,
+            max: 9999,
+            class: "w-full px-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" %>
+      </div>
+      <%= f.submit "저장", class: "w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium btn-hover cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <!-- 보너스 크레딧 -->
+  <div class="bg-card rounded-xl border border-border p-4">
+    <h3 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+      <%= icon "gift", variant: :outline, css_class: "w-5 h-5" %>
+      보너스 크레딧
+    </h3>
+    <%= form_with url: update_bonus_admin_ai_usage_path(@user), method: :patch, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">현재 보너스</label>
+        <p class="text-lg font-medium <%= @stats[:has_bonus] ? 'text-yellow-600' : 'text-foreground' %>">
+          +<%= @stats[:bonus] %>개
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">새 보너스</label>
+        <%= f.number_field :bonus,
+            value: @user.ai_bonus_credits,
+            min: 0,
+            max: 9999,
+            class: "w-full px-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" %>
+        <p class="text-xs text-muted-foreground mt-1">프로모션/보상용</p>
+      </div>
+      <%= f.submit "적용", class: "w-full px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <!-- 잔여횟수 직접 설정 -->
+  <div class="bg-card rounded-xl border border-border p-4">
+    <h3 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+      <%= icon "arrow-path", variant: :outline, css_class: "w-5 h-5" %>
+      잔여횟수 설정
+    </h3>
+    <%= form_with url: set_remaining_admin_ai_usage_path(@user), method: :patch, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">현재 잔여</label>
+        <p class="text-lg font-medium text-foreground"><%= @stats[:remaining] %>회</p>
+        <p class="text-xs text-muted-foreground">
+          (기본 <%= @stats[:base_remaining] %> + 보너스 <%= @stats[:bonus] %>)
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm text-muted-foreground mb-2">원하는 잔여</label>
+        <%= f.number_field :remaining,
+            value: @stats[:remaining],
+            min: 0,
+            max: 9999,
+            class: "w-full px-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" %>
+        <p class="text-xs text-muted-foreground mt-1">보너스가 자동 계산됩니다</p>
+      </div>
+      <%= f.submit "설정", class: "w-full px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors cursor-pointer" %>
+    <% end %>
+  </div>
+</div>
+
+<!-- 분석 기록 관리 -->
+<div class="bg-card rounded-xl border border-border p-4 mb-6">
+  <h3 class="font-semibold text-foreground mb-4 flex items-center gap-2">
+    <%= icon "trash", variant: :outline, css_class: "w-5 h-5 text-red-600" %>
+    분석 기록 관리
+  </h3>
+  <div class="p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800">
+    <p class="text-sm text-red-800 dark:text-red-300 mb-3">
+      전체 분석 기록(<strong><%= @analyses.count %></strong>개)을 삭제하면 복구할 수 없습니다.
+      삭제하면 잔여횟수가 자동으로 증가합니다.
+    </p>
+    <%= button_to reset_admin_ai_usage_path(@user),
+        method: :delete,
+        data: { confirm: "정말 #{@user.name}의 모든 분석 기록(#{@analyses.count}개)을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다." },
+        class: "px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer" do %>
+      전체 삭제 (<%= @analyses.count %>개)
+    <% end %>
+  </div>
+</div>
+
+<!-- 분석 이력 테이블 -->
+<div class="bg-card rounded-xl border border-border overflow-hidden">
+  <div class="p-4 border-b border-border flex items-center justify-between">
+    <h2 class="font-semibold text-foreground">
+      분석 이력
+      <span class="text-muted-foreground font-normal ml-2">(<%= @analyses.count %>개)</span>
+    </h2>
+  </div>
+
+  <% if @analyses.any? %>
+    <%= form_with url: destroy_selected_admin_ai_usage_path(@user), method: :delete, data: { turbo: false, controller: "checkbox-select" } do |f| %>
+      <!-- 선택 삭제 버튼 -->
+      <div class="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <input type="checkbox" id="select-all" data-action="change->checkbox-select#toggleAll" class="w-4 h-4 rounded border-border">
+          <label for="select-all" class="text-sm text-muted-foreground">전체 선택</label>
+        </div>
+        <%= f.submit "선택 삭제",
+            data: { confirm: "선택한 분석 기록을 삭제하시겠습니까?" },
+            class: "px-4 py-2 bg-red-500/10 text-red-600 rounded-lg text-sm font-medium btn-hover cursor-pointer" %>
+      </div>
+
+      <table class="w-full">
+        <thead class="bg-muted/50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase w-12"></th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">분석 일시</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">아이디어</th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">점수</th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">상태</th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">유형</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">액션</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          <% @analyses.each do |analysis| %>
+            <tr class="hover:bg-muted/30 transition-colors">
+              <td class="px-4 py-3">
+                <input type="checkbox"
+                       name="analysis_ids[]"
+                       value="<%= analysis.id %>"
+                       data-checkbox-select-target="item"
+                       class="w-4 h-4 rounded border-border">
+              </td>
+              <td class="px-4 py-3">
+                <p class="text-sm text-foreground"><%= analysis.created_at.strftime("%Y-%m-%d") %></p>
+                <p class="text-xs text-muted-foreground"><%= analysis.created_at.strftime("%H:%M") %></p>
+              </td>
+              <td class="px-4 py-3">
+                <p class="text-sm text-foreground line-clamp-2 max-w-md"><%= truncate(analysis.idea, length: 100) %></p>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <% if analysis.score.present? %>
+                  <span class="px-2 py-1 rounded-full text-xs font-medium
+                    <%= analysis.score >= 80 ? 'bg-green-500/10 text-green-600' :
+                        analysis.score >= 60 ? 'bg-yellow-500/10 text-yellow-600' :
+                        'bg-red-500/10 text-red-600' %>">
+                    <%= analysis.score %>점
+                  </span>
+                <% else %>
+                  <span class="text-xs text-muted-foreground">-</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <% case analysis.status %>
+                <% when "completed" %>
+                  <span class="px-2 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-medium">완료</span>
+                <% when "analyzing" %>
+                  <span class="px-2 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-medium">분석 중</span>
+                <% when "failed" %>
+                  <span class="px-2 py-1 rounded-full bg-red-500/10 text-red-600 text-xs font-medium">실패</span>
+                <% else %>
+                  <span class="px-2 py-1 rounded-full bg-gray-500/10 text-gray-600 text-xs font-medium"><%= analysis.status %></span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <% if analysis.is_real_analysis %>
+                  <span class="text-xs text-purple-600">실제</span>
+                <% else %>
+                  <span class="text-xs text-muted-foreground">Mock</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= button_to admin_destroy_ai_analysis_path(@user, analysis_id: analysis.id),
+                    method: :delete,
+                    data: { confirm: "이 분석 기록을 삭제하시겠습니까?" },
+                    class: "px-3 py-1.5 bg-red-500/10 text-red-600 rounded-lg text-xs font-medium btn-hover" do %>
+                  삭제
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  <% else %>
+    <div class="p-8 text-center">
+      <%= icon "document-text", variant: :outline, css_class: "w-12 h-12 text-muted-foreground mx-auto mb-3" %>
+      <p class="text-muted-foreground">분석 기록이 없습니다.</p>
+    </div>
+  <% end %>
+</div>

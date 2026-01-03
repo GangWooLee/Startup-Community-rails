@@ -170,5 +170,20 @@ Rails.application.routes.draw do
 
     resources :reports, only: [:index, :show, :update]
     resources :inquiries, only: [:index, :show, :update]
+
+    # AI 분석 사용량 관리
+    resources :ai_usages, only: [:index, :show] do
+      member do
+        patch :update_limit           # limit 수정
+        patch :update_bonus           # 보너스 크레딧 수정
+        patch :set_remaining          # 잔여횟수 직접 설정
+        delete :reset                 # 전체 삭제
+        delete :destroy_selected      # 선택 삭제
+      end
+    end
+    # 개별 분석 삭제
+    delete "ai_usages/:id/analyses/:analysis_id",
+           to: "ai_usages#destroy_analysis",
+           as: :destroy_ai_analysis
   end
 end

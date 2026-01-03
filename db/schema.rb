@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_02_055944) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -389,6 +389,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_02_055944) do
   create_table "users", force: :cascade do |t|
     t.text "achievements"
     t.string "affiliation"
+    t.integer "ai_analysis_limit"
+    t.integer "ai_bonus_credits", default: 0, null: false
     t.json "availability_statuses", default: []
     t.string "avatar_url"
     t.text "bio"

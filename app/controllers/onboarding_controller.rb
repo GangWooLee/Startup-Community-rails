@@ -10,14 +10,14 @@ class OnboardingController < ApplicationController
   def landing
     # 온보딩 랜딩은 누구나 접근 가능
     # 로그인한 사용자도 AI 분석 기능 사용 가능
-    @remaining_analyses = [MAX_FREE_ANALYSES - current_usage_count, 0].max
+    set_usage_stats
   end
 
   def ai_input
     # AI 아이디어 입력 화면
     # 뒤로가기 경로 설정: 로그인한 사용자는 커뮤니티로, 비로그인은 온보딩으로
     @back_path = logged_in? ? community_path : root_path
-    @remaining_analyses = [MAX_FREE_ANALYSES - current_usage_count, 0].max
+    set_usage_stats
   end
 
   # AI 추가 질문 생성 (POST /ai/questions)
@@ -113,21 +113,21 @@ class OnboardingController < ApplicationController
 
   private
 
-  # 사용 횟수 제한 확인 (비로그인 + 로그인 합산 5회)
+  # 사용 횟수 제한 확인 (사용자별 limit + 보너스 적용)
   def check_usage_limit
-    usage_count = current_usage_count
-    remaining = MAX_FREE_ANALYSES - usage_count
+    limit = effective_limit
+    remaining = remaining_analyses
 
-    if usage_count >= MAX_FREE_ANALYSES
+    if remaining <= 0
       respond_to do |format|
         format.html do
-          flash[:alert] = "무료 분석 #{MAX_FREE_ANALYSES}회가 끝났습니다."
+          flash[:alert] = "무료 분석 #{limit}회가 끝났습니다."
           redirect_to community_path
         end
         format.json do
           render json: {
             error: "limit_exceeded",
-            message: "무료 분석 #{MAX_FREE_ANALYSES}회가 끝났습니다.",
+            message: "무료 분석 #{limit}회가 끝났습니다.",
             remaining: 0
           }, status: :forbidden
         end
@@ -155,6 +155,39 @@ class OnboardingController < ApplicationController
   def increment_guest_usage_count
     current_count = cookies[:guest_ai_usage_count].to_i
     cookies.permanent[:guest_ai_usage_count] = (current_count + 1).to_s
+  end
+
+  # 사용자별 유효 limit 반환 (로그인: 사용자 설정, 비로그인: 기본값)
+  def effective_limit
+    if logged_in?
+      current_user.effective_ai_limit
+    else
+      MAX_FREE_ANALYSES
+    end
+  end
+
+  # 잔여 분석 횟수 반환 (로그인: 보너스 포함, 비로그인: 쿠키 기반)
+  def remaining_analyses
+    if logged_in?
+      # 로그인 사용자: User 모델의 보너스 포함 계산 사용
+      current_user.ai_analyses_remaining
+    else
+      # 비로그인 사용자: 기본 limit - 쿠키 사용량
+      MAX_FREE_ANALYSES - cookies[:guest_ai_usage_count].to_i
+    end
+  end
+
+  # 보너스 보유 여부 (UI 표시용)
+  def has_bonus?
+    logged_in? && current_user.ai_bonus_credits.to_i > 0
+  end
+  helper_method :has_bonus?
+
+  # 뷰에 필요한 사용량 통계 설정
+  def set_usage_stats
+    @remaining_analyses = remaining_analyses
+    @effective_limit = effective_limit
+    @has_bonus = has_bonus?
   end
 
   # 입력 데이터만 캐시에 저장 (AI 미실행 - Lazy Registration)

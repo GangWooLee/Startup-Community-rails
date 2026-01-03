@@ -57,6 +57,9 @@ class User < ApplicationRecord
   # AI 아이디어 분석
   has_many :idea_analyses, dependent: :destroy
 
+  # AI 분석 사용량 제한 (관리자 설정 가능)
+  DEFAULT_AI_ANALYSIS_LIMIT = 5
+
   # 회원 탈퇴 기록
   has_many :user_deletions, dependent: :destroy
 
@@ -325,6 +328,51 @@ class User < ApplicationRecord
   # 해당 Post에 대한 주문 가져오기
   def order_for(post)
     orders.find_by(post: post)
+  end
+
+  # ==========================================================================
+  # AI 분석 사용량 관리 메서드
+  # ==========================================================================
+
+  # 사용자의 유효 AI 분석 limit 반환 (nil이면 기본값 사용)
+  def effective_ai_limit
+    ai_analysis_limit || DEFAULT_AI_ANALYSIS_LIMIT
+  end
+
+  # 남은 AI 분석 횟수 반환 (보너스 포함)
+  # remaining = limit - used + bonus
+  def ai_analyses_remaining
+    [effective_ai_limit - idea_analyses.count + ai_bonus_credits.to_i, 0].max
+  end
+
+  # 보너스 제외 기본 잔여 횟수
+  def base_remaining
+    [effective_ai_limit - idea_analyses.count, 0].max
+  end
+
+  # AI 분석 limit에 도달했는지 확인
+  def ai_limit_reached?
+    ai_analyses_remaining <= 0
+  end
+
+  # 원하는 잔여횟수를 설정하기 위해 필요한 보너스 계산
+  def calculate_bonus_for_remaining(desired_remaining)
+    base = effective_ai_limit - idea_analyses.count
+    desired_remaining - base
+  end
+
+  # AI 분석 사용량 통계 (관리자용)
+  def ai_usage_stats
+    {
+      used: idea_analyses.count,
+      limit: effective_ai_limit,
+      bonus: ai_bonus_credits.to_i,
+      remaining: ai_analyses_remaining,
+      base_remaining: base_remaining,
+      is_custom_limit: ai_analysis_limit.present?,
+      has_bonus: ai_bonus_credits.to_i > 0,
+      reached: ai_limit_reached?
+    }
   end
 
   private
