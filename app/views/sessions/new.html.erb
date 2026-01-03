@@ -1,128 +1,111 @@
-<div class="min-h-screen w-full grid lg:grid-cols-2">
-  <!-- Left Panel - Brand/Character (hidden on mobile) -->
-  <div class="hidden lg:flex flex-col items-center justify-center bg-zinc-900 p-12 relative overflow-hidden">
-    <!-- Decorative background gradient -->
-    <div class="absolute inset-0 bg-gradient-to-br from-zinc-800/50 via-transparent to-zinc-900"></div>
+<div class="min-h-screen w-full flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
+  <!-- Subtle background pattern -->
+  <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0); background-size: 32px 32px;"></div>
 
-    <!-- Subtle pattern overlay -->
-    <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+  <!-- Decorative gradient blurs -->
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
 
-    <!-- Character Image with animation -->
-    <div class="relative z-10 animate-fade-slide-up">
-      <img src="/undrew_hello_icon.png" alt="Undrew Character"
-           class="w-56 h-56 xl:w-64 xl:h-64 object-contain drop-shadow-2xl">
-    </div>
-
-    <!-- Brand Text -->
-    <div class="relative z-10 text-center mt-8 animate-fade-slide-up animate-delay-200">
-      <h2 class="text-3xl xl:text-4xl font-bold text-white mb-4">반가워요!</h2>
-      <p class="text-zinc-400 text-base xl:text-lg max-w-xs leading-relaxed">
-        아이디어, 사람, 외주가<br>만나는 곳
-      </p>
-    </div>
-
-    <!-- Decorative bottom element -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
-      <div class="w-2 h-2 rounded-full bg-zinc-700"></div>
-      <div class="w-2 h-2 rounded-full bg-zinc-600"></div>
-      <div class="w-2 h-2 rounded-full bg-zinc-700"></div>
-    </div>
-  </div>
-
-  <!-- Right Panel - Login Form -->
-  <div class="flex items-center justify-center bg-background px-4 py-8 lg:py-12">
-    <div class="w-full max-w-md">
-      <!-- Logo/Title -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-foreground mb-2">스타트업 커뮤니티</h1>
-        <p class="text-muted-foreground">아이디어, 사람, 외주가 만나는 곳</p>
+  <!-- Main Content -->
+  <div class="relative z-10 w-full max-w-md">
+    <!-- Character Header -->
+    <div class="text-center mb-6">
+      <!-- Character with floating animation -->
+      <div class="flex justify-center mb-4">
+        <img src="/undrew_hello_icon.png"
+             alt="Undrew Character"
+             class="w-20 h-20 object-contain animate-float drop-shadow-lg">
       </div>
 
-      <!-- Login Card - shadcn Card 스타일 -->
-      <div class="rounded-xl border bg-card text-card-foreground shadow-lg p-8">
-        <h2 class="text-2xl font-bold text-foreground mb-6">로그인</h2>
+      <!-- Welcome Text -->
+      <h1 class="text-2xl font-bold text-foreground mb-1">환영합니다!</h1>
+      <p class="text-muted-foreground text-sm">아이디어, 사람, 기업이 만나는 곳</p>
+    </div>
 
-        <%= form_with url: login_path, method: :post, local: true, class: "space-y-4" do |f| %>
-          <!-- Email Field - shadcn Input -->
-          <div class="space-y-2">
-            <%= render_label name: "email", label: "이메일" %>
-            <%= render_input name: "email",
-                            type: :email,
-                            id: "email",
-                            value: params[:email],
-                            placeholder: "example@startup.com",
-                            required: true,
-                            class: "w-full" %>
-          </div>
+    <!-- Login Card -->
+    <div class="rounded-xl border bg-card text-card-foreground shadow-xl p-8">
+      <h2 class="text-xl font-semibold text-foreground mb-6 text-center">로그인</h2>
 
-          <!-- Password Field - shadcn Input -->
-          <div class="space-y-2">
-            <%= render_label name: "password", label: "비밀번호" %>
-            <%= render_input name: "password",
-                            type: :password,
-                            id: "password",
-                            placeholder: "••••••••",
-                            required: true,
-                            class: "w-full" %>
-          </div>
+      <%= form_with url: login_path, method: :post, local: true, class: "space-y-4" do |f| %>
+        <!-- Email Field -->
+        <div class="space-y-2">
+          <%= render_label name: "email", label: "이메일" %>
+          <%= render_input name: "email",
+                          type: :email,
+                          id: "email",
+                          value: params[:email],
+                          placeholder: "example@startup.com",
+                          required: true,
+                          class: "w-full" %>
+        </div>
 
-          <!-- Remember Me & Account Recovery -->
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="checkbox" name="remember_me" class="rounded border-input h-4 w-4">
-              <span>로그인 상태 유지</span>
-            </label>
-            <%= link_to "비밀번호 찾기", forgot_password_form_path, class: "text-sm text-primary link-hover relative" %>
-          </div>
+        <!-- Password Field -->
+        <div class="space-y-2">
+          <%= render_label name: "password", label: "비밀번호" %>
+          <%= render_input name: "password",
+                          type: :password,
+                          id: "password",
+                          placeholder: "••••••••",
+                          required: true,
+                          class: "w-full" %>
+        </div>
 
-          <!-- Submit Button - shadcn Button -->
-          <%= render_button "로그인", class: "w-full h-11" %>
+        <!-- Remember Me & Account Recovery -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-sm text-muted-foreground">
+            <input type="checkbox" name="remember_me" class="rounded border-input h-4 w-4">
+            <span>로그인 상태 유지</span>
+          </label>
+          <%= link_to "비밀번호 찾기", forgot_password_form_path, class: "text-sm text-primary link-hover relative" %>
+        </div>
+
+        <!-- Submit Button -->
+        <%= render_button "로그인", class: "w-full h-11" %>
+      <% end %>
+
+      <!-- Divider -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-border"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-card px-2 text-muted-foreground">또는</span>
+        </div>
+      </div>
+
+      <!-- Social Login Buttons -->
+      <div class="space-y-2">
+        <%= form_with url: oauth_passthru_path(provider: "google_oauth2"), method: :post, local: true, data: { turbo: false } do %>
+          <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
+          <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+            </svg>
+            Google로 계속하기
+          <% end %>
         <% end %>
 
-        <!-- Divider -->
-        <div class="relative my-6">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-border"></div>
-          </div>
-          <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-card px-2 text-muted-foreground">또는</span>
-          </div>
-        </div>
-
-        <!-- Social Login Buttons - shadcn Button outline -->
-        <div class="space-y-2">
-          <%= form_with url: oauth_passthru_path(provider: "google_oauth2"), method: :post, local: true, data: { turbo: false } do %>
-            <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
-            <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-              </svg>
-              Google로 계속하기
-            <% end %>
+        <%= form_with url: oauth_passthru_path(provider: "github"), method: :post, local: true, data: { turbo: false } do %>
+          <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
+          <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub로 계속하기
           <% end %>
-
-          <%= form_with url: oauth_passthru_path(provider: "github"), method: :post, local: true, data: { turbo: false } do %>
-            <%= hidden_field_tag :origin, @return_to if @return_to.present? %>
-            <%= render_button variant: :outline, class: "w-full h-11 gap-2" do %>
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              GitHub로 계속하기
-            <% end %>
-          <% end %>
-        </div>
-
-        <!-- Signup Link -->
-        <div class="mt-6 text-center text-sm text-muted-foreground">
-          아직 계정이 없으신가요?
-          <%= link_to "회원가입", signup_path, class: "text-primary font-medium hover:underline ml-1" %>
-        </div>
+        <% end %>
       </div>
 
-      <!-- Back to Home -->
-      <div class="mt-4 text-center">
-        <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground link-hover relative inline-block" %>
+      <!-- Signup Link -->
+      <div class="mt-6 text-center text-sm text-muted-foreground">
+        아직 계정이 없으신가요?
+        <%= link_to "회원가입", signup_path, class: "text-primary font-medium hover:underline ml-1" %>
       </div>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="mt-4 text-center">
+      <%= link_to "← 처음으로 돌아가기", root_path, class: "text-sm text-muted-foreground link-hover relative inline-block" %>
     </div>
   </div>
 </div>

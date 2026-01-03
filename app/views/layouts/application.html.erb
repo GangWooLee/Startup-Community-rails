@@ -271,6 +271,18 @@
         .animate-delay-100, .animate-delay-200, .animate-delay-300,
         .animate-delay-400, .animate-delay-500 { opacity: 1 !important; }
       }
+
+      /* Floating Animation - 로그인/회원가입 캐릭터 */
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animate-float { animation: none !important; }
+      }
     </style>
 
     <%# Google Analytics 4 (사용자 행동 분석) %>
