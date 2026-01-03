@@ -96,7 +96,7 @@
                    placeholder="example@startup.com"
                    required
                    data-email-verification-target="emailInput"
-                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                   class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
             <button type="button"
                     data-email-verification-target="sendButton"
                     data-action="click->email-verification#sendCode"
@@ -113,7 +113,7 @@
                      placeholder="인증 코드 6자리"
                      data-email-verification-target="codeInput"
                      data-action="input->email-verification#onCodeInput"
-                     class="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm tracking-widest font-mono uppercase ring-offset-background placeholder:text-muted-foreground placeholder:tracking-normal placeholder:font-sans focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                     class="flex h-10 flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm tracking-widest font-mono uppercase ring-offset-background placeholder:text-muted-foreground placeholder:tracking-normal placeholder:font-sans focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
               <span data-email-verification-target="timer" class="text-sm font-mono text-muted-foreground w-12">5:00</span>
               <button type="button"
                       data-email-verification-target="verifyButton"

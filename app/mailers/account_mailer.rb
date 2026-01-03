@@ -3,7 +3,7 @@
 # - 비밀번호 재설정
 # - OAuth 사용자 안내
 class AccountMailer < ApplicationMailer
-  default from: "noreply@startup-community.com"
+  default from: "undrew1dev@gmail.com"
 
   # 회원가입 이메일 인증 코드 발송
   # 5분 유효
@@ -13,7 +13,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: email,
-      subject: "[스타트업 커뮤니티] 회원가입 인증 코드"
+      subject: "[Undrew] 회원가입 인증 코드"
     )
   end
 
@@ -26,7 +26,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: "[스타트업 커뮤니티] 비밀번호 재설정"
+      subject: "[Undrew] 비밀번호 재설정"
     )
   end
 
@@ -44,7 +44,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: "[스타트업 커뮤니티] 비밀번호 재설정 안내"
+      subject: "[Undrew] 비밀번호 재설정 안내"
     )
   end
 end
