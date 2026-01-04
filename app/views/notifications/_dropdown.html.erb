@@ -1,16 +1,17 @@
-<%# 알림 드롭다운 (헤더용) %>
+<%# 알림 드롭다운 (헤더용) - Organic Modern Style %>
 <%# 헤더에서 직접 렌더링될 때는 current_user에서 알림을 가져옴 %>
 
 <% notifications = current_user.notifications.includes(:actor, :notifiable).recent.limit(10) %>
 <% unread_count = current_user.unread_notifications_count %>
 
-<div class="bg-card rounded-lg overflow-hidden">
+<div class="bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden
+            border border-stone-200/60 shadow-lg shadow-stone-900/5">
   <%# 헤더 %>
-  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
-    <h3 class="font-semibold text-foreground text-sm">알림</h3>
+  <div class="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50/50">
+    <h3 class="font-semibold text-stone-800 text-sm">알림</h3>
     <% if unread_count > 0 %>
       <%= button_to mark_all_read_notifications_path, method: :post,
-          class: "text-xs text-primary hover:underline",
+          class: "text-xs text-orange-500 hover:text-orange-600 font-medium transition-colors",
           data: { turbo_method: :post } do %>
         모두 읽음
       <% end %>
@@ -18,13 +19,15 @@
   </div>
 
   <%# 알림 목록 %>
-  <div id="notification-dropdown-list" class="max-h-72 overflow-y-auto">
+  <div id="notification-dropdown-list" class="max-h-72 overflow-y-auto custom-scrollbar-premium">
     <%= render "notifications/dropdown_list", notifications: notifications %>
   </div>
 
   <%# 전체보기 링크 %>
-  <div class="px-4 py-2 border-t border-border">
-    <%= link_to notifications_path, class: "block text-center text-sm text-primary hover:underline", data: { turbo_frame: "_top" } do %>
+  <div class="px-4 py-2.5 border-t border-stone-100 bg-stone-50/30">
+    <%= link_to notifications_path,
+        class: "block text-center text-sm text-stone-600 hover:text-stone-900 font-medium transition-colors",
+        data: { turbo_frame: "_top" } do %>
       전체 알림 보기
     <% end %>
   </div>

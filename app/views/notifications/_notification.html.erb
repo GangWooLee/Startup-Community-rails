@@ -1,11 +1,13 @@
-<%# 알림 아이템 %>
+<%# 알림 아이템 - Organic Modern Style %>
 <%# locals: (notification:) %>
 
 <%# actor가 없는 경우 (삭제된 사용자) 알림 표시하지 않음 %>
 <% return unless notification.actor %>
 
 <div id="notification-<%= notification.id %>"
-     class="<%= notification.unread? ? 'bg-primary/5' : 'bg-background' %> card-hover">
+     class="rounded-xl overflow-hidden transition-all duration-200
+            <%= notification.unread? ? 'bg-white/90 shadow-sm ring-1 ring-orange-200/30' : 'bg-white/60 hover:bg-white/80' %>
+            backdrop-blur-sm">
   <%= link_to notification_path(notification),
       class: "flex items-start gap-3 p-4",
       data: { turbo_method: :get } do %>
@@ -15,55 +17,65 @@
       <% if notification.actor.has_profile_image? %>
         <% if notification.actor.avatar.attached? %>
           <%= image_tag notification.actor.avatar.variant(:thumb),
-              class: "w-10 h-10 rounded-full object-cover",
+              class: "w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-sm",
               alt: notification.actor.name %>
         <% else %>
           <img src="<%= notification.actor.avatar_url %>"
-               class="w-10 h-10 rounded-full object-cover"
+               class="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-sm"
                alt="<%= notification.actor.name %>">
         <% end %>
       <% else %>
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-          <span class="text-sm font-semibold text-primary-foreground">
+        <div class="w-11 h-11 rounded-full bg-gradient-to-br from-stone-200 to-stone-300
+                    flex items-center justify-center ring-2 ring-white shadow-sm">
+          <span class="text-sm font-semibold text-stone-600">
             <%= notification.actor.name&.first&.upcase %>
           </span>
         </div>
       <% end %>
 
       <%# 액션 아이콘 뱃지 %>
-      <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center
+      <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center
+                  shadow-sm ring-2 ring-white
                   <%= notification_icon_bg(notification.action) %>">
-        <%= notification_icon(notification.action) %>
+        <svg class="w-2.5 h-2.5 text-white" fill="<%= notification.action == 'like' ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+          <% if notification.action == 'comment' || notification.action == 'reply' %>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          <% elsif notification.action == 'like' %>
+            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          <% else %>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          <% end %>
+        </svg>
       </div>
     </div>
 
     <%# 알림 내용 %>
     <div class="flex-1 min-w-0">
-      <p class="text-sm text-foreground">
+      <p class="text-sm text-stone-800">
         <span class="font-semibold"><%= notification.actor.name %></span>
-        <span class="text-muted-foreground"><%= notification_action_text(notification.action) %></span>
+        <span class="text-stone-500"><%= notification_action_text(notification.action) %></span>
       </p>
 
       <%# 알림 대상 내용 미리보기 (notifiable이 있는 경우만) %>
       <% if notification.notifiable %>
         <% preview = notification_preview(notification) %>
         <% if preview.present? %>
-          <p class="text-sm text-muted-foreground mt-0.5 line-clamp-1">
+          <p class="text-sm text-stone-500 mt-0.5 line-clamp-1">
             "<%= preview %>"
           </p>
         <% end %>
       <% end %>
 
       <%# 시간 %>
-      <p class="text-xs text-muted-foreground mt-1">
+      <p class="text-xs text-stone-400 mt-1">
         <%= time_ago_in_words(notification.created_at) %> 전
       </p>
     </div>
 
     <%# 읽지 않음 표시 %>
     <% if notification.unread? %>
-      <div class="flex-shrink-0">
-        <div class="w-2 h-2 rounded-full bg-primary"></div>
+      <div class="flex-shrink-0 mt-1">
+        <div class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div>
       </div>
     <% end %>
   <% end %>
