@@ -1,0 +1,137 @@
+<%# Command Palette Search Modal - Phase 16 %>
+<%# Linear/Raycast/Notion 스타일의 몰입형 검색 %>
+<%# Note: data-controller="search-modal" is on <body> tag for global access %>
+
+<div class="contents">
+  <%# Backdrop Overlay %>
+  <div data-search-modal-target="overlay"
+       data-action="click->search-modal#closeOnOverlay"
+       class="fixed inset-0 z-50 bg-stone-900/20 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+
+    <%# Modal Container - 상단 중앙 배치 %>
+    <div class="flex justify-center pt-[15vh] px-4">
+      <div data-search-modal-target="modal"
+           class="w-full max-w-2xl bg-white/90 backdrop-blur-2xl rounded-2xl
+                  shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]
+                  border border-white/50 ring-1 ring-stone-200/30 overflow-hidden
+                  opacity-0">
+
+        <%# Search Input Header - Crystal Lens Style %>
+        <div class="flex items-center gap-4 px-5 py-5 border-b border-stone-100/80">
+          <%# Search Icon - Premium Size %>
+          <svg data-search-modal-target="searchIcon"
+               class="w-6 h-6 text-stone-400 flex-shrink-0 transition-colors duration-200"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+
+          <%# Input Field - Large Typography + Orange Caret %>
+          <input type="text"
+                 data-search-modal-target="input"
+                 data-action="input->search-modal#search keydown.escape->search-modal#close keydown.arrow-down->search-modal#navigateDown keydown.arrow-up->search-modal#navigateUp keydown.enter->search-modal#selectCurrent"
+                 placeholder="검색어를 입력하세요..."
+                 autocomplete="off"
+                 class="flex-1 bg-transparent text-xl md:text-2xl font-medium text-stone-900
+                        placeholder:text-stone-400 placeholder:font-normal caret-orange-500
+                        outline-none border-none focus:ring-0">
+
+          <%# ESC Badge - Keyboard Hint %>
+          <button type="button"
+                  data-action="click->search-modal#close"
+                  class="px-2.5 py-1.5 text-xs font-medium text-stone-400 bg-stone-100/80
+                         rounded-md border border-stone-200/80 hover:bg-stone-200/80
+                         hover:text-stone-500 transition-all duration-150">
+            ESC
+          </button>
+        </div>
+
+        <%# Results Container %>
+        <div class="max-h-[60vh] overflow-y-auto custom-scrollbar-premium">
+
+          <%# Loading Indicator %>
+          <div data-search-modal-target="loading" class="hidden py-12">
+            <div class="flex flex-col items-center justify-center gap-4">
+              <div class="relative w-10 h-10">
+                <div class="absolute inset-0 rounded-full border-2 border-stone-200"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin"></div>
+              </div>
+              <p class="text-sm text-stone-500">검색 중...</p>
+            </div>
+          </div>
+
+          <%# Recent Searches (기본 표시) %>
+          <div data-search-modal-target="recentSearches" class="py-3">
+            <div class="px-4 py-2">
+              <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">최근 검색</p>
+            </div>
+            <div class="space-y-1 px-2" data-search-modal-target="recentSearchList">
+              <%# JavaScript에서 쿠키 기반으로 동적 렌더링됨 %>
+              <p class="px-3 py-2 text-sm text-stone-400">최근 검색 내역이 없습니다</p>
+            </div>
+
+            <%# 빠른 링크 %>
+            <div class="mt-4 px-4 py-2">
+              <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">빠른 링크</p>
+            </div>
+            <div class="space-y-1 px-2 pb-2">
+              <%= link_to job_posts_path,
+                          data: { action: "click->search-modal#resultClick", search_modal_target: "resultItem" },
+                          tabindex: "0",
+                          class: "w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-xl
+                                  hover:bg-orange-50/50 focus:bg-orange-50/50
+                                  hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
+                                  transition-all duration-150 group outline-none" do %>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100
+                            flex items-center justify-center shadow-sm">
+                  <svg class="w-4.5 h-4.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900">Join Project</p>
+                  <p class="text-xs text-stone-400">외주 및 프로젝트 찾기</p>
+                </div>
+                <svg class="w-4 h-4 text-stone-300 group-hover:text-orange-400 transition-colors"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+
+          <%# Search Results (Turbo Frame) %>
+          <turbo-frame id="search_modal_results"
+                       data-search-modal-target="resultsFrame"
+                       data-action="turbo:frame-load->search-modal#frameLoaded turbo:frame-error->search-modal#frameError">
+            <%# 검색 결과가 여기에 로드됨 %>
+          </turbo-frame>
+
+        </div>
+
+        <%# Footer - Crystal Lens Keyboard Hints %>
+        <div class="px-5 py-3.5 bg-stone-50/60 border-t border-stone-100/80">
+          <div class="flex items-center justify-between text-xs text-stone-400">
+            <div class="flex items-center gap-5">
+              <span class="flex items-center gap-1.5">
+                <kbd class="px-1.5 py-0.5 bg-white/80 rounded border border-stone-200/80 text-stone-500 font-medium">↑↓</kbd>
+                <span>이동</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <kbd class="px-1.5 py-0.5 bg-white/80 rounded border border-stone-200/80 text-stone-500 font-medium">↵</kbd>
+                <span>선택</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <kbd class="px-1.5 py-0.5 bg-white/80 rounded border border-stone-200/80 text-stone-500 font-medium">esc</kbd>
+                <span>닫기</span>
+              </span>
+            </div>
+            <span class="text-stone-400/80">⌘K로 언제든 검색</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

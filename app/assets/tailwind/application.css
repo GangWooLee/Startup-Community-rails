@@ -1,3 +1,6 @@
+/* Pretendard Font - 한글 최적화 (must be before @import 'tailwindcss') */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css');
+
 @import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
@@ -69,6 +72,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
 
   /* Chat animations */
@@ -287,5 +291,910 @@
     .animate-delay-500 {
       opacity: 1 !important;
     }
+  }
+
+  /* ==========================================================================
+     Organic Modern Design System - Community Page Redesign
+     Reference: design-sample/community_page/community_page
+     Color Palette: Cream (#FDFBF7), Charcoal (#2C2825), Orange (#f97316)
+     ========================================================================== */
+
+  /* Dot Pattern Background (Legacy) */
+  .bg-dot-pattern {
+    background-image: radial-gradient(#d6d3d1 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Grainy Noise Texture - Organic Modern Paper Effect
+     Creates a subtle paper-like grain texture for warm, analog feel */
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+  }
+
+  /* Glass Panel Effect */
+  .glass-panel {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  /* Glass Navigation Bar */
+  .glass-nav {
+    background-color: rgba(253, 251, 247, 0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(214, 211, 209, 0.5);
+  }
+
+  /* Sidebar Custom Scrollbar */
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #e7e5e4 transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: #e7e5e4;
+    border-radius: 20px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #d6d3d1;
+  }
+
+  /* Organic Modern Color Utilities */
+  .organic-bg { background-color: #FDFBF7; }
+  .organic-text { color: #2C2825; }
+  .organic-text-muted { color: #5C5446; }
+  .organic-accent { color: #f97316; }
+
+  /* Stone Color Extensions (for Organic Modern) */
+  .text-stone-800 { color: #292524; }
+  .text-stone-600 { color: #57534e; }
+  .text-stone-500 { color: #78716c; }
+  .text-stone-400 { color: #a8a29e; }
+  .bg-stone-100 { background-color: #f5f5f4; }
+  .bg-stone-50 { background-color: #fafaf9; }
+  .border-stone-200 { border-color: #e7e5e4; }
+  .border-stone-100 { border-color: #f5f5f4; }
+
+  /* Blob Animation - Enhanced v1.3 (faster, larger, smoother) */
+  .animate-blob {
+    animation: blob 8s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Reduce motion for blob animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-blob {
+      animation: none !important;
+    }
+  }
+
+  /* ==========================================================================
+     Phase 7: Frontend Design Polishing - Micro-interactions & Depth
+     ========================================================================== */
+
+  /* Card Lift Effect - 호버 시 부드러운 상승 효과 */
+  .card-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 12px -2px rgba(0, 0, 0, 0.08),
+      0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Card Depth Effect - 다층 그림자로 깊이감 */
+  .card-depth {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.02),
+      0 4px 8px rgba(0, 0, 0, 0.04),
+      0 12px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Link Glow Effect - 호버 시 오렌지 글로우 */
+  .link-glow {
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+  }
+
+  .link-glow:hover {
+    color: #f97316;
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  }
+
+  /* Subtle Scale Effect - 호버 시 미세한 확대 */
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Icon Bounce Effect - 아이콘 호버 시 바운스 */
+  .icon-bounce {
+    transition: transform 0.2s ease;
+  }
+
+  .icon-bounce:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Reduce motion for micro-interactions */
+  @media (prefers-reduced-motion: reduce) {
+    .card-lift,
+    .hover-scale,
+    .icon-bounce,
+    .link-glow {
+      transition: none !important;
+    }
+
+    .card-lift:hover,
+    .hover-scale:hover,
+    .icon-bounce:hover {
+      transform: none !important;
+    }
+  }
+
+  /* ==========================================================================
+     Phase 8: Coffee House Chat - AI Input Page Redesign
+     Conversational UI inspired by Typeform/Toss
+     ========================================================================== */
+
+  /* Immersive Input - 밑줄 포커스 스타일 (Typeform 영감)
+     - 투명 배경, 테두리 없음
+     - 밑줄만으로 입력 영역 표시
+     - 포커스 시 오렌지 밑줄 + 글로우 */
+  .input-underline {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #d6d3d1;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .input-underline:focus {
+    border-bottom-color: #f97316;
+    box-shadow: 0 4px 20px -8px rgba(249, 115, 22, 0.3);
+  }
+
+  .input-underline::placeholder {
+    color: #a8a29e;
+  }
+
+  /* Question Card - AI 질문 카드 (Glass 효과) */
+  .question-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.04),
+      0 20px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Dimmed Answer - 이전 답변 흐림 효과 */
+  .dimmed-answer {
+    opacity: 0.5;
+    transform: scale(0.95);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  /* Slide Up Animation (Large) - 단계 전환용 */
+  .animate-slide-up-lg {
+    animation: slide-up-lg 0.6s ease-out forwards;
+  }
+
+  /* Staggered Card Animations - 질문 카드 순차 등장 */
+  .question-card:nth-child(1) { animation-delay: 0s; }
+  .question-card:nth-child(2) { animation-delay: 0.1s; }
+  .question-card:nth-child(3) { animation-delay: 0.15s; }
+  .question-card:nth-child(4) { animation-delay: 0.2s; }
+
+  /* Typing Indicator - AI 타이핑 효과 */
+  .typing-indicator {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background-color: #a8a29e;
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out both;
+  }
+
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+  /* Example Tag Chip - 예시 태그 스타일 */
+  .example-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(214, 211, 209, 0.5);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #57534e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .example-chip:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #007aff;
+    color: #007aff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
+  }
+
+  /* Reduce motion for Phase 8 animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-up-lg,
+    .question-card {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .dimmed-answer {
+      transition: none !important;
+    }
+
+    .typing-indicator span {
+      animation: none !important;
+    }
+
+    .example-chip:hover {
+      transform: none !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Blob Animation Keyframes - Organic Modern (Enhanced v1.3)
+   - Faster: 8s (was 15s)
+   - Larger movement: 60px (was 30px)
+   - Smoother: 4 keyframes with ease-in-out
+   ========================================================================== */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  25% {
+    transform: translate(60px, -40px) scale(1.15);
+  }
+  50% {
+    transform: translate(-30px, 50px) scale(0.95);
+  }
+  75% {
+    transform: translate(40px, 30px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+/* ==========================================================================
+   Phase 8: Coffee House Chat - Keyframes
+   ========================================================================== */
+
+/* Slide Up (Large) - 단계 전환용 (0.6s, 30px) */
+@keyframes slide-up-lg {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing Bounce - AI 타이핑 인디케이터 */
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Phase 14: Floating Write Button - Pulse Subtle Animation
+   Organic Modern 스타일에 맞는 미묘한 그림자 펄스 효과
+   ========================================================================== */
+
+/* 미묘한 펄스 애니메이션 - 주의를 끌되 방해하지 않음 */
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.3),
+                0 4px 6px -2px rgba(249, 115, 22, 0.1);
+  }
+  50% {
+    box-shadow: 0 10px 35px -5px rgba(249, 115, 22, 0.5),
+                0 6px 10px -2px rgba(249, 115, 22, 0.2);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-subtle {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   Phase 9: macOS Window Style - "The Creator's Workspace"
+   화면 전체를 "책상(Desktop)"으로, 입력창을 "아이디어 노트 앱(App Window)"으로 정의
+   영감: macOS Finder, Notes App, iMessage
+   ========================================================================== */
+
+/* macOS Window Container - 메인 윈도우 프레임
+   - Glassmorphism 효과 (반투명 + 블러)
+   - 3단계 그림자로 부드러운 입체감
+   - macOS 스타일 12px 라운딩 */
+.macos-window {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* macOS Title Bar - 타이틀 바 */
+.macos-titlebar {
+  height: 52px;
+  background: rgba(246, 246, 246, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px 12px 0 0;
+}
+
+/* Traffic Lights Container - 신호등 버튼 컨테이너 */
+.traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+}
+
+/* Traffic Light Base - 신호등 버튼 공통 스타일 */
+.traffic-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: filter 0.15s ease, transform 0.15s ease;
+  cursor: default;
+}
+
+.traffic-light:hover {
+  filter: brightness(0.9);
+  transform: scale(1.1);
+}
+
+/* Traffic Light Colors - 실제 macOS 색상 */
+.traffic-light-close { background-color: #ff5f57; }
+.traffic-light-minimize { background-color: #febc2e; }
+.traffic-light-maximize { background-color: #28c840; }
+
+/* macOS Editor - 메모장 스타일 입력창 */
+.macos-editor {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #1a1a1a;
+}
+
+.macos-editor::placeholder {
+  color: #b0b0b0;
+}
+
+/* Message Bubbles - iMessage 스타일 말풍선 */
+.message-bubble-ai {
+  background: #e9e9eb;
+  color: #1a1a1a;
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  max-width: 85%;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.message-bubble-user {
+  background: #007aff;
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px;
+  max-width: 85%;
+  margin-left: auto;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* macOS Send Button - 전송 버튼 (iMessage 스타일) */
+.macos-send-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #007aff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.macos-send-button:hover {
+  transform: scale(1.1);
+  background: #0066d6;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.macos-send-button:disabled {
+  background: #c7c7cc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spotlight Gradient Background - 중앙 하이라이트 */
+.spotlight-gradient {
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 40%,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(253, 251, 247, 0) 70%
+  );
+}
+
+/* macOS Input Area - 입력 영역 컨테이너 */
+.macos-input-area {
+  background: rgba(249, 250, 251, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.macos-input-area:focus-within {
+  border-color: rgba(0, 122, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* Chat Area Scroll - 채팅 영역 스크롤 */
+.macos-chat-scroll {
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.macos-chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.macos-chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.macos-chat-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   Phase 9: macOS Window - Animations
+   ========================================================================== */
+
+/* Bubble Slide Up - 말풍선 등장 애니메이션 */
+@keyframes bubble-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-bubble-slide-up {
+  animation: bubble-slide-up 0.3s ease-out forwards;
+}
+
+/* Window Scale In - 윈도우 등장 애니메이션 */
+@keyframes window-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-window-scale-in {
+  animation: window-scale-in 0.4s ease-out forwards;
+}
+
+/* Reduce motion for Phase 9 */
+@media (prefers-reduced-motion: reduce) {
+  .macos-window,
+  .traffic-light,
+  .macos-send-button {
+    transition: none !important;
+  }
+
+  .animate-bubble-slide-up,
+  .animate-window-scale-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Phase 10: 초정밀 macOS 네이티브 앱 수준 리디자인
+   "실제 macOS 네이티브 앱을 웹으로 옮겨온 듯한 퀄리티"
+   - 픽셀 하나, 그림자 농도(Opacity) 하나까지 정확하게 구현
+   - 웹사이트 느낌 제거 → "나만의 아이디어 노트 앱" 몰입감
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Noise Texture - 종이 질감 (고급 아날로그 느낌)
+   -------------------------------------------------------------------------- */
+.bg-noise-paper {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+/* --------------------------------------------------------------------------
+   2. macOS Window Premium - 강화된 Glassmorphism
+   -------------------------------------------------------------------------- */
+.macos-window-premium {
+  /* 65% 불투명도 - Phase 9(85%)보다 더 투명하게 */
+  background: rgba(255, 255, 255, 0.65);
+
+  /* 매우 강한 블러 (40px) - Phase 9(20px)의 2배 */
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+
+  /* 아주 얇고 투명한 흰색 테두리 */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  /* 가장 진한 그림자 + 미세 윤곽선 */
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  /* macOS Sonoma 스타일 32px 라운딩 */
+  border-radius: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. macOS Title Bar Premium - 투명 배경으로 일체감
+   -------------------------------------------------------------------------- */
+.macos-titlebar-premium {
+  height: 56px;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 2rem 2rem 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Traffic Lights Premium - 테두리로 입체감 강화
+   -------------------------------------------------------------------------- */
+.traffic-light-premium {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  cursor: default;
+}
+
+.traffic-light-premium:hover {
+  filter: brightness(0.9);
+  transform: scale(1.1);
+}
+
+/* 실제 macOS 색상 + 어두운 테두리 */
+.traffic-light-close-premium {
+  background-color: #FF5F57;
+  border: 1px solid #E0443E;
+}
+
+.traffic-light-minimize-premium {
+  background-color: #FEBC2E;
+  border: 1px solid #D89E24;
+}
+
+.traffic-light-maximize-premium {
+  background-color: #28C840;
+  border: 1px solid #1AAB29;
+}
+
+/* --------------------------------------------------------------------------
+   5. Premium Textarea - 대형 타이포그래피
+   -------------------------------------------------------------------------- */
+.premium-textarea {
+  width: 100%;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: #1a1a1a;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0;
+  font-weight: 500;
+}
+
+.premium-textarea::placeholder {
+  color: #d6d3d1;
+}
+
+@media (min-width: 768px) {
+  .premium-textarea {
+    font-size: 1.875rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Send Button Premium - 48px, Charcoal Brown
+   -------------------------------------------------------------------------- */
+.send-button-premium {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2C2825;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.send-button-premium:hover {
+  transform: scale(1.1);
+  background: #000000;
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3);
+}
+
+.send-button-premium:hover svg {
+  transform: rotate(-45deg);
+  transition: transform 0.3s ease;
+}
+
+.send-button-premium:disabled {
+  background: #e7e5e4;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-button-premium:disabled svg {
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   7. History Bubble - 이전 답변 스타일
+   -------------------------------------------------------------------------- */
+.history-bubble {
+  max-width: 80%;
+  padding: 1rem 1.5rem;
+  background: #2C2825;
+  color: white;
+  border-radius: 1rem;
+  border-top-right-radius: 0.375rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   8. Custom Scrollbar Premium - macOS 스타일
+   -------------------------------------------------------------------------- */
+.custom-scrollbar-premium {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.custom-scrollbar-premium::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar-premium::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-premium::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar-premium::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================================================
+   Phase 10: Premium Animations
+   ========================================================================== */
+
+/* Fade In Up - 페이지 로드 시 인사말 (0.8s) */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+/* Scale Down & Fade - 전송 시 히스토리화 (0.4s) */
+@keyframes scale-down-fade {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
+.animate-scale-down-fade {
+  animation: scale-down-fade 0.4s ease-out forwards;
+}
+
+/* Slide In Up - AI 질문 카드 등장 (0.5s) */
+@keyframes slide-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.5s ease-out forwards;
+}
+
+/* Window Emerge - 윈도우 등장 (더 드라마틱) */
+@keyframes window-emerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-window-emerge {
+  animation: window-emerge 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered Animation Delays */
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+
+/* Reduce motion for Phase 10 */
+@media (prefers-reduced-motion: reduce) {
+  .macos-window-premium,
+  .traffic-light-premium,
+  .send-button-premium {
+    transition: none !important;
+  }
+
+  .animate-fade-in-up,
+  .animate-scale-down-fade,
+  .animate-slide-in-up,
+  .animate-window-emerge {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Phase 18: Crystal Lens - Premium Command Palette Animations
+   ========================================================================== */
+
+/* Modal Emerge - 쫀득한 등장 (scale + translate) */
+@keyframes modal-emerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-emerge {
+  animation: modal-emerge 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal Dismiss - 퇴장 (역방향) */
+@keyframes modal-dismiss {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+}
+
+.animate-modal-dismiss {
+  animation: modal-dismiss 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Reduce motion for Phase 18 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-emerge,
+  .animate-modal-dismiss {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

@@ -1,0 +1,142 @@
+<%# Command Palette 모달용 검색 결과 (Turbo Frame) %>
+<%# 이 partial은 turbo-frame id="search_modal_results" 내부에 렌더링됨 %>
+
+<turbo-frame id="search_modal_results">
+  <% if query.blank? %>
+    <%# 빈 쿼리 - 아무것도 표시하지 않음 %>
+  <% elsif users.empty? && posts.empty? %>
+    <%# 결과 없음 %>
+    <div class="py-12 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-stone-100 flex items-center justify-center">
+        <svg class="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <p class="text-stone-500 font-medium">"<%= query %>" 검색 결과가 없습니다</p>
+      <p class="text-sm text-stone-400 mt-1">다른 키워드로 검색해보세요</p>
+    </div>
+  <% else %>
+    <div class="divide-y divide-stone-100">
+
+      <%# 사용자 결과 %>
+      <% if users.any? %>
+        <div class="py-3">
+          <div class="px-4 py-2 flex items-center justify-between">
+            <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">사용자</p>
+            <% if users_total_count > 3 %>
+              <%= link_to search_path(q: query, tab: "users"),
+                          data: { action: "click->search-modal#resultClick" },
+                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium" do %>
+                <%= users_total_count %>명 모두 보기 →
+              <% end %>
+            <% end %>
+          </div>
+          <div class="space-y-1 px-2">
+            <% users.each_with_index do |user, index| %>
+              <%= link_to profile_path(user),
+                          data: { action: "click->search-modal#resultClick", search_modal_target: "resultItem" },
+                          tabindex: "0",
+                          class: "flex items-center gap-3 px-3 py-2.5 rounded-xl
+                                  hover:bg-orange-50/50 focus:bg-orange-50/50
+                                  hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
+                                  transition-all duration-150 group outline-none" do %>
+                <%# 아바타 %>
+                <div class="w-10 h-10 rounded-full bg-stone-200 overflow-hidden flex-shrink-0">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+                  <% elsif user.avatar_url.present? %>
+                    <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover" %>
+                  <% else %>
+                    <div class="w-full h-full flex items-center justify-center bg-stone-300 text-stone-600 font-bold text-sm">
+                      <%= user.name[0].upcase %>
+                    </div>
+                  <% end %>
+                </div>
+
+                <%# 정보 %>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900 truncate">
+                    <%= user.name %>
+                  </p>
+                  <% if user.role_title.present? || user.affiliation.present? %>
+                    <p class="text-xs text-stone-400 truncate">
+                      <%= [user.role_title, user.affiliation].compact.join(" · ") %>
+                    </p>
+                  <% end %>
+                </div>
+
+                <%# 화살표 %>
+                <svg class="w-4 h-4 text-stone-300 group-hover:text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%# 게시글 결과 %>
+      <% if posts.any? %>
+        <div class="py-3">
+          <div class="px-4 py-2 flex items-center justify-between">
+            <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">게시글</p>
+            <% if posts_total_count > 5 %>
+              <%= link_to search_path(q: query, tab: "posts"),
+                          data: { action: "click->search-modal#resultClick" },
+                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium" do %>
+                <%= posts_total_count %>개 모두 보기 →
+              <% end %>
+            <% end %>
+          </div>
+          <div class="space-y-1 px-2">
+            <% posts.each_with_index do |post, index| %>
+              <%= link_to post_path(post),
+                          data: { action: "click->search-modal#resultClick", search_modal_target: "resultItem" },
+                          tabindex: "0",
+                          class: "flex items-start gap-3 px-3 py-2.5 rounded-xl
+                                  hover:bg-orange-50/50 focus:bg-orange-50/50
+                                  hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
+                                  transition-all duration-150 group outline-none" do %>
+                <%# 카테고리 아이콘 %>
+                <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center <%= post_category_bg_class(post) %>">
+                  <%= post_category_icon(post) %>
+                </div>
+
+                <%# 정보 %>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900 truncate">
+                    <%= post.title %>
+                  </p>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-xs text-stone-400"><%= post.user.name %></span>
+                    <span class="text-xs text-stone-300">·</span>
+                    <span class="text-xs text-stone-400"><%= time_ago_in_words(post.created_at) %> 전</span>
+                  </div>
+                </div>
+
+                <%# 화살표 %>
+                <svg class="w-4 h-4 text-stone-300 group-hover:text-stone-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%# 전체 검색 페이지로 이동 링크 %>
+      <div class="px-4 py-3 bg-stone-50/50">
+        <%= link_to search_path(q: query),
+                    data: { action: "click->search-modal#resultClick" },
+                    class: "flex items-center justify-center gap-2 text-sm text-stone-500 hover:text-stone-700 font-medium py-2" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          "<%= query %>" 전체 검색 결과 보기
+        <% end %>
+      </div>
+
+    </div>
+  <% end %>
+</turbo-frame>
