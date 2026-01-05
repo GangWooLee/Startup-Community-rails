@@ -42,20 +42,34 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
+
+          # Write key and fix potential line ending issues
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          # Remove Windows line endings if present
+          sed -i 's/\r$//' ~/.ssh/id_ed25519
+          # Ensure file ends with newline
+          sed -i -e '$a\' ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # SSH config - each line needs proper indentation
-          echo "Host *" > ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
-          echo "  BatchMode yes" >> ~/.ssh/config
+          # Debug: show key format (first and last lines only)
+          echo "Key format check:"
+          head -1 ~/.ssh/id_ed25519
+          tail -1 ~/.ssh/id_ed25519
+          wc -l ~/.ssh/id_ed25519
+
+          # SSH config
+          cat > ~/.ssh/config << 'EOF'
+          Host *
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            IdentityFile ~/.ssh/id_ed25519
+            BatchMode yes
+          EOF
           chmod 600 ~/.ssh/config
 
-          # Start ssh-agent and add key
+          # Start ssh-agent and add key from file
           eval $(ssh-agent -s)
-          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh-add ~/.ssh/id_ed25519
 
           # Export SSH_AUTH_SOCK for subsequent steps
           echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
