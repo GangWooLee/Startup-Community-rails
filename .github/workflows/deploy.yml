@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy with Kamal
 
 on:
   push:
@@ -6,9 +6,13 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 env:
-  REGISTRY: docker.io
-  IMAGE_NAME: kbmsrs8739/undrew
+  RAILS_ENV: production
+  DOCKER_BUILDKIT: 1
 
 jobs:
   deploy:
@@ -33,17 +37,22 @@ jobs:
           username: kbmsrs8739
           password: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
 
-      - name: Set up SSH
-        env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 165.22.109.72 >> ~/.ssh/known_hosts
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: ssh-keyscan -H 165.22.109.72 >> ~/.ssh/known_hosts
 
       - name: Install Kamal
         run: gem install kamal
+
+      - name: Release Kamal lock (if exists)
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+        run: kamal lock release || true
 
       - name: Deploy with Kamal
         env:
