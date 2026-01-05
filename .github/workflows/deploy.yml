@@ -39,14 +39,12 @@ jobs:
 
       - name: Set up SSH
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_BASE64: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
 
-          # Write key using printf to preserve newlines correctly
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          # Remove Windows line endings if present
-          sed -i 's/\r$//' ~/.ssh/id_ed25519
+          # Decode base64 encoded key to preserve newlines
+          echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           # Debug: show key structure
@@ -57,7 +55,7 @@ jobs:
           echo "File size: $(wc -c < ~/.ssh/id_ed25519) bytes"
           echo "=== End Debug ==="
 
-          # SSH config - no indentation issues
+          # SSH config
           cat > ~/.ssh/config << 'SSHCONFIG'
           Host 165.22.109.72
             HostName 165.22.109.72
