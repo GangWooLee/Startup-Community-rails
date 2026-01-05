@@ -43,41 +43,40 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # Write key and fix potential line ending issues
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          # Write key using printf to preserve newlines correctly
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           # Remove Windows line endings if present
           sed -i 's/\r$//' ~/.ssh/id_ed25519
-          # Ensure file ends with newline
-          sed -i -e '$a\' ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Debug: show key format (first and last lines only)
-          echo "Key format check:"
-          head -1 ~/.ssh/id_ed25519
-          tail -1 ~/.ssh/id_ed25519
-          wc -l ~/.ssh/id_ed25519
+          # Debug: show key structure
+          echo "=== Key Debug Info ==="
+          echo "Line count: $(wc -l < ~/.ssh/id_ed25519)"
+          echo "First line: $(head -1 ~/.ssh/id_ed25519)"
+          echo "Last line: $(tail -1 ~/.ssh/id_ed25519)"
+          echo "File size: $(wc -c < ~/.ssh/id_ed25519) bytes"
+          echo "=== End Debug ==="
 
-          # SSH config
-          cat > ~/.ssh/config << 'EOF'
-          Host *
+          # SSH config - no indentation issues
+          cat > ~/.ssh/config << 'SSHCONFIG'
+          Host 165.22.109.72
+            HostName 165.22.109.72
+            User root
+            IdentityFile ~/.ssh/id_ed25519
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
-            IdentityFile ~/.ssh/id_ed25519
             BatchMode yes
-          EOF
+          SSHCONFIG
           chmod 600 ~/.ssh/config
 
-          # Start ssh-agent and add key from file
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_ed25519
-
-          # Export SSH_AUTH_SOCK for subsequent steps
-          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
-          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> $GITHUB_ENV
+      - name: Verify SSH Key Format
+        run: |
+          # Try to read key with ssh-keygen (this validates the format)
+          ssh-keygen -l -f ~/.ssh/id_ed25519 || echo "Key validation failed"
 
       - name: Test SSH Connection
         run: |
-          ssh -v root@165.22.109.72 "echo 'SSH connection successful'" 2>&1 || true
+          ssh -vvv -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o BatchMode=yes root@165.22.109.72 "echo 'SSH OK'" 2>&1 | head -100 || true
 
       - name: Create Kamal secrets file
         run: |
