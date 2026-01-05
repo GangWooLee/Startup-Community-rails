@@ -363,6 +363,7 @@
     <% end %>
 
     <%= javascript_importmap_tags %>
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
   </head>
 
   <body class="font-sans antialiased" data-controller="search-modal">
