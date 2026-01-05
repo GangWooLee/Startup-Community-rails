@@ -96,6 +96,16 @@ jobs:
       - name: Release Kamal lock (if exists)
         run: kamal lock release || true
 
+      - name: Boot Database Accessory
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
+          # Boot the PostgreSQL database accessory first
+          kamal accessory boot db || true
+
+      - name: Wait for Database
+        run: sleep 10
+
       - name: Deploy with Kamal
         run: |
           # Ensure ssh-agent is available for this step
