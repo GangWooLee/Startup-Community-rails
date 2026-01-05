@@ -131,6 +131,48 @@ class User < ApplicationRecord
   # 재가입 방지: 탈퇴한 이메일로는 재가입 불가
   validate :check_blacklisted_email, on: :create
 
+  # ===== 약관 동의 관련 =====
+  CURRENT_TERMS_VERSION = "1.0".freeze
+
+  # 약관 동의 여부 확인 메서드
+  def terms_accepted?
+    terms_accepted_at.present?
+  end
+
+  def privacy_accepted?
+    privacy_accepted_at.present?
+  end
+
+  def guidelines_accepted?
+    guidelines_accepted_at.present?
+  end
+
+  def all_terms_accepted?
+    terms_accepted_at.present? &&
+    privacy_accepted_at.present? &&
+    guidelines_accepted_at.present?
+  end
+
+  # 약관 동의 처리 (OAuth 사용자용)
+  def accept_terms!(version: CURRENT_TERMS_VERSION)
+    now = Time.current
+    update!(
+      terms_accepted_at: now,
+      privacy_accepted_at: now,
+      guidelines_accepted_at: now,
+      terms_version: version
+    )
+  end
+
+  # 약관 동의 시간 일괄 설정 (회원가입 시 사용)
+  def set_terms_accepted!
+    now = Time.current
+    self.terms_accepted_at = now
+    self.privacy_accepted_at = now
+    self.guidelines_accepted_at = now
+    self.terms_version = CURRENT_TERMS_VERSION
+  end
+
   # Callbacks
   before_save :downcase_email
 
@@ -146,7 +188,7 @@ class User < ApplicationRecord
   # 2. 없으면 이메일로 기존 사용자 찾고, OAuth 연결 추가
   # 3. 없으면 새 사용자 생성 + OAuth 연결 추가
   # 보안: 트랜잭션으로 데이터 무결성 보장
-  # 반환: { user:, deleted: } - deleted가 true면 탈퇴 처리된 사용자
+  # 반환: { user:, deleted:, new_user: } - new_user가 true면 신규 가입자 (약관 동의 필요)
   def self.from_omniauth(auth)
     email = auth.info.email&.downcase
     provider = auth.provider
@@ -157,7 +199,7 @@ class User < ApplicationRecord
     if identity
       user = identity.user
       # 탈퇴한 사용자 확인
-      return { user: user, deleted: user.deleted? }
+      return { user: user, deleted: user.deleted?, new_user: false }
     end
 
     # 2, 3단계는 트랜잭션으로 묶어서 원자성 보장
@@ -168,17 +210,18 @@ class User < ApplicationRecord
       if user
         # 탈퇴한 사용자 확인
         if user.deleted?
-          return { user: user, deleted: true }
+          return { user: user, deleted: true, new_user: false }
         end
 
         # 기존 사용자에게 새 OAuth 연결 추가
         user.oauth_identities.create!(provider: provider, uid: uid)
         # 프로필 사진이 없을 때만 OAuth 사진 사용
         user.update(avatar_url: auth.info.image) if user.avatar_url.blank? && auth.info.image.present?
-        return { user: user, deleted: false }
+        return { user: user, deleted: false, new_user: false }
       end
 
       # 3. 새 사용자 생성 + OAuth 연결 (최초 가입 시에만 OAuth 사진 사용)
+      # 약관 동의 필드는 비워둠 - OAuth 약관 동의 페이지에서 설정
       user = create!(
         email: email,
         name: auth.info.name || auth.info.nickname || "User",
@@ -186,7 +229,7 @@ class User < ApplicationRecord
         avatar_url: auth.info.image
       )
       user.oauth_identities.create!(provider: provider, uid: uid)
-      { user: user, deleted: false }
+      { user: user, deleted: false, new_user: true }
     end
   end
 

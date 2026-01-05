@@ -178,13 +178,33 @@
           <p class="text-xs text-muted-foreground">최대 500자</p>
         </div>
 
-        <!-- Terms Agreement -->
-        <div class="flex items-start gap-2">
-          <input type="checkbox" id="terms" required class="mt-1 rounded border-input h-4 w-4">
-          <label for="terms" class="text-sm text-muted-foreground">
-            <a href="#" class="text-primary link-hover relative">이용약관</a> 및
-            <a href="#" class="text-primary link-hover relative">개인정보 처리방침</a>에 동의합니다 *
-          </label>
+        <!-- Terms Agreement (3개 체크박스) -->
+        <div class="space-y-3 p-4 rounded-lg bg-muted/30 border border-border">
+          <p class="text-sm font-medium text-foreground mb-2">약관 동의 (필수)</p>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="terms_agreement" id="terms_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="terms_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "이용약관", terms_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="privacy_agreement" id="privacy_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="privacy_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "개인정보 처리방침", privacy_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="guidelines_agreement" id="guidelines_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="guidelines_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "커뮤니티 가이드라인", guidelines_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
         </div>
 
         <!-- Submit Button -->

@@ -22,7 +22,7 @@
           <% end %>
         <% elsif logged_in? && post.user != current_user %>
           <%# 신고 버튼 (본인 글이 아닐 때) %>
-          <div class="relative" data-controller="dropdown">
+          <div class="relative" data-controller="dropdown" data-testid="post-actions-dropdown">
             <button type="button"
                     class="p-2 rounded-md text-muted-foreground btn-hover"
                     data-action="click->dropdown#toggle">

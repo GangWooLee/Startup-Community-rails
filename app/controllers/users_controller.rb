@@ -12,6 +12,15 @@ class UsersController < ApplicationController
   def create
     email = params[:user][:email]&.downcase&.strip
 
+    # 약관 동의 검증 (3개 모두 체크 필수)
+    unless terms_all_agreed?
+      @user = User.new(user_params)
+      @user.errors.add(:base, "모든 약관에 동의해주세요.")
+      flash.now[:alert] = "이용약관, 개인정보 처리방침, 커뮤니티 가이드라인에 모두 동의해주세요."
+      render :new, status: :unprocessable_entity
+      return
+    end
+
     # 이메일 인증 확인
     unless EmailVerification.find_by(email: email, verified: true)
       @user = User.new(user_params)
@@ -24,12 +33,23 @@ class UsersController < ApplicationController
     # 기존 OAuth 사용자 확인 (계정 통합)
     existing_user = User.find_by(email: email)
     if existing_user&.oauth_user?
-      # 이미 OAuth로 가입된 사용자 → 비밀번호 설정 허용
-      if existing_user.update(
+      # 이미 OAuth로 가입된 사용자 → 비밀번호 설정 + 약관 동의 처리
+      update_attrs = {
         password: params[:user][:password],
         password_confirmation: params[:user][:password_confirmation],
         name: params[:user][:name].presence || existing_user.name
-      )
+      }
+      # 약관 동의가 아직 안 되어 있으면 설정
+      unless existing_user.all_terms_accepted?
+        now = Time.current
+        update_attrs.merge!(
+          terms_accepted_at: now,
+          privacy_accepted_at: now,
+          guidelines_accepted_at: now,
+          terms_version: User::CURRENT_TERMS_VERSION
+        )
+      end
+      if existing_user.update(update_attrs)
         # 사용된 인증 코드 삭제
         EmailVerification.where(email: email).destroy_all
         log_in(existing_user)
@@ -58,8 +78,9 @@ class UsersController < ApplicationController
       return
     end
 
-    # 새 사용자 생성
+    # 새 사용자 생성 (약관 동의 시간 포함)
     @user = User.new(user_params)
+    @user.set_terms_accepted!
 
     if @user.save
       # 사용된 인증 코드 삭제
@@ -92,5 +113,12 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :password_confirmation, :name, :role_title, :bio)
+  end
+
+  # 약관 동의 검증 (3개 모두 체크 필수)
+  def terms_all_agreed?
+    params[:terms_agreement] == "1" &&
+    params[:privacy_agreement] == "1" &&
+    params[:guidelines_agreement] == "1"
   end
 end

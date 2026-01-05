@@ -25,6 +25,17 @@ class OmniauthCallbacksController < ApplicationController
     end
 
     if @user&.persisted?
+      # 신규 OAuth 사용자: 약관 동의 필요
+      if result[:new_user] && !@user.all_terms_accepted?
+        # 세션에 사용자 ID 저장 (로그인 전 상태로 약관 동의 페이지로 이동)
+        session[:pending_oauth_user_id] = @user.id
+        # 기존 return_to 값 유지
+        session[:oauth_return_to] = session.delete(:return_to) || cookies.delete(:return_to)
+        Rails.logger.info "OAuth new user - redirecting to terms: #{provider_name} - User #{@user.id}"
+        redirect_to oauth_terms_path
+        return
+      end
+
       # 로그인 처리 (세션 ID 재생성 + pending_analysis_key/pending_input_key 보존)
       log_in(@user)
 

@@ -1,0 +1,89 @@
+<div class="min-h-screen bg-background">
+  <!-- Header -->
+  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+    <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
+      <%= link_to root_path, class: "h-9 w-9 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-semibold">커뮤니티 가이드라인</h1>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <div class="prose prose-stone max-w-none">
+      <p class="text-sm text-muted-foreground mb-8">최종 수정일: 2026년 1월 1일</p>
+
+      <p class="lead">Undrew는 모든 이용자가 안전하고 신뢰할 수 있는 환경에서 소통할 수 있도록 본 커뮤니티 가이드라인을 운영합니다. 본 가이드라인은 서비스 이용약관과 함께 적용되며, 위반 시 서비스 이용이 제한될 수 있습니다.</p>
+
+      <h2>허용되는 활동</h2>
+      <ul>
+        <li>창업, 아이디어, 기술, 팀 빌딩, 커리어, 협업과 관련된 정보와 의견을 자유롭게 공유할 수 있습니다.</li>
+        <li>경험 공유, 질문, 토론, 피드백 제공은 환영됩니다.</li>
+        <li>타인을 존중하는 표현과 건설적인 의견 제시는 권장됩니다.</li>
+      </ul>
+
+      <h2>금지되는 활동</h2>
+      <ul>
+        <li><strong>무단 도용</strong>: 타인의 아이디어, 콘텐츠, 개인정보를 무단으로 도용하거나 침해하는 행위</li>
+        <li><strong>허위 정보</strong>: 허위 정보, 과장된 주장, 사실 확인이 되지 않은 내용을 유포하는 행위</li>
+        <li><strong>불법 영업</strong>: 사기, 금전 요구, 투자 권유, 다단계, 불법 영업 행위</li>
+        <li><strong>혐오 표현</strong>: 욕설, 혐오 표현, 차별, 비방, 명예훼손 등 타인에게 불쾌감을 주는 행위</li>
+        <li><strong>유해 콘텐츠</strong>: 청소년에게 유해하거나 부적절한 콘텐츠의 게시</li>
+        <li><strong>도배</strong>: 동일하거나 유사한 내용을 반복 게시하는 도배 행위</li>
+        <li><strong>시스템 악용</strong>: 서비스 운영을 방해하거나 시스템을 악용하는 행위</li>
+      </ul>
+
+      <h2>투자 및 아이디어 관련 유의사항</h2>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 my-4">
+        <p class="text-amber-800 font-medium mb-2">중요 안내</p>
+        <ul class="text-amber-700 text-sm">
+          <li>Undrew는 투자, 계약, 거래를 중개하거나 보증하는 플랫폼이 아닙니다.</li>
+          <li>커뮤니티에 게시된 아이디어, 정보, 제안은 참고 자료일 뿐이며 그 신뢰성이나 결과를 보장하지 않습니다.</li>
+          <li>회원 간의 투자, 계약, 협업은 당사자 간의 책임 하에 이루어져야 합니다.</li>
+          <li>아이디어 공개에 따른 법적 보호 여부는 회원 본인이 판단해야 합니다.</li>
+        </ul>
+      </div>
+
+      <h2>메시지 기능 이용 기준</h2>
+      <ul>
+        <li>메시지 기능은 회원 간 자율적인 소통을 위한 수단입니다.</li>
+        <li>스팸, 사기, 반복적인 홍보 메시지 전송은 금지됩니다.</li>
+        <li>불법 행위나 가이드라인 위반이 확인될 경우 메시지 기능 이용이 제한될 수 있습니다.</li>
+      </ul>
+
+      <h2>게시물 관리 및 제재</h2>
+      <ol>
+        <li>회사는 본 가이드라인 또는 이용약관을 위반한 게시물에 대하여 사전 통지 없이 삭제하거나 접근을 제한할 수 있습니다.</li>
+        <li>위반 정도에 따라 다음과 같은 조치가 이루어질 수 있습니다:
+          <ul>
+            <li>경고</li>
+            <li>게시물 삭제</li>
+            <li>메시지 기능 제한</li>
+            <li>서비스 이용 제한</li>
+            <li>계정 정지</li>
+          </ul>
+        </li>
+        <li>반복적이거나 중대한 위반의 경우 영구 이용 제한이 적용될 수 있습니다.</li>
+      </ol>
+
+      <h2>신고 및 대응</h2>
+      <ul>
+        <li>회원은 가이드라인을 위반한 게시물이나 행위를 신고할 수 있습니다.</li>
+        <li>회사는 신고 내용을 검토하여 필요한 조치를 취합니다.</li>
+        <li>허위 신고 또는 악의적인 신고는 제재 대상이 될 수 있습니다.</li>
+      </ul>
+
+      <h2>가이드라인의 변경</h2>
+      <p>본 가이드라인은 서비스 운영 정책 또는 관련 법령에 따라 변경될 수 있으며, 변경 시 서비스 내 공지를 통해 안내합니다.</p>
+
+      <h2>부칙</h2>
+      <p>이 가이드라인은 2026년 1월 1일부터 시행합니다.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <%= render "shared/policy_footer" %>
+</div>

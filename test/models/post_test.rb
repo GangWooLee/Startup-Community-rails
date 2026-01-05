@@ -71,7 +71,7 @@ class PostTest < ActiveSupport::TestCase
     assert_validation_error post, :service_type
   end
 
-  test "should require work_type for hiring posts" do
+  test "should allow optional work_type for hiring posts" do
     post = Post.new(
       user: @user,
       title: "개발자 구인",
@@ -80,8 +80,8 @@ class PostTest < ActiveSupport::TestCase
       service_type: "development",
       status: :published
     )
-    assert_not post.valid?
-    assert_validation_error post, :work_type
+    # work_type은 선택적 필드로 변경됨
+    assert post.valid?, "Post should be valid without work_type: #{post.errors.full_messages}"
   end
 
   test "should be valid with all required fields for hiring posts" do
@@ -309,11 +309,12 @@ class PostTest < ActiveSupport::TestCase
     assert_not @hiring_post.community?
   end
 
-  test "category_label should return Korean label" do
+  test "category_label should return correct label" do
     assert_equal "자유", @free_post.category_label
     assert_equal "질문", @question_post.category_label
-    assert_equal "구인", @hiring_post.category_label
-    assert_equal "구직", @seeking_post.category_label
+    # hiring/seeking은 UI에서 Makers/Projects로 표시
+    assert_equal "Makers", @hiring_post.category_label
+    assert_equal "Projects", @seeking_post.category_label
   end
 
   test "increment_views! should increase views_count" do

@@ -1,0 +1,18 @@
+<%# Policy Footer - 법적 페이지용 간단 Footer %>
+<footer class="py-8 px-4 border-t border-border bg-muted/30">
+  <div class="max-w-3xl mx-auto text-center">
+    <!-- Policy Links -->
+    <div class="flex justify-center gap-4 mb-4 text-sm">
+      <%= link_to "이용약관", terms_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+      <span class="text-muted-foreground/40">|</span>
+      <%= link_to "개인정보처리방침", privacy_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+      <span class="text-muted-foreground/40">|</span>
+      <%= link_to "환불정책", refund_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+    </div>
+
+    <!-- Copyright -->
+    <p class="text-xs text-muted-foreground">
+      &copy; <%= Time.current.year %> Grounded Inc. All rights reserved.
+    </p>
+  </div>
+</footer>

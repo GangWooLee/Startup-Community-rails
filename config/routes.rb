@@ -116,6 +116,16 @@ Rails.application.routes.draw do
   # shadcn UI Test Page (development only)
   get "shadcn_test", to: "pages#shadcn_test" if Rails.env.development?
 
+  # Legal Pages (법적 페이지)
+  get "terms", to: "pages#terms", as: :terms
+  get "privacy", to: "pages#privacy", as: :privacy
+  get "refund", to: "pages#refund", as: :refund
+  get "guidelines", to: "pages#guidelines", as: :guidelines
+
+  # OAuth 약관 동의 (신규 소셜 로그인 사용자용)
+  get  "oauth/terms", to: "oauth_terms#show", as: :oauth_terms
+  post "oauth/terms/accept", to: "oauth_terms#accept", as: :oauth_terms_accept
+
   # Search
   get "search", to: "search#index", as: :search
   delete "search/recent", to: "search#destroy_recent", as: :destroy_recent_search

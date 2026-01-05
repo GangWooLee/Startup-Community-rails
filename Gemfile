@@ -58,6 +58,16 @@ gem "rack-attack"
 # Security: Active Storage file validation
 gem "active_storage_validations"
 
+# Error Tracking & Monitoring
+gem "sentry-ruby"
+gem "sentry-rails"
+
+# Structured JSON Logging
+gem "lograge"
+
+# AWS S3 SDK for backups
+gem "aws-sdk-s3", require: false
+
 # AI/LLM Integration
 gem "langchainrb"           # AI Agent framework for Ruby
 gem "ruby-openai"           # OpenAI API client
@@ -104,6 +114,9 @@ group :test do
 
   # Code coverage analysis [https://github.com/simplecov-ruby/simplecov]
   gem "simplecov", require: false
+
+  # HTTP request stubbing for isolated tests [https://github.com/bblimke/webmock]
+  gem "webmock"
 end
 
 gem "rails_icons", "~> 1.5"

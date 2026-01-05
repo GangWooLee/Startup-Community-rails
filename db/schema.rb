@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_04_221239) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_05_081039) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -425,6 +425,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_04_221239) do
     t.integer "followers_count", default: 0, null: false
     t.integer "following_count", default: 0, null: false
     t.string "github_url"
+    t.datetime "guidelines_accepted_at"
     t.boolean "is_admin", default: false, null: false
     t.datetime "last_sign_in_at"
     t.string "linkedin_url"
@@ -437,11 +438,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_04_221239) do
     t.datetime "password_reset_sent_at"
     t.string "password_reset_token"
     t.string "portfolio_url"
+    t.datetime "privacy_accepted_at"
     t.string "provider"
     t.string "remember_digest"
     t.string "role_title"
     t.string "skills"
     t.string "status_message", limit: 100
+    t.datetime "terms_accepted_at"
+    t.string "terms_version", default: "1.0"
     t.text "toolbox"
     t.string "uid"
     t.datetime "updated_at", null: false

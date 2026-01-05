@@ -190,25 +190,38 @@
   <%# Reference: whileInView={{ opacity: 1, y: 0 }}, duration: 0.6s %>
   <footer class="relative py-12 sm:py-16 px-4 sm:px-6 bg-[#F8F9FA] border-t border-[#2C4A6B]/10"
           data-controller="scroll-animation">
-    <div class="max-w-5xl mx-auto flex flex-col items-center text-center animate-on-scroll"
+    <div class="max-w-5xl mx-auto animate-on-scroll"
          data-scroll-animation-target="item">
       <%# Wordmark %>
-      <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#2C4A6B] tracking-tight mb-2 sm:mb-3">
+      <h2 class="text-xl sm:text-2xl font-bold text-[#2C4A6B] tracking-tight mb-2">
         Undrew
       </h2>
 
       <%# Tagline %>
-      <p class="text-[#2C4A6B]/40 text-xs sm:text-sm mb-6 sm:mb-8">
+      <p class="text-[#2C4A6B]/40 text-xs sm:text-sm mb-6">
         아직 완성되지 않아도 괜찮아요
       </p>
 
-      <%# Divider %>
-      <div class="w-12 h-px bg-[#2C4A6B]/20 mb-6 sm:mb-8"></div>
+      <%# Policy Links %>
+      <div class="flex flex-wrap gap-3 sm:gap-4 mb-6 text-xs sm:text-sm">
+        <%= link_to "이용약관", terms_path, class: "text-[#2C4A6B]/60 hover:text-[#2C4A6B] transition-colors" %>
+        <%= link_to "개인정보처리방침", privacy_path, class: "text-[#2C4A6B]/60 hover:text-[#2C4A6B] transition-colors" %>
+        <%= link_to "환불정책", refund_path, class: "text-[#2C4A6B]/60 hover:text-[#2C4A6B] transition-colors" %>
+      </div>
 
-      <%# Company %>
-      <p class="text-[#2C4A6B]/30 text-[10px] sm:text-xs uppercase tracking-widest">
-        Grounded Inc.
-      </p>
+      <%# Divider %>
+      <div class="w-full h-px bg-[#2C4A6B]/10 mb-6"></div>
+
+      <%# Business Information (전자상거래법 준수) %>
+      <div class="text-[10px] sm:text-xs text-[#2C4A6B]/40 space-y-1">
+        <p>상호: (주)그라운디드 | 대표: 홍길동</p>
+        <p>사업자등록번호: 000-00-00000 | 통신판매업신고: 제0000-서울강남-0000호</p>
+        <p>주소: 서울특별시 강남구 테헤란로 000, 0층</p>
+        <p>이메일: support@undrew.io | 고객센터: 02-0000-0000</p>
+        <p class="pt-3 text-[#2C4A6B]/30">
+          &copy; <%= Time.current.year %> Grounded Inc. All rights reserved.
+        </p>
+      </div>
     </div>
   </footer>
 

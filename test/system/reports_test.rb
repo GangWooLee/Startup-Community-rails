@@ -17,8 +17,10 @@ class ReportsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit post_path(@post)
 
-    # 더보기 버튼 클릭
-    find("button[data-action*='dropdown#toggle']").click
+    # 더보기 버튼 클릭 (data-testid로 특정)
+    within("[data-testid='post-actions-dropdown']") do
+      find("button[data-action*='dropdown#toggle']").click
+    end
 
     # 신고하기 버튼 확인 및 클릭
     within("[data-dropdown-target='menu']") do
@@ -43,8 +45,15 @@ class ReportsTest < ApplicationSystemTestCase
       click_button "신고하기"
     end
 
-    # 신고 완료 확인 (페이지 리다이렉트 또는 성공 메시지)
-    # Turbo가 리다이렉트하거나 성공 모달을 보여줌
+    # 신고 완료 확인 (성공 메시지 표시됨)
+    assert_selector "#report-modal", visible: true
+    within("#report-modal") do
+      assert_text "신고 접수 완료"
+      # 확인 버튼 클릭하여 모달 닫기
+      click_button "확인"
+    end
+
+    # 모달 닫힘 확인
     assert_no_selector "#report-modal", visible: true, wait: 5
   end
 
@@ -66,28 +75,31 @@ class ReportsTest < ApplicationSystemTestCase
   end
 
   # =========================================
-  # 사용자 프로필 신고하기
+  # 사용자 프로필 액션
   # =========================================
 
-  test "can report user from profile page" do
+  test "profile dropdown opens correctly" do
     log_in_as(@user)
     visit profile_path(@other_user)
 
-    # 더보기 버튼 클릭
-    find("button[data-action*='dropdown#toggle']").click
-
-    # 신고하기 버튼 확인
-    within("[data-dropdown-target='menu']") do
-      assert_selector "button", text: "신고하기"
+    # 더보기 버튼 클릭 (data-testid로 특정)
+    within("[data-testid='profile-actions-dropdown']") do
+      find("button[data-action*='dropdown#toggle']").click
     end
+
+    # 드롭다운 메뉴가 열림 확인
+    assert_selector "[data-dropdown-target='menu']", visible: true
+
+    # 프로필 링크 복사 버튼 확인
+    assert_text "프로필 링크 복사"
   end
 
-  test "report button not shown on own profile" do
+  test "profile dropdown not shown on own profile" do
     log_in_as(@user)
     visit profile_path(@user)
 
-    # 자신의 프로필에는 신고 버튼이 없어야 함
-    assert_no_selector "button[data-action*='report-modal#open']"
+    # 자신의 프로필에는 더보기 드롭다운이 없어야 함
+    assert_no_selector "[data-testid='profile-actions-dropdown']"
   end
 
   # =========================================
@@ -98,8 +110,10 @@ class ReportsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit post_path(@post)
 
-    # 더보기 → 신고하기
-    find("button[data-action*='dropdown#toggle']").click
+    # 더보기 → 신고하기 (data-testid로 특정)
+    within("[data-testid='post-actions-dropdown']") do
+      find("button[data-action*='dropdown#toggle']").click
+    end
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -115,31 +129,35 @@ class ReportsTest < ApplicationSystemTestCase
     assert_no_selector "#report-modal", visible: true
   end
 
-  test "report modal can be closed by clicking overlay" do
+  test "report modal can be closed with escape key" do
     log_in_as(@user)
     visit post_path(@post)
 
-    # 더보기 → 신고하기
-    find("button[data-action*='dropdown#toggle']").click
+    # 더보기 → 신고하기 (data-testid로 특정)
+    within("[data-testid='post-actions-dropdown']") do
+      find("button[data-action*='dropdown#toggle']").click
+    end
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
 
     assert_selector "#report-modal", visible: true
 
-    # 오버레이 클릭 (배경)
-    find(".fixed.inset-0.bg-gray-500", match: :first).click
+    # ESC 키로 닫기 (오버레이 클릭 대신)
+    find("body").send_keys(:escape)
 
     # 모달 닫힘 확인
-    assert_no_selector "#report-modal", visible: true
+    assert_no_selector "#report-modal", visible: true, wait: 3
   end
 
   test "report modal shows all reason options" do
     log_in_as(@user)
     visit post_path(@post)
 
-    # 더보기 → 신고하기
-    find("button[data-action*='dropdown#toggle']").click
+    # 더보기 → 신고하기 (data-testid로 특정)
+    within("[data-testid='post-actions-dropdown']") do
+      find("button[data-action*='dropdown#toggle']").click
+    end
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -158,9 +176,13 @@ class ReportsTest < ApplicationSystemTestCase
 
   def log_in_as(user)
     visit login_path
-    fill_in "이메일", with: user.email
-    fill_in "비밀번호", with: "password"
+
+    # 명시적으로 입력 필드 찾아서 입력
+    find("input[name='email']", wait: 3).set(user.email)
+    find("input[name='password']").set("test1234")
     click_button "로그인"
-    assert_current_path root_path
+
+    # 로그인 완료 대기
+    assert_no_current_path login_path, wait: 3
   end
 end

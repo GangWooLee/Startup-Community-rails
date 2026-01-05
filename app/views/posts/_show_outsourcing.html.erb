@@ -32,7 +32,7 @@
           <% end %>
         <% elsif logged_in? && post.user != current_user %>
           <%# Report dropdown %>
-          <div class="relative" data-controller="dropdown">
+          <div class="relative" data-controller="dropdown" data-testid="post-actions-dropdown">
             <button type="button"
                     class="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
                     data-action="click->dropdown#toggle">

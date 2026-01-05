@@ -1,0 +1,51 @@
+<%#
+  Shared Footer - 전자상거래법 준수 Footer
+  모든 레이아웃에서 재사용 가능
+
+  사용법:
+    <%= render "shared/footer" %>
+    <%= render "shared/footer", compact: true %>  # 간소화 버전
+%>
+
+<% compact = local_assigns[:compact] || false %>
+
+<footer class="py-8 sm:py-12 px-4 sm:px-6 bg-muted/30 border-t border-border">
+  <div class="max-w-5xl mx-auto">
+    <% unless compact %>
+      <%# Brand %>
+      <h2 class="text-lg sm:text-xl font-bold text-foreground tracking-tight mb-2">
+        Undrew
+      </h2>
+
+      <%# Tagline %>
+      <p class="text-muted-foreground text-xs sm:text-sm mb-6">
+        아직 완성되지 않아도 괜찮아요
+      </p>
+    <% end %>
+
+    <%# Policy Links %>
+    <div class="flex flex-wrap gap-3 sm:gap-4 mb-6 text-xs sm:text-sm">
+      <%= link_to "이용약관", terms_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+      <%= link_to "개인정보처리방침", privacy_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+      <%= link_to "환불정책", refund_path, class: "text-muted-foreground hover:text-foreground transition-colors" %>
+    </div>
+
+    <% unless compact %>
+      <%# Divider %>
+      <div class="w-full h-px bg-border mb-6"></div>
+
+      <%# Business Information (전자상거래법 준수) %>
+      <div class="text-[10px] sm:text-xs text-muted-foreground/60 space-y-1">
+        <p>상호: (주)그라운디드 | 대표: 홍길동</p>
+        <p>사업자등록번호: 000-00-00000 | 통신판매업신고: 제0000-서울강남-0000호</p>
+        <p>주소: 서울특별시 강남구 테헤란로 000, 0층</p>
+        <p>이메일: support@undrew.io | 고객센터: 02-0000-0000</p>
+      </div>
+    <% end %>
+
+    <%# Copyright %>
+    <p class="<%= compact ? '' : 'pt-4' %> text-[10px] sm:text-xs text-muted-foreground/40">
+      &copy; <%= Time.current.year %> Grounded Inc. All rights reserved.
+    </p>
+  </div>
+</footer>

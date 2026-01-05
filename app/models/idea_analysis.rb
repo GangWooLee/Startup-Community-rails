@@ -24,8 +24,9 @@ class IdeaAnalysis < ApplicationRecord
   }.freeze
 
   validates :idea, presence: true
-  # analysis_result는 analyzing 상태에서 비어있을 수 있음
-  validates :analysis_result, presence: true, unless: :analyzing?
+  # analysis_result는 completed 상태에서만 필수
+  # analyzing, failed 상태에서는 비어있을 수 있음
+  validates :analysis_result, presence: true, if: :completed?
 
   # 최신순 정렬
   scope :recent, -> { order(created_at: :desc) }

@@ -26,6 +26,18 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 
+# WebMock for HTTP request stubbing (AI API 등 외부 호출 격리)
+require "webmock/minitest"
+WebMock.disable_net_connect!(
+  allow_localhost: true,
+  allow: [
+    "chromedriver.storage.googleapis.com",  # Selenium driver
+    /selenium/,                              # Selenium grid
+    /127\.0\.0\.1/,                          # localhost
+    /localhost/                              # localhost
+  ]
+)
+
 # OmniAuth 테스트 모드 활성화
 OmniAuth.config.test_mode = true
 
@@ -147,11 +159,26 @@ module AiMockHelpers
     }
   end
 
-  # Gemini API 호출 스텁
+  # Gemini API 호출 스텁 (WebMock 사용)
   def stub_gemini_api(response_content)
-    # LangchainRB를 통한 API 호출을 스텁
-    mock_response = mock_gemini_response(response_content)
-    # 실제 구현에서는 WebMock 또는 VCR 사용
+    stub_request(:post, %r{generativelanguage\.googleapis\.com})
+      .to_return(
+        status: 200,
+        body: mock_gemini_response(response_content).to_json,
+        headers: { "Content-Type" => "application/json" }
+      )
+  end
+
+  # Gemini API 에러 스텁
+  def stub_gemini_api_error(status: 500, error_message: "Internal Server Error")
+    stub_request(:post, %r{generativelanguage\.googleapis\.com})
+      .to_return(status: status, body: { error: error_message }.to_json)
+  end
+
+  # AI 에이전트용 JSON 응답 스텁
+  def stub_gemini_json_response(json_hash)
+    json_content = "```json\n#{json_hash.to_json}\n```"
+    stub_gemini_api(json_content)
   end
 end
 

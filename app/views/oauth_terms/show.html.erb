@@ -1,0 +1,89 @@
+<div class="min-h-screen w-full flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
+  <!-- Subtle background pattern -->
+  <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0); background-size: 32px 32px;"></div>
+
+  <!-- Decorative gradient blurs -->
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 w-full max-w-md">
+    <!-- Welcome Text -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-foreground mb-1">거의 다 됐어요!</h1>
+      <p class="text-muted-foreground text-sm">서비스 이용을 위해 약관에 동의해주세요</p>
+    </div>
+
+    <!-- Terms Card -->
+    <div class="rounded-xl border bg-card text-card-foreground shadow-xl p-8">
+      <!-- User Info -->
+      <div class="flex items-center gap-3 mb-6 p-3 rounded-lg bg-muted/30">
+        <% if @user.has_profile_image? %>
+          <img src="<%= @user.profile_image_url %>" alt="프로필" class="w-12 h-12 rounded-full object-cover">
+        <% else %>
+          <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <span class="text-lg font-medium text-primary"><%= @user.name&.first&.upcase || "U" %></span>
+          </div>
+        <% end %>
+        <div>
+          <p class="font-medium text-foreground"><%= @user.name %></p>
+          <p class="text-sm text-muted-foreground"><%= @user.email %></p>
+        </div>
+      </div>
+
+      <%= form_with url: oauth_terms_accept_path, method: :post, local: true, class: "space-y-4" do |f| %>
+        <% if flash[:alert] %>
+          <div class="rounded-md bg-destructive/10 border border-destructive/20 p-4">
+            <div class="flex items-center gap-2">
+              <svg class="h-5 w-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-sm text-destructive"><%= flash[:alert] %></p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Terms Agreement (3개 체크박스) -->
+        <div class="space-y-3 p-4 rounded-lg bg-muted/30 border border-border">
+          <p class="text-sm font-medium text-foreground mb-2">약관 동의 (필수)</p>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="terms_agreement" id="terms_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="terms_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "이용약관", terms_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="privacy_agreement" id="privacy_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="privacy_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "개인정보 처리방침", privacy_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <input type="checkbox" name="guidelines_agreement" id="guidelines_agreement" value="1" required
+                   class="mt-1 rounded border-input h-4 w-4 text-primary focus:ring-primary">
+            <label for="guidelines_agreement" class="text-sm text-muted-foreground">
+              <%= link_to "커뮤니티 가이드라인", guidelines_path, class: "text-primary link-hover relative underline", target: "_blank" %>에 동의합니다 *
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground h-11 px-8 w-full">
+          동의하고 시작하기
+        </button>
+      <% end %>
+
+      <!-- Cancel Link -->
+      <div class="mt-4 text-center">
+        <p class="text-xs text-muted-foreground mb-2">동의하지 않으시면 서비스를 이용할 수 없습니다.</p>
+        <%= link_to "취소하고 로그인 페이지로", login_path, class: "text-sm text-muted-foreground link-hover relative inline-block" %>
+      </div>
+    </div>
+  </div>
+</div>

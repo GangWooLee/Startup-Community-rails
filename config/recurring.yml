@@ -18,3 +18,8 @@ production:
   destroy_expired_deletions:
     class: DestroyExpiredDeletionsJob
     schedule: at 3am every day
+
+  # 데이터베이스 자동 백업 (매일 새벽 4시 KST)
+  database_backup:
+    class: DatabaseBackupJob
+    schedule: at 4am every day

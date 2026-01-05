@@ -44,6 +44,26 @@ Rails.application.configure do
   # Prevent health checks from clogging up the logs.
   config.silence_healthcheck_path = "/up"
 
+  # ===== Lograge 설정 (구조화된 JSON 로깅) =====
+  config.lograge.enabled = true
+  config.lograge.formatter = Lograge::Formatters::Json.new
+  config.lograge.custom_options = lambda do |event|
+    {
+      time: Time.current.iso8601,
+      request_id: event.payload[:request_id],
+      user_id: event.payload[:user_id],
+      ip: event.payload[:ip],
+      user_agent: event.payload[:user_agent]
+    }.compact
+  end
+  config.lograge.custom_payload do |controller|
+    {
+      user_id: controller.current_user&.id,
+      ip: controller.request.remote_ip,
+      user_agent: controller.request.user_agent&.truncate(100)
+    }
+  end
+
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 

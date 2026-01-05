@@ -67,3 +67,7 @@ coverage/
 
 # Design reference files
 design-sample/
+
+# Claude temporary files (keep main .claude/ folder for team sharing)
+.claude/plans/
+.claude/*.md
