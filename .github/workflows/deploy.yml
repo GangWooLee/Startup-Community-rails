@@ -37,13 +37,12 @@ jobs:
           username: kbmsrs8739
           password: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
 
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add server to known hosts
-        run: ssh-keyscan -H 165.22.109.72 >> ~/.ssh/known_hosts
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 165.22.109.72 >> ~/.ssh/known_hosts
 
       - name: Install Kamal
         run: gem install kamal
