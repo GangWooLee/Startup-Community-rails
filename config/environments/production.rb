@@ -58,7 +58,8 @@ Rails.application.configure do
   end
   config.lograge.custom_payload do |controller|
     {
-      user_id: controller.current_user&.id,
+      # Rails::HealthController는 ApplicationController를 상속하지 않아 current_user 없음
+      user_id: controller.respond_to?(:current_user) ? controller.current_user&.id : nil,
       ip: controller.request.remote_ip,
       user_agent: controller.request.user_agent&.truncate(100)
     }
