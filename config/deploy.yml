@@ -7,7 +7,7 @@ image: kbmsrs8739/undrew
 # Deploy to these servers.
 servers:
   web:
-    - 167.99.68.105
+    - 165.22.109.72
   # job:
   #   hosts:
   #     - 192.168.0.1
