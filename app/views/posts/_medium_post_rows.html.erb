@@ -1,0 +1,13 @@
+<%#
+  Medium Post Rows - 게시글 목록 렌더링
+  Turbo Stream append용 partial
+
+  Local variables:
+  - posts: 게시글 컬렉션
+%>
+
+<% posts.each_with_index do |post, index| %>
+  <div class="post-item animate-fade-slide-up" style="animation-delay: <%= index * 50 %>ms;">
+    <%= render "posts/medium_post_row", post: post, is_last: false %>
+  </div>
+<% end %>

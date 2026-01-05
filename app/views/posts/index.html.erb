@@ -81,15 +81,17 @@
             <% end %>
           </div>
         <% else %>
-          <%= render "posts/medium_post_list", posts: @posts %>
+          <%# 게시글 목록 컨테이너 - Turbo Stream으로 추가 콘텐츠 append %>
+          <div class="bg-white/95 backdrop-blur-sm rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+            <%# 게시글 목록 (Turbo Stream append 대상) %>
+            <div id="posts-list">
+              <% @posts.each_with_index do |post, index| %>
+                <%= render "posts/medium_post_row", post: post, is_last: false %>
+              <% end %>
+            </div>
 
-          <%# Load More Button %>
-          <% next_page = (params[:page].to_i > 0 ? params[:page].to_i : 1) + 1 %>
-          <div class="flex justify-center pt-4 pb-12">
-            <%= link_to community_path(category: params[:category], sort: params[:sort], page: next_page),
-                class: "px-8 py-3 border border-stone-200 bg-white/50 hover:bg-white text-stone-600 font-bold rounded-full text-sm transition-all hover:shadow-md backdrop-blur-sm active:scale-95" do %>
-              더 많은 이야기 보기
-            <% end %>
+            <%# Load More Button - Turbo Stream replace 대상 %>
+            <%= render "posts/load_more_button", page: @page, has_more: @has_more, category: params[:category], sort: params[:sort] %>
           </div>
         <% end %>
 

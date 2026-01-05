@@ -8,21 +8,47 @@ class PostsController < ApplicationController
   def index
     # 커뮤니티 섹션: 커뮤니티 글만 표시 (free, question, promotion)
     # 구인/구직은 외주 섹션(/job_posts)에서 표시
-    @posts = Post.published
-                 .includes(:user, images_attachments: :blob)
-                 .where(category: filter_categories)
+    @page = [params[:page].to_i, 1].max
+    @per_page = POSTS_PER_PAGE
+
+    base_query = Post.published
+                     .includes(:user, images_attachments: :blob)
+                     .where(category: filter_categories)
 
     # 정렬 방식 적용
-    @posts = if params[:sort] == "popular"
-               @posts.popular
-             else
-               @posts.recent
-             end
+    base_query = if params[:sort] == "popular"
+                   base_query.popular
+                 else
+                   base_query.recent
+                 end
 
-    @posts = @posts.limit(POSTS_PER_PAGE)
+    # 전체 개수 확인 (다음 페이지 존재 여부)
+    @total_count = base_query.count
+    @has_more = (@page * @per_page) < @total_count
+
+    # 페이지네이션 적용
+    @posts = base_query.offset((@page - 1) * @per_page).limit(@per_page)
 
     # 현재 정렬 상태 (뷰에서 사용)
     @current_sort = params[:sort]&.to_sym || :recent
+
+    # Turbo Stream 요청인 경우 (더 보기 버튼 클릭)
+    respond_to do |format|
+      format.html # 기본 렌더링
+      format.turbo_stream do
+        render turbo_stream: [
+          # 새 게시글들을 목록 끝에 추가
+          turbo_stream.append("posts-list", partial: "posts/medium_post_rows", locals: { posts: @posts }),
+          # 더 보기 버튼 업데이트
+          turbo_stream.replace("load-more-section", partial: "posts/load_more_button", locals: {
+            page: @page,
+            has_more: @has_more,
+            category: params[:category],
+            sort: params[:sort]
+          })
+        ]
+      end
+    end
   end
 
   def show

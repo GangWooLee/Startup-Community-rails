@@ -1,0 +1,32 @@
+<%#
+  Load More Button - 더 많은 이야기 보기 버튼
+  Turbo Stream replace용 partial
+
+  Local variables:
+  - page: 현재 페이지 번호
+  - has_more: 다음 페이지 존재 여부
+  - category: 카테고리 필터
+  - sort: 정렬 방식
+%>
+
+<div id="load-more-section" class="flex justify-center py-6 border-t border-stone-100">
+  <% if has_more %>
+    <%= link_to community_path(category: category, sort: sort, page: page + 1),
+        data: {
+          turbo_stream: true,
+          controller: "load-more",
+          action: "click->load-more#load"
+        },
+        class: "load-more-btn group px-8 py-3 border border-stone-200 bg-white/50 hover:bg-white text-stone-600 font-bold rounded-full text-sm transition-all hover:shadow-md backdrop-blur-sm active:scale-95 flex items-center gap-2" do %>
+      <span class="load-more-text">더 많은 이야기 보기</span>
+      <span class="load-more-spinner hidden">
+        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </span>
+    <% end %>
+  <% else %>
+    <p class="text-stone-400 text-sm font-medium">모든 이야기를 확인했습니다</p>
+  <% end %>
+</div>
