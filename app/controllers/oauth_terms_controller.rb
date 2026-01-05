@@ -1,6 +1,6 @@
 class OauthTermsController < ApplicationController
-  # 로그인 전 상태이므로 require_login 스킵
-  skip_before_action :require_login, if: -> { respond_to?(:require_login, true) }
+  # 로그인 전 상태이므로 require_login 스킵 (정의되지 않은 경우 무시)
+  skip_before_action :require_login, raise: false
 
   # GET /oauth/terms
   def show
