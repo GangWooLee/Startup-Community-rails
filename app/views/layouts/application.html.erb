@@ -25,6 +25,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
 
+    <%# Devicon - 기술 스택 아이콘 (최신 버전) %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+
+    <%# ActionText (Trix 에디터) 스타일 %>
+    <%= stylesheet_link_tag "actiontext" %>
+
     <%# Tailwind CSS CDN (개발/테스트용) %>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -195,6 +201,11 @@
         color: hsl(var(--foreground));
       }
 
+      /* Devicon 색상 오버라이드 - 브랜드 색상 정확도 향상 */
+      .devicon-python-plain.colored {
+        color: #3776AB !important; /* Python 공식 파란색 */
+      }
+
       /* ==========================================================================
          Landing Page Animations
          ==========================================================================
@@ -283,6 +294,28 @@
       @media (prefers-reduced-motion: reduce) {
         .animate-float { animation: none !important; }
       }
+
+      /* Creator's Canvas Modal Animations */
+      @keyframes canvas-emerge {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      .animate-canvas-emerge {
+        animation: canvas-emerge 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animate-canvas-emerge {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
     </style>
 
     <%# Google Analytics 4 (사용자 행동 분석) %>
@@ -332,7 +365,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-sans antialiased">
+  <body class="font-sans antialiased" data-controller="search-modal">
     <!-- Flash Messages -->
     <% if flash.any? %>
       <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 pointer-events-none">
@@ -407,7 +440,71 @@
       </script>
     <% end %>
 
-    <%= yield %>
+    <% if show_global_sidebar? %>
+      <%#
+        Global Sidebar Layout - SaaS Dashboard Style
+        Reference: Linear, Raycast, Framer, Untitled UI
+
+        Structure:
+        ┌────────────────────────────────────────────┐
+        │ Global     │  Compact Header (검색+알림)   │
+        │ Sidebar    ├───────────────────────────────┤
+        │ (w-64)     │                               │
+        │            │  Main Content                 │
+        │ - Logo     │  (Fluid Width, Scrollable)    │
+        │ - Nav      │                               │
+        │ - Boards   │                               │
+        │            │                               │
+        │ ───────    │                               │
+        │ User       │                               │
+        │ Widget     │                               │
+        └────────────┴───────────────────────────────┘
+      %>
+      <div class="flex h-screen w-full bg-[#FDFBF7] overflow-hidden">
+        <%# Left: Global Sidebar (hidden on mobile) %>
+        <%= render "shared/global_sidebar" %>
+
+        <%# Right: Main Content Area %>
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <%# Compact Header %>
+          <%= render "shared/compact_header" %>
+
+          <%# Scrollable Content %>
+          <main class="flex-1 overflow-y-auto sidebar-content-scroll">
+            <%= yield %>
+          </main>
+        </div>
+      </div>
+
+      <style>
+        /* Sidebar scroll customization */
+        .sidebar-scroll::-webkit-scrollbar,
+        .sidebar-content-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track,
+        .sidebar-content-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .sidebar-content-scroll::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.08);
+          border-radius: 4px;
+        }
+        .sidebar-content-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.15);
+        }
+      </style>
+    <% else %>
+      <%# Standard Layout (Login, Landing, Admin, etc.) %>
+      <%= yield %>
+    <% end %>
 
     <%# 토스트 알림 컨테이너 %>
     <div id="toast-container"></div>
@@ -415,7 +512,15 @@
     <%# 프로필 오버레이 컨테이너 %>
     <div id="profile-overlay-container"></div>
 
+    <%# Command Palette 검색 모달 (Phase 16) %>
+    <%= render "shared/search_modal" %>
+
     <%# 플로팅 글쓰기 버튼 (로그인 시에만) %>
     <%= render "shared/floating_write_button" %>
+
+    <%# Creator's Canvas Modal (글쓰기 모달) %>
+    <% if logged_in? %>
+      <%= render "posts/canvas_modal" %>
+    <% end %>
   </body>
 </html>

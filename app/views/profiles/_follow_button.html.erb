@@ -1,0 +1,42 @@
+<%# 팔로우 버튼 Partial - Turbo Stream으로 실시간 업데이트됨 %>
+<%# locals: user, following (boolean) %>
+
+<div id="follow-button-<%= user.id %>" class="w-full">
+  <% if logged_in? && current_user != user %>
+    <%= button_to follow_profile_path(user),
+        method: :post,
+        class: "w-full inline-flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl
+                transition-all duration-200
+                hover:scale-[1.02] active:scale-[0.98]
+                #{following ?
+                  'bg-stone-100 text-stone-600 hover:bg-red-50 hover:text-red-600 border border-stone-200' :
+                  'bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100'}",
+        data: { turbo_frame: "_top" } do %>
+      <% if following %>
+        <%# 팔로잉 상태 %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span>팔로잉</span>
+      <% else %>
+        <%# 팔로우하지 않은 상태 %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>팔로우</span>
+      <% end %>
+    <% end %>
+  <% elsif !logged_in? %>
+    <%# 비로그인 사용자 - 로그인 유도 %>
+    <%= link_to login_path(return_to: profile_path(user)),
+        class: "w-full inline-flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl
+                bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100
+                transition-all duration-200
+                hover:scale-[1.02] active:scale-[0.98]" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>팔로우</span>
+    <% end %>
+  <% end %>
+</div>

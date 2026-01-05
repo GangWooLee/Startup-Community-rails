@@ -1,0 +1,27 @@
+<%# Notification Toggle Partial - Turbo Stream 교체용 %>
+<div id="notification-toggle" class="rounded-xl border bg-card text-card-foreground overflow-hidden">
+  <div class="px-4 py-3 border-b border-border bg-muted/30">
+    <h3 class="font-semibold text-sm text-muted-foreground">알림</h3>
+  </div>
+  <div class="divide-y divide-border">
+    <%= form_with model: user, url: settings_path, method: :patch, data: { controller: "toggle-form", turbo_frame: "_top" } do |f| %>
+      <div class="px-4 py-4 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium">푸시 알림 받기</p>
+          <p class="text-xs text-muted-foreground">커뮤니티 활동 및 외주 알림</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <%= f.check_box :notifications_enabled,
+              class: "sr-only peer",
+              data: { action: "change->toggle-form#submit" } %>
+          <div class="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        </label>
+      </div>
+    <% end %>
+  </div>
+  <div class="px-4 py-2 bg-muted/20">
+    <p class="text-xs text-muted-foreground">
+      <%= user.notifications_enabled ? "알림이 활성화되어 있습니다" : "알림이 비활성화되어 있습니다" %>
+    </p>
+  </div>
+</div>

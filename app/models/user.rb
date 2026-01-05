@@ -7,10 +7,25 @@ class User < ApplicationRecord
 
   # Active Storage - 프로필 이미지
   has_one_attached :avatar
+  has_one_attached :cover_image
+
+  # ActionText - Rich Text 상세 소개
+  has_rich_text :detailed_bio
 
   # 아바타 파일 검증 (보안: 악성 파일 업로드 방지)
   MAX_AVATAR_SIZE = 2.megabytes
+  MAX_COVER_SIZE = 5.megabytes
   ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"].freeze
+
+  # 커버 이미지 기본 그라디언트 (업로드 없을 때 사용)
+  COVER_GRADIENTS = [
+    "from-amber-100 via-orange-50 to-rose-50",
+    "from-sky-100 via-blue-50 to-indigo-50",
+    "from-emerald-100 via-teal-50 to-cyan-50",
+    "from-violet-100 via-purple-50 to-fuchsia-50",
+    "from-slate-100 via-gray-50 to-zinc-50",
+    "from-lime-100 via-green-50 to-emerald-50"
+  ].freeze
 
   validates :avatar,
     content_type: {
@@ -20,6 +35,16 @@ class User < ApplicationRecord
     size: {
       less_than: MAX_AVATAR_SIZE,
       message: "는 2MB 이하만 허용됩니다"
+    }
+
+  validates :cover_image,
+    content_type: {
+      in: ALLOWED_AVATAR_TYPES,
+      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
+    },
+    size: {
+      less_than: MAX_COVER_SIZE,
+      message: "는 5MB 이하만 허용됩니다"
     }
 
   # 활동 상태 옵션 (다중 선택 가능)
@@ -37,6 +62,8 @@ class User < ApplicationRecord
   has_many :likes, dependent: :destroy
   has_many :bookmarks, dependent: :destroy
   has_many :bookmarked_posts, through: :bookmarks, source: :bookmarkable, source_type: "Post"
+  has_many :liked_posts, through: :likes, source: :likeable, source_type: "Post"
+  has_many :commented_posts, -> { distinct }, through: :comments, source: :post
 
   # 알림 (받은 알림, 보낸 알림)
   has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
@@ -68,6 +95,12 @@ class User < ApplicationRecord
   has_many :received_reports, class_name: "Report", as: :reportable, dependent: :destroy  # 나를 신고
   has_many :inquiries, dependent: :destroy  # 내 문의
 
+  # 팔로우 관계 (Self-Referential)
+  has_many :active_follows, class_name: "Follow", foreign_key: :follower_id, dependent: :destroy
+  has_many :passive_follows, class_name: "Follow", foreign_key: :followed_id, dependent: :destroy
+  has_many :following, through: :active_follows, source: :followed
+  has_many :followers, through: :passive_follows, source: :follower
+
   # 비밀번호 정책 상수
   MIN_PASSWORD_LENGTH = 8
   # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)
@@ -85,6 +118,9 @@ class User < ApplicationRecord
   validates :affiliation, length: { maximum: 50 }, allow_blank: true
   validates :skills, length: { maximum: 200 }, allow_blank: true
   validates :custom_status, length: { maximum: 10 }, allow_blank: true
+  validates :status_message, length: { maximum: 100 }, allow_blank: true
+  validates :looking_for, length: { maximum: 200 }, allow_blank: true
+  validates :location, length: { maximum: 50 }, allow_blank: true
 
   # URL 형식 검증 (빈 값 허용)
   validates :linkedin_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
@@ -255,6 +291,82 @@ class User < ApplicationRecord
     self.achievements = arr.is_a?(Array) ? arr.join("\n") : arr
   end
 
+  # 도구 & 장비를 배열로 반환 (쉼표 구분)
+  def toolbox_array
+    return [] if toolbox.blank?
+    toolbox.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  # 도구 배열을 문자열로 저장
+  def toolbox_array=(arr)
+    self.toolbox = arr.is_a?(Array) ? arr.join(", ") : arr
+  end
+
+  # 작업 스타일 Q&A 파싱 (JSON 형식)
+  # 예: [{"question": "선호 커뮤니케이션", "answer": "슬랙 DM"}]
+  def work_style_items
+    return [] if work_style.blank?
+    items = JSON.parse(work_style, symbolize_names: true)
+    items.is_a?(Array) ? items : []
+  rescue JSON::ParserError
+    []
+  end
+
+  # 작업 스타일 설정 (배열 또는 JSON 문자열)
+  def work_style_items=(arr)
+    self.work_style = arr.is_a?(Array) ? arr.to_json : arr
+  end
+
+  # ==========================================================================
+  # Experience Timeline (JSON 컬럼)
+  # 구조: [{ type: "work|education|project", title: "직책/학위",
+  #          organization: "회사/학교", period: "2023.03 - 현재",
+  #          description: "설명", is_current: true/false }]
+  # ==========================================================================
+
+  EXPERIENCE_TYPES = {
+    "work" => { icon: "briefcase", label: "경력", color: "bg-blue-100 text-blue-700" },
+    "education" => { icon: "academic-cap", label: "학력", color: "bg-purple-100 text-purple-700" },
+    "project" => { icon: "rocket-launch", label: "프로젝트", color: "bg-orange-100 text-orange-700" },
+    "award" => { icon: "trophy", label: "수상", color: "bg-amber-100 text-amber-700" },
+    "certification" => { icon: "check-badge", label: "자격증", color: "bg-green-100 text-green-700" }
+  }.freeze
+
+  # Experience 배열 반환 (nil 방지)
+  def experiences_array
+    experiences || []
+  end
+
+  # 타입별로 그룹화된 경험 반환
+  def grouped_experiences
+    experiences_array.group_by { |exp| exp["type"] || "work" }
+  end
+
+  # 정렬된 경험 반환 (현재 진행 중인 것 우선, 그 다음 최신순)
+  def sorted_experiences
+    experiences_array.sort_by do |exp|
+      [
+        exp["is_current"] ? 0 : 1,  # 현재 진행 중인 것 우선
+        -(exp["sort_order"] || 999) # sort_order 역순
+      ]
+    end
+  end
+
+  # Experience가 있는지 확인
+  def has_experiences?
+    experiences_array.any?
+  end
+
+  # 현재 진행 중인 경험만 반환
+  def current_experiences
+    experiences_array.select { |exp| exp["is_current"] }
+  end
+
+  # 특정 타입의 경험만 반환
+  def experiences_by_type(type)
+    experiences_array.select { |exp| exp["type"] == type.to_s }
+  end
+
   # 활동 상태 배열 반환 (JSON 컬럼)
   def availability_statuses_array
     availability_statuses || []
@@ -295,6 +407,34 @@ class User < ApplicationRecord
     availability_statuses_array.include?(status_key)
   end
 
+  # 외주 가능 상태인지 확인
+  def available_for_work?
+    has_status?("available_for_work")
+  end
+
+  # ==========================================================================
+  # 활동 피드 (Activity Feed) - "Ruby Merge Pattern"
+  # ==========================================================================
+
+  # 최근 활동 가져오기 (게시글 + 댓글을 시간순 정렬)
+  def recent_activities(limit: 20)
+    # 1. 각 모델에서 데이터 가져오기 (N+1 방지)
+    last_posts = posts.published
+                      .includes(:user, images_attachments: :blob)
+                      .order(created_at: :desc)
+                      .limit(limit)
+
+    last_comments = comments.includes(:post, :user)
+                            .order(created_at: :desc)
+                            .limit(limit)
+
+    # 2. 하나의 배열로 합치기
+    activities = last_posts.to_a + last_comments.to_a
+
+    # 3. 시간순 정렬 (최신순) 후 자르기
+    activities.sort_by(&:created_at).reverse.first(limit)
+  end
+
   # 읽지 않은 알림 수
   def unread_notifications_count
     notifications.unread.count
@@ -328,6 +468,58 @@ class User < ApplicationRecord
   # 해당 Post에 대한 주문 가져오기
   def order_for(post)
     orders.find_by(post: post)
+  end
+
+  # ==========================================================================
+  # 팔로우 관련 메서드
+  # ==========================================================================
+
+  # 특정 사용자를 팔로우 중인지 확인
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
+  # 팔로우하기
+  def follow(other_user)
+    return false if self == other_user
+    active_follows.find_or_create_by(followed: other_user)
+  end
+
+  # 언팔로우
+  def unfollow(other_user)
+    active_follows.find_by(followed: other_user)&.destroy
+  end
+
+  # 팔로우 토글 (팔로우 중이면 언팔, 아니면 팔로우)
+  def toggle_follow!(other_user)
+    if following?(other_user)
+      unfollow(other_user)
+      false
+    else
+      follow(other_user)
+      true
+    end
+  end
+
+  # ==========================================================================
+  # 커버 이미지 관련 메서드
+  # ==========================================================================
+
+  # 커버 이미지 기본 그라디언트 반환 (사용자 ID 기반)
+  def cover_gradient
+    COVER_GRADIENTS[id % COVER_GRADIENTS.length]
+  end
+
+  # 커버 이미지 URL 반환 (업로드 이미지 우선)
+  def cover_image_url
+    if cover_image.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(cover_image, only_path: true)
+    end
+  end
+
+  # 커버 이미지가 있는지 확인
+  def has_cover_image?
+    cover_image.attached?
   end
 
   # ==========================================================================

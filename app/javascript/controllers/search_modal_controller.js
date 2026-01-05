@@ -18,7 +18,12 @@ import { Turbo } from "@hotwired/turbo-rails"
  */
 export default class extends Controller {
   static targets = ["overlay", "modal", "input", "resultsFrame", "loading", "recentSearches", "recentSearchList", "searchIcon", "resultItem"]
-  static values = { open: Boolean, selectedIndex: { type: Number, default: -1 } }
+  static values = {
+    open: Boolean,
+    selectedIndex: { type: Number, default: -1 },
+    previousQuery: String,        // Drill-down 복귀용
+    isDrilldown: Boolean          // Drill-down 상태 추적
+  }
 
   connect() {
     // Cmd+K / Ctrl+K 단축키 등록
@@ -82,6 +87,8 @@ export default class extends Controller {
   close() {
     this.openValue = false
     this.selectedIndexValue = -1  // 선택 초기화
+    this.isDrilldownValue = false // Drill-down 상태 초기화
+    this.previousQueryValue = ""  // 이전 쿼리 초기화
 
     // 쫀득한 퇴장 애니메이션
     this.overlayTarget.classList.add("opacity-0")
@@ -112,10 +119,11 @@ export default class extends Controller {
     this.openValue ? this.close() : this.open()
   }
 
-  // 오버레이 클릭 시 닫기
+  // 오버레이 클릭 시 닫기 (Task 91)
   closeOnOverlay(event) {
-    // 모달 내부 클릭은 무시
-    if (event.target === this.overlayTarget) {
+    // 모달 내부 클릭은 무시 - 모달 요소 또는 그 자식인지 확인
+    // 오버레이 내부의 flex 컨테이너를 클릭해도 닫히도록 개선
+    if (this.hasModalTarget && !this.modalTarget.contains(event.target)) {
       this.close()
     }
   }
@@ -205,9 +213,47 @@ export default class extends Controller {
     }
   }
 
-  // 결과 클릭 시 모달 닫기
-  resultClick() {
+  // 결과 클릭 시 모달 닫고 해당 페이지로 이동
+  resultClick(event) {
+    event.preventDefault()
+    const href = event.currentTarget.getAttribute("href")
     this.close()
+
+    // 모달 닫힌 후 페이지 이동
+    if (href) {
+      setTimeout(() => Turbo.visit(href), 100)
+    }
+  }
+
+  // ============================================================
+  // Task 56-59: Drill-down 기능 (모달 내 계층 전환)
+  // ============================================================
+
+  // Drill-down 진입 - "모두 보기" 클릭 시
+  drillDown(event) {
+    // ⭐ Task 85: pending search를 취소하여 drilldown을 방해하지 않도록 함
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer)
+      this.debounceTimer = null
+    }
+
+    // 현재 검색어 저장 (뒤로가기용)
+    this.previousQueryValue = this.inputTarget.value
+    this.isDrilldownValue = true
+
+    // Turbo Frame이 자동으로 내용 교체
+    // 슬라이드 애니메이션은 CSS로 처리
+  }
+
+  // Drill-down에서 복귀 - 뒤로가기 클릭 시
+  goBack(event) {
+    event.preventDefault()
+    this.isDrilldownValue = false
+
+    // 이전 검색 결과로 복귀
+    if (this.previousQueryValue) {
+      this.performSearch(this.previousQueryValue)
+    }
   }
 
   // ============================================================

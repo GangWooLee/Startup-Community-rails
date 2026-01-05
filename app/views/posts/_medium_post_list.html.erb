@@ -1,0 +1,22 @@
+<%#
+  Medium-Style Post List - Container Wrapper
+  Reference: Medium.com, Substack list layout
+
+  하나의 흰색 컨테이너 안에 게시글 리스트를 담음
+  - 단일 컨테이너로 정보 밀도 향상
+  - border separator로 아이템 구분
+  - 마지막 아이템은 border 없음
+
+  Local variables:
+  - posts: ActiveRecord collection (required)
+%>
+
+<% if local_assigns[:posts] && posts.present? %>
+  <div class="bg-white/95 backdrop-blur-sm rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+    <% posts.each_with_index do |post, index| %>
+      <%= render "posts/medium_post_row",
+                 post: post,
+                 is_last: (index == posts.size - 1) %>
+    <% end %>
+  </div>
+<% end %>

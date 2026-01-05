@@ -1,53 +1,100 @@
 <%# Turbo Stream 구독 (분석 완료 시 자동 업데이트) %>
 <%= turbo_stream_from "idea_analysis_#{@idea_analysis.id}" %>
 
-<div class="min-h-screen bg-background flex flex-col pb-20"
+<div class="min-h-screen bg-[#FDFBF7] flex flex-col pb-20 relative overflow-hidden"
      data-controller="ai-result ai-loading accordion"
      data-ai-result-idea-value="<%= @idea %>"
      data-ai-loading-status-value="<%= @idea_analysis.status %>">
 
-  <%# 분석 중일 때 로딩 오버레이 - 단계별 원형 프로그레스 바 %>
+  <%# ========== Organic Modern Background (Phase 15) ========== %>
+  <%# Fixed background layer - visible when content is shown %>
+  <div class="fixed inset-0 z-0 pointer-events-none">
+    <%# Noise Texture - 종이 질감 %>
+    <div class="absolute inset-0 opacity-20"
+         style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.4\'/%3E%3C/svg%3E');"></div>
+
+    <%# Gradient Blobs - 따뜻한 분위기 %>
+    <div class="absolute top-[-5%] right-[5%] w-[35rem] h-[35rem] bg-orange-200/25 rounded-full filter blur-[120px]"></div>
+    <div class="absolute bottom-[10%] left-[-5%] w-[30rem] h-[30rem] bg-amber-100/20 rounded-full filter blur-[120px]"></div>
+    <div class="absolute top-[40%] right-[-10%] w-[25rem] h-[25rem] bg-indigo-100/15 rounded-full filter blur-[100px]"></div>
+  </div>
+
+  <%# 분석 중일 때 로딩 오버레이 - "생각하는 Undrew" 디자인 (Phase 14) %>
   <% if @idea_analysis.analyzing? %>
     <div data-ai-loading-target="overlay"
-         class="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center transition-opacity duration-500">
-      <div class="text-center space-y-8 max-w-sm mx-auto px-6">
+         class="fixed inset-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-xl flex items-center justify-center transition-opacity duration-500">
 
-        <%# 단계별 원형 프로그레스 바 (Turbo Stream으로 업데이트됨) %>
-        <div id="ai_loading_progress">
-          <%= render "onboarding/loading_progress",
-                     current_stage: @idea_analysis.current_stage,
-                     total_stages: IdeaAnalysis::TOTAL_STAGES,
-                     stage_name: IdeaAnalysis::STAGE_NAMES[@idea_analysis.current_stage] %>
+      <%# Background Effects %>
+      <div class="absolute inset-0 opacity-30 pointer-events-none"
+           style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.4\'/%3E%3C/svg%3E');"></div>
+      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem]
+                  bg-orange-200/30 rounded-full filter blur-[150px]"></div>
+
+      <div class="relative z-10 text-center space-y-8 max-w-md mx-auto px-6">
+
+        <%# Undrew 캐릭터 with 호흡 애니메이션 %>
+        <div class="relative flex items-center justify-center">
+          <div class="absolute w-36 h-36 rounded-full bg-orange-200/40 blur-2xl animate-pulse"></div>
+          <img src="/undrew_hello_icon.png"
+               alt="Undrew"
+               class="relative w-32 h-32 object-contain"
+               style="animation: breathing 3s ease-in-out infinite;">
         </div>
 
-        <%# 메시지 %>
-        <div class="space-y-3">
-          <h2 class="text-xl font-bold text-foreground">
+        <%# 말풍선 with 타이핑 인디케이터 %>
+        <div class="relative inline-block">
+          <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/90 rotate-45 rounded-sm"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm rounded-2xl px-8 py-5 shadow-lg border border-stone-100">
+            <div class="flex items-center justify-center gap-3">
+              <span class="text-lg font-medium text-[#2C2825]" data-ai-loading-target="statusText">
+                리포트를 작성하고 있어요
+              </span>
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
+                <span class="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span>
+                <span class="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# 프로그레스 정보 %>
+        <div class="space-y-4">
+          <h2 class="text-2xl font-bold text-[#2C2825]">
             <% if current_user %>
               <%= current_user.name %>님을 위한<br/>분석 리포트 생성 중
             <% else %>
               AI 분석 리포트 생성 중
             <% end %>
           </h2>
-          <p class="text-sm text-muted-foreground leading-relaxed">
-            5개 전문 에이전트가 아이디어를 분석하고 있어요
+
+          <%# 프로그레스 바 (Turbo Stream으로 업데이트됨) %>
+          <div id="ai_loading_progress">
+            <%= render "onboarding/loading_progress",
+                       current_stage: @idea_analysis.current_stage,
+                       total_stages: IdeaAnalysis::TOTAL_STAGES,
+                       stage_name: IdeaAnalysis::STAGE_NAMES[@idea_analysis.current_stage] %>
+          </div>
+
+          <p class="text-sm text-stone-400 animate-pulse">
+            잠시만요, 좋은 인사이트를 찾고 있어요
           </p>
         </div>
 
-        <%# 예상 소요 시간 %>
-        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 text-xs text-muted-foreground">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <span>예상 소요 시간: 10~30초</span>
-        </div>
       </div>
     </div>
+
+    <%# 호흡 애니메이션 CSS (인라인) %>
+    <style>
+      @keyframes breathing {
+        0%, 100% { transform: scale(1) translateY(0); }
+        50% { transform: scale(1.05) translateY(-5px); }
+      }
+    </style>
   <% end %>
 
   <!-- Header: Undrew AI Branding -->
-  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+  <header class="sticky top-0 bg-[#FDFBF7]/95 backdrop-blur-sm border-b border-stone-200/50 z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-3">
       <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +116,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-screen-xl mx-auto w-full px-4 py-6">
+  <main class="flex-1 max-w-screen-xl mx-auto w-full px-4 py-6 relative z-10">
     <!-- Progress Indicator -->
     <div class="flex items-center justify-center gap-2 mb-6">
       <div class="h-2 w-8 rounded-full bg-primary"></div>

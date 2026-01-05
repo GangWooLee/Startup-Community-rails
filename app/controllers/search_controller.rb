@@ -61,10 +61,45 @@ class SearchController < ApplicationController
 
     respond_to do |format|
       format.html do
-        if live_search_request?
+        if drilldown_request?
+          # Drill-down 모달용 결과 (전체 리스트)
+          render partial: "search/modal_drilldown", locals: drilldown_locals, layout: false
+        elsif modal_search_request?
+          # Command Palette 모달용 결과 (Turbo Frame)
+          render partial: "search/modal_results", locals: modal_result_locals, layout: false
+        elsif live_search_request?
           render partial: "search/results", locals: result_locals, layout: false
         else
           render :index
+        end
+      end
+
+      # Task 88: Turbo Stream append 패턴 - "더 보기" 클릭 시 기존 아이템 유지 + 새 아이템 추가
+      format.turbo_stream do
+        if drilldown_append_request?
+          items = @tab == "users" ? @users : @posts
+          total_count = @tab == "users" ? @users_total_count : @posts_total_count
+          total_pages = @tab == "users" ? @users_total_pages : @posts_total_pages
+          has_more = @page < total_pages
+
+          render turbo_stream: [
+            # 새 아이템들을 기존 리스트에 append
+            turbo_stream.append(
+              "drilldown_items_#{@tab}",
+              partial: "search/drilldown_items",
+              locals: { drilldown_type: @tab, items: items }
+            ),
+            # 더 보기 버튼 업데이트 (다음 페이지 있으면 교체, 없으면 제거)
+            if has_more
+              turbo_stream.replace(
+                "drilldown_load_more",
+                partial: "search/drilldown_load_more",
+                locals: { query: @query, drilldown_type: @tab, next_page: @page + 1, total_count: total_count }
+              )
+            else
+              turbo_stream.remove("drilldown_load_more")
+            end
+          ].compact
         end
       end
     end
@@ -112,6 +147,45 @@ class SearchController < ApplicationController
   # 실시간 검색 요청인지 확인
   def live_search_request?
     request.xhr? || params[:live] == "true"
+  end
+
+  # Command Palette 모달 검색 요청인지 확인
+  def modal_search_request?
+    params[:modal] == "true"
+  end
+
+  # Drill-down 요청인지 확인 (모달 내 "모두 보기")
+  def drilldown_request?
+    params[:modal] == "true" && params[:drilldown] == "true"
+  end
+
+  # Task 88: Drill-down append 요청인지 확인 ("더 보기" 클릭)
+  def drilldown_append_request?
+    params[:modal] == "true" && params[:drilldown] == "true" && params[:append] == "true"
+  end
+
+  # 모달용 결과 locals (컴팩트 버전)
+  def modal_result_locals
+    {
+      query: @query,
+      users: @users.first(3),           # 모달에서는 3명만 표시
+      posts: @posts.first(5),           # 모달에서는 5개만 표시
+      users_total_count: @users_total_count,
+      posts_total_count: @posts_total_count
+    }
+  end
+
+  # Drill-down 모달용 locals (전체 리스트)
+  def drilldown_locals
+    {
+      query: @query,
+      drilldown_type: @tab,  # "users" or "posts"
+      items: @tab == "users" ? @users : @posts,
+      total_count: @tab == "users" ? @users_total_count : @posts_total_count,
+      current_page: @page,
+      has_more_pages: @tab == "users" ? @users_page < @users_total_pages : @posts_page < @posts_total_pages,
+      next_page: @page + 1
+    }
   end
 
   # 사용자 검색 (전체 탭용 - 제한된 수만 표시)

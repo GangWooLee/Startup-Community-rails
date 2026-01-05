@@ -46,7 +46,8 @@ module Components::TabsHelper
       @panels = []
     end
 
-    def list(&block)
+    def list(**options, &block)
+      @list_options = options
       @list_content = @template.capture(&block)
     end
 
@@ -95,10 +96,10 @@ module Components::TabsHelper
       end
     end
 
-    def panel(id, &block)
+    def panel(id, **options, &block)
       active = (id.to_s == @default.to_s)
       content = @template.capture(&block)
-      @panels << { id: id, content: content, active: active }
+      @panels << { id: id, content: content, active: active, options: options }
     end
   end
 end

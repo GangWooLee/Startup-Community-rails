@@ -1,0 +1,111 @@
+<%#
+  Medium-Style Post Row - Individual Item
+  Reference: Medium.com article list
+
+  Features:
+  - Horizontal layout: content LEFT, thumbnail RIGHT
+  - No placeholder when image absent (text expands full width)
+  - Border separator (except last item)
+  - Row hover effect with subtle background change
+  - XS avatar with author info
+
+  Local variables:
+  - post: Post object (required)
+  - is_last: Boolean - whether this is the last item (default: false)
+%>
+
+<% if local_assigns[:post] && post.present? %>
+  <% is_last = local_assigns.fetch(:is_last, false) %>
+  <% has_image = post.images.attached? && post.images.first.present? %>
+
+  <%= link_to post_path(post),
+      class: "block px-5 py-4 transition-colors duration-150 hover:bg-stone-50/80 cursor-pointer group #{is_last ? '' : 'border-b border-stone-100'}" do %>
+
+    <div class="flex gap-4 items-start">
+      <%# Content Section (LEFT) - Expands to full width when no image %>
+      <div class="flex-1 min-w-0 flex flex-col">
+
+        <%# Meta Row: Avatar + Name + Category + Time %>
+        <div class="flex items-center gap-2 mb-2">
+          <%# Author Avatar (XS size) %>
+          <%= render_user_avatar(post.user, size: "xs", class: "ring-1 ring-stone-200/50") %>
+
+          <%# Author Name %>
+          <span class="text-xs font-medium text-stone-600 truncate max-w-[100px]">
+            <%= post.user.name %>
+          </span>
+
+          <%# Category Badge (only for outsourcing posts) %>
+          <% if post.hiring? || post.seeking? %>
+            <span class="text-stone-300 text-xs">·</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500 font-medium">
+              <%= post_category_label(post) %>
+            </span>
+          <% end %>
+
+          <%# Time Separator %>
+          <span class="text-stone-300 text-xs">·</span>
+          <span class="text-[11px] text-stone-400">
+            <%= time_ago_in_words(post.created_at) %> 전
+          </span>
+        </div>
+
+        <%# Title %>
+        <h4 class="text-base font-bold text-stone-900 mb-1.5 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
+          <%= post.title %>
+        </h4>
+
+        <%# Description %>
+        <% if post.content.present? %>
+          <p class="text-sm text-stone-500 line-clamp-2 leading-relaxed mb-3">
+            <%= truncate(strip_tags(post.content), length: 120) %>
+          </p>
+        <% else %>
+          <div class="mb-3"></div>
+        <% end %>
+
+        <%# Stats Row %>
+        <div class="flex items-center gap-3 text-stone-400 text-xs font-medium">
+          <%# Likes (Heart icon) %>
+          <span class="flex items-center gap-1 hover:text-orange-500 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+            <span><%= post.likes_count || 0 %></span>
+          </span>
+
+          <%# Comments %>
+          <span class="flex items-center gap-1 hover:text-stone-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span><%= post.comments_count || 0 %></span>
+          </span>
+
+          <%# Views %>
+          <span class="flex items-center gap-1 hover:text-stone-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span><%= format_views_count(post.views_count || 0) %></span>
+          </span>
+
+        </div>
+      </div>
+
+      <%# Thumbnail Section (RIGHT) - Only rendered when image exists %>
+      <% if has_image %>
+        <div class="shrink-0 w-[120px] self-stretch rounded-xl overflow-hidden bg-stone-100 ml-1">
+          <%= image_tag post.images.first,
+              alt: post.title,
+              loading: "lazy",
+              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

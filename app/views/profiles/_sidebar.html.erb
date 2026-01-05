@@ -1,0 +1,273 @@
+<%# 프로필 사이드바 - Premium ID Card %>
+<%# locals: user, is_own_profile, is_following (optional) %>
+
+<% is_following ||= false %>
+
+<%# Premium ID Card Container %>
+<div class="bg-white/80 backdrop-blur-xl border border-white/50
+            shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden">
+
+  <%# 상단 그라디언트 배경 (미니 커버) %>
+  <div class="h-24 bg-gradient-to-br <%= user.cover_gradient %> relative overflow-hidden">
+    <%# 추상적 도형 패턴 %>
+    <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+    <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-orange-200/30 rounded-full blur-xl"></div>
+
+    <%# 노이즈 텍스처 %>
+    <div class="absolute inset-0 opacity-20 pointer-events-none"
+         style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noise\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%\" height=\"100%\" filter=\"url(%23noise)\" opacity=\"0.4\"/%3E%3C/svg%3E');">
+    </div>
+  </div>
+
+  <div class="px-5 pb-6">
+    <%# 아바타 섹션 - 링 + 그림자로 분리감 %>
+    <div class="-mt-14 mb-4 flex justify-center">
+      <div class="relative">
+        <%# 메인 아바타 - ring은 외부에 그려져 이미지 크기 영향 없음 %>
+        <div class="w-28 h-28 rounded-full ring-4 ring-white shadow-xl overflow-hidden">
+          <% if user.avatar.attached? %>
+            <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+          <% elsif user.avatar_url.present? %>
+            <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover" %>
+          <% else %>
+            <div class="w-full h-full flex items-center justify-center
+                        bg-gradient-to-br from-orange-400 to-rose-400
+                        text-white text-3xl font-bold">
+              <%= user.name[0].upcase %>
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+    <%# 상태 뱃지 (Status Badge) - pulse 애니메이션 %>
+    <% if user.status_message.present? || user.has_availability_status? %>
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <span class="w-2 h-2 rounded-full animate-pulse
+                     <%= user.available_for_work? ? 'bg-green-500' : 'bg-amber-400' %>">
+        </span>
+        <span class="text-xs font-medium text-stone-600">
+          <%= user.status_message.presence || user.availability_badges.first&.dig(:label) %>
+        </span>
+      </div>
+    <% end %>
+
+    <%# 이름 + 역할 %>
+    <div class="text-center mt-6">
+      <h1 class="text-2xl font-bold text-[#2C2825]"><%= user.name %></h1>
+      <% if user.role_title.present? %>
+        <p class="text-sm font-medium text-amber-600 mt-1"><%= user.role_title %></p>
+      <% end %>
+      <% if user.affiliation.present? %>
+        <p class="text-sm text-stone-500 mt-0.5"><%= user.affiliation %></p>
+      <% end %>
+    </div>
+
+    <%# 자기소개 - 인용문 스타일 %>
+    <% if user.bio.present? %>
+      <div class="mt-4 px-2">
+        <p class="text-sm text-stone-600 text-center leading-relaxed line-clamp-3 italic">
+          "<%= user.bio %>"
+        </p>
+      </div>
+    <% end %>
+
+    <%# Stats Box (밀도 높이기) %>
+    <div class="bg-stone-50 rounded-2xl p-4 mt-6">
+      <div class="flex justify-between text-center">
+        <div class="flex-1">
+          <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.followers_count) %></span>
+          <p class="text-xs text-stone-400 mt-0.5">팔로워</p>
+        </div>
+        <div class="w-px bg-stone-200 my-1"></div>
+        <div class="flex-1">
+          <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.following_count) %></span>
+          <p class="text-xs text-stone-400 mt-0.5">팔로잉</p>
+        </div>
+        <div class="w-px bg-stone-200 my-1"></div>
+        <div class="flex-1">
+          <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.posts.published.count) %></span>
+          <p class="text-xs text-stone-400 mt-0.5">게시글</p>
+        </div>
+      </div>
+    </div>
+
+    <%# CTA 버튼 영역 - Primary/Secondary 위계 %>
+    <div class="space-y-3 mt-6">
+      <% if is_own_profile %>
+        <%# 본인 프로필 - 편집 버튼 (Primary) %>
+        <%= link_to edit_my_page_path,
+            class: "w-full inline-flex items-center justify-center gap-2 py-3.5
+                    text-sm font-bold text-white bg-[#2C2825] rounded-xl
+                    shadow-lg shadow-stone-900/20
+                    hover:scale-[1.02] active:scale-[0.98] transition-transform" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          프로필 편집하기
+        <% end %>
+      <% else %>
+        <%# 다른 사용자 프로필 %>
+        <%# Primary Action - 커피챗 제안 (전체 폭, 가장 강조) %>
+        <%= link_to start_chat_path(user),
+            method: :post,
+            class: "w-full inline-flex items-center justify-center gap-2 py-3.5
+                    text-sm font-bold text-white bg-[#2C2825] rounded-xl
+                    shadow-lg shadow-stone-900/20
+                    hover:scale-[1.02] active:scale-[0.98] transition-transform",
+            data: { turbo_method: :post } do %>
+          <span class="text-lg">☕️</span>
+          <span>커피챗 제안하기</span>
+        <% end %>
+
+        <%# Secondary Actions - 팔로우 + 더보기 가로 배치 %>
+        <div class="flex gap-2">
+          <%# 팔로우 버튼 %>
+          <div class="flex-1">
+            <%= render "profiles/follow_button", user: user, following: is_following %>
+          </div>
+
+          <%# 더보기 메뉴 (미트볼) %>
+          <div class="relative" data-controller="dropdown">
+            <button type="button"
+                    data-action="dropdown#toggle"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl
+                           border border-stone-200 bg-stone-50
+                           text-stone-400 hover:bg-stone-100 hover:text-stone-600
+                           transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+              </svg>
+            </button>
+
+            <%# 드롭다운 메뉴 %>
+            <div data-dropdown-target="menu"
+                 class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl
+                        border border-stone-100 py-1 z-50 origin-top-right">
+
+              <%# 일반 액션 %>
+              <button type="button"
+                      class="w-full text-left px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50
+                             flex items-center gap-2"
+                      onclick="navigator.clipboard.writeText('<%= profile_url(user) %>').then(() => alert('프로필 링크가 복사되었습니다'))">
+                <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                프로필 링크 복사
+              </button>
+
+              <div class="h-px bg-stone-100 my-1"></div>
+
+              <%# 위험 액션 (빨간색) %>
+              <button type="button"
+                      class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50
+                             flex items-center gap-2"
+                      onclick="alert('차단 기능은 준비 중입니다')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                </svg>
+                차단하기
+              </button>
+
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# ═══════════════════════════════════════════════════════════════════════ %>
+    <%# Maker's DNA 섹션 - Skills는 About 탭에서만 표시 (중복 제거) %>
+    <%# ═══════════════════════════════════════════════════════════════════════ %>
+
+    <%# 활동 지역 %>
+    <% if user.location.present? %>
+      <div class="flex items-center justify-center gap-2 text-xs text-stone-500 mt-4">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span><%= user.location %></span>
+      </div>
+    <% end %>
+
+    <%# 소셜 링크 Dock %>
+    <% if user.linkedin_url.present? || user.github_url.present? || user.portfolio_url.present? || user.open_chat_url.present? %>
+      <div class="border-t border-stone-100 pt-5 mt-5">
+        <div class="flex justify-center gap-3">
+          <% if user.linkedin_url.present? %>
+            <%= link_to user.linkedin_url,
+                target: "_blank", rel: "noopener noreferrer",
+                class: "w-10 h-10 flex items-center justify-center rounded-xl bg-stone-100
+                        text-stone-400 hover:bg-blue-50 hover:text-blue-600
+                        transition-all duration-200 hover:scale-105",
+                title: "LinkedIn" do %>
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+            <% end %>
+          <% end %>
+
+          <% if user.github_url.present? %>
+            <%= link_to user.github_url,
+                target: "_blank", rel: "noopener noreferrer",
+                class: "w-10 h-10 flex items-center justify-center rounded-xl bg-stone-100
+                        text-stone-400 hover:bg-stone-800 hover:text-white
+                        transition-all duration-200 hover:scale-105",
+                title: "GitHub" do %>
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            <% end %>
+          <% end %>
+
+          <% if user.portfolio_url.present? %>
+            <%= link_to user.portfolio_url,
+                target: "_blank", rel: "noopener noreferrer",
+                class: "w-10 h-10 flex items-center justify-center rounded-xl bg-stone-100
+                        text-stone-400 hover:bg-orange-50 hover:text-orange-600
+                        transition-all duration-200 hover:scale-105",
+                title: "포트폴리오" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+              </svg>
+            <% end %>
+          <% end %>
+
+          <% if user.open_chat_url.present? %>
+            <%= link_to user.open_chat_url,
+                target: "_blank", rel: "noopener noreferrer",
+                class: "w-10 h-10 flex items-center justify-center rounded-xl bg-stone-100
+                        text-stone-400 hover:bg-yellow-50 hover:text-yellow-600
+                        transition-all duration-200 hover:scale-105",
+                title: "오픈채팅" do %>
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.27 6.054-.188.702-.682 2.545-.78 2.939-.123.5.184.494.387.36.159-.106 2.53-1.714 3.55-2.403.504.063 1.028.095 1.573.095 4.97 0 9-3.185 9-7.045 0-3.93-4.03-7.115-9-7.115z"/>
+              </svg>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# 활동 상태 뱃지 (전체) %>
+    <% if user.availability_badges.any? %>
+      <div class="flex flex-wrap justify-center gap-2 pt-4 mt-4 border-t border-stone-100">
+        <% user.availability_badges.each do |badge| %>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
+                       text-white rounded-full <%= badge[:color] %> shadow-sm">
+            <span class="w-1.5 h-1.5 bg-white/80 rounded-full animate-pulse"></span>
+            <%= badge[:label] %>
+          </span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

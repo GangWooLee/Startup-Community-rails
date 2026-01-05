@@ -1,9 +1,9 @@
-<%# 시스템 메시지 (중앙 정렬) %>
+<%# 시스템 메시지 - Fluid Lounge Style %>
 <div id="<%= dom_id(message) %>" class="flex justify-center my-4 animate-fade-in">
-  <div class="<%= message.deal_confirm? ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-secondary text-muted-foreground' %> px-4 py-2 rounded-full text-xs text-center max-w-[85%]">
+  <div class="<%= message.deal_confirm? ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-stone-50 text-stone-500' %> px-4 py-1.5 rounded-full text-xs text-center max-w-[85%]">
     <% if message.deal_confirm? %>
-      <span class="inline-flex items-center gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <span class="inline-flex items-center gap-1.5 font-medium">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <%= message.content %>

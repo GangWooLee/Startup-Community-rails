@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_04_221239) do
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -123,6 +133,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
     t.index ["email"], name: "index_email_verifications_on_email"
   end
 
+  create_table "follows", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "followed_id", null: false
+    t.integer "follower_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["followed_id", "created_at"], name: "index_follows_on_followed_id_and_created_at"
+    t.index ["followed_id"], name: "index_follows_on_followed_id"
+    t.index ["follower_id", "followed_id"], name: "index_follows_on_follower_id_and_followed_id", unique: true
+    t.index ["follower_id"], name: "index_follows_on_follower_id"
+  end
+
   create_table "idea_analyses", force: :cascade do |t|
     t.json "analysis_result", null: false
     t.datetime "created_at", null: false
@@ -145,6 +166,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
     t.string "category", null: false
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.boolean "is_private", default: false, null: false
     t.datetime "responded_at"
     t.integer "responded_by_id"
     t.string "status", default: "pending", null: false
@@ -395,14 +417,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
     t.string "avatar_url"
     t.text "bio"
     t.datetime "created_at", null: false
+    t.text "currently_learning"
     t.string "custom_status"
     t.datetime "deleted_at"
     t.string "email", null: false
+    t.json "experiences", default: []
+    t.integer "followers_count", default: 0, null: false
+    t.integer "following_count", default: 0, null: false
     t.string "github_url"
     t.boolean "is_admin", default: false, null: false
     t.datetime "last_sign_in_at"
     t.string "linkedin_url"
+    t.string "location", limit: 50
+    t.string "looking_for", limit: 200
     t.string "name", null: false
+    t.boolean "notifications_enabled", default: true, null: false
     t.string "open_chat_url"
     t.string "password_digest", null: false
     t.datetime "password_reset_sent_at"
@@ -412,8 +441,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
     t.string "remember_digest"
     t.string "role_title"
     t.string "skills"
+    t.string "status_message", limit: 100
+    t.text "toolbox"
     t.string "uid"
     t.datetime "updated_at", null: false
+    t.text "work_style"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["is_admin"], name: "index_users_on_is_admin"
@@ -434,6 +466,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_03_064802) do
   add_foreign_key "comments", "comments", column: "parent_id", on_delete: :cascade
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
+  add_foreign_key "follows", "users", column: "followed_id"
+  add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "idea_analyses", "users"
   add_foreign_key "inquiries", "users"
   add_foreign_key "inquiries", "users", column: "responded_by_id"

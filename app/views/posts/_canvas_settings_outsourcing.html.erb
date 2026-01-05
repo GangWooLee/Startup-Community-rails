@@ -1,0 +1,222 @@
+<%#
+  Creator's Canvas - Outsourcing Settings Panel
+  우측 30% 설정 영역 (외주 글용)
+
+  포함 항목:
+  - 유형 (Makers/Projects)
+  - 서비스 분야
+  - 필요 기술
+  - 진행 방식
+  - 예산
+  - 예상 기간
+  - 참고 이미지
+%>
+
+<div class="p-5 sm:p-6 space-y-5 text-sm">
+
+  <%# Section Header %>
+  <h3 class="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+    프로젝트 정보
+  </h3>
+
+  <%# ===== Hiring vs Seeking Toggle ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">유형 <span class="text-orange-500">*</span></label>
+    <div class="flex gap-2">
+      <%# Makers (구인) - checked 제거: 커뮤니티 패널과 충돌 방지 %>
+      <label class="flex-1 cursor-pointer">
+        <input type="radio"
+               name="post[category]"
+               value="hiring"
+               form="canvas-form"
+               class="peer sr-only"
+               data-action="change->canvas-modal#updateCategory">
+        <span class="
+          block text-center py-2.5 rounded-xl border-2
+          transition-all duration-200
+          peer-checked:border-orange-400 peer-checked:bg-orange-50
+          border-stone-200 hover:border-stone-300
+          text-sm font-medium
+        ">
+          🔍 Makers
+        </span>
+      </label>
+
+      <%# Projects (구직) %>
+      <label class="flex-1 cursor-pointer">
+        <input type="radio"
+               name="post[category]"
+               value="seeking"
+               form="canvas-form"
+               class="peer sr-only"
+               data-action="change->canvas-modal#updateCategory">
+        <span class="
+          block text-center py-2.5 rounded-xl border-2
+          transition-all duration-200
+          peer-checked:border-orange-400 peer-checked:bg-orange-50
+          border-stone-200 hover:border-stone-300
+          text-sm font-medium
+        ">
+          🚀 Projects
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <%# ===== Service Type ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">
+      서비스 분야 <span class="text-orange-500">*</span>
+    </label>
+    <select name="post[service_type]"
+            form="canvas-form"
+            data-canvas-modal-target="serviceType"
+            data-action="change->canvas-modal#validateForm"
+            class="
+              w-full px-3 py-2.5 rounded-xl
+              bg-stone-50 border-none
+              text-stone-700
+              focus:ring-2 focus:ring-orange-100 focus:outline-none
+              appearance-none cursor-pointer
+            ">
+      <option value="">분야 선택</option>
+      <% Post::SERVICE_TYPES.each do |key, label| %>
+        <option value="<%= key %>"><%= label %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <%# ===== Skills ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">필요 기술</label>
+    <input type="text"
+           name="post[skills]"
+           form="canvas-form"
+           placeholder="React, Node.js, Figma"
+           class="
+             w-full px-3 py-2.5 rounded-xl
+             bg-stone-50 border-none
+             placeholder:text-stone-300
+             focus:ring-2 focus:ring-orange-100 focus:outline-none
+           ">
+    <p class="text-xs text-stone-400">쉼표로 구분해서 입력하세요</p>
+  </div>
+
+  <%# ===== Work Type ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">진행 방식</label>
+    <div class="flex flex-wrap gap-2">
+      <% Post::WORK_TYPES.each do |key, label| %>
+        <label class="cursor-pointer">
+          <input type="radio"
+                 name="post[work_type]"
+                 value="<%= key %>"
+                 form="canvas-form"
+                 class="peer sr-only">
+          <span class="
+            inline-block px-3 py-1.5 rounded-lg border text-xs
+            transition-colors duration-200
+            peer-checked:border-orange-300 peer-checked:bg-orange-50
+            border-stone-200 text-stone-500
+            hover:border-stone-300
+          ">
+            <%= label %>
+          </span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <%# ===== Price ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">예산</label>
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">₩</span>
+      <input type="number"
+             name="post[price]"
+             form="canvas-form"
+             placeholder="0"
+             min="0"
+             step="10000"
+             class="
+               w-full pl-8 pr-3 py-2.5 rounded-xl
+               bg-stone-50 border-none
+               placeholder:text-stone-300
+               focus:ring-2 focus:ring-orange-100 focus:outline-none
+               [appearance:textfield]
+               [&::-webkit-outer-spin-button]:appearance-none
+               [&::-webkit-inner-spin-button]:appearance-none
+             ">
+    </div>
+    <label class="flex items-center gap-2 text-stone-500 cursor-pointer">
+      <input type="checkbox"
+             name="post[price_negotiable]"
+             value="1"
+             form="canvas-form"
+             class="rounded border-stone-300 text-orange-500 focus:ring-orange-200">
+      <span class="text-xs">협의 가능</span>
+    </label>
+  </div>
+
+  <%# ===== Work Period ===== %>
+  <div class="space-y-2">
+    <label class="font-medium text-stone-700">예상 기간</label>
+    <input type="text"
+           name="post[work_period]"
+           form="canvas-form"
+           placeholder="예: 2주, 1개월"
+           class="
+             w-full px-3 py-2.5 rounded-xl
+             bg-stone-50 border-none
+             placeholder:text-stone-300
+             focus:ring-2 focus:ring-orange-100 focus:outline-none
+           ">
+  </div>
+
+  <%# ===== Compact Image Upload ===== %>
+  <div data-controller="image-upload" class="space-y-2">
+    <label class="font-medium text-stone-700">참고 이미지</label>
+
+    <%# Preview Grid (Compact) %>
+    <div data-image-upload-target="preview"
+         class="grid grid-cols-4 gap-1 empty:hidden">
+    </div>
+
+    <%# Upload Zone (Compact) %>
+    <label data-image-upload-target="dropzone"
+           class="
+             flex items-center justify-center gap-2
+             p-3
+             border border-dashed border-stone-200
+             rounded-xl bg-stone-50
+             cursor-pointer
+             hover:border-orange-300 hover:bg-orange-50/50
+             transition-colors duration-200
+             text-xs text-stone-400
+           ">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      사진 추가
+      <input type="file"
+             name="post[images][]"
+             form="canvas-form"
+             multiple
+             accept="image/*"
+             class="hidden"
+             data-image-upload-target="input"
+             data-action="change->image-upload#handleFiles">
+    </label>
+
+    <%# Counter %>
+    <span class="text-xs text-stone-400" data-image-upload-target="counter">0/5</span>
+  </div>
+
+  <%# ===== Tips ===== %>
+  <div class="pt-4 border-t border-stone-100">
+    <p class="text-xs text-stone-400 leading-relaxed">
+      💡 <strong>필수:</strong> 제목, 본문, 서비스 분야를 입력하면 등록 버튼이 활성화됩니다.
+    </p>
+  </div>
+
+</div>

@@ -1,95 +1,349 @@
+<%#
+  Help Desk 페이지 - Organic Modern 리디자인
+  레퍼런스: FAQ 아코디언 + 1:1 문의 카드 리스트 + 운영시간 위젯
+%>
+
 <% content_for :head do %>
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<div class="min-h-screen bg-background pb-20">
-  <!-- Header -->
-  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
-    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: settings_path, action: "click->navigation#goBack" } do %>
-          <%= render partial: "shared/icons/arrow_left", locals: { css_css_class: "h-5 w-5" } %>
-        <% end %>
-        <h1 class="text-xl font-bold">내 문의</h1>
-      </div>
-      <%= link_to new_inquiry_path, class: "inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm btn-hover" do %>
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        새 문의
-      <% end %>
+<div class="flex-1 overflow-y-auto bg-[#FDFBF7]"
+     data-controller="navigation"
+     data-navigation-reset-on-connect-value="true">
+
+  <%# ===== Header (간소화) ===== %>
+  <header class="sticky top-0 z-30 bg-[#FDFBF7]/95 backdrop-blur-sm border-b border-stone-200/60">
+    <div class="max-w-6xl mx-auto px-4 md:px-6 py-4">
+      <h1 class="text-2xl font-bold text-stone-900 flex items-center gap-2">
+        <span class="text-xl">💬</span>
+        고객센터
+      </h1>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <% if @inquiries.any? %>
-      <div class="space-y-4">
-        <% @inquiries.each do |inquiry| %>
-          <%= link_to inquiry_path(inquiry), class: "block rounded-xl border bg-card text-card-foreground p-4 card-hover" do %>
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-2">
-                  <%# 카테고리 뱃지 %>
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium <%= inquiry_category_badge_class(inquiry.category) %>">
-                    <%= inquiry.category_label %>
-                  </span>
-
-                  <%# 상태 뱃지 %>
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium <%= inquiry_status_badge_class(inquiry.status) %>">
-                    <%= inquiry.status_label %>
-                  </span>
-                </div>
-
-                <h3 class="font-semibold text-foreground truncate"><%= inquiry.title %></h3>
-                <p class="text-sm text-muted-foreground line-clamp-2 mt-1"><%= inquiry.content.truncate(100) %></p>
-
-                <div class="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                  <span><%= time_ago_in_words(inquiry.created_at) %> 전</span>
-                  <% if inquiry.answered? %>
-                    <span class="flex items-center gap-1 text-green-600">
-                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      답변 완료
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-
-              <svg class="h-5 w-5 text-muted-foreground flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
+  <%# ===== 검색창 ===== %>
+  <div class="max-w-6xl mx-auto px-4 md:px-6 pt-6">
+    <%= form_with url: inquiries_path, method: :get, class: "mb-6", data: { turbo_frame: "_top" } do |f| %>
+      <%= hidden_field_tag :filter, @filter if @filter != "all" %>
+      <div class="relative">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <%= f.text_field :q, value: @search,
+                         placeholder: "FAQ 또는 문의 검색...",
+                         class: "w-full pl-12 pr-4 py-3 bg-stone-50 border border-stone-200
+                                rounded-xl focus:bg-white focus:border-orange-300 focus:ring-2 focus:ring-orange-100
+                                transition-all text-sm placeholder:text-stone-400",
+                         autocomplete: "off" %>
+        <% if @search.present? %>
+          <%= link_to inquiries_path(filter: @filter == "all" ? nil : @filter),
+              class: "absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           <% end %>
         <% end %>
       </div>
-
-      <%# 페이지네이션 %>
-      <% if @inquiries.respond_to?(:total_pages) && @inquiries.total_pages > 1 %>
-        <div class="mt-6 flex justify-center">
-          <%= paginate @inquiries %>
-        </div>
-      <% end %>
-    <% else %>
-      <div class="text-center py-16">
-        <svg class="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 class="text-lg font-semibold text-foreground mb-2">문의 내역이 없습니다</h3>
-        <p class="text-sm text-muted-foreground mb-6">
-          커뮤니티에 대한 의견이나 문의사항이 있으시면<br>
-          새 문의를 등록해주세요.
-        </p>
-        <%= link_to new_inquiry_path, class: "inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm btn-hover" do %>
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          새 문의 작성
-        <% end %>
-      </div>
     <% end %>
+  </div>
+
+  <%# ===== Main Content Grid ===== %>
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-6 pb-32 md:pb-6">
+    <div class="grid grid-cols-12 gap-6">
+
+      <%# ===== Left Column (8 cols) ===== %>
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        <%# FAQ 아코디언 섹션 - Drawbridge Task #101: 컨트롤러를 section으로 이동 %>
+        <section class="card-depth rounded-2xl border border-stone-200/60 overflow-hidden"
+                 data-controller="accordion" data-accordion-multiple-value="true">
+          <%# 헤더 (레퍼런스 스타일) %>
+          <div class="px-5 py-4 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+            <h2 class="text-base font-bold text-stone-900 flex items-center gap-2">
+              <span class="text-orange-500">❓</span>
+              Frequently Asked Questions
+            </h2>
+            <%# Drawbridge Task #101: FAQ 전체 펼치기 버튼 %>
+            <button type="button"
+                    data-action="click->accordion#openAll"
+                    class="text-sm text-orange-600 hover:text-orange-700 font-medium
+                           flex items-center gap-1 group">
+              View all FAQs
+              <svg class="w-4 h-4 group-hover:rotate-90 transition-transform"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+          </div>
+
+          <%# 아코디언 아이템들 %>
+          <div>
+            <% faq_items.each_with_index do |faq, index| %>
+              <div data-accordion-target="item"
+                   class="border-b border-stone-100 last:border-b-0">
+                <%# 트리거 버튼 %>
+                <button type="button"
+                        data-action="click->accordion#toggle"
+                        data-item-id="faq-<%= index %>"
+                        aria-expanded="false"
+                        class="w-full px-5 py-4 flex items-center justify-between text-left group
+                               hover:bg-stone-50/50 transition-colors">
+                  <span class="font-medium text-stone-800 group-hover:text-orange-600 transition-colors pr-4">
+                    <%= faq[:question] %>
+                  </span>
+                  <svg data-accordion-target="icon"
+                       data-item-id="faq-<%= index %>"
+                       class="w-5 h-5 text-stone-400 transition-transform duration-200 flex-shrink-0"
+                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+
+                <%# 콘텐츠 (기본 숨김) %>
+                <div data-accordion-target="content"
+                     data-item-id="faq-<%= index %>"
+                     class="hidden">
+                  <div class="px-5 pb-4 text-sm text-stone-600 leading-relaxed">
+                    <%= faq[:answer] %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </section>
+
+        <%# 1:1 문의 내역 섹션 %>
+        <section>
+          <%# 섹션 헤더 + 인라인 필터 탭 (레퍼런스 스타일) %>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h2 class="text-lg font-bold text-stone-900">
+              1:1 Inquiry Board
+            </h2>
+
+            <%# 인라인 필터 탭 %>
+            <div class="flex items-center gap-1.5 bg-stone-100 rounded-full p-1">
+              <%= link_to inquiries_path(q: @search.presence),
+                  class: "px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                         #{@filter == 'all' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}" do %>
+                전체
+              <% end %>
+              <%= link_to inquiries_path(filter: 'pending', q: @search.presence),
+                  class: "px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                         #{@filter == 'pending' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}" do %>
+                대기중
+              <% end %>
+              <%= link_to inquiries_path(filter: 'answered', q: @search.presence),
+                  class: "px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                         #{@filter == 'answered' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}" do %>
+                답변완료
+              <% end %>
+            </div>
+          </div>
+
+          <%# 문의 카드 리스트 %>
+          <% if @inquiries.any? %>
+            <div class="space-y-3">
+              <% @inquiries.each do |inquiry| %>
+                <%= render 'inquiry_card', inquiry: inquiry %>
+              <% end %>
+            </div>
+
+            <%# Load More 버튼 %>
+            <% if @inquiries.respond_to?(:next_page) && @inquiries.next_page %>
+              <div class="mt-6 text-center">
+                <%= link_to inquiries_path(filter: @filter == "all" ? nil : @filter, q: @search.presence, page: @inquiries.next_page),
+                            class: "inline-flex items-center gap-2 px-6 py-3 rounded-full
+                                   bg-stone-100 text-stone-700 text-sm font-medium
+                                   hover:bg-stone-200 transition-colors" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  더 많은 문의 불러오기
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <%# Empty State %>
+            <div class="card-depth rounded-2xl border border-stone-200/60 p-8 text-center">
+              <div class="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <h3 class="font-bold text-stone-900 mb-2">
+                <% if @filter == 'pending' %>
+                  대기중인 문의가 없습니다
+                <% elsif @filter == 'answered' %>
+                  답변 완료된 문의가 없습니다
+                <% else %>
+                  문의 내역이 없습니다
+                <% end %>
+              </h3>
+              <p class="text-sm text-stone-500 mb-6">
+                궁금한 점이나 개선 요청이 있으시면<br>
+                새 문의를 등록해주세요.
+              </p>
+              <%= link_to new_inquiry_path,
+                  class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                         bg-orange-500 text-white text-sm font-semibold
+                         hover:bg-orange-600 hover:scale-105 transition-all shadow-md" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                새 문의 작성
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+      </div>
+
+      <%# ===== Right Column (4 cols) - Desktop Only ===== %>
+      <aside class="hidden lg:block lg:col-span-4 sticky top-24 space-y-6 self-start">
+
+        <%# 운영시간 위젯 (오렌지/갈색 그라데이션 - 레퍼런스 스타일) %>
+        <div class="rounded-2xl overflow-hidden shadow-xl">
+          <div class="bg-gradient-to-br from-[#D97706] via-[#B45309] to-[#78350F] p-6 text-white">
+            <%# OPERATING HOURS 헤더 %>
+            <div class="flex items-center gap-3 mb-5">
+              <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold tracking-widest bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                OPERATING HOURS
+              </span>
+            </div>
+
+            <%# 운영시간 테이블 (레퍼런스 스타일) %>
+            <div class="space-y-3">
+              <%# 평일 %>
+              <div class="flex items-center justify-between">
+                <span class="text-white/80">Weekdays</span>
+                <span class="font-semibold">09:00 - 18:00</span>
+              </div>
+
+              <%# 점심시간 %>
+              <div class="flex items-center justify-between">
+                <span class="text-white/80">Lunch Break</span>
+                <span class="font-semibold">12:00 - 13:00</span>
+              </div>
+
+              <%# 주말 - 빨간색 Closed %>
+              <div class="flex items-center justify-between">
+                <span class="text-white/80">Weekends</span>
+                <span class="font-semibold text-red-300">Closed</span>
+              </div>
+            </div>
+
+            <%# 평균 응답시간 %>
+            <div class="mt-5 pt-4 border-t border-white/20">
+              <p class="text-white/70 text-xs mb-1">Average Response Time</p>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                <span class="font-bold">Within 2 hours</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# 빠른 링크 위젯 %>
+        <div class="card-depth rounded-2xl p-5 border border-stone-200/60">
+          <h3 class="text-sm font-bold text-stone-800 mb-4 flex items-center gap-2">
+            <span>🔗</span>
+            빠른 링크
+          </h3>
+
+          <div class="space-y-2">
+            <%= link_to new_inquiry_path,
+                class: "flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group" do %>
+              <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-stone-700 group-hover:text-orange-600 transition-colors">새 문의 작성</p>
+                <p class="text-xs text-stone-400">버그 신고, 기능 제안</p>
+              </div>
+            <% end %>
+
+            <%= link_to community_path,
+                class: "flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group" do %>
+              <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-stone-700 group-hover:text-blue-600 transition-colors">커뮤니티</p>
+                <p class="text-xs text-stone-400">다른 메이커들과 소통</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Need more help? 위젯 (레퍼런스 스타일) %>
+        <div class="card-depth rounded-2xl p-5 border border-stone-200/60">
+          <h3 class="text-sm font-bold text-stone-800 mb-4">
+            Need more help?
+          </h3>
+
+          <div class="space-y-3">
+            <%# Email Support %>
+            <a href="mailto:support@undrew.com"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group">
+              <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-bold text-stone-900 group-hover:text-orange-600 transition-colors">Email Support</p>
+                <p class="text-xs text-stone-500">support@undrew.com</p>
+              </div>
+            </a>
+
+            <%# Live Chat %>
+            <a href="#"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group">
+              <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-bold text-stone-900 group-hover:text-emerald-600 transition-colors">Live Chat</p>
+                <p class="text-xs text-stone-500">Available during hours</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
   </main>
 
+  <%# ===== FAB Button (Mobile) ===== %>
+  <%= link_to new_inquiry_path,
+      class: "lg:hidden fixed bottom-24 right-4 z-50
+             flex items-center gap-2 px-5 py-3.5 rounded-full
+             bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/30
+             hover:bg-orange-600 hover:scale-105 hover:shadow-xl
+             active:scale-95 transition-all duration-200" do %>
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    <span>새 문의</span>
+  <% end %>
+
+  <%# 모바일 하단 네비게이션 %>
   <%= render "shared/bottom_nav" %>
 </div>

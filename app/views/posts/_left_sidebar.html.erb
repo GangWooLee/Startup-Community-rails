@@ -1,0 +1,138 @@
+<%#
+  Left Sidebar - Organic Modern 스타일
+  Reference: design-sample/community_page/community_page (lines 126-172)
+
+  Features:
+  - Sticky positioning below header
+  - Navigation items with icons (replaces bottom nav on desktop)
+  - Active state highlighting
+  - Community categories section
+  - Custom scrollbar
+
+  Navigation Order: 홈 → 채팅 → AI 분석 → 프로젝트 찾기 → Q&A
+  Uses: CommunityHelper (my_communities)
+%>
+
+<aside class="hidden md:block md:col-span-3 lg:col-span-2 sticky top-28 overflow-y-auto max-h-[calc(100vh-8rem)] sidebar-scroll pr-2">
+  <nav class="space-y-6">
+    <%# Main Navigation - 하단 네비 대체 %>
+    <div class="space-y-1">
+      <%# 1. 홈 %>
+      <% is_home_active = current_page?(community_path) && params[:category].blank? && params[:sort].blank? %>
+      <%= link_to community_path,
+          class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all #{is_home_active ? 'text-stone-900 bg-white shadow-sm border border-stone-100 font-bold' : 'text-stone-600 hover:bg-white/60 hover:text-stone-900'}" do %>
+        <svg class="w-5 h-5 <%= is_home_active ? 'text-orange-500' : '' %>" fill="<%= is_home_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_home_active ? '0' : '2' %>" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        홈
+      <% end %>
+
+      <%# 2. 채팅 (with unread badge) %>
+      <% is_chat_active = controller_name == "chat_rooms" || controller_name == "messages" %>
+      <% if logged_in? %>
+        <%= link_to chat_rooms_path,
+            class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all #{is_chat_active ? 'text-stone-900 bg-white shadow-sm border border-stone-100 font-bold' : 'text-stone-600 hover:bg-white/60 hover:text-stone-900'}" do %>
+          <div class="relative">
+            <svg class="w-5 h-5 <%= is_chat_active ? 'text-orange-500' : '' %>" fill="<%= is_chat_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_chat_active ? '0' : '2' %>" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <% unread_count = current_user.total_unread_messages %>
+            <% if unread_count > 0 %>
+              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-1 font-bold">
+                <%= unread_count > 99 ? "99+" : unread_count %>
+              </span>
+            <% end %>
+          </div>
+          채팅
+        <% end %>
+      <% else %>
+        <%= link_to login_path,
+            class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-stone-600 hover:bg-white/60 hover:text-stone-900" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          채팅
+        <% end %>
+      <% end %>
+
+      <%# 3. AI 분석 %>
+      <% is_ai_active = current_page?(onboarding_ai_input_path) || request.path.start_with?("/ai/result") rescue false %>
+      <%= link_to onboarding_ai_input_path,
+          class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all #{is_ai_active ? 'text-stone-900 bg-white shadow-sm border border-stone-100 font-bold' : 'text-stone-600 hover:bg-white/60 hover:text-stone-900'}" do %>
+        <svg class="w-5 h-5 <%= is_ai_active ? 'text-orange-500' : '' %>" fill="<%= is_ai_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_ai_active ? '0' : '2' %>" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        AI 분석
+      <% end %>
+
+      <%# 4. Join Project %>
+      <%= link_to job_posts_path,
+          class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all #{current_page?(job_posts_path) ? 'text-stone-900 bg-white shadow-sm border border-stone-100 font-bold' : 'text-stone-600 hover:bg-white/60 hover:text-stone-900'}" do %>
+        <svg class="w-5 h-5 <%= current_page?(job_posts_path) ? 'text-orange-500' : '' %>" fill="<%= current_page?(job_posts_path) ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= current_page?(job_posts_path) ? '0' : '2' %>" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+        </svg>
+        Join Project
+      <% end %>
+
+      <%# 5. Q&A (Help Desk) %>
+      <% is_qa_active = controller_name == 'inquiries' %>
+      <%= link_to inquiries_path,
+          class: "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all #{is_qa_active ? 'text-stone-900 bg-white shadow-sm border border-stone-100 font-bold' : 'text-stone-600 hover:bg-white/60 hover:text-stone-900'}" do %>
+        <svg class="w-5 h-5 <%= is_qa_active ? 'text-orange-500' : '' %>" fill="<%= is_qa_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_qa_active ? '0' : '2' %>" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Q&A
+      <% end %>
+    </div>
+
+    <%# Community Categories - 게시판 필터 %>
+    <div class="pt-4 border-t border-stone-200/50">
+      <h3 class="px-4 text-xs font-bold text-stone-400 uppercase tracking-wider mb-3">게시판</h3>
+      <div class="space-y-1">
+        <%# 인기 %>
+        <% is_popular_active = params[:sort] == 'popular' %>
+        <%= link_to community_path(sort: :popular),
+            class: "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all #{is_popular_active ? 'text-stone-900 bg-white/80 shadow-sm' : 'text-stone-500 hover:bg-white/60 hover:text-stone-900'}" do %>
+          <svg class="w-4 h-4 <%= is_popular_active ? 'text-orange-500' : '' %>" fill="<%= is_popular_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_popular_active ? '0' : '2' %>" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+          </svg>
+          인기글
+        <% end %>
+
+        <%# 자유게시판 %>
+        <% is_free_active = params[:category] == 'free' %>
+        <%= link_to community_path(category: :free),
+            class: "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all #{is_free_active ? 'text-stone-900 bg-white/80 shadow-sm' : 'text-stone-500 hover:bg-white/60 hover:text-stone-900'}" do %>
+          <svg class="w-4 h-4 <%= is_free_active ? 'text-orange-500' : '' %>" fill="<%= is_free_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_free_active ? '0' : '2' %>" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+          </svg>
+          자유게시판
+        <% end %>
+
+        <%# 홍보 %>
+        <% is_promo_active = params[:category] == 'promotion' %>
+        <%= link_to community_path(category: :promotion),
+            class: "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all #{is_promo_active ? 'text-stone-900 bg-white/80 shadow-sm' : 'text-stone-500 hover:bg-white/60 hover:text-stone-900'}" do %>
+          <svg class="w-4 h-4 <%= is_promo_active ? 'text-orange-500' : '' %>" fill="<%= is_promo_active ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="<%= is_promo_active ? '0' : '2' %>" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+          </svg>
+          홍보
+        <% end %>
+      </div>
+    </div>
+
+    <%# My Community Section (Mockup) %>
+    <div class="pt-4 border-t border-stone-200/50">
+      <h3 class="px-4 text-xs font-bold text-stone-400 uppercase tracking-wider mb-3">My Community</h3>
+      <div class="space-y-1">
+        <% my_communities.each do |community| %>
+          <a href="#"
+             class="flex items-center gap-3 px-4 py-2 text-stone-500 hover:bg-white/60 hover:text-stone-900 rounded-xl text-sm font-medium transition-all">
+            <span class="w-2 h-2 rounded-full <%= community[:color] %>"></span>
+            <%= community[:name] %>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  </nav>
+</aside>

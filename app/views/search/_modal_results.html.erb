@@ -25,9 +25,9 @@
           <div class="px-4 py-2 flex items-center justify-between">
             <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">사용자</p>
             <% if users_total_count > 3 %>
-              <%= link_to search_path(q: query, tab: "users"),
-                          data: { action: "click->search-modal#resultClick" },
-                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium" do %>
+              <%= link_to search_path(q: query, tab: "users", modal: true, drilldown: true),
+                          data: { turbo_frame: "search_modal_results", action: "click->search-modal#drillDown" },
+                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium transition-colors" do %>
                 <%= users_total_count %>명 모두 보기 →
               <% end %>
             <% end %>
@@ -82,9 +82,9 @@
           <div class="px-4 py-2 flex items-center justify-between">
             <p class="text-xs font-medium text-stone-400 uppercase tracking-wider">게시글</p>
             <% if posts_total_count > 5 %>
-              <%= link_to search_path(q: query, tab: "posts"),
-                          data: { action: "click->search-modal#resultClick" },
-                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium" do %>
+              <%= link_to search_path(q: query, tab: "posts", modal: true, drilldown: true),
+                          data: { turbo_frame: "search_modal_results", action: "click->search-modal#drillDown" },
+                          class: "text-xs text-orange-500 hover:text-orange-600 font-medium transition-colors" do %>
                 <%= posts_total_count %>개 모두 보기 →
               <% end %>
             <% end %>

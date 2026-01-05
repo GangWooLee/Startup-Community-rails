@@ -1,10 +1,15 @@
-<%# 일반 텍스트 메시지 %>
+<%# 일반 텍스트 메시지 - Fluid Lounge Style %>
 <%# locals: message, viewing_user (required), show_profile (optional), show_time (optional), is_read (optional) %>
 <%
   # viewing_user는 상위 partial에서 전달됨
   viewing_user_id = viewing_user&.id
   is_mine = viewing_user_id && message.sender_id == viewing_user_id
-  bubble_class = is_mine ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
+
+  # Organic Modern 색상 팔레트
+  # 내 메시지: Warm Stone #57534E (stone-600, 부드러운 연필심 톤) + 우상단 작은 radius (말꼬리)
+  # 상대 메시지: Stone-100 #F5F5F4 + 좌상단 작은 radius (말꼬리)
+  bubble_class = is_mine ? "bg-stone-600 text-white" : "bg-[#F5F5F4] text-stone-700"
+  bubble_radius = is_mine ? "rounded-2xl rounded-tr-sm" : "rounded-2xl rounded-tl-sm"
   container_class = is_mine ? "justify-end" : "justify-start"
 
   # 그룹화 옵션 (기본값: 프로필과 시간 모두 표시)
@@ -13,34 +18,47 @@
   is_read = local_assigns.fetch(:is_read, true)
 %>
 
-<div id="<%= dom_id(message) %>" class="flex <%= container_class %> animate-fade-in <%= show_profile ? '' : 'mt-0.5' %>">
+<div id="<%= dom_id(message) %>" class="group flex <%= container_class %> animate-fade-in <%= show_profile ? '' : 'mt-0.5' %>">
   <% unless is_mine %>
     <%# 프로필 영역: 표시하거나 빈 공간 유지 %>
     <div class="flex-shrink-0 mr-2 self-end w-8">
       <% if show_profile %>
-        <%= link_to profile_path(message.sender), class: "block" do %>
-          <%= render "shared/avatar", user: message.sender, size: "sm" %>
+        <% sender = message.sender %>
+        <% is_deleted_sender = sender.nil? %>
+        <% if is_deleted_sender %>
+          <%# 탈퇴한 회원 - Ghost Icon (링크 없음) %>
+          <div class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
+            <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+        <% else %>
+          <%= link_to profile_path(sender), class: "block" do %>
+            <%= render "shared/avatar", user: sender, size: "sm" %>
+          <% end %>
         <% end %>
       <% end %>
     </div>
   <% end %>
 
-  <div class="max-w-[75%] <%= is_mine ? 'order-1' : '' %>">
+  <div class="max-w-[70%] 2xl:max-w-[500px] <%= is_mine ? 'order-1' : '' %>">
     <%# 메시지 버블과 시간/읽음 표시를 같은 줄에 %>
     <div class="flex items-end gap-1.5 <%= is_mine ? 'flex-row-reverse' : '' %>">
-      <div class="<%= bubble_class %> px-4 py-2 rounded-2xl <%= is_mine ? 'rounded-br-md' : 'rounded-bl-md' %>">
-        <p class="whitespace-pre-wrap break-words text-sm"><%= message.content %></p>
+      <div class="<%= bubble_class %> <%= bubble_radius %> px-4 py-2.5 shadow-sm">
+        <p class="whitespace-pre-wrap break-words text-sm leading-relaxed"><%= message.content %></p>
       </div>
 
       <%# 시간 또는 읽음 표시가 필요한 경우 %>
       <% if show_time || (is_mine && !is_read) %>
         <div class="flex flex-col items-<%= is_mine ? 'end' : 'start' %> gap-0.5 flex-shrink-0">
-          <%# 읽음 표시 (내 메시지이고 상대방이 안 읽었을 때 - 시간과 관계없이 항상 표시) %>
+          <%# 읽음 표시 (내 메시지이고 상대방이 안 읽었을 때) - 항상 표시 %>
           <% if is_mine && !is_read %>
-            <span class="text-[11px] text-muted-foreground font-medium">-</span>
+            <span class="text-[10px] text-orange-500 font-medium">1</span>
           <% end %>
+          <%# 시간 표시 - 호버 시에만 표시 %>
           <% if show_time %>
-            <span class="text-[11px] text-muted-foreground/70">
+            <span class="text-[10px] text-stone-400
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <%= format_message_time(message.created_at) %>
             </span>
           <% end %>

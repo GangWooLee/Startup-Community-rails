@@ -5,12 +5,12 @@
   <% if post.hiring? %>
     <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-4 w-4 text-blue-500" } %>
     <span class="inline-flex items-center rounded-md bg-blue-500/10 text-blue-600 px-2.5 py-0.5 text-xs font-semibold">
-      구인
+      Makers
     </span>
   <% elsif post.seeking? %>
     <%= render partial: "shared/icons/user", locals: { css_css_class: "h-4 w-4 text-green-500" } %>
     <span class="inline-flex items-center rounded-md bg-green-500/10 text-green-600 px-2.5 py-0.5 text-xs font-semibold">
-      구직
+      Projects
     </span>
   <% end %>
 

@@ -1,0 +1,23 @@
+<%# 활동 탭 콘텐츠 Partial - "이 사람이 살아있는 유저인가?" %>
+<%# locals: user %>
+
+<%# relative z-0: 탭 헤더(z-40)보다 낮은 stacking context로 backdrop-blur 겹침 방지 %>
+<div class="space-y-4 relative z-0">
+  <% activities = user.recent_activities(limit: 20) %>
+  <% if activities.any? %>
+    <% activities.each do |activity| %>
+      <%= render "profiles/activity_card", activity: activity %>
+    <% end %>
+
+    <% if activities.size >= 20 %>
+      <p class="text-center text-sm text-stone-400 pt-2">더 많은 활동이 있습니다</p>
+    <% end %>
+  <% else %>
+    <%= render "profiles/empty_state",
+        icon: "activity",
+        title: "아직 활동이 없습니다",
+        description: "게시글이나 댓글을 남겨보세요",
+        action_text: "커뮤니티 둘러보기",
+        action_path: community_path %>
+  <% end %>
+</div>

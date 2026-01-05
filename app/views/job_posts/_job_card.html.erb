@@ -1,0 +1,161 @@
+<%#
+  The Stacked Identity Card - Dribbble Top Tier Design
+  Drawbridge Task #95: "The Stacked Context"
+
+  디자인 핵심:
+  - No More Box Lines: 테두리 대신 면(Surface)과 그림자(Shadow)로 구분
+  - Inner Container: 카드 내부에 연한 색상 박스로 정보 그룹핑
+  - Invisible Action: "자세히 보기" 버튼 제거, 카드 전체 클릭 가능
+
+  Structure:
+  1. Shell: bg-white rounded-[24px] + subtle shadow
+  2. Header: Avatar + Name + Role Badge + Status Pill
+  3. Inner Box: bg-[#F9F9F8] (Makers) or bg-orange-50/30 (Projects)
+  4. Footer: Meta Info + Bookmark
+
+  locals: post (Post model)
+%>
+
+<article class="job-card bg-white rounded-[24px] overflow-hidden
+               border border-stone-100
+               shadow-[0_2px_12px_rgba(0,0,0,0.04)]
+               hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)]
+               hover:-translate-y-1
+               transition-all duration-300 ease-out
+               cursor-pointer group
+               flex flex-col h-full"
+         data-service-type="<%= post.service_type %>"
+         data-title="<%= post.title.downcase %>"
+         data-job-filter-target="card">
+
+  <%= link_to post_path(post), class: "block flex flex-col flex-1" do %>
+
+    <%# === HEADER: Identity === %>
+    <div class="flex items-center justify-between p-5 pb-3">
+      <%# Left: Avatar + Name + Role Badge %>
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <%# Avatar with Status Dot %>
+        <div class="relative flex-shrink-0">
+          <div class="w-12 h-12 rounded-full overflow-hidden bg-stone-100">
+            <% if post.user.avatar.attached? %>
+              <%= image_tag post.user.avatar, class: "w-full h-full object-cover" %>
+            <% elsif post.user.avatar_url.present? %>
+              <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>
+            <% else %>
+              <div class="w-full h-full flex items-center justify-center text-stone-600 font-bold text-lg">
+                <%= post.user.name[0] %>
+              </div>
+            <% end %>
+          </div>
+          <%# Status Dot %>
+          <% if post.seeking? && post.available_now? %>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full
+                         bg-green-500 ring-2 ring-white"></span>
+          <% else %>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full
+                         bg-stone-300 ring-2 ring-white"></span>
+          <% end %>
+        </div>
+
+        <%# Name (Drawbridge Task #121: Role Badge 제거) %>
+        <div class="min-w-0 flex-1">
+          <h4 class="font-bold text-stone-900 truncate">
+            <%= post.user.name %>
+          </h4>
+          <p class="text-xs text-stone-400 mt-0.5">
+            <%= time_ago_in_words(post.created_at) %> 전
+          </p>
+        </div>
+      </div>
+
+      <%# Drawbridge Tasks #138-139: 즉시 가능 / Maker 뱃지 제거 %>
+    </div>
+
+    <%# === INNER CONTEXT BOX: The Core Design Element === %>
+    <div class="mx-5 mb-4 rounded-2xl p-4
+                <%= post.hiring? ? 'bg-[#F9F9F8]' : 'bg-orange-50/30' %>">
+
+      <%# Title %>
+      <h3 class="text-lg font-bold text-stone-900 mb-2 leading-tight line-clamp-2
+                 group-hover:text-orange-600 transition-colors">
+        <%= post.title %>
+      </h3>
+
+      <%# Description (본문 미리보기) %>
+      <% if post.content.present? %>
+        <p class="text-sm text-stone-500 line-clamp-2 mb-3">
+          <%= strip_tags(post.content).truncate(100) %>
+        </p>
+      <% end %>
+
+      <%# Skills Tags - White chips inside the inner box %>
+      <% skills = post.skills_array.first(4) %>
+      <% if skills.any? %>
+        <div class="flex flex-wrap items-center gap-2">
+          <% skills.each do |skill| %>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                         bg-white border border-stone-200 text-stone-600 shadow-sm">
+              <img src="<%= devicon_url(skill) %>"
+                   alt="<%= skill %>"
+                   class="w-3.5 h-3.5"
+                   onerror="this.style.display='none'">
+              <%= skill %>
+            </span>
+          <% end %>
+          <% if post.skills_array.count > 4 %>
+            <span class="px-2.5 py-1 rounded-lg text-xs font-medium
+                         bg-white border border-orange-200 text-orange-600 shadow-sm">
+              +<%= post.skills_array.count - 4 %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Spacer to push footer to bottom %>
+    <div class="flex-1"></div>
+
+    <%# === FOOTER: Meta Info (Drawbridge Task #113: 좋아요/댓글/스크랩 제거) === %>
+    <div class="px-5 pb-5 border-t border-stone-50 pt-4">
+      <%# Meta Info - 공간 확보를 위해 Actions 제거 %>
+      <div class="flex items-center flex-wrap gap-3 text-xs font-medium text-stone-500">
+        <%# Price %>
+        <span class="inline-flex items-center gap-1">
+          <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="text-stone-700 font-semibold"><%= post.price_display %></span>
+        </span>
+
+        <% if post.work_period.present? %>
+          <span class="inline-flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <%= post.work_period %>
+          </span>
+        <% end %>
+
+        <% if post.work_type.present? %>
+          <span class="inline-flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <%= post.work_type_label %>
+          </span>
+        <% end %>
+
+        <%# Views count - 간소화된 통계 %>
+        <span class="inline-flex items-center gap-1 ml-auto">
+          <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          <%= post.views_count %>
+        </span>
+      </div>
+    </div>
+
+  <% end %>
+</article>

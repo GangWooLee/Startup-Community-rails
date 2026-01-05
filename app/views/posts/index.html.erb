@@ -2,29 +2,105 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<div class="min-h-screen bg-background pb-20" data-controller="navigation" data-navigation-reset-on-connect-value="true">
-  <!-- Header -->
-  <%= render partial: "shared/main_header" %>
+<%#
+  Community Main Page - Organic Modern Design (Global Sidebar Version)
+  Reference: design-sample/community_page/community_page
 
-  <!-- Main Content -->
-  <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <% if @posts.empty? %>
-      <div class="text-center py-12">
-        <svg class="h-12 w-12 mx-auto text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-        </svg>
-        <p class="text-muted-foreground">아직 게시글이 없습니다</p>
-        <p class="text-sm text-muted-foreground mt-1">첫 번째 글을 작성해보세요!</p>
-      </div>
-    <% else %>
-      <%# 반응형 그리드 레이아웃: 1열(모바일) → 2열(태블릿) → 3열(데스크톱) %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% @posts.each do |post| %>
-          <%= render_post_card(post, variant: :grid) %>
+  Layout: 2-Column (Center Content + Right Widgets)
+  Left Sidebar handled by application.html.erb (Global Sidebar)
+  Mobile: Right Sidebar hidden, Bottom Nav visible
+%>
+
+<div class="min-h-full text-stone-800 pb-20 md:pb-0 relative overflow-x-hidden"
+     data-controller="navigation"
+     data-navigation-reset-on-connect-value="true">
+
+  <%# Background Effects - Grainy Gradient v1.2 (Enhanced Distribution) %>
+  <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <%# SVG Noise Texture - Paper-like grain %>
+    <div class="absolute inset-0 bg-noise opacity-20"></div>
+
+    <%# 5 Blobs - Softer opacity (30-40%), diverse positions %>
+    <%# Top-Left: Orange (main warm accent) %>
+    <div class="absolute top-[-8%] left-[5%] w-[38rem] h-[38rem] bg-orange-200/40 rounded-full mix-blend-multiply filter blur-[120px] animate-blob"></div>
+    <%# Top-Right: Rose (balance) %>
+    <div class="absolute top-[5%] right-[5%] w-[35rem] h-[35rem] bg-rose-200/35 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000"></div>
+    <%# Center: Peach (subtle center focus) %>
+    <div class="absolute top-[35%] left-[40%] w-[30rem] h-[30rem] bg-orange-100/30 rounded-full mix-blend-multiply filter blur-[130px] animate-blob animation-delay-4000"></div>
+    <%# Bottom-Left: Amber (warm corner) %>
+    <div class="absolute bottom-[5%] left-[10%] w-[35rem] h-[35rem] bg-amber-100/35 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000"></div>
+    <%# Bottom-Right: Indigo (cool balance) %>
+    <div class="absolute bottom-[-5%] right-[15%] w-[40rem] h-[40rem] bg-indigo-100/30 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-4000"></div>
+  </div>
+
+  <%# Main Content - 2 Column Layout (Left Sidebar in Global Layout) %>
+  <main class="relative z-10 max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <%# Center Content (Main) %>
+      <section class="col-span-1 lg:col-span-8 space-y-6">
+
+        <%# Weekly Best Hero Card - 카테고리 필터에 따라 해당 카테고리 인기글 표시 %>
+        <%= render "posts/weekly_best_card", post: weekly_best_post(category: params[:category]) %>
+
+        <%# Sort Controls %>
+        <div class="flex items-center justify-between pt-2">
+          <h3 class="text-xl font-bold text-stone-900 flex items-center gap-2">
+            최신 이야기
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+          </h3>
+          <div class="flex items-center gap-2 text-sm text-stone-500 font-medium bg-white/60 px-1 py-1 rounded-lg border border-stone-200/50">
+            <%= link_to community_path(category: params[:category]),
+                class: sort_button_class(:recent, @current_sort) do %>
+              최신순
+            <% end %>
+            <%= link_to community_path(category: params[:category], sort: :popular),
+                class: sort_button_class(:popular, @current_sort) do %>
+              인기순
+            <% end %>
+          </div>
+        </div>
+
+        <%# Post List %>
+        <% if @posts.empty? %>
+          <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-12 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-stone-100 flex items-center justify-center">
+              <svg class="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+              </svg>
+            </div>
+            <p class="text-stone-600 font-medium">아직 게시글이 없습니다</p>
+            <p class="text-sm text-stone-400 mt-1">첫 번째 글을 작성해보세요!</p>
+            <% if logged_in? %>
+              <%= link_to new_post_path, class: "inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-[#2C2825] text-[#FDFBF7] rounded-full font-medium text-sm hover:bg-stone-800 transition-colors" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                글쓰기
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <%= render "posts/medium_post_list", posts: @posts %>
+
+          <%# Load More Button %>
+          <% next_page = (params[:page].to_i > 0 ? params[:page].to_i : 1) + 1 %>
+          <div class="flex justify-center pt-4 pb-12">
+            <%= link_to community_path(category: params[:category], sort: params[:sort], page: next_page),
+                class: "px-8 py-3 border border-stone-200 bg-white/50 hover:bg-white text-stone-600 font-bold rounded-full text-sm transition-all hover:shadow-md backdrop-blur-sm active:scale-95" do %>
+              더 많은 이야기 보기
+            <% end %>
+          </div>
         <% end %>
-      </div>
-    <% end %>
+
+      </section>
+
+      <%# Right Sidebar - Notice + Top Makers %>
+      <%= render "posts/right_sidebar" %>
+
+    </div>
   </main>
 
+  <%# Bottom Navigation (Mobile Only) %>
   <%= render "shared/bottom_nav" %>
 </div>

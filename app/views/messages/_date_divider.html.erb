@@ -1,12 +1,10 @@
-<%# 날짜 구분선 %>
+<%# 날짜 구분선 - Fluid Lounge Style %>
 <%# locals: date %>
 
-<div class="flex items-center justify-center my-4">
-  <div class="flex items-center gap-3">
-    <div class="h-px bg-border w-12"></div>
-    <span class="text-xs font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-      <%= format_message_date(date) %>
-    </span>
-    <div class="h-px bg-border w-12"></div>
-  </div>
+<div class="flex items-center gap-4 my-6">
+  <div class="flex-1 h-px bg-stone-200"></div>
+  <span class="text-xs font-medium text-stone-400">
+    <%= format_message_date(date) %>
+  </span>
+  <div class="flex-1 h-px bg-stone-200"></div>
 </div>

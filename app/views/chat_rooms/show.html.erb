@@ -1,5 +1,5 @@
 <% content_for :turbo_frame_chat_room_content do %>
-  <%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-secondary/30" do %>
+  <%= turbo_frame_tag "chat_room_content", class: "hidden md:flex flex-1 flex-col bg-white" do %>
     <%= render "chat_rooms/chat_room_detail",
                chat_room: @chat_room,
                messages: @messages,
@@ -12,11 +12,17 @@
   <%= content_for :turbo_frame_chat_room_content %>
 <% else %>
   <%# 모바일에서 접근 또는 직접 URL 접근 시 - 전체 페이지 렌더링 %>
-  <!-- PC: 2단 분할 레이아웃, 모바일: 전체 화면 -->
-  <div class="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-background">
+  <%# The Fluid Lounge - Island Container Layout %>
+  <div class="h-full bg-[#FDFBF7] md:flex md:items-center md:justify-center md:p-6">
+    <%# Island Container - 떠 있는 둥근 카드 (반응형 확장) %>
+    <div class="w-full md:max-w-5xl lg:max-w-6xl xl:max-w-[1600px] 2xl:max-w-[1800px]
+                h-screen md:h-[70vh] xl:h-[75vh] 2xl:h-[78vh]
+                bg-white md:rounded-[2rem] md:shadow-2xl md:shadow-stone-900/5
+                md:border md:border-stone-100 overflow-hidden
+                flex flex-col md:flex-row">
 
-    <!-- 좌측: 채팅 목록 패널 (PC에서만 표시) -->
-    <div class="hidden md:block">
+    <!-- 좌측: 채팅 목록 패널 (PC에서만 표시, 2xl에서 너비 조정) -->
+    <div class="hidden md:block md:w-[360px] 2xl:w-[320px] flex-shrink-0">
       <%
         # show 페이지에서도 index와 동일한 데이터 구조 사용
         filter = params[:filter] || "all"
@@ -57,14 +63,24 @@
                  current_chat_room: @chat_room %>
     </div>
 
-    <!-- 우측/전체: 채팅방 상세 -->
-    <%= turbo_frame_tag "chat_room_content", class: "flex-1 flex flex-col h-full" do %>
+    <!-- 중앙: 채팅방 상세 -->
+    <%= turbo_frame_tag "chat_room_content", class: "flex-1 flex flex-col h-full bg-white" do %>
       <%= render "chat_rooms/chat_room_detail",
                  chat_room: @chat_room,
                  messages: @messages,
                  other_user: @other_user %>
     <% end %>
-  </div>
+
+    <!-- 우측: 정보 패널 (2xl에서만 표시 - 3단 레이아웃) -->
+    <aside class="hidden 2xl:flex 2xl:flex-col 2xl:w-[320px] flex-shrink-0 border-l border-stone-200/60"
+           aria-label="상대방 정보">
+      <%= render "chat_rooms/info_panel",
+                 other_user: @other_user,
+                 chat_room: @chat_room %>
+    </aside>
+
+    </div><%# Island Container 닫기 %>
+  </div><%# Outer wrapper 닫기 %>
 
   <!-- 하단 네비게이션 바 (모바일에서만 표시) -->
   <%= render "shared/bottom_nav" %>

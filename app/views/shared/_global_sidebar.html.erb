@@ -1,0 +1,117 @@
+<%#
+  Global Sidebar - SaaS Dashboard Style with Collapsible Feature
+  Reference: Linear, Raycast, Framer, Untitled UI
+
+  Features:
+  - Collapsible sidebar (w-64 ↔ w-16)
+  - Logo & Brand at top
+  - Main Navigation (Home, Chat, AI, Projects, Q&A)
+  - Boards Section (Popular, Free, Promotion)
+  - User Profile Widget at bottom
+
+  Usage:
+  Rendered in application.html.erb when show_global_sidebar? is true
+
+  Drawbridge Task #109: My Community 섹션 삭제 (개발 미완료)
+%>
+
+<div data-controller="sidebar-collapse" class="contents">
+  <aside class="hidden md:flex md:flex-col w-64 bg-white border-r border-stone-200/60
+                h-screen sticky top-0 flex-shrink-0 transition-all duration-300"
+         data-sidebar-collapse-target="sidebar">
+
+    <%# Logo & Brand - h-16 (64px) to align with Compact Header %>
+    <div class="flex items-center h-16 border-b border-stone-100 px-3">
+      <%# 펼친 상태: 로고 + 브랜드명 + 접기 버튼 %>
+      <div class="flex items-center justify-between w-full" data-sidebar-collapse-target="expandedContent">
+        <%= link_to community_path, class: "flex items-center gap-3 group" do %>
+          <%= image_tag "/undrew_icon_only.png", alt: "Undrew",
+              class: "w-9 h-9 rounded-xl shadow-md shadow-stone-900/10
+                      group-hover:scale-105 transition-transform object-contain" %>
+          <span class="font-bold text-lg text-stone-900 tracking-tight">Undrew</span>
+        <% end %>
+
+        <%# 접기 버튼 %>
+        <button type="button"
+                class="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+                data-action="click->sidebar-collapse#toggle"
+                title="사이드바 접기">
+          <svg data-sidebar-collapse-target="toggleIcon"
+               class="w-4 h-4 transition-transform duration-300"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+          </svg>
+        </button>
+      </div>
+
+      <%# 접힌 상태: 로고만 (클릭하면 펼치기) %>
+      <div class="hidden w-full flex justify-center" data-sidebar-collapse-target="collapsedContent">
+        <button type="button"
+                class="p-1 hover:bg-stone-100 rounded-lg transition-colors"
+                data-action="click->sidebar-collapse#toggle"
+                title="사이드바 펼치기">
+          <%= image_tag "/undrew_icon_only.png", alt: "Undrew",
+              class: "w-9 h-9 rounded-xl shadow-md shadow-stone-900/10
+                      hover:scale-105 transition-transform object-contain" %>
+        </button>
+      </div>
+    </div>
+
+    <%# Navigation - Scrollable %>
+    <nav class="flex-1 overflow-y-auto py-4 px-2 space-y-6 sidebar-scroll">
+
+      <%# Main Navigation %>
+      <div class="space-y-1">
+        <%# 1. Home %>
+        <% is_home_active = current_page?(community_path) && params[:category].blank? && params[:sort].blank? %>
+        <%= collapsible_sidebar_nav_item "홈", community_path, :home, is_active: is_home_active %>
+
+        <%# 2. Chat (with unread badge) %>
+        <% if logged_in? %>
+          <% is_chat_active = controller_name == "chat_rooms" || controller_name == "messages" %>
+          <%= collapsible_sidebar_nav_item "채팅", chat_rooms_path, :chat,
+              is_active: is_chat_active,
+              badge: unread_messages_count %>
+        <% else %>
+          <%= collapsible_sidebar_nav_item "채팅", login_path, :chat %>
+        <% end %>
+
+        <%# 3. AI Analysis %>
+        <% is_ai_active = current_page?(onboarding_ai_input_path) || request.path.start_with?("/ai/result") rescue false %>
+        <%= collapsible_sidebar_nav_item "AI 분석", onboarding_ai_input_path, :ai, is_active: is_ai_active %>
+
+        <%# 4. Join Project %>
+        <%= collapsible_sidebar_nav_item "Join Project", job_posts_path, :rocket %>
+
+        <%# 5. Q&A (Help Desk) %>
+        <% is_qa_active = controller_name == 'inquiries' %>
+        <%= collapsible_sidebar_nav_item "Q&A", inquiries_path, :question, is_active: is_qa_active %>
+      </div>
+
+      <%# Boards Section - 펼친 상태에서만 표시 %>
+      <div class="pt-4 border-t border-stone-200/50" data-sidebar-collapse-target="expandedContent">
+        <h3 class="px-3 text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">게시판</h3>
+        <div class="space-y-0.5">
+          <%# Popular %>
+          <% is_popular_active = params[:sort] == 'popular' %>
+          <%= sidebar_nav_item "인기글", community_path(sort: :popular), :fire,
+              is_active: is_popular_active, size: :sm %>
+
+          <%# Free Board %>
+          <% is_free_active = params[:category] == 'free' %>
+          <%= sidebar_nav_item "자유게시판", community_path(category: :free), :chat,
+              is_active: is_free_active, size: :sm %>
+
+          <%# Promotion %>
+          <% is_promo_active = params[:category] == 'promotion' %>
+          <%= sidebar_nav_item "홍보", community_path(category: :promotion), :megaphone,
+              is_active: is_promo_active, size: :sm %>
+        </div>
+      </div>
+
+    </nav>
+
+    <%# User Profile Widget (Bottom Fixed) %>
+    <%= render "shared/sidebar_user_widget" %>
+  </aside>
+</div>

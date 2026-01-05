@@ -1,137 +1,490 @@
-<div class="min-h-screen bg-background flex flex-col">
-  <!-- Header -->
-  <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
-    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", action: "click->navigation#goBack" } do %>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<%#
+  AI Idea Input Page - "Premium macOS Native App"
+  Phase 10: 초정밀 macOS 네이티브 앱 수준 리디자인
+
+  Design Goals:
+  - "실제 macOS 네이티브 앱을 웹으로 옮겨온 듯한 퀄리티"
+  - 픽셀 하나, 그림자 농도(Opacity) 하나까지 정확하게 구현
+  - 웹사이트 느낌 제거 → "나만의 아이디어 노트 앱" 몰입감
+
+  Key Changes from Phase 9:
+  - Window: 65% opacity, blur(40px), rounded-[2rem]
+  - Typography: text-3xl ~ text-4xl for greeting
+  - Textarea: text-2xl ~ text-3xl (premium-textarea)
+  - Send Button: 48px, #2C2825 (Charcoal Brown)
+  - Traffic Lights: With borders for depth
+  - Background: Noise texture + huge centered blobs
+
+  Phase 11 Note:
+  - CSS is INLINE because layout only loads Tailwind CDN
+  - Built CSS (app/assets/builds/tailwind.css) is NOT loaded
+  - Same pattern as layout's Landing Page Animations (Lines 198-286)
+%>
+
+<style>
+  /* =========================================================================
+     Phase 10: Premium macOS Native App - Inline Styles
+     WHY INLINE? CDN (cdn.tailwindcss.com) doesn't load built CSS file
+     ========================================================================= */
+
+  /* macOS Window Premium - 강화된 Glassmorphism */
+  .macos-window-premium {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border-radius: 2rem;
+  }
+
+  /* macOS Title Bar Premium */
+  .macos-titlebar-premium {
+    height: 56px;
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 2rem 2rem 0 0;
+  }
+
+  /* Traffic Lights Premium */
+  .traffic-light-premium {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    cursor: default;
+  }
+  .traffic-light-premium:hover {
+    filter: brightness(0.9);
+    transform: scale(1.1);
+  }
+  .traffic-light-close-premium {
+    background-color: #FF5F57;
+    border: 1px solid #E0443E;
+  }
+  .traffic-light-minimize-premium {
+    background-color: #FEBC2E;
+    border: 1px solid #D89E24;
+  }
+  .traffic-light-maximize-premium {
+    background-color: #28C840;
+    border: 1px solid #1AAB29;
+  }
+
+  /* Premium Textarea */
+  .premium-textarea {
+    width: 100%;
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: #1a1a1a;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 0;
+    font-weight: 500;
+  }
+  .premium-textarea::placeholder {
+    color: #d6d3d1;
+  }
+  @media (min-width: 768px) {
+    .premium-textarea {
+      font-size: 1.875rem;
+    }
+  }
+
+  /* Send Button Premium */
+  .send-button-premium {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #2C2825;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  .send-button-premium:hover {
+    transform: scale(1.1);
+    background: #000;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3);
+  }
+  .send-button-premium:hover svg {
+    transform: rotate(-45deg);
+    transition: transform 0.3s ease;
+  }
+  .send-button-premium:disabled {
+    background: #e7e5e4;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .send-button-premium:disabled svg {
+    transform: none;
+  }
+
+  /* Noise Texture */
+  .bg-noise-paper {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+
+  /* Custom Scrollbar Premium */
+  .custom-scrollbar-premium {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  }
+  .custom-scrollbar-premium::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar-premium::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar-premium::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .custom-scrollbar-premium::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
+  /* Window Emerge Animation */
+  @keyframes window-emerge {
+    0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .animate-window-emerge {
+    animation: window-emerge 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Fade In Up Animation */
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+  }
+
+  /* Typing Indicator */
+  .typing-indicator span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: typing 1.4s infinite ease-in-out both;
+  }
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* History Bubble Style */
+  .history-bubble {
+    max-width: 80%;
+    padding: 1rem 1.25rem;
+    background: #2C2825;
+    color: white;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+
+  /* =========================================================================
+     Phase 12: Undrew Character Animations - Loading Screen & AI Questions
+     ========================================================================= */
+
+  /* 호흡 애니메이션 - 캐릭터가 살아있는 듯한 효과 */
+  @keyframes breathing {
+    0%, 100% {
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      transform: scale(1.05) translateY(-5px);
+    }
+  }
+  .animate-breathing {
+    animation: breathing 3s ease-in-out infinite;
+  }
+
+  /* 부드러운 바운스 - 캐릭터 아바타용 */
+  @keyframes subtle-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  .animate-subtle-bounce {
+    animation: subtle-bounce 2s ease-in-out infinite;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .macos-window-premium,
+    .traffic-light-premium,
+    .send-button-premium,
+    .animate-window-emerge,
+    .animate-fade-in-up,
+    .animate-breathing,
+    .animate-subtle-bounce {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>
+
+<div class="min-h-screen bg-[#FDFBF7] relative overflow-hidden"
+     data-controller="ai-input"
+     data-ai-input-questions-url-value="<%= onboarding_ai_questions_path %>"
+     data-ai-input-analyze-url-value="<%= onboarding_ai_analyze_path %>"
+     data-ai-input-csrf-token-value="<%= form_authenticity_token %>">
+
+  <%# ========== Background: The Desktop Environment ========== %>
+
+  <%# 1. Noise Texture - 종이 질감 (opacity-40) %>
+  <div class="fixed inset-0 z-0 opacity-40 pointer-events-none bg-noise-paper"></div>
+
+  <%# 2. Ambient Light - 거대한 중앙 글로우 %>
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <%# 중앙 뒤쪽 거대한 오렌지 글로우 - 창문 뒤에서 비침 %>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[40rem]
+                bg-orange-300/20 rounded-full filter blur-[150px]"></div>
+
+    <%# 우측 상단 인디고 글로우 - 색감 깊이 추가 %>
+    <div class="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem]
+                bg-indigo-300/10 rounded-full filter blur-[150px]"></div>
+  </div>
+
+  <%# ========== Header: Remaining Count (외부) ========== %>
+  <header class="relative z-20 px-6 py-4">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <%# Logo + Back %>
+      <div class="flex items-center gap-3">
+        <button type="button"
+                class="p-2 -ml-2 text-stone-400 hover:text-stone-600 hover:bg-white/50 rounded-full transition-colors"
+                data-controller="navigation"
+                data-action="click->navigation#goBack">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
+        </button>
+        <%= link_to community_path, class: "flex items-center gap-2 group" do %>
+          <img src="/undrew_icon_only.png" alt="Undrew" class="w-8 h-8 rounded-lg object-contain">
+          <span class="font-bold text-[#2C2825] tracking-tight hidden sm:block">Undrew AI</span>
         <% end %>
-        <%# Project Logo - Task #16 %>
-        <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-          <img src="/undrew_icon_only.png" alt="Undrew" class="w-8 h-8 object-contain">
-        </div>
-        <h1 class="text-lg font-semibold text-foreground">Undrew AI</h1>
       </div>
-      <!-- 남은 횟수 표시 -->
-      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 border border-border">
-        <svg class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+
+      <%# Remaining Count Badge (Glass Style) %>
+      <div class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-xl border border-white/50 shadow-sm">
+        <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
-        <span class="text-xs font-medium text-muted-foreground">
-          <%= @remaining_analyses %>/<%= @effective_limit %>회 남음
+        <span class="text-sm font-medium text-stone-600">
+          <span class="text-amber-600 font-bold"><%= @remaining_analyses %></span>/<%= @effective_limit %>회
           <% if @has_bonus %>
-            <span class="text-yellow-600">(+보너스)</span>
+            <span class="text-amber-500 text-xs ml-1">+보너스</span>
           <% end %>
         </span>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-screen-xl mx-auto w-full px-4 py-6"
-        data-controller="ai-input"
-        data-ai-input-questions-url-value="<%= onboarding_ai_questions_path %>"
-        data-ai-input-analyze-url-value="<%= onboarding_ai_analyze_path %>"
-        data-ai-input-csrf-token-value="<%= form_authenticity_token %>">
+  <%# ========== Main: Premium macOS Window (화면 중앙, 75vh) ========== %>
+  <main class="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 sm:px-6 pb-8">
+    <div class="macos-window-premium w-full max-w-4xl h-[75vh] min-h-[600px] flex flex-col animate-window-emerge">
 
-    <!-- Progress Indicator -->
-    <div class="flex items-center justify-center gap-2 mb-8">
-      <div class="h-2 w-8 rounded-full bg-primary" data-ai-input-target="progress1"></div>
-      <div class="h-2 w-8 rounded-full bg-secondary" data-ai-input-target="progress2"></div>
-      <div class="h-2 w-8 rounded-full bg-secondary" data-ai-input-target="progress3"></div>
-    </div>
-
-    <!-- Chat Container -->
-    <div class="space-y-4 mb-6" data-ai-input-target="chatContainer">
-      <!-- AI Initial Message -->
-      <div class="flex gap-3" data-ai-input-target="aiMessage">
-        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-          <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
+      <%# ========== Premium Title Bar ========== %>
+      <div class="macos-titlebar-premium flex items-center relative shrink-0">
+        <%# Traffic Lights with Borders %>
+        <div class="flex items-center gap-2 pl-5">
+          <span class="traffic-light-premium traffic-light-close-premium"></span>
+          <span class="traffic-light-premium traffic-light-minimize-premium"></span>
+          <span class="traffic-light-premium traffic-light-maximize-premium"></span>
         </div>
-        <div class="flex-1">
-          <p class="text-sm font-medium text-foreground mb-1">AI 분석봇</p>
-          <div class="bg-secondary/50 rounded-2xl rounded-tl-md px-4 py-3">
-            <p class="text-sm text-foreground">어떤 아이디어가 있으신가요? 자유롭게 적어주세요!</p>
+
+        <%# Window Title (파일명 스타일) %>
+        <span class="absolute left-1/2 -translate-x-1/2 font-mono text-xs font-medium text-stone-400 tracking-widest uppercase">
+          Untitled Idea.draft
+        </span>
+
+        <%# Progress Indicator (우측) %>
+        <div class="absolute right-5 flex items-center gap-1.5" data-ai-input-target="progressContainer">
+          <div class="h-1.5 w-6 rounded-full bg-[#2C2825] transition-all duration-300" data-ai-input-target="progress1"></div>
+          <div class="h-1.5 w-6 rounded-full bg-stone-200 transition-all duration-300" data-ai-input-target="progress2"></div>
+          <div class="h-1.5 w-6 rounded-full bg-stone-200 transition-all duration-300" data-ai-input-target="progress3"></div>
+        </div>
+      </div>
+
+      <%# ========== Content Area (Scrollable) ========== %>
+      <div class="flex-1 overflow-y-auto custom-scrollbar-premium p-6 sm:p-8" data-ai-input-target="chatArea">
+
+        <%# ========== Step 1: Initial Conversation ========== %>
+        <div data-ai-input-target="step1" class="flex flex-col h-full">
+
+          <%# AI Greeting (대형 타이포그래피) %>
+          <div class="mb-8 animate-fade-in-up">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-[#2C2825] leading-tight tracking-tight mb-2">
+              반가워요, <%= @user&.name || "메이커" %>님!
+            </h1>
+            <p class="text-2xl md:text-3xl font-medium text-stone-400 leading-tight">
+              세상을 바꿀 아이디어를 기록해볼까요?
+            </p>
+          </div>
+
+          <%# User Input Area (하단 배치) %>
+          <div class="mt-auto" data-ai-input-target="inputArea">
+            <div class="relative bg-stone-50/50 rounded-2xl p-5 border border-stone-100">
+              <textarea
+                name="idea"
+                id="idea-input"
+                rows="4"
+                placeholder="어떤 서비스를 꿈꾸고 계신가요?"
+                class="premium-textarea min-h-[120px]"
+                data-ai-input-target="textarea"
+                data-action="input->ai-input#updateCharCount input->ai-input#autoResize keydown->ai-input#handleKeydown"
+              ></textarea>
+
+              <%# Bottom Bar: Char Count + Send Button %>
+              <div class="flex items-center justify-between mt-4">
+                <span class="text-sm text-stone-400">
+                  <span data-ai-input-target="charCount" class="font-medium">0</span>/500
+                </span>
+                <button type="button"
+                        class="send-button-premium"
+                        data-ai-input-target="submitButton"
+                        data-action="click->ai-input#submitIdea"
+                        disabled>
+                  <svg class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <%# Example Ideas as Chips %>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <button type="button"
+                      data-action="click->ai-input#fillExample"
+                      data-example="대학생들이 서로 스터디 그룹을 만들고 관리할 수 있는 앱"
+                      class="px-4 py-2.5 text-sm font-medium text-stone-500 bg-white/80 backdrop-blur-sm border border-stone-200/80 rounded-full shadow-sm transition-all hover:bg-stone-50 hover:border-stone-300 hover:text-[#2C2825] hover:shadow-md">
+                스터디 매칭
+              </button>
+              <button type="button"
+                      data-action="click->ai-input#fillExample"
+                      data-example="프리랜서 개발자와 디자이너를 연결해주는 외주 플랫폼"
+                      class="px-4 py-2.5 text-sm font-medium text-stone-500 bg-white/80 backdrop-blur-sm border border-stone-200/80 rounded-full shadow-sm transition-all hover:bg-stone-50 hover:border-stone-300 hover:text-[#2C2825] hover:shadow-md">
+                외주 매칭
+              </button>
+              <button type="button"
+                      data-action="click->ai-input#fillExample"
+                      data-example="AI가 사용자의 일정을 분석하고 최적의 할 일 순서를 추천해주는 투두 앱"
+                      class="px-4 py-2.5 text-sm font-medium text-stone-500 bg-white/80 backdrop-blur-sm border border-stone-200/80 rounded-full shadow-sm transition-all hover:bg-stone-50 hover:border-stone-300 hover:text-[#2C2825] hover:shadow-md">
+                AI 일정관리
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <%# ========== Step 2: Follow-up Questions ========== %>
+        <div class="hidden" data-ai-input-target="step2">
+
+          <%# Previous User Answer (History Bubble) %>
+          <div class="hidden mb-6" data-ai-input-target="previousAnswer">
+            <div class="flex justify-end">
+              <div class="history-bubble" data-ai-input-target="previousAnswerText"></div>
+            </div>
+          </div>
+
+          <%# AI Thinking Indicator with Undrew Character %>
+          <div class="hidden mb-6" data-ai-input-target="aiThinking">
+            <div class="flex items-start gap-3">
+              <%# Undrew avatar %>
+              <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-50 p-1 shadow-sm">
+                <img src="/undrew_hello_icon.png" alt="Undrew" class="w-full h-full object-contain animate-subtle-bounce">
+              </div>
+              <%# Thinking bubble %>
+              <div class="px-5 py-3 bg-stone-100 rounded-2xl rounded-tl-md">
+                <div class="flex items-center gap-3">
+                  <span class="text-base text-stone-600">분석 중</span>
+                  <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%# Questions Container %>
+          <div class="space-y-4 mb-6" data-ai-input-target="questionsContainer">
+            <%# Dynamic question cards inserted by Stimulus %>
+          </div>
+
+          <%# Final Submit Button (Premium Style) %>
+          <div class="mt-6 pt-6 border-t border-stone-100">
+            <button type="button"
+                    class="w-full py-4 bg-[#2C2825] text-white rounded-2xl font-bold text-lg shadow-lg transition-all hover:bg-black hover:shadow-xl disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed"
+                    data-ai-input-target="analyzeButton"
+                    data-action="click->ai-input#submitForAnalysis"
+                    disabled>
+              AI 분석 요청하기
+            </button>
+          </div>
+
+        </div>
+
+        <%# ========== Loading State - "생각하는 Undrew" ========== %>
+        <%# h-full + flex로 대화 박스 내에서 수직 중앙 배치 %>
+        <div class="hidden h-full min-h-[400px] flex items-center justify-center" data-ai-input-target="loading">
+          <div class="flex flex-col items-center justify-center space-y-6">
+
+            <%# Undrew 캐릭터 with 호흡 애니메이션 %>
+            <div class="relative">
+              <%# 배경 글로우 (orange) %>
+              <div class="absolute inset-0 w-32 h-32 rounded-full bg-orange-200/40 blur-2xl animate-pulse"></div>
+
+              <%# 캐릭터 이미지 with 호흡 효과 %>
+              <img src="/undrew_hello_icon.png"
+                   alt="Undrew"
+                   class="relative w-28 h-28 object-contain animate-breathing">
+            </div>
+
+            <%# 생각 말풍선 with 타이핑 인디케이터 %>
+            <div class="relative">
+              <%# 말풍선 꼬리 (삼각형) %>
+              <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/90 rotate-45 rounded-sm"></div>
+
+              <%# 말풍선 본체 %>
+              <div class="relative bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-stone-100">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg font-medium text-[#2C2825]" data-ai-input-target="loadingText">
+                    추가 질문을 생성하고 있어요
+                  </span>
+                  <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <%# 부가 텍스트 %>
+            <p class="text-sm text-stone-400 animate-pulse">잠시만요, 좋은 질문을 고민 중이에요</p>
+
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Step 1: Initial Idea Input -->
-    <div data-ai-input-target="step1">
-      <div class="bg-card rounded-xl border border-border p-4 mb-4">
-        <textarea
-          name="idea"
-          id="idea-input"
-          rows="4"
-          placeholder="예: 대학생을 위한 AI 공부 커뮤니티를 만들고 싶어요. 서로 질문하고 답변하면서 학습할 수 있는 플랫폼이요."
-          class="w-full bg-transparent text-foreground placeholder:text-muted-foreground resize-none focus:outline-none text-base leading-relaxed"
-          data-ai-input-target="textarea"
-          data-action="input->ai-input#updateCharCount"
-        ></textarea>
-        <div class="flex items-center justify-between mt-3 pt-3 border-t border-border">
-          <span class="text-xs text-muted-foreground">
-            <span data-ai-input-target="charCount">0</span> / 500자
-          </span>
-        </div>
-      </div>
+        <%# Chat Container for backward compatibility (hidden) %>
+        <div class="hidden" data-ai-input-target="chatContainer"></div>
 
-      <!-- Example Ideas -->
-      <div class="mb-4">
-        <p class="text-xs text-muted-foreground mb-3">예시 아이디어</p>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" data-action="click->ai-input#fillExample" data-example="대학생들이 서로 스터디 그룹을 만들고 관리할 수 있는 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
-            스터디 매칭 앱
-          </button>
-          <button type="button" data-action="click->ai-input#fillExample" data-example="프리랜서 개발자와 디자이너를 연결해주는 외주 플랫폼" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
-            외주 매칭 플랫폼
-          </button>
-          <button type="button" data-action="click->ai-input#fillExample" data-example="AI가 사용자의 일정을 분석하고 최적의 할 일 순서를 추천해주는 투두 앱" class="px-3 py-1.5 rounded-full bg-secondary/50 text-xs text-muted-foreground btn-hover">
-            AI 일정 관리
-          </button>
-        </div>
-      </div>
-
-      <!-- Submit Button (Step 1) -->
-      <button type="button"
-              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground btn-hover font-medium disabled:opacity-50 disabled:pointer-events-none"
-              data-ai-input-target="submitButton"
-              data-action="click->ai-input#submitIdea"
-              disabled>
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-        다음
-      </button>
-    </div>
-
-    <!-- Step 2: Follow-up Questions (Hidden initially) -->
-    <div class="hidden" data-ai-input-target="step2">
-      <!-- Questions will be dynamically inserted here -->
-      <div data-ai-input-target="questionsContainer"></div>
-
-      <!-- Submit Button (Step 2) -->
-      <button type="button"
-              class="w-full h-14 gap-2 shadow-lg inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground btn-hover font-medium disabled:opacity-50 disabled:pointer-events-none"
-              data-ai-input-target="analyzeButton"
-              data-action="click->ai-input#submitForAnalysis"
-              disabled>
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-        AI에게 분석 요청하기
-      </button>
-    </div>
-
-    <!-- Loading State (Hidden initially) -->
-    <div class="hidden text-center py-8" data-ai-input-target="loading">
-      <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50">
-        <div class="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
-        <span class="text-sm text-muted-foreground" data-ai-input-target="loadingText">추가 질문 생성 중...</span>
       </div>
     </div>
   </main>

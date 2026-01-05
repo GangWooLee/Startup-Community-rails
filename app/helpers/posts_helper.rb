@@ -1,4 +1,99 @@
 module PostsHelper
+  # ===== Tech Stack Icon Helpers =====
+
+  # Devicon CDN URL 생성 (기술 스택 아이콘용)
+  # @param skill_name [String] 기술명 (e.g., "React", "Ruby", "Python")
+  # @return [String] Devicon SVG URL
+  # @example devicon_url("React") => "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg"
+  def devicon_url(skill_name)
+    # 기술명 정규화: 소문자 + 특수문자 제거
+    normalized = skill_name.to_s.downcase.strip.gsub(/[^a-z0-9]/, "")
+
+    # 기술명 매핑 (특수 케이스 처리)
+    mapping = {
+      "js" => "javascript",
+      "ts" => "typescript",
+      "rb" => "ruby",
+      "py" => "python",
+      "cpp" => "cplusplus",
+      "c++" => "cplusplus",
+      "c#" => "csharp",
+      "csharp" => "csharp",
+      "objc" => "objectivec",
+      "objectivec" => "objectivec",
+      "golang" => "go",
+      "vue" => "vuejs",
+      "vuejs" => "vuejs",
+      "vue3" => "vuejs",
+      "nextjs" => "nextjs",
+      "next" => "nextjs",
+      "nuxt" => "nuxtjs",
+      "nuxtjs" => "nuxtjs",
+      "expressjs" => "express",
+      "express" => "express",
+      "nodejs" => "nodejs",
+      "node" => "nodejs",
+      "reactnative" => "react",
+      "rails" => "rails",
+      "rubyonrails" => "rails",
+      "postgresql" => "postgresql",
+      "postgres" => "postgresql",
+      "mysql" => "mysql",
+      "mongodb" => "mongodb",
+      "mongo" => "mongodb",
+      "redis" => "redis",
+      "docker" => "docker",
+      "kubernetes" => "kubernetes",
+      "k8s" => "kubernetes",
+      "aws" => "amazonwebservices",
+      "gcp" => "googlecloud",
+      "azure" => "azure",
+      "firebase" => "firebase",
+      "tailwindcss" => "tailwindcss",
+      "tailwind" => "tailwindcss",
+      "sass" => "sass",
+      "scss" => "sass",
+      "flutter" => "flutter",
+      "dart" => "dart",
+      "swift" => "swift",
+      "kotlin" => "kotlin",
+      "java" => "java",
+      "spring" => "spring",
+      "springboot" => "spring",
+      "django" => "django",
+      "flask" => "flask",
+      "fastapi" => "fastapi",
+      "graphql" => "graphql",
+      "git" => "git",
+      "github" => "github",
+      "figma" => "figma",
+      "sketch" => "sketch",
+      "xd" => "xd",
+      "photoshop" => "photoshop",
+      "illustrator" => "illustrator"
+    }
+
+    # 매핑된 이름 또는 원본 사용
+    icon_name = mapping[normalized] || normalized
+
+    "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{icon_name}/#{icon_name}-original.svg"
+  end
+
+  # 기술 스택 아이콘 렌더링 (fallback 포함)
+  # @param skill_name [String] 기술명
+  # @param size [String] 아이콘 크기 클래스 (default: "w-5 h-5")
+  # @return [String] 이미지 태그 HTML
+  def tech_icon(skill_name, size: "w-5 h-5")
+    tag.img(
+      src: devicon_url(skill_name),
+      alt: skill_name,
+      class: size,
+      onerror: "this.style.display='none'"
+    )
+  end
+
+  # ===== Category Helpers =====
+
   # 게시글 카테고리 라벨
   def post_category_label(post)
     Post::CATEGORY_LABELS[post.category] || post.category

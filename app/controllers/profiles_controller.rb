@@ -1,7 +1,7 @@
 class ProfilesController < ApplicationController
   def show
     # N+1 쿼리 방지를 위해 includes 사용
-    @user = User.includes(:posts)
+    @user = User.includes(:posts, :oauth_identities, avatar_attachment: :blob, cover_image_attachment: :blob)
                 .find(params[:id])
 
     # 각 탭별 데이터 (최신순, 제한)
@@ -19,5 +19,8 @@ class ProfilesController < ApplicationController
 
     # 현재 사용자가 본인 프로필인지 확인
     @is_own_profile = logged_in? && current_user.id == @user.id
+
+    # 팔로우 상태 확인 (로그인 시)
+    @is_following = logged_in? && current_user.following?(@user)
   end
 end

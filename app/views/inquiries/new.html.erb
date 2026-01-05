@@ -98,6 +98,23 @@
                           placeholder: "문의 내용을 자세히 작성해주세요.\n\n버그 신고 시: 어떤 상황에서 어떤 문제가 발생했는지\n기능 제안 시: 어떤 기능이 필요한지, 왜 필요한지" %>
         </div>
 
+        <!-- 비공개 설정 -->
+        <div class="flex items-center gap-3 p-4 rounded-lg bg-stone-50 border border-stone-200">
+          <%= f.check_box :is_private, class: "w-5 h-5 rounded border-stone-300 text-orange-500 focus:ring-orange-500" %>
+          <%= f.label :is_private, class: "flex-1 cursor-pointer" do %>
+            <span class="text-sm font-medium text-stone-800 flex items-center gap-2">
+              <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              비공개 문의
+            </span>
+            <span class="text-xs text-stone-500 block mt-0.5">
+              운영자만 문의 내용을 확인할 수 있습니다
+            </span>
+          <% end %>
+        </div>
+
         <!-- 제출 버튼 -->
         <div class="flex justify-end gap-3">
           <%= link_to "취소", inquiries_path, class: "rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 btn-hover" %>

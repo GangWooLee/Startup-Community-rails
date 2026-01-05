@@ -69,7 +69,11 @@ Rails.application.routes.draw do
   end
 
   # Profiles
-  resources :profiles, only: [:show]
+  resources :profiles, only: [:show] do
+    member do
+      post :follow, to: "follows#toggle"  # 팔로우 토글
+    end
+  end
 
   # Job Posts (Freelance/Outsourcing) - 외주 마켓플레이스 인덱스
   resources :job_posts, only: [:index]
@@ -101,6 +105,7 @@ Rails.application.routes.draw do
 
   # Settings
   get "settings", to: "settings#show", as: :settings
+  patch "settings", to: "settings#update"
 
   # Reports (신고)
   resources :reports, only: [:create]

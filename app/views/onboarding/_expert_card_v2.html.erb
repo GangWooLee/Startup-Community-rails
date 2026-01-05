@@ -34,14 +34,14 @@
 %>
 
 <button type="button"
-        class="group text-left cursor-pointer w-full animate-card-lift"
+        class="group text-left cursor-pointer w-full h-full animate-card-lift"
         data-action="click->expert-overlay#show"
         data-expert-overlay-user-id-param="<%= user.id %>"
         data-expert-overlay-score-boost-param="<%= score_boost %>"
         data-expert-overlay-boost-area-param="<%= boost_area %>"
         data-expert-overlay-why-param="<%= why %>">
 
-  <div class="bg-gradient-to-br <%= c[:bg] %> rounded-xl p-5 border-2 <%= c[:border] %> shadow-lg card-hover">
+  <div class="bg-gradient-to-br <%= c[:bg] %> rounded-xl p-5 border-2 <%= c[:border] %> shadow-lg card-hover h-full flex flex-col">
 
     <%# 헤더: 아바타 + 점수 배지 %>
     <div class="flex justify-between items-start mb-4">
@@ -94,7 +94,7 @@
     <% end %>
 
     <%# 추천 이유 %>
-    <p class="text-slate-700 leading-relaxed mb-3 line-clamp-2"><%= why %></p>
+    <p class="text-slate-700 leading-relaxed mb-3 line-clamp-2 flex-grow"><%= why %></p>
 
     <%# 활동 상태 뱃지 %>
     <% if user.respond_to?(:has_availability_status?) && user.has_availability_status? %>

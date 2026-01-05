@@ -1,0 +1,203 @@
+<%# 우측 정보 패널 - Smart Split Layout (Profile 60% + Project 40%) %>
+<%# locals: other_user, chat_room %>
+<%# 2xl 이상에서는 항상 표시, 그 이하에서는 Drawer로 사용 %>
+
+<div class="h-full flex flex-col bg-white">
+
+  <%# ===== TOP 60%: 프로필 섹션 (Sticky Header) ===== %>
+  <div class="sticky top-0 z-10 bg-white border-b border-stone-100">
+    <div class="p-6 text-center">
+      <%# 프로필 이미지 (80px) %>
+      <div class="w-20 h-20 rounded-full ring-4 ring-stone-100 overflow-hidden mx-auto mb-4 bg-stone-100">
+        <% if other_user.avatar.attached? %>
+          <%= image_tag other_user.avatar, alt: other_user.name, class: "h-full w-full object-cover" %>
+        <% elsif other_user.avatar_url.present? %>
+          <%= image_tag other_user.avatar_url, alt: other_user.name, class: "h-full w-full object-cover" %>
+        <% else %>
+          <div class="h-full w-full flex items-center justify-center">
+            <span class="text-2xl font-semibold text-stone-400"><%= other_user.name&.first&.upcase || "?" %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <%# 이름 + 인증 뱃지 %>
+      <div class="flex items-center justify-center gap-2 mb-1">
+        <h3 class="text-lg font-bold text-stone-900"><%= other_user.name %></h3>
+        <% if other_user.provider.present? %>
+          <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            인증
+          </span>
+        <% end %>
+      </div>
+
+      <%# 역할 & 소속 %>
+      <p class="text-sm text-stone-500">
+        <% if other_user.role_title.present? %>
+          <%= other_user.role_title %>
+        <% end %>
+        <% if other_user.affiliation.present? %>
+          <span class="text-stone-400">@</span><%= other_user.affiliation %>
+        <% end %>
+      </p>
+
+      <%# 활동 상태 뱃지들 (최대 2개) %>
+      <% if other_user.respond_to?(:has_availability_status?) && other_user.has_availability_status? %>
+        <div class="flex items-center justify-center gap-1.5 flex-wrap mt-3">
+          <% other_user.availability_badges.first(2).each do |badge| %>
+            <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white <%= badge[:color] %>">
+              <span class="h-1.5 w-1.5 rounded-full bg-white/80"></span>
+              <%= badge[:label] %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# 전체 프로필 버튼 %>
+      <%= link_to profile_path(other_user),
+                  class: "mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-stone-700 bg-stone-50 border border-stone-200 hover:bg-stone-100 transition-all",
+                  data: { turbo_frame: "_top" } do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+        전체 프로필 보기
+      <% end %>
+    </div>
+  </div>
+
+  <%# ===== SCROLLABLE AREA ===== %>
+  <div class="flex-1 overflow-y-auto">
+
+    <%# ===== BOTTOM 40%: 프로젝트 정보 ===== %>
+    <% if chat_room.source_post.present? %>
+      <div class="p-5 border-b border-stone-100">
+        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4">현재 논의 중인 프로젝트</h4>
+
+        <%# 프로젝트 카드 %>
+        <%= link_to post_path(chat_room.source_post), class: "block", data: { turbo_frame: "_top" } do %>
+          <div class="bg-stone-50 rounded-xl p-4 hover:bg-stone-100 transition-colors">
+            <%# 카테고리 뱃지 %>
+            <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-semibold mb-2
+                  <%= chat_room.source_post.hiring? ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700' %>">
+              <%= chat_room.source_post.hiring? ? '구인' : '구직' %>
+            </span>
+
+            <%# 제목 (2줄 제한) %>
+            <p class="font-semibold text-stone-900 line-clamp-2 mb-3">
+              <%= chat_room.source_post.title %>
+            </p>
+
+            <%# 2열 그리드: 예산, 기간 %>
+            <div class="grid grid-cols-2 gap-3">
+              <% if chat_room.source_post.budget.present? %>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="text-lg">💰</span>
+                  <div>
+                    <p class="text-[10px] text-stone-400 uppercase">예산</p>
+                    <p class="font-medium text-stone-700"><%= chat_room.source_post.budget %></p>
+                  </div>
+                </div>
+              <% end %>
+              <% if chat_room.source_post.duration.present? %>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="text-lg">📅</span>
+                  <div>
+                    <p class="text-[10px] text-stone-400 uppercase">기간</p>
+                    <p class="font-medium text-stone-700"><%= chat_room.source_post.duration %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <%# 거래 상태 %>
+            <% if chat_room.confirmed? %>
+              <div class="mt-3 flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                거래 확정됨
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# ===== 연락처 섹션 ===== %>
+    <div class="p-5">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4">연락처</h4>
+      <div class="space-y-3">
+        <%# 이메일 %>
+        <% if other_user.email.present? %>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <span class="text-sm text-stone-700 truncate"><%= other_user.email %></span>
+          </div>
+        <% end %>
+
+        <%# 오픈채팅 %>
+        <% if other_user.open_chat_url.present? %>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+            <% if safe_url?(other_user.open_chat_url) %>
+              <%= link_to other_user.open_chat_url, target: "_blank", class: "text-sm text-orange-600 hover:underline truncate" do %>
+                오픈채팅 바로가기
+              <% end %>
+            <% else %>
+              <span class="text-sm text-stone-400 truncate">유효하지 않은 URL</span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%# GitHub %>
+        <% if other_user.github_url.present? %>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </div>
+            <% if safe_url?(other_user.github_url) %>
+              <%= link_to other_user.github_url, target: "_blank", class: "text-sm text-orange-600 hover:underline truncate" do %>
+                GitHub 프로필
+              <% end %>
+            <% else %>
+              <span class="text-sm text-stone-400 truncate">유효하지 않은 URL</span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%# 포트폴리오 %>
+        <% if other_user.portfolio_url.present? %>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </div>
+            <% if safe_url?(other_user.portfolio_url) %>
+              <%= link_to other_user.portfolio_url, target: "_blank", class: "text-sm text-orange-600 hover:underline truncate" do %>
+                포트폴리오
+              <% end %>
+            <% else %>
+              <span class="text-sm text-stone-400 truncate">유효하지 않은 URL</span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%# 연락처가 없는 경우 %>
+        <% if other_user.email.blank? && other_user.open_chat_url.blank? && other_user.github_url.blank? && other_user.portfolio_url.blank? %>
+          <p class="text-sm text-stone-400 italic">등록된 연락처가 없습니다</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

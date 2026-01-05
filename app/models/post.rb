@@ -11,7 +11,11 @@ class Post < ApplicationRecord
   has_many :reports, as: :reportable, dependent: :destroy
 
   # Active Storage - 이미지 첨부 (최대 5개)
-  has_many_attached :images
+  has_many_attached :images do |attachable|
+    attachable.variant :thumb, resize_to_fill: [160, 160]
+    attachable.variant :medium, resize_to_limit: [600, 600]
+    attachable.variant :large, resize_to_limit: [1200, 1200]
+  end
 
   # 이미지 파일 검증 (보안: 악성 파일 업로드 방지)
   MAX_IMAGES = 5
@@ -66,13 +70,13 @@ class Post < ApplicationRecord
     "hybrid" => "혼합(협의)"
   }.freeze
 
-  # 카테고리 라벨 (한글)
+  # 카테고리 라벨 (UI Display)
   CATEGORY_LABELS = {
     "free" => "자유",
     "question" => "질문",
     "promotion" => "홍보",
-    "hiring" => "구인",
-    "seeking" => "구직"
+    "hiring" => "Makers",
+    "seeking" => "Projects"
   }.freeze
 
   # Validations
@@ -84,11 +88,6 @@ class Post < ApplicationRecord
   # 외주 글 공통 검증
   validates :service_type, presence: { message: "를 선택해주세요" }, if: :outsourcing?
   validates :price, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
-
-  # 구인(Hiring) 글일 때 추가 검증
-  with_options if: :hiring? do |post|
-    post.validates :work_type, presence: { message: "을 선택해주세요" }
-  end
 
   # 구직(Seeking) 글일 때 추가 검증 (포트폴리오는 선택사항으로 유지)
   with_options if: :seeking? do |post|

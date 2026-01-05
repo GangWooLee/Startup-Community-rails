@@ -1,4 +1,4 @@
-<nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+<nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 md:hidden">
   <div class="max-w-screen-xl mx-auto px-4">
     <div class="flex items-center justify-around h-16">
       <!-- Home/Community -->
@@ -12,7 +12,7 @@
       <% is_active_jobs = current_page?(job_posts_path) %>
       <%= link_to job_posts_path, class: "flex flex-col items-center justify-center gap-1 flex-1 h-full link-hover relative #{is_active_jobs ? 'text-primary' : 'text-muted-foreground'}" do %>
         <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-5 w-5" } %>
-        <span class="text-xs font-medium">외주</span>
+        <span class="text-xs font-medium">Project</span>
       <% end %>
 
       <!-- 채팅/메시지 -->

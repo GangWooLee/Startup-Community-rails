@@ -10,9 +10,19 @@ class PostsController < ApplicationController
     # 구인/구직은 외주 섹션(/job_posts)에서 표시
     @posts = Post.published
                  .includes(:user, images_attachments: :blob)
-                 .where(category: [:free, :question, :promotion])
-                 .recent
-                 .limit(POSTS_PER_PAGE)
+                 .where(category: filter_categories)
+
+    # 정렬 방식 적용
+    @posts = if params[:sort] == "popular"
+               @posts.popular
+             else
+               @posts.recent
+             end
+
+    @posts = @posts.limit(POSTS_PER_PAGE)
+
+    # 현재 정렬 상태 (뷰에서 사용)
+    @current_sort = params[:sort]&.to_sym || :recent
   end
 
   def show
@@ -21,6 +31,26 @@ class PostsController < ApplicationController
     @comments = @post.comments.root_comments
                      .includes(:user, :likes, replies: [:user, :likes])
                      .oldest
+
+    # 외주 글일 경우 비슷한 프로젝트 쿼리
+    if @post.outsourcing?
+      @similar_posts = Post.published
+                           .includes(:user, images_attachments: :blob)
+                           .where(category: @post.category)
+                           .where.not(id: @post.id)
+
+      # 서비스 타입이 같은 것 우선, 없으면 같은 카테고리
+      if @post.service_type.present?
+        # 안전한 방식: sanitize로 SQL injection 방지
+        sanitized_type = ActiveRecord::Base.connection.quote(@post.service_type)
+        @similar_posts = @similar_posts
+                           .order(Arel.sql("CASE WHEN service_type = #{sanitized_type} THEN 0 ELSE 1 END"))
+                           .recent
+                           .limit(3)
+      else
+        @similar_posts = @similar_posts.recent.limit(3)
+      end
+    end
   end
 
   def new
@@ -144,6 +174,16 @@ class PostsController < ApplicationController
   # 커뮤니티 카테고리인지 확인 (free, question, promotion)
   def community_category?(category)
     %w[free question promotion].include?(category.to_s)
+  end
+
+  # 필터링할 카테고리 결정
+  # params[:category]가 있으면 해당 카테고리만, 없으면 전체 커뮤니티 카테고리
+  def filter_categories
+    if params[:category].present? && community_category?(params[:category])
+      params[:category]
+    else
+      %i[free question promotion]
+    end
   end
 
   # 비로그인 사용자를 온보딩으로 리디렉션

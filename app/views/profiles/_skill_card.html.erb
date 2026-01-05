@@ -1,0 +1,24 @@
+<%# 스킬 카드 Partial - Devicon + Badge Style %>
+<%# locals: skill, index %>
+
+<%
+  # Bento Grid 패턴: 0, 3, 6, 9... 번째는 col-span-2 (넓은 카드)
+  is_wide = (index % 6 == 0 || index % 6 == 3)
+%>
+
+<div class="<%= is_wide ? 'col-span-2 sm:col-span-1 md:col-span-2' : '' %>
+            px-4 py-3 bg-white border border-stone-200 rounded-lg
+            shadow-sm hover:shadow-md hover:border-stone-300
+            transition-all duration-200 hover:-translate-y-0.5
+            flex items-center gap-3 group">
+
+  <%# 아이콘 영역 %>
+  <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+    <%= skill_icon(skill, size: "md") %>
+  </div>
+
+  <%# 스킬 이름 %>
+  <span class="text-sm font-medium text-stone-700 group-hover:text-[#2C2825] transition-colors">
+    <%= skill %>
+  </span>
+</div>

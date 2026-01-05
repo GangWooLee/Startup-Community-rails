@@ -1,0 +1,64 @@
+<%#
+  문의 카드 컴포넌트 - 레퍼런스 스타일
+  좌측에 상태 뱃지를 크게 배치
+  locals: inquiry
+%>
+
+<%= link_to inquiry_path(inquiry),
+    class: "block card-depth rounded-xl p-4 border border-stone-200/60
+           hover:border-orange-200 hover:shadow-md transition-all group" do %>
+  <div class="flex items-center gap-4">
+    <%# 상태 뱃지 (좌측에 크게 - 레퍼런스 스타일) %>
+    <div class="flex-shrink-0">
+      <% badge_class = case inquiry.status.to_s
+                       when 'pending'
+                         'bg-stone-100 text-stone-600 border-stone-200'
+                       when 'in_progress'
+                         'bg-blue-50 text-blue-600 border-blue-200'
+                       when 'resolved', 'closed'
+                         'bg-emerald-50 text-emerald-600 border-emerald-200'
+                       else
+                         'bg-stone-100 text-stone-600 border-stone-200'
+                       end
+         badge_label = case inquiry.status.to_s
+                       when 'pending' then 'Waiting'
+                       when 'in_progress' then 'In Progress'
+                       when 'resolved', 'closed' then 'Answered'
+                       else 'Waiting'
+                       end %>
+      <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border
+                   <%= badge_class %>">
+        <%= badge_label %>
+      </span>
+    </div>
+
+    <%# 콘텐츠 %>
+    <div class="flex-1 min-w-0">
+      <%# 제목 + 비공개 아이콘 %>
+      <h3 class="font-semibold text-stone-900 group-hover:text-orange-600 transition-colors flex items-center gap-1.5">
+        <span class="truncate"><%= inquiry.title %></span>
+        <% if inquiry.is_private %>
+          <svg class="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        <% end %>
+      </h3>
+
+      <%# 메타 정보: 카테고리 • 시간 • 작성자 %>
+      <p class="text-sm text-stone-500 mt-1 flex items-center gap-1.5">
+        <span><%= inquiry.category_label %></span>
+        <span class="text-stone-300">•</span>
+        <span><%= time_ago_in_words(inquiry.created_at) %> ago</span>
+        <span class="text-stone-300">•</span>
+        <span><%= inquiry.user.name.to_s.first(3) %>***</span>
+      </p>
+    </div>
+
+    <%# 화살표 %>
+    <svg class="w-5 h-5 text-stone-300 group-hover:text-orange-400 transition-colors flex-shrink-0"
+         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+    </svg>
+  </div>
+<% end %>

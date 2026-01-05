@@ -2,112 +2,226 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
-<div class="min-h-screen bg-background pb-20" data-controller="navigation" data-navigation-reset-on-connect-value="true">
-  <!-- Header -->
-  <%= render partial: "shared/main_header" %>
+<%#
+  Join Project 페이지 - Enhanced Organic Modern Style
+  "트렌디하고 꽉 찬 느낌" 리뉴얼
 
-  <!-- Main Content -->
+  Structure:
+  1. Hero Section: Dual Gateway Cards (기존 유지)
+  2. Smart Filter Bar: Enhanced with Sort + Advanced Filters
+  3. Featured Section: HOT 공고 (NEW)
+  4. Weekly Best: 가로 스크롤 (NEW)
+  5. Main Content: 2-column layout with Sidebar (NEW)
+  6. Makers/Projects Grid: Enhanced Cards
+%>
+
+<div class="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/50 pb-20"
+     data-controller="job-filter navigation"
+     data-navigation-reset-on-connect-value="true">
+
+  <%# Main Content %>
   <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <div class="w-full">
-      <!-- Tab Headers -->
-      <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full grid grid-cols-2 mb-6">
-        <button data-tab="hiring" class="tab-trigger-freelance active inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
-          <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-4 w-4 mr-2" } %>
-          구인 (<%= @hiring_posts.count %>)
-        </button>
-        <button data-tab="seeking" class="tab-trigger-freelance inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow">
-          <%= render partial: "shared/icons/user", locals: { css_css_class: "h-4 w-4 mr-2" } %>
-          구직 (<%= @seeking_posts.count %>)
-        </button>
+
+    <%# ===== Hero Section - Compact Horizontal Gateway (Above the Fold 최적화) ===== %>
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+      <%# Card A: Find Makers (Dark Charcoal) - Horizontal Slim %>
+      <a href="#makers-section"
+         class="group relative flex items-center justify-between overflow-hidden
+                rounded-2xl h-32 px-5 py-4
+                bg-[#2C2825] hover:shadow-xl hover:shadow-stone-900/20
+                transition-all duration-300 cursor-pointer"
+         data-action="click->job-filter#scrollToMakers">
+        <%# Left: Text Content %>
+        <div class="flex-1 min-w-0 pr-4 relative z-10">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span>
+            <span class="text-[10px] font-semibold text-orange-300 uppercase tracking-wider">Hiring</span>
+          </div>
+          <h2 class="text-lg md:text-xl font-bold text-white mb-1 leading-tight">Find Makers</h2>
+          <p class="text-stone-400 text-xs mb-2 line-clamp-1">프로젝트에 함께할 동료를 찾아보세요.</p>
+          <span class="inline-flex items-center gap-1.5 text-white/80 text-xs font-medium
+                       group-hover:text-orange-300 transition-colors">
+            <%= @hiring_count %>명 둘러보기
+            <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </span>
+        </div>
+        <%# Right: Icon %>
+        <div class="flex-shrink-0 w-16 h-16 opacity-15 group-hover:opacity-25 transition-opacity">
+          <svg class="w-full h-full text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
+        <%# Subtle glow %>
+        <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl
+                    group-hover:scale-125 group-hover:bg-orange-500/15 transition-all duration-500"></div>
+      </a>
+
+      <%# Card B: Find Projects (Light) - Horizontal Slim %>
+      <a href="#projects-section"
+         class="group relative flex items-center justify-between overflow-hidden
+                rounded-2xl h-32 px-5 py-4
+                bg-white border border-orange-200 hover:border-orange-400
+                hover:shadow-xl hover:shadow-orange-500/10
+                transition-all duration-300 cursor-pointer"
+         data-action="click->job-filter#scrollToProjects">
+        <%# Left: Text Content %>
+        <div class="flex-1 min-w-0 pr-4 relative z-10">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Seeking</span>
+          </div>
+          <h2 class="text-lg md:text-xl font-bold text-stone-900 mb-1 leading-tight">Find Projects</h2>
+          <p class="text-stone-500 text-xs mb-2 line-clamp-1">참여하고 싶은 프로젝트를 찾아보세요.</p>
+          <span class="inline-flex items-center gap-1.5 text-orange-600 text-xs font-medium
+                       group-hover:text-orange-700 transition-colors">
+            <%= @seeking_count %>개 둘러보기
+            <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </span>
+        </div>
+        <%# Right: Icon %>
+        <div class="flex-shrink-0 w-16 h-16 opacity-10 group-hover:opacity-20 transition-opacity">
+          <svg class="w-full h-full text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+        </div>
+      </a>
+    </section>
+
+    <%# ===== Filter Bar ===== %>
+    <%= render "job_posts/filter_bar" %>
+
+    <%# ===== Main Content: 2-Column Layout ===== %>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <%# ===== Left Column: Main Content (9 cols) ===== %>
+      <div class="lg:col-span-9 space-y-10">
+
+        <%# ===== Makers Section ===== %>
+        <section id="makers-section" class="scroll-mt-24" data-job-filter-target="makersSection">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#2C2825] flex items-center justify-center shadow-sm">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold text-stone-900">Makers</h2>
+                <p class="text-sm text-stone-500">함께할 동료를 찾고 있어요</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-stone-100 text-stone-700 shadow-sm">
+              <%= @hiring_count %>명
+            </span>
+          </div>
+
+          <% if @hiring_posts.any? %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"
+                 data-job-filter-target="makersGrid">
+              <% @hiring_posts.each do |post| %>
+                <%= render partial: "job_posts/job_card", locals: { post: post } %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-16 bg-white rounded-2xl border border-stone-200/60 shadow-sm">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 flex items-center justify-center">
+                <svg class="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <p class="text-lg font-semibold text-stone-700 mb-1">아직 등록된 Maker가 없습니다</p>
+              <p class="text-sm text-stone-500 mb-4">팀원을 찾고 있다면 등록해보세요!</p>
+              <% if logged_in? %>
+                <%= link_to new_post_path(type: 'outsourcing'),
+                    class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold
+                           bg-stone-900 text-white hover:bg-orange-600 transition-colors" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  첫 번째 등록하기
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+
+        <%# ===== Projects Section ===== %>
+        <section id="projects-section" class="scroll-mt-24" data-job-filter-target="projectsSection">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-sm">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold text-stone-900">Projects</h2>
+                <p class="text-sm text-stone-500">참여할 프로젝트를 찾고 있어요</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-orange-100 text-orange-700 shadow-sm">
+              <%= @seeking_count %>개
+            </span>
+          </div>
+
+          <% if @seeking_posts.any? %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5"
+                 data-job-filter-target="projectsGrid">
+              <% @seeking_posts.each do |post| %>
+                <%= render partial: "job_posts/job_card", locals: { post: post } %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-16 bg-white rounded-2xl border border-stone-200/60 shadow-sm">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-100 flex items-center justify-center">
+                <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+              </div>
+              <p class="text-lg font-semibold text-stone-700 mb-1">아직 등록된 Project가 없습니다</p>
+              <p class="text-sm text-stone-500 mb-4">프로젝트에 합류하고 싶다면 등록해보세요!</p>
+              <% if logged_in? %>
+                <%= link_to new_post_path(type: 'outsourcing'),
+                    class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold
+                           bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 transition-colors shadow-sm" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  첫 번째 등록하기
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+
       </div>
 
-      <!-- Hiring Tab (구인 공고) -->
-      <div id="tab-hiring" class="tab-content-freelance">
-        <% if @hiring_posts.any? %>
-          <%# 반응형 그리드: 1열(모바일) → 2열(태블릿) → 3열(데스크톱) %>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <% @hiring_posts.each do |post| %>
-              <%= render_post_card(post, variant: :outsourcing) %>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="text-center py-20 text-muted-foreground">
-            <%= render partial: "shared/icons/briefcase", locals: { css_css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
-            <p class="text-lg font-medium mb-2">아직 등록된 구인 공고가 없습니다</p>
-            <p class="text-sm">첫 번째 구인 공고를 등록해보세요!</p>
-          </div>
-        <% end %>
+      <%# ===== Right Column: Sidebar (3 cols, Desktop only) ===== %>
+      <div class="lg:col-span-3">
+        <%= render "job_posts/sidebar",
+            hiring_count: @hiring_count,
+            seeking_count: @seeking_count,
+            today_count: @today_count,
+            top_makers: @top_makers,
+            featured_posts: @featured_posts %>
       </div>
 
-      <!-- Seeking Tab (구직 정보) -->
-      <div id="tab-seeking" class="tab-content-freelance hidden">
-        <% if @seeking_posts.any? %>
-          <%# 반응형 그리드: 1열(모바일) → 2열(태블릿) → 3열(데스크톱) %>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <% @seeking_posts.each do |post| %>
-              <%= render_post_card(post, variant: :outsourcing) %>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="text-center py-20 text-muted-foreground">
-            <%= render partial: "shared/icons/user", locals: { css_css_class: "h-16 w-16 mx-auto mb-4 opacity-50" } %>
-            <p class="text-lg font-medium mb-2">아직 등록된 구직 정보가 없습니다</p>
-            <p class="text-sm">첫 번째 구직 정보를 등록해보세요!</p>
-          </div>
-        <% end %>
-      </div>
     </div>
   </main>
 
   <%= render "shared/bottom_nav" %>
 </div>
 
-<script>
-  // Tab switching for freelance page
-  function setupFreelanceTabs() {
-    const tabTriggers = document.querySelectorAll('.tab-trigger-freelance');
-    const tabContents = document.querySelectorAll('.tab-content-freelance');
-
-    // Initialize: ensure hiring tab is visible and button is selected by default
-    const hiringTab = document.getElementById('tab-hiring');
-    const seekingTab = document.getElementById('tab-seeking');
-    const hiringButton = document.querySelector('[data-tab="hiring"]');
-    const seekingButton = document.querySelector('[data-tab="seeking"]');
-
-    if (hiringTab && seekingTab) {
-      // Show hiring content, hide seeking content
-      hiringTab.classList.remove('hidden');
-      seekingTab.classList.add('hidden');
-    }
-
-    if (hiringButton && seekingButton) {
-      // Set hiring button as active
-      hiringButton.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
-      // Ensure seeking button is not active
-      seekingButton.classList.remove('active', 'bg-background', 'text-foreground', 'shadow');
-    }
-
-    tabTriggers.forEach(trigger => {
-      trigger.addEventListener('click', function() {
-        const tabId = this.getAttribute('data-tab');
-
-        // Remove active class from all triggers
-        tabTriggers.forEach(t => t.classList.remove('active', 'bg-background', 'text-foreground', 'shadow'));
-
-        // Add active class to clicked trigger
-        this.classList.add('active', 'bg-background', 'text-foreground', 'shadow');
-
-        // Hide all tab contents
-        tabContents.forEach(content => content.classList.add('hidden'));
-
-        // Show selected tab content
-        document.getElementById('tab-' + tabId).classList.remove('hidden');
-      });
-    });
+<style>
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-
-  // Support both initial load and Turbo navigation
-  document.addEventListener('DOMContentLoaded', setupFreelanceTabs);
-  document.addEventListener('turbo:load', setupFreelanceTabs);
-  document.addEventListener('turbo:render', setupFreelanceTabs);
-</script>
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

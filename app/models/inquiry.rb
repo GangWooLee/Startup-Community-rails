@@ -35,6 +35,8 @@ class Inquiry < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :by_category, ->(category) { where(category: category) if category.present? }
   scope :active, -> { where(status: %w[pending in_progress]) }
+  scope :public_only, -> { where(is_private: false) }
+  scope :private_only, -> { where(is_private: true) }
 
   # 카테고리 한글 표시
   def category_label
@@ -61,6 +63,10 @@ class Inquiry < ApplicationRecord
 
   def closed?
     status == "closed"
+  end
+
+  def private?
+    is_private
   end
 
   # 답변 완료 여부

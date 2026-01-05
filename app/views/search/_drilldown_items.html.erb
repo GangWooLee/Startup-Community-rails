@@ -1,0 +1,78 @@
+<%# Task 88: Turbo Stream append용 아이템 partial %>
+<%# locals: drilldown_type, items %>
+
+<% if drilldown_type == "users" %>
+  <%# 사용자 리스트 %>
+  <% items.each do |user| %>
+    <%= link_to profile_path(user),
+                data: { action: "click->search-modal#resultClick", search_modal_target: "resultItem" },
+                tabindex: "0",
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-xl
+                        hover:bg-orange-50/50 focus:bg-orange-50/50
+                        hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
+                        transition-all duration-150 group outline-none" do %>
+      <%# 아바타 %>
+      <div class="w-10 h-10 rounded-full bg-stone-200 overflow-hidden flex-shrink-0">
+        <% if user.avatar.attached? %>
+          <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+        <% elsif user.avatar_url.present? %>
+          <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover" %>
+        <% else %>
+          <div class="w-full h-full flex items-center justify-center bg-stone-300 text-stone-600 font-bold text-sm">
+            <%= user.name[0].upcase %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# 정보 %>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900 truncate">
+          <%= user.name %>
+        </p>
+        <% if user.role_title.present? || user.affiliation.present? %>
+          <p class="text-xs text-stone-400 truncate">
+            <%= [user.role_title, user.affiliation].compact.join(" · ") %>
+          </p>
+        <% end %>
+      </div>
+
+      <%# 화살표 %>
+      <svg class="w-4 h-4 text-stone-300 group-hover:text-orange-400 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    <% end %>
+  <% end %>
+<% else %>
+  <%# 게시글 리스트 %>
+  <% items.each do |post| %>
+    <%= link_to post_path(post),
+                data: { action: "click->search-modal#resultClick", search_modal_target: "resultItem" },
+                tabindex: "0",
+                class: "flex items-start gap-3 px-3 py-2.5 rounded-xl
+                        hover:bg-orange-50/50 focus:bg-orange-50/50
+                        hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
+                        transition-all duration-150 group outline-none" do %>
+      <%# 카테고리 아이콘 %>
+      <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center <%= post_category_bg_class(post) %>">
+        <%= post_category_icon(post) %>
+      </div>
+
+      <%# 정보 %>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900 truncate">
+          <%= post.title %>
+        </p>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-xs text-stone-400"><%= post.user.name %></span>
+          <span class="text-xs text-stone-300">·</span>
+          <span class="text-xs text-stone-400"><%= time_ago_in_words(post.created_at) %> 전</span>
+        </div>
+      </div>
+
+      <%# 화살표 %>
+      <svg class="w-4 h-4 text-stone-300 group-hover:text-orange-400 flex-shrink-0 mt-1 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    <% end %>
+  <% end %>
+<% end %>

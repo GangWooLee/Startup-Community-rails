@@ -17,6 +17,7 @@ class OnboardingController < ApplicationController
     # AI 아이디어 입력 화면
     # 뒤로가기 경로 설정: 로그인한 사용자는 커뮤니티로, 비로그인은 온보딩으로
     @back_path = logged_in? ? community_path : root_path
+    @user = current_user
     set_usage_stats
   end
 

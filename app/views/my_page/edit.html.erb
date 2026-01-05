@@ -48,8 +48,40 @@
                          file:text-sm file:font-medium file:bg-primary file:text-primary-foreground
                          hover:file:bg-primary/90 file:cursor-pointer cursor-pointer" %>
             </label>
-            <p class="text-xs text-muted-foreground">JPG, PNG, GIF (최대 5MB)</p>
+            <p class="text-xs text-muted-foreground">JPG, PNG, GIF (최대 2MB)</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Cover Image -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6">
+        <h3 class="text-lg font-semibold mb-4">커버 이미지</h3>
+        <p class="text-sm text-muted-foreground mb-4">프로필 상단에 표시되는 배경 이미지입니다.</p>
+
+        <%# 현재 커버 이미지 미리보기 %>
+        <div class="mb-4 rounded-xl overflow-hidden h-32 relative">
+          <% if @user.has_cover_image? %>
+            <%= image_tag @user.cover_image, alt: "현재 커버 이미지", class: "w-full h-full object-cover" %>
+          <% else %>
+            <div class="w-full h-full bg-gradient-to-r <%= @user.cover_gradient %>">
+              <div class="absolute inset-0 flex items-center justify-center text-stone-400 text-sm">
+                기본 그라디언트 (커버 이미지를 업로드하면 변경됩니다)
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex-1">
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-foreground">새 커버 이미지 업로드</span>
+            <%= f.file_field :cover_image,
+                accept: "image/jpeg,image/png,image/gif,image/webp",
+                class: "mt-2 block w-full text-sm text-muted-foreground
+                       file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                       file:text-sm file:font-medium file:bg-primary file:text-primary-foreground
+                       hover:file:bg-primary/90 file:cursor-pointer cursor-pointer" %>
+          </label>
+          <p class="text-xs text-muted-foreground">JPG, PNG, GIF, WebP (최대 5MB). 권장 크기: 1200x400px</p>
         </div>
       </div>
 
@@ -103,7 +135,7 @@
                           class: "w-full" %>
         </div>
 
-        <!-- Bio -->
+        <!-- Bio (한 줄) -->
         <div class="space-y-2">
           <%= render_label name: "user[bio]", label: "한 줄 소개" %>
           <%= render_textarea name: "user[bio]",
@@ -113,6 +145,64 @@
                              rows: 2,
                              class: "w-full resize-none" %>
           <p class="text-xs text-muted-foreground">프로필에 인용문처럼 표시됩니다 (최대 500자)</p>
+        </div>
+      </div>
+
+      <!-- Detailed Bio (상세 소개 - Rich Text) -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
+        <h3 class="text-lg font-semibold">상세 소개</h3>
+        <p class="text-sm text-muted-foreground">본인을 자세히 소개해보세요. 서식을 적용할 수 있습니다.</p>
+
+        <div class="space-y-2">
+          <%= f.label :detailed_bio, "자기소개", class: "block text-sm font-medium text-foreground" %>
+          <div class="trix-content-wrapper rounded-lg border border-border overflow-hidden bg-background">
+            <%= f.rich_text_area :detailed_bio,
+                                 class: "w-full min-h-[200px] focus:outline-none",
+                                 placeholder: "경험, 관심사, 작업 방식 등을 자유롭게 적어주세요..." %>
+          </div>
+          <p class="text-xs text-muted-foreground">이미지 첨부, 링크, 목록 등 서식을 활용해보세요</p>
+        </div>
+      </div>
+
+      <!-- Status Message & Context (NEW: Persona Canvas) -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
+        <h3 class="text-lg font-semibold mb-4">프로필 컨텍스트</h3>
+        <p class="text-sm text-muted-foreground mb-4">다른 사람들이 당신을 더 잘 이해할 수 있도록 도와주세요.</p>
+
+        <!-- Status Message -->
+        <div class="space-y-2">
+          <%= render_label name: "user[status_message]", label: "현재 상태" %>
+          <%= render_input name: "user[status_message]",
+                          type: :text,
+                          id: "user_status_message",
+                          value: @user.status_message,
+                          placeholder: "예: 사이드 프로젝트 찾는 중, 이직 준비 중",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">프로필에서 이름 아래에 표시됩니다 (최대 100자)</p>
+        </div>
+
+        <!-- Looking For -->
+        <div class="space-y-2">
+          <%= render_label name: "user[looking_for]", label: "찾는 것" %>
+          <%= render_input name: "user[looking_for]",
+                          type: :text,
+                          id: "user_looking_for",
+                          value: @user.looking_for,
+                          placeholder: "예: AI 서비스 기획자, 초기 스타트업 마케팅 관심",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">협업하고 싶은 사람이나 관심 분야를 적어주세요 (최대 200자)</p>
+        </div>
+
+        <!-- Location -->
+        <div class="space-y-2">
+          <%= render_label name: "user[location]", label: "활동 지역" %>
+          <%= render_input name: "user[location]",
+                          type: :text,
+                          id: "user_location",
+                          value: @user.location,
+                          placeholder: "예: 서울 강남, 판교, 리모트",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">주로 활동하는 지역입니다 (최대 50자)</p>
         </div>
       </div>
 
@@ -192,6 +282,252 @@
         <% end %>
       </div>
 
+      <!-- Toolbox & Learning -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
+        <h3 class="text-lg font-semibold mb-4">도구 & 성장</h3>
+        <p class="text-sm text-muted-foreground mb-4">주로 사용하는 도구와 요즘 관심사를 공유하세요.</p>
+
+        <!-- Toolbox -->
+        <div class="space-y-2">
+          <%= render_label name: "user[toolbox]", label: "사용 도구 & 장비" %>
+          <%= render_input name: "user[toolbox]",
+                          type: :text,
+                          id: "user_toolbox",
+                          value: @user.toolbox,
+                          placeholder: "예: MacBook Pro, Figma, Notion, VSCode (쉼표로 구분)",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">주로 사용하는 도구와 장비를 쉼표로 구분해 입력하세요</p>
+        </div>
+
+        <% if @user.toolbox_array.any? %>
+          <div>
+            <p class="text-sm font-medium text-foreground mb-2">등록된 도구:</p>
+            <div class="flex flex-wrap gap-2">
+              <% @user.toolbox_array.each do |tool| %>
+                <%= render_badge tool, variant: :outline %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Currently Learning -->
+        <div class="space-y-2 pt-4 border-t border-border">
+          <%= render_label name: "user[currently_learning]", label: "요즘 배우는 것" %>
+          <%= render_textarea name: "user[currently_learning]",
+                             id: "user_currently_learning",
+                             value: @user.currently_learning,
+                             placeholder: "예: AI/ML 기초, 린 스타트업 방법론, 프롬프트 엔지니어링",
+                             rows: 2,
+                             class: "w-full resize-none" %>
+          <p class="text-xs text-muted-foreground">최근 학습하고 있거나 관심 있는 분야를 적어주세요</p>
+        </div>
+      </div>
+
+      <!-- Experience Timeline (경력 & 경험) -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4"
+           data-controller="experience-form">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold">경력 & 경험</h3>
+            <p class="text-sm text-muted-foreground">경력, 학력, 프로젝트 등을 추가하세요.</p>
+          </div>
+          <button type="button"
+                  data-action="experience-form#add"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
+                         bg-primary text-primary-foreground rounded-lg
+                         hover:bg-primary/90 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            추가
+          </button>
+        </div>
+
+        <%# 경험 목록 컨테이너 %>
+        <div data-experience-form-target="list" class="space-y-4">
+          <% (@user.experiences_array.presence || []).each_with_index do |exp, index| %>
+            <div class="p-4 rounded-xl border border-border bg-secondary/30 relative group"
+                 data-experience-form-target="item">
+              <%# 삭제 버튼 %>
+              <button type="button"
+                      data-action="experience-form#remove"
+                      class="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground
+                             rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100
+                             transition-opacity hover:scale-110">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+
+              <div class="grid grid-cols-2 gap-4">
+                <%# 경험 타입 %>
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-xs font-medium text-foreground mb-1">타입</label>
+                  <select name="user[experiences][][type]"
+                          class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <% User::EXPERIENCE_TYPES.each do |key, info| %>
+                      <option value="<%= key %>" <%= 'selected' if exp["type"] == key %>><%= info[:label] %></option>
+                    <% end %>
+                  </select>
+                </div>
+
+                <%# 현재 진행 중 %>
+                <div class="col-span-2 sm:col-span-1 flex items-end">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox"
+                           name="user[experiences][][is_current]"
+                           value="true"
+                           <%= 'checked' if exp["is_current"] %>
+                           class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                    <span class="text-sm font-medium">현재 진행 중</span>
+                  </label>
+                </div>
+
+                <%# 제목 %>
+                <div class="col-span-2">
+                  <label class="block text-xs font-medium text-foreground mb-1">제목 *</label>
+                  <input type="text"
+                         name="user[experiences][][title]"
+                         value="<%= exp["title"] %>"
+                         placeholder="예: 백엔드 개발자, 컴퓨터공학 학사"
+                         required
+                         class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+
+                <%# 조직/회사/학교 %>
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-xs font-medium text-foreground mb-1">조직/회사/학교</label>
+                  <input type="text"
+                         name="user[experiences][][organization]"
+                         value="<%= exp["organization"] %>"
+                         placeholder="예: 스타트업 A, 서울대학교"
+                         class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+
+                <%# 기간 %>
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-xs font-medium text-foreground mb-1">기간</label>
+                  <input type="text"
+                         name="user[experiences][][period]"
+                         value="<%= exp["period"] %>"
+                         placeholder="예: 2023.03 - 현재"
+                         class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+
+                <%# 설명 %>
+                <div class="col-span-2">
+                  <label class="block text-xs font-medium text-foreground mb-1">설명</label>
+                  <textarea name="user[experiences][][description]"
+                            placeholder="주요 업무나 성과를 간단히 적어주세요"
+                            rows="2"
+                            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                   placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20
+                                   resize-none"><%= exp["description"] %></textarea>
+                </div>
+
+                <%# 정렬 순서 (hidden) %>
+                <input type="hidden" name="user[experiences][][sort_order]" value="<%= index %>">
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <%# 빈 상태 %>
+        <div data-experience-form-target="empty"
+             class="<%= @user.experiences_array.any? ? 'hidden' : '' %>
+                    text-center py-8 text-muted-foreground">
+          <svg class="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm">아직 등록된 경험이 없습니다</p>
+          <p class="text-xs mt-1">위의 "추가" 버튼을 클릭하여 경력, 학력, 프로젝트를 추가하세요</p>
+        </div>
+
+        <%# 템플릿 (Stimulus에서 클론해서 사용) %>
+        <template data-experience-form-target="template">
+          <div class="p-4 rounded-xl border border-border bg-secondary/30 relative group"
+               data-experience-form-target="item">
+            <button type="button"
+                    data-action="experience-form#remove"
+                    class="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground
+                           rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100
+                           transition-opacity hover:scale-110">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-xs font-medium text-foreground mb-1">타입</label>
+                <select name="user[experiences][][type]"
+                        class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary/20">
+                  <% User::EXPERIENCE_TYPES.each do |key, info| %>
+                    <option value="<%= key %>"><%= info[:label] %></option>
+                  <% end %>
+                </select>
+              </div>
+
+              <div class="col-span-2 sm:col-span-1 flex items-end">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox"
+                         name="user[experiences][][is_current]"
+                         value="true"
+                         class="h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                  <span class="text-sm font-medium">현재 진행 중</span>
+                </label>
+              </div>
+
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-foreground mb-1">제목 *</label>
+                <input type="text"
+                       name="user[experiences][][title]"
+                       placeholder="예: 백엔드 개발자, 컴퓨터공학 학사"
+                       required
+                       class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                              placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+              </div>
+
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-xs font-medium text-foreground mb-1">조직/회사/학교</label>
+                <input type="text"
+                       name="user[experiences][][organization]"
+                       placeholder="예: 스타트업 A, 서울대학교"
+                       class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                              placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+              </div>
+
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-xs font-medium text-foreground mb-1">기간</label>
+                <input type="text"
+                       name="user[experiences][][period]"
+                       placeholder="예: 2023.03 - 현재"
+                       class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                              placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20">
+              </div>
+
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-foreground mb-1">설명</label>
+                <textarea name="user[experiences][][description]"
+                          placeholder="주요 업무나 성과를 간단히 적어주세요"
+                          rows="2"
+                          class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
+                                 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20
+                                 resize-none"></textarea>
+              </div>
+
+              <input type="hidden" name="user[experiences][][sort_order]" value="0">
+            </div>
+          </div>
+        </template>
+      </div>
+
       <!-- Related Links -->
       <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4">
         <h3 class="text-lg font-semibold mb-4">관련 링크</h3>
@@ -229,6 +565,18 @@
                           placeholder: "https://notion.so/..., https://behance.net/...",
                           class: "w-full" %>
           <p class="text-xs text-muted-foreground">노션, 비핸스, 개인 웹사이트 등</p>
+        </div>
+
+        <!-- Open Chat URL -->
+        <div class="space-y-2">
+          <%= render_label name: "user[open_chat_url]", label: "오픈채팅" %>
+          <%= render_input name: "user[open_chat_url]",
+                          type: :url,
+                          id: "user_open_chat_url",
+                          value: @user.open_chat_url,
+                          placeholder: "https://open.kakao.com/o/...",
+                          class: "w-full" %>
+          <p class="text-xs text-muted-foreground">카카오톡 오픈채팅 등 빠른 연락처</p>
         </div>
       </div>
 

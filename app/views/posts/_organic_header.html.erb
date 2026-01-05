@@ -1,0 +1,110 @@
+<%#
+  Organic Modern Header - Glass-nav 스타일
+  Reference: design-sample/community_page/community_page (lines 93-123)
+
+  Features:
+  - Glass-nav effect (backdrop-blur)
+  - Logo + Brand name
+  - Search bar (desktop only)
+  - Write button
+  - Notification bell with badge
+  - User avatar / Login button
+%>
+
+<nav class="sticky top-0 z-50 glass-nav shadow-sm transition-all duration-300">
+  <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center gap-4">
+
+      <%# Logo & Brand %>
+      <%= link_to community_path, class: "flex items-center gap-3 shrink-0 group" do %>
+        <%= image_tag "/undrew_icon_only.png", alt: "Undrew", class: "w-10 h-10 rounded-xl shadow-lg shadow-stone-900/10 group-hover:scale-105 transition-transform object-contain" %>
+        <span class="font-bold text-xl text-stone-900 tracking-tight hidden sm:block">Undrew</span>
+      <% end %>
+
+      <%# Search Bar (Desktop only) - Command Palette Trigger %>
+      <div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
+        <button type="button"
+                data-action="click->search-modal#open"
+                class="block w-full text-left">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </span>
+          <div class="flex items-center justify-between w-full pl-10 pr-3 py-2.5 rounded-full bg-white/80 backdrop-blur-sm border border-stone-200/60 text-stone-400 text-sm cursor-pointer hover:border-stone-300 hover:bg-white transition-all shadow-sm">
+            <span>관심있는 주제나 커뮤니티를 검색해보세요</span>
+            <%# 검색 아이콘 (⌘K 대신) %>
+            <div class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg bg-stone-100 border border-stone-200">
+              <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <%# Right Actions %>
+      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+
+        <%# Mobile Search Icon - Command Palette Trigger %>
+        <button type="button"
+                data-action="click->search-modal#open"
+                class="md:hidden text-stone-500 hover:text-stone-700 p-2 hover:bg-white/50 rounded-full transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </button>
+
+        <%# Notification Bell %>
+        <% if logged_in? %>
+          <div class="relative" data-controller="notification-dropdown">
+            <button type="button"
+                    class="text-stone-500 hover:text-stone-700 p-2 hover:bg-white/50 rounded-full transition-colors relative"
+                    data-action="click->notification-dropdown#toggle"
+                    data-notification-dropdown-target="button">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <%# Notification Badge %>
+              <% unread_count = current_user.unread_notifications_count %>
+              <% if unread_count > 0 %>
+                <span class="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-[#FDFBF7]"></span>
+              <% end %>
+            </button>
+
+            <%# Notification Dropdown %>
+            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white border border-stone-200 rounded-2xl shadow-xl"
+                 data-notification-dropdown-target="dropdown">
+              <%= render "notifications/dropdown" %>
+            </div>
+          </div>
+        <% end %>
+
+        <%# User Avatar / Login Button %>
+        <% if logged_in? %>
+          <%= link_to my_page_path, class: "block" do %>
+            <div class="h-10 w-10 rounded-full bg-stone-200 overflow-hidden border border-white shadow-md cursor-pointer hover:ring-2 hover:ring-stone-200 transition-all">
+              <% if current_user.avatar.attached? %>
+                <%= image_tag current_user.avatar, alt: current_user.name, class: "h-full w-full object-cover" %>
+              <% elsif current_user.avatar_url.present? %>
+                <%= image_tag current_user.avatar_url, alt: current_user.name, class: "h-full w-full object-cover" %>
+              <% else %>
+                <div class="h-full w-full flex items-center justify-center bg-stone-300 text-stone-600 font-bold text-sm">
+                  <%= current_user.name[0].upcase %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <%= link_to login_path, class: "flex items-center justify-center gap-2 bg-[#2C2825] hover:bg-stone-800 text-[#FDFBF7] px-5 py-2.5 rounded-full font-medium shadow-md shadow-stone-900/5 transition-all hover:-translate-y-0.5 text-sm" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span>로그인</span>
+          <% end %>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</nav>

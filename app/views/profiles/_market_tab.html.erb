@@ -1,0 +1,123 @@
+<%# 외주 마켓 탭 콘텐츠 Partial %>
+<%# locals: user, posts %>
+
+<div class="space-y-4">
+  <% if posts.any? %>
+    <% posts.each do |post| %>
+      <%= link_to post_path(post),
+          class: "block p-4 rounded-lg bg-white/60 border border-stone-200/60
+                  backdrop-blur-sm transition-all duration-200
+                  hover:shadow-md hover:border-orange-200/60 hover:-translate-y-0.5 group" do %>
+
+        <div class="flex gap-4">
+          <%# 카테고리 아이콘 %>
+          <div class="w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center
+                      <%= post.category == 'hiring' ? 'bg-orange-100' : 'bg-blue-100' %>">
+            <% if post.category == 'hiring' %>
+              <%# 구인 (인재를 찾는 중) %>
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            <% else %>
+              <%# 구직 (일을 찾는 중) %>
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            <% end %>
+          </div>
+
+          <%# 콘텐츠 %>
+          <div class="flex-1 min-w-0">
+            <%# 카테고리 뱃지 + 상태 %>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                           <%= post.category == 'hiring' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700' %>">
+                <%= post.category == 'hiring' ? '구인' : '구직' %>
+              </span>
+              <% if post.price.present? && post.price > 0 %>
+                <span class="text-xs font-medium text-green-600">
+                  <%= number_to_currency(post.price, unit: "₩", precision: 0) %>
+                </span>
+              <% end %>
+              <span class="text-xs text-stone-400">
+                <%= time_ago_in_words(post.created_at) %> 전
+              </span>
+            </div>
+
+            <%# 제목 %>
+            <h4 class="font-medium text-stone-800 group-hover:text-orange-600
+                       transition-colors line-clamp-1 mb-1">
+              <%= post.title %>
+            </h4>
+
+            <%# 본문 미리보기 %>
+            <p class="text-sm text-stone-500 line-clamp-2">
+              <%= strip_tags(post.content).truncate(100) %>
+            </p>
+
+            <%# 예산/기간 정보 %>
+            <div class="flex items-center gap-4 mt-2 text-xs text-stone-400">
+              <% if post.budget.present? %>
+                <span class="flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <%= post.budget %>
+                </span>
+              <% end %>
+              <% if post.duration.present? %>
+                <span class="flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <%= post.duration %>
+                </span>
+              <% end %>
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <%= post.views_count %>
+              </span>
+            </div>
+          </div>
+
+          <%# 화살표 %>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-stone-300 group-hover:text-orange-400 transition-colors"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# 더 보기 링크 %>
+    <% if posts.size >= 5 %>
+      <div class="text-center pt-4">
+        <%= link_to job_posts_path(author: user.id),
+            class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
+                    text-orange-600 hover:text-orange-700 transition-colors" do %>
+          모든 외주 글 보기
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        <% end %>
+      </div>
+    <% end %>
+
+  <% else %>
+    <%= render "profiles/empty_state",
+        icon: "briefcase",
+        title: "아직 등록된 외주 글이 없습니다",
+        description: "외주를 찾거나 인재를 모집해보세요" %>
+  <% end %>
+</div>

@@ -2,8 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 
 // 공유 기능 컨트롤러
 // Web Share API, 클립보드 복사, 카카오 공유 지원
+// Drawbridge Task #110: PC 드롭다운 + 모바일 바텀시트 반응형 지원
 export default class extends Controller {
-  static targets = ["overlay", "sheet", "toast"]
+  static targets = ["overlay", "sheet", "toast", "dropdown"]
   static values = {
     url: String,
     title: String,
@@ -14,11 +15,41 @@ export default class extends Controller {
   connect() {
     // ESC 키로 닫기
     this.boundHandleKeydown = this.handleKeydown.bind(this)
+    this.boundHandleClickOutside = this.handleClickOutside.bind(this)
     document.addEventListener("keydown", this.boundHandleKeydown)
+    document.addEventListener("click", this.boundHandleClickOutside)
   }
 
   disconnect() {
     document.removeEventListener("keydown", this.boundHandleKeydown)
+    document.removeEventListener("click", this.boundHandleClickOutside)
+  }
+
+  // PC 드롭다운 토글
+  toggleDropdown(event) {
+    event.stopPropagation()
+    if (!this.hasDropdownTarget) return
+
+    const isHidden = this.dropdownTarget.classList.contains("hidden")
+    if (isHidden) {
+      this.dropdownTarget.classList.remove("hidden")
+    } else {
+      this.dropdownTarget.classList.add("hidden")
+    }
+  }
+
+  // 드롭다운 닫기
+  closeDropdown() {
+    if (this.hasDropdownTarget) {
+      this.dropdownTarget.classList.add("hidden")
+    }
+  }
+
+  // 외부 클릭 시 드롭다운 닫기
+  handleClickOutside(event) {
+    if (this.hasDropdownTarget && !this.element.contains(event.target)) {
+      this.closeDropdown()
+    }
   }
 
   // 바텀시트 열기
@@ -70,8 +101,16 @@ export default class extends Controller {
   }
 
   handleKeydown(event) {
-    if (event.key === "Escape" && !this.overlayTarget.classList.contains("hidden")) {
-      this.close()
+    if (event.key === "Escape") {
+      // 드롭다운 닫기 (PC)
+      if (this.hasDropdownTarget && !this.dropdownTarget.classList.contains("hidden")) {
+        this.closeDropdown()
+        return
+      }
+      // 바텀시트 닫기 (Mobile)
+      if (this.hasOverlayTarget && !this.overlayTarget.classList.contains("hidden")) {
+        this.close()
+      }
     }
   }
 
@@ -102,12 +141,20 @@ export default class extends Controller {
     }
   }
 
+  // 모든 공유 UI 닫기 (드롭다운 또는 바텀시트)
+  closeAll() {
+    this.closeDropdown()
+    if (this.hasOverlayTarget && !this.overlayTarget.classList.contains("hidden")) {
+      this.close()
+    }
+  }
+
   // URL 클립보드 복사
   async copyUrl() {
     try {
       await navigator.clipboard.writeText(this.urlValue)
       this.showToast("링크가 복사되었습니다")
-      this.close()
+      this.closeAll()
     } catch (err) {
       // 폴백: 임시 텍스트 영역 사용
       const textArea = document.createElement("textarea")
@@ -119,7 +166,7 @@ export default class extends Controller {
       try {
         document.execCommand("copy")
         this.showToast("링크가 복사되었습니다")
-        this.close()
+        this.closeAll()
       } catch (e) {
         this.showToast("복사에 실패했습니다")
       }

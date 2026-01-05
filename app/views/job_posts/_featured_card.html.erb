@@ -1,0 +1,200 @@
+<%#
+  Featured Job Card - HOT 공고용 큰 카드
+  "주목받는 공고" 섹션에 사용
+
+  Structure:
+  - 큰 사이즈, 강조된 디자인
+  - 더 많은 정보 표시
+  - 그라데이션 배경 효과
+
+  locals: post (Post model)
+%>
+
+<article class="featured-card relative bg-white rounded-2xl overflow-hidden
+               border-2 border-orange-200 hover:border-orange-400
+               shadow-lg hover:shadow-2xl
+               transition-all duration-300 group">
+
+  <%= link_to post_path(post), class: "block" do %>
+    <%# === Gradient Header with Category === %>
+    <div class="relative px-6 pt-5 pb-4
+                <% if post.hiring? %>
+                  bg-gradient-to-r from-[#2C2825] to-stone-700
+                <% else %>
+                  bg-gradient-to-r from-orange-500 to-amber-500
+                <% end %>">
+      <%# Top Row: Badges %>
+      <div class="flex items-center justify-between mb-4">
+        <%# Availability Badge %>
+        <% if post.seeking? && post.available_now? %>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
+                       bg-white/20 text-white backdrop-blur-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            즉시 가능
+          </span>
+        <% elsif post.created_at > 3.days.ago %>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
+                       bg-white/20 text-white backdrop-blur-sm">
+            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            NEW
+          </span>
+        <% else %>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
+                       bg-white/20 text-white backdrop-blur-sm">
+            모집중
+          </span>
+        <% end %>
+
+        <%# Category Badge %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-white text-stone-900">
+          <%= post.hiring? ? 'Makers' : 'Projects' %>
+        </span>
+      </div>
+
+      <%# User Info (Avatar + Name + Role) %>
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <div class="w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/30 bg-white/10">
+            <% if post.user.avatar.attached? %>
+              <%= image_tag post.user.avatar, class: "w-full h-full object-cover" %>
+            <% elsif post.user.avatar_url.present? %>
+              <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>
+            <% else %>
+              <div class="w-full h-full flex items-center justify-center text-white font-bold text-xl">
+                <%= post.user.name[0] %>
+              </div>
+            <% end %>
+          </div>
+          <% if post.seeking? && post.available_now? %>
+            <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white"></span>
+          <% end %>
+        </div>
+
+        <div class="flex-1 text-white">
+          <h4 class="font-bold text-lg"><%= post.user.name %></h4>
+          <div class="flex items-center gap-2 text-sm opacity-80">
+            <% if post.user.role_title.present? %>
+              <span><%= post.user.role_title %></span>
+              <span>·</span>
+            <% end %>
+            <span class="font-medium"><%= post.service_type_label %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# === Body Content === %>
+    <div class="p-6">
+      <%# Title %>
+      <h3 class="font-bold text-xl text-stone-900 leading-tight line-clamp-2 mb-4
+                 group-hover:text-orange-600 transition-colors">
+        <%= post.title %>
+      </h3>
+
+      <%# Description Preview %>
+      <p class="text-sm text-stone-600 line-clamp-2 mb-4">
+        <%= post.content.truncate(100) %>
+      </p>
+
+      <%# Meta Grid: Price / Duration / Work Type %>
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <%# Price %>
+        <div class="text-center p-3 bg-orange-50 rounded-xl">
+          <div class="text-xs text-stone-500 mb-1">예산</div>
+          <div class="font-bold text-orange-600"><%= post.price_display %></div>
+        </div>
+
+        <%# Duration %>
+        <div class="text-center p-3 bg-stone-50 rounded-xl">
+          <div class="text-xs text-stone-500 mb-1">기간</div>
+          <div class="font-semibold text-stone-700"><%= post.work_period.presence || '협의' %></div>
+        </div>
+
+        <%# Work Type %>
+        <div class="text-center p-3 bg-stone-50 rounded-xl">
+          <div class="text-xs text-stone-500 mb-1">방식</div>
+          <div class="font-semibold text-stone-700"><%= post.work_type_label.presence || '협의' %></div>
+        </div>
+      </div>
+
+      <%# Skills with Devicon %>
+      <% skills = post.skills_array.first(5) %>
+      <% if skills.any? %>
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <% skills.each do |skill| %>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                         bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors">
+              <img src="<%= devicon_url(skill) %>"
+                   alt="<%= skill %>"
+                   class="w-4 h-4"
+                   onerror="this.style.display='none'">
+              <%= skill %>
+            </span>
+          <% end %>
+          <% if post.skills_array.count > 5 %>
+            <span class="px-3 py-1.5 rounded-lg text-sm font-medium bg-orange-100 text-orange-600">
+              +<%= post.skills_array.count - 5 %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Trust Indicators Row %>
+      <div class="flex items-center gap-4 text-sm text-stone-500 pt-4 border-t border-stone-100">
+        <% if post.seeking? && post.portfolio_url.present? %>
+          <span class="inline-flex items-center gap-1.5 text-blue-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            포트폴리오
+          </span>
+        <% end %>
+
+        <% if post.images.attached? %>
+          <span class="inline-flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <%= post.images.count %> 이미지
+          </span>
+        <% end %>
+
+        <span class="inline-flex items-center gap-1.5 ml-auto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          <%= post.views_count %>회
+        </span>
+
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          <%= post.likes_count %>
+        </span>
+      </div>
+    </div>
+  <% end %>
+
+  <%# === Footer: CTA === %>
+  <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-stone-50 to-stone-100/50 border-t border-stone-100">
+    <%# Timestamp %>
+    <span class="text-sm text-stone-400">
+      <%= time_ago_in_words(post.created_at) %> 전
+    </span>
+
+    <%# CTA Button %>
+    <%= link_to post_path(post),
+        class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold
+               bg-gradient-to-r from-orange-500 to-amber-500 text-white
+               hover:from-orange-600 hover:to-amber-600
+               shadow-md hover:shadow-lg transition-all",
+        onclick: "event.stopPropagation();" do %>
+      자세히 보기
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    <% end %>
+  </div>
+</article>

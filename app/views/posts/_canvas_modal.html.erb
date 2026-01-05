@@ -1,0 +1,77 @@
+<%#
+  Creator's Canvas Modal
+  Notion/Medium 스타일의 몰입형 글쓰기 경험
+
+  디자인 컨셉:
+  - Full-screen Modal Overlay (페이지 이동 없음)
+  - Split Layout: 70% Writing Canvas + 30% Settings Panel
+  - Borderless inputs (백지 캔버스 느낌)
+  - 크림색 배경 (#FDFBF7)
+
+  Usage: application.html.erb 하단에 렌더
+  <%= render "posts/canvas_modal" %>
+%>
+
+<div id="canvas-modal"
+     data-controller="canvas-modal"
+     data-canvas-modal-open-value="false"
+     class="fixed inset-0 z-[60] hidden"
+     data-action="keydown.esc->canvas-modal#close">
+
+  <%# ===== Backdrop with Blur ===== %>
+  <div data-canvas-modal-target="backdrop"
+       data-action="click->canvas-modal#closeIfDirty"
+       class="fixed inset-0 bg-stone-900/20 backdrop-blur-sm
+              transition-opacity duration-300 ease-out opacity-0">
+  </div>
+
+  <%# ===== Modal Container ===== %>
+  <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8 pointer-events-none">
+
+    <%# Panel: The Floating Canvas %>
+    <div data-canvas-modal-target="panel"
+         class="
+           w-full max-w-5xl
+           h-[95vh] sm:h-[90vh]
+           bg-[#FDFBF7]
+           rounded-2xl sm:rounded-[2rem]
+           shadow-2xl
+           border border-stone-100
+           pointer-events-auto
+           flex flex-col lg:flex-row
+           overflow-hidden
+           transition-all duration-300 ease-out
+           opacity-0 scale-95
+         ">
+
+      <%# ===== Left: Writing Canvas (70%) ===== %>
+      <div class="flex-1 flex flex-col min-w-0 lg:border-r lg:border-stone-100 overflow-hidden">
+        <%= render "posts/canvas_writing_area" %>
+      </div>
+
+      <%# ===== Right: Settings Panel (30%) ===== %>
+      <div data-canvas-modal-target="settingsPanel"
+           class="
+             w-full lg:w-80
+             bg-white/50
+             flex-shrink-0
+             overflow-y-auto
+             border-t lg:border-t-0
+             border-stone-100
+             max-h-[40vh] lg:max-h-none
+           ">
+
+        <%# Community Settings (기본 표시) %>
+        <div data-canvas-modal-target="communitySettings">
+          <%= render "posts/canvas_settings_community" %>
+        </div>
+
+        <%# Outsourcing Settings (숨김) %>
+        <div data-canvas-modal-target="outsourcingSettings" class="hidden">
+          <%= render "posts/canvas_settings_outsourcing" %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

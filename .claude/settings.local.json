@@ -64,7 +64,16 @@
       "Bash(TZ=Asia/Seoul date:*)",
       "Bash(bin/rails db:seed:*)",
       "Bash(xargs ls:*)",
-      "Bash(EDITOR=\"cp /tmp/credentials_content.yml\" bin/rails credentials:edit)"
+      "Bash(EDITOR=\"cp /tmp/credentials_content.yml\" bin/rails credentials:edit)",
+      "Skill(bridge)",
+      "Skill(bridge:*)",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_fill",
+      "mcp__puppeteer__puppeteer_select",
+      "mcp__puppeteer__puppeteer_hover",
+      "mcp__puppeteer__puppeteer_evaluate"
     ],
     "deny": [],
     "ask": []

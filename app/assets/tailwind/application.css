@@ -166,6 +166,59 @@
       transform: translateY(0);
     }
   }
+
+  /* ==========================================================================
+     Drill-down Animations - Search Modal (Task 56-59)
+     Raycast/Linear style slide transitions
+     ========================================================================== */
+
+  /* Slide In from Right - for drill-down entry */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Slide Out to Left - for drill-down exit (returning) */
+  @keyframes slide-out-left {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+  }
+
+  /* Modal Emerge - Crystal Lens premium animation */
+  @keyframes modal-emerge {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Modal Dismiss - Crystal Lens premium animation */
+  @keyframes modal-dismiss {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.96) translateY(-8px);
+    }
+  }
 }
 
 /* ==========================================================================
@@ -195,6 +248,24 @@
   /* Profile overlay animation */
   .animate-slide-up {
     animation: slide-up 0.2s ease-out;
+  }
+
+  /* Drill-down animations (Task 56-59) */
+  .animate-slide-in-right {
+    animation: slide-in-right 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-out-left {
+    animation: slide-out-left 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Crystal Lens modal animations */
+  .animate-modal-emerge {
+    animation: modal-emerge 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-modal-dismiss {
+    animation: modal-dismiss 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   /* ==========================================================================

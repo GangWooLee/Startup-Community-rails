@@ -4,27 +4,19 @@ class MyPageController < ApplicationController
 
   def show
     @user = current_user
+    @is_own_profile = true  # 마이페이지는 항상 본인
 
-    # 내가 작성한 글 (커뮤니티 / 외주 분리) - N+1 방지
-    my_posts = @user.posts.published
-                    .includes(:user, images_attachments: :blob)
-                    .recent.limit(PROFILE_POSTS_LIMIT)
-    @my_community_posts = my_posts.select(&:community?)
-    @my_outsourcing_posts = my_posts.select(&:outsourcing?)
+    # 커뮤니티 글 (free, question, promotion)
+    @posts = @user.posts.published
+                  .includes(images_attachments: :blob)
+                  .where(category: [:free, :question, :promotion])
+                  .recent.limit(PROFILE_POSTS_LIMIT)
 
-    # 내가 북마크한 글 (커뮤니티 / 외주 분리) - N+1 방지
-    # bookmarkable의 user와 images를 함께 로드
-    bookmarked_post_ids = @user.bookmarks
-                               .where(bookmarkable_type: "Post")
-                               .recent
-                               .limit(PROFILE_POSTS_LIMIT)
-                               .pluck(:bookmarkable_id)
-
-    bookmarked_posts = Post.where(id: bookmarked_post_ids)
-                           .includes(:user, images_attachments: :blob)
-
-    @bookmarked_community_posts = bookmarked_posts.select(&:community?)
-    @bookmarked_outsourcing_posts = bookmarked_posts.select(&:outsourcing?)
+    # 외주 글 (hiring, seeking)
+    @outsourcing_posts = @user.posts.published
+                              .includes(images_attachments: :blob)
+                              .where(category: [:hiring, :seeking])
+                              .recent.limit(PROFILE_POSTS_LIMIT)
   end
 
   def edit
@@ -49,11 +41,33 @@ class MyPageController < ApplicationController
   private
 
   def profile_params
-    params.require(:user).permit(
-      :name, :role_title, :bio, :avatar,
+    permitted = params.require(:user).permit(
+      :name, :role_title, :bio, :avatar, :cover_image,
       :affiliation, :skills, :custom_status,
-      :linkedin_url, :github_url, :portfolio_url,
+      :status_message, :looking_for, :location,  # Persona Canvas
+      :toolbox, :currently_learning,             # Phase 9: 도구 & 성장
+      :linkedin_url, :github_url, :portfolio_url, :open_chat_url,
+      :detailed_bio,                             # ActionText rich text
       availability_statuses: []
     )
+
+    # Experience Timeline (JSON 배열) 특별 처리
+    if params[:user][:experiences].present?
+      experiences = params[:user][:experiences].map do |exp|
+        {
+          type: exp[:type],
+          title: exp[:title],
+          organization: exp[:organization],
+          period: exp[:period],
+          description: exp[:description],
+          is_current: exp[:is_current] == "true",
+          sort_order: exp[:sort_order].to_i
+        }.compact_blank
+      end.reject { |exp| exp[:title].blank? } # 제목 없는 항목 제거
+
+      permitted[:experiences] = experiences
+    end
+
+    permitted
   end
 end

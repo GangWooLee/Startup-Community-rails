@@ -1,0 +1,81 @@
+<%#
+  Compact Header - Search + Notifications + Write Button
+  For use with Global Sidebar layout
+
+  Features:
+  - Search button (opens Command Palette modal)
+  - Write button (logged in only)
+  - Notification bell with badge
+  - Mobile hamburger menu (optional future)
+
+  Usage:
+  Rendered in application.html.erb when show_global_sidebar? is true
+%>
+
+<header class="sticky top-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-sm border-b border-stone-200/60">
+  <div class="flex items-center justify-center h-16 px-6 relative">
+
+    <%# Center: Search Button (Command Palette Trigger) - max-w-640px, h-14 %>
+    <div class="w-full max-w-[640px]">
+      <button type="button"
+              data-action="click->search-modal#open"
+              class="flex items-center gap-2 w-full px-6 h-14 rounded-full
+                     bg-white/80 border border-stone-200/60 text-stone-400 text-sm
+                     hover:border-stone-300 hover:bg-white transition-all cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <span class="truncate">관심있는 주제나 커뮤니티를 검색해보세요</span>
+        <%# Search Icon Badge %>
+        <div class="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg
+                    bg-stone-100 border border-stone-200 ml-auto flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <%# Right: Actions (absolute position for centered search bar) %>
+    <div class="absolute right-6 flex items-center gap-3">
+
+      <%# Notification Bell %>
+      <% if logged_in? %>
+        <div class="relative" data-controller="notification-dropdown">
+          <button type="button"
+                  class="p-2 rounded-full text-stone-500 hover:bg-stone-100
+                         hover:text-stone-700 transition-colors relative"
+                  data-action="click->notification-dropdown#toggle"
+                  data-notification-dropdown-target="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <%# Notification Badge %>
+            <% if current_user.unread_notifications_count > 0 %>
+              <span class="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-orange-500
+                           ring-2 ring-[#FDFBF7]"></span>
+            <% end %>
+          </button>
+
+          <%# Notification Dropdown %>
+          <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto
+                      bg-white border border-stone-200 rounded-2xl shadow-xl z-50"
+               data-notification-dropdown-target="dropdown">
+            <%= render "notifications/dropdown" %>
+          </div>
+        </div>
+      <% else %>
+        <%# Login button for guests (compact version) %>
+        <%= link_to login_path,
+            class: "flex items-center gap-2 px-4 py-2
+                    bg-[#2C2825] hover:bg-stone-800 text-white
+                    rounded-full font-medium text-sm transition-colors" do %>
+          로그인
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</header>

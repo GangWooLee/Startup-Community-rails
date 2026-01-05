@@ -1,0 +1,146 @@
+<%#
+  Creator's Canvas - Writing Area
+  좌측 70% 글쓰기 영역
+
+  디자인 포인트:
+  - Notion 스타일 제목: text-4xl, 테두리 없음
+  - 본문: 자동 높이 조절, 테두리 없음
+  - Segmented Control로 타입 전환
+%>
+
+<div class="flex-1 flex flex-col p-5 sm:p-6 lg:p-8 overflow-y-auto">
+
+  <%# ===== Header: Type Toggle + Close ===== %>
+  <div class="flex items-center justify-between mb-6 sm:mb-8 flex-shrink-0">
+
+    <%# Segmented Control: 이야기 나누기 vs 팀원 찾기 %>
+    <div class="inline-flex rounded-xl bg-stone-100 p-1">
+      <button type="button"
+              data-action="click->canvas-modal#switchType"
+              data-canvas-modal-target="typeButton"
+              data-type="community"
+              data-active="true"
+              class="
+                px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium
+                transition-all duration-200 whitespace-nowrap
+                data-[active=true]:bg-white data-[active=true]:shadow-sm
+                data-[active=true]:text-stone-900
+                text-stone-500 hover:text-stone-700
+              ">
+        <span class="mr-1">💬</span>
+        <span class="hidden sm:inline">커뮤니티</span>
+        <span class="sm:hidden">커뮤니티</span>
+      </button>
+
+      <button type="button"
+              data-action="click->canvas-modal#switchType"
+              data-canvas-modal-target="typeButton"
+              data-type="outsourcing"
+              data-active="false"
+              class="
+                px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium
+                transition-all duration-200 whitespace-nowrap
+                data-[active=true]:bg-white data-[active=true]:shadow-sm
+                data-[active=true]:text-stone-900
+                text-stone-500 hover:text-stone-700
+              ">
+        <span class="mr-1">🚀</span>
+        <span class="hidden sm:inline">Join</span>
+        <span class="sm:hidden">Join</span>
+      </button>
+    </div>
+
+    <%# Close Button %>
+    <button type="button"
+            data-action="click->canvas-modal#close"
+            class="
+              p-2 rounded-full
+              text-stone-400 hover:text-stone-600
+              hover:bg-stone-100
+              transition-colors duration-200
+            ">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <%# ===== Form ===== %>
+  <%= form_with(
+        model: Post.new,
+        id: "canvas-form",
+        local: false,
+        html: { multipart: true },
+        data: {
+          canvas_modal_target: "form",
+          action: "input->canvas-modal#validateForm submit->canvas-modal#handleSubmit"
+        }
+      ) do |f| %>
+
+    <%# ===== Title: Notion Style ===== %>
+    <div class="mb-4 sm:mb-6 flex-shrink-0">
+      <%= f.text_field :title,
+          placeholder: "제목을 입력하세요",
+          autocomplete: "off",
+          data: {
+            canvas_modal_target: "titleInput",
+            action: "input->canvas-modal#validateForm"
+          },
+          class: "
+            w-full bg-transparent border-none outline-none
+            text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-800
+            placeholder:text-stone-300
+            focus:ring-0 focus:outline-none
+          " %>
+    </div>
+
+    <%# ===== Content: Auto-resize Textarea ===== %>
+    <div class="flex-1 min-h-[150px] sm:min-h-[200px]">
+      <%= f.text_area :content,
+          placeholder: "창업 아이디어, 개발 고민, 팀 빌딩 등 자유롭게 이야기해보세요...",
+          rows: 8,
+          data: {
+            canvas_modal_target: "contentInput",
+            action: "input->canvas-modal#autoResize input->canvas-modal#validateForm"
+          },
+          class: "
+            w-full h-full min-h-[150px]
+            bg-transparent border-none outline-none resize-none
+            text-base sm:text-lg text-stone-700 leading-relaxed
+            placeholder:text-stone-300
+            focus:ring-0 focus:outline-none
+          " %>
+    </div>
+
+  <% end %>
+
+  <%# ===== Footer: Validation Hint + Submit Button ===== %>
+  <div class="pt-4 sm:pt-6 border-t border-stone-100 flex items-center justify-end gap-4 flex-shrink-0">
+    <%# Validation Hint (mr-auto로 왼쪽 정렬, 버튼은 항상 오른쪽) %>
+    <p data-canvas-modal-target="validationHint"
+       class="hidden text-sm text-orange-500 font-medium mr-auto">
+    </p>
+
+    <button type="submit"
+            form="canvas-form"
+            data-canvas-modal-target="submitButton"
+            disabled
+            data-valid="false"
+            class="
+              px-5 sm:px-6 py-2 sm:py-2.5 rounded-full
+              text-sm font-medium
+              transition-all duration-300 ease-out
+              bg-stone-200 text-stone-400
+              disabled:cursor-not-allowed
+              data-[valid=true]:bg-orange-500
+              data-[valid=true]:text-white
+              data-[valid=true]:hover:bg-orange-600
+              data-[valid=true]:shadow-lg
+              data-[valid=true]:shadow-orange-500/25
+              data-[valid=true]:cursor-pointer
+            ">
+      등록하기
+    </button>
+  </div>
+
+</div>
