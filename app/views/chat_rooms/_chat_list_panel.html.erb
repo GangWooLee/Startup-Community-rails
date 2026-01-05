@@ -2,7 +2,7 @@
 <%# locals: filter, search, total_unread, received_unread, sent_unread, chat_rooms, current_chat_room (optional) %>
 
 <%= turbo_frame_tag "chat_list_panel",
-                    class: "w-full md:w-[360px] md:min-w-[360px] md:max-w-[360px] 2xl:w-[320px] 2xl:min-w-[320px] 2xl:max-w-[320px] flex flex-col h-full md:border-r border-stone-200/60 bg-white" do %>
+                    class: "w-full md:w-[clamp(280px,28vw,360px)] xl:w-[clamp(300px,22vw,340px)] flex flex-col h-full md:border-r border-stone-200/60 bg-white" do %>
   <div class="flex flex-col h-full">
     <!-- 헤더 - Fluid Lounge Style -->
     <header class="sticky top-0 z-10 bg-white border-b border-stone-100">

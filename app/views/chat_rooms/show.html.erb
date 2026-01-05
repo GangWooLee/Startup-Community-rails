@@ -16,13 +16,13 @@
   <div class="h-full bg-[#FDFBF7] md:flex md:items-center md:justify-center md:p-6">
     <%# Island Container - 떠 있는 둥근 카드 (반응형 확장) %>
     <div class="w-full md:max-w-5xl lg:max-w-6xl xl:max-w-[1600px] 2xl:max-w-[1800px]
-                h-screen md:h-[70vh] xl:h-[75vh] 2xl:h-[78vh]
+                h-screen md:h-[calc(100vh-100px)] xl:h-[calc(100vh-80px)] 2xl:h-[calc(100vh-60px)]
                 bg-white md:rounded-[2rem] md:shadow-2xl md:shadow-stone-900/5
                 md:border md:border-stone-100 overflow-hidden
                 flex flex-col md:flex-row">
 
-    <!-- 좌측: 채팅 목록 패널 (PC에서만 표시, 2xl에서 너비 조정) -->
-    <div class="hidden md:block md:w-[360px] 2xl:w-[320px] flex-shrink-0">
+    <!-- 좌측: 채팅 목록 패널 (PC에서만 표시, 유동적 너비) -->
+    <div class="hidden md:block md:w-[clamp(280px,28vw,360px)] xl:w-[clamp(300px,22vw,340px)] flex-shrink-0">
       <%
         # show 페이지에서도 index와 동일한 데이터 구조 사용
         filter = params[:filter] || "all"
@@ -71,8 +71,8 @@
                  other_user: @other_user %>
     <% end %>
 
-    <!-- 우측: 정보 패널 (2xl에서만 표시 - 3단 레이아웃) -->
-    <aside class="hidden 2xl:flex 2xl:flex-col 2xl:w-[320px] flex-shrink-0 border-l border-stone-200/60"
+    <!-- 우측: 정보 패널 (xl에서부터 표시 - 유동적 너비) -->
+    <aside class="hidden xl:flex xl:flex-col xl:w-[clamp(260px,18vw,320px)] flex-shrink-0 border-l border-stone-200/60"
            aria-label="상대방 정보">
       <%= render "chat_rooms/info_panel",
                  other_user: @other_user,

@@ -13,13 +13,13 @@
 %>
 
 <header class="sticky top-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-sm border-b border-stone-200/60">
-  <div class="flex items-center justify-center h-16 px-6 relative">
+  <div class="flex items-center justify-center h-[clamp(3.5rem,8vh,4rem)] px-6 relative">
 
     <%# Center: Search Button (Command Palette Trigger) - max-w-640px, h-14 %>
-    <div class="w-full max-w-[640px]">
+    <div class="w-full max-w-[clamp(320px,50vw,640px)]">
       <button type="button"
               data-action="click->search-modal#open"
-              class="flex items-center gap-2 w-full px-6 h-14 rounded-full
+              class="flex items-center gap-2 w-full px-6 h-[clamp(3rem,7vh,3.5rem)] rounded-full
                      bg-white/80 border border-stone-200/60 text-stone-400 text-sm
                      hover:border-stone-300 hover:bg-white transition-all cursor-pointer">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
           </button>
 
           <%# Notification Dropdown %>
-          <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto
+          <div class="hidden absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto
                       bg-white border border-stone-200 rounded-2xl shadow-xl z-50"
                data-notification-dropdown-target="dropdown">
             <%= render "notifications/dropdown" %>

@@ -6,7 +6,7 @@
 <% show_author = local_assigns.fetch(:show_author, true) %>
 <% show_actions = local_assigns.fetch(:show_actions, true) %>
 
-<article class="rounded-xl border bg-card text-card-foreground p-6 card-hover">
+<article class="rounded-xl border bg-card text-card-foreground p-4 sm:p-6 card-hover">
   <% if show_author %>
     <!-- Author Info -->
     <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 group mb-4" do %>
@@ -25,9 +25,9 @@
 
   <!-- Post Content -->
   <%= link_to post_path(post.id), class: "block" do %>
-    <div class="flex gap-4">
+    <div class="flex gap-2 sm:gap-4">
       <div class="flex-1 min-w-0">
-        <h2 class="text-lg font-semibold mb-2 link-hover relative cursor-pointer">
+        <h2 class="text-base sm:text-lg font-semibold mb-2 link-hover relative cursor-pointer">
           <%= post.title %>
         </h2>
         <p class="text-foreground mb-3 leading-relaxed link-hover relative cursor-pointer line-clamp-3">
@@ -36,11 +36,11 @@
       </div>
       <% if post.images.attached? %>
         <div class="flex-shrink-0">
-          <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
+          <div class="relative w-[clamp(3rem,8vw,4rem)] h-[clamp(3rem,8vw,4rem)] rounded-lg overflow-hidden bg-secondary">
             <%= image_tag post.images.first, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
             <% if post.images.count > 1 %>
               <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <span class="text-white text-sm font-bold">+<%= post.images.count - 1 %></span>
+                <span class="text-white text-xs sm:text-sm font-bold">+<%= post.images.count - 1 %></span>
               </div>
             <% end %>
           </div>
@@ -51,7 +51,7 @@
 
   <% if show_actions %>
     <!-- Actions -->
-    <div class="flex items-center gap-4 pt-3 border-t border-border">
+    <div class="flex items-center gap-2 sm:gap-4 pt-3 border-t border-border">
       <%= render partial: "shared/like_button", locals: { post: post, liked: defined?(current_user) && current_user ? post.liked_by?(current_user) : false, size: "sm" } %>
       <%= link_to post_path(post), class: "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium btn-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 rounded-md px-3" do %>
         <%= render partial: "shared/icons/message_square", locals: { css_css_class: "h-4 w-4" } %>

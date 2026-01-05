@@ -5,12 +5,12 @@
 
   <%# Island Container - 떠 있는 둥근 카드 (반응형 확장) %>
   <div class="w-full md:max-w-5xl lg:max-w-6xl xl:max-w-[1600px] 2xl:max-w-[1800px]
-              h-screen md:h-[70vh] xl:h-[75vh] 2xl:h-[78vh]
+              h-screen md:h-[clamp(500px,70vh,800px)] xl:h-[clamp(550px,75vh,900px)]
               bg-white md:rounded-[2rem] md:shadow-2xl md:shadow-stone-900/5
               md:border md:border-stone-100 overflow-hidden
               flex flex-col md:flex-row">
 
-    <!-- 좌측: 채팅 목록 패널 (모바일: 전체, PC: 360px 고정) -->
+    <!-- 좌측: 채팅 목록 패널 (모바일: 전체, PC: 유동적 너비) -->
     <%= render "chat_rooms/chat_list_panel",
                filter: @filter,
                search: @search,

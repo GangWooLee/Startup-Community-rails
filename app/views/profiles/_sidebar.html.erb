@@ -24,7 +24,7 @@
     <div class="-mt-14 mb-4 flex justify-center">
       <div class="relative">
         <%# 메인 아바타 - ring은 외부에 그려져 이미지 크기 영향 없음 %>
-        <div class="w-28 h-28 rounded-full ring-4 ring-white shadow-xl overflow-hidden">
+        <div class="w-[clamp(5rem,12vw,7rem)] h-[clamp(5rem,12vw,7rem)] rounded-full ring-4 ring-white shadow-xl overflow-hidden">
           <% if user.avatar.attached? %>
             <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
           <% elsif user.avatar_url.present? %>

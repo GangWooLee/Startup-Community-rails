@@ -1,13 +1,13 @@
 <%# 검색 결과용 게시글 카드 - 하이라이팅 적용 %>
 <%# 사용법: render partial: "search/post_result_card", locals: { post: @post, query: "검색어" } %>
 
-<div class="block bg-card rounded-xl p-4 border border-border card-hover hover:border-primary/50 h-[140px] cursor-pointer"
+<div class="block bg-card rounded-xl p-3 sm:p-4 border border-border card-hover hover:border-primary/50 min-h-[clamp(100px,15vh,120px)] cursor-pointer"
      role="link"
      tabindex="0"
      data-href="<%= post_path(post) %>"
      onmousedown="event.preventDefault(); window.location.href = this.dataset.href;"
      onkeydown="if(event.key==='Enter') window.location.href = this.dataset.href;">
-  <div class="flex gap-4 h-full">
+  <div class="flex gap-2 sm:gap-4">
     <!-- Content -->
     <div class="flex-1 min-w-0 flex flex-col">
       <!-- Category Badge -->
@@ -72,11 +72,11 @@
     <!-- Thumbnail -->
     <% if post.images.attached? %>
       <div class="flex-shrink-0">
-        <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
+        <div class="relative w-[clamp(3rem,8vw,4rem)] h-[clamp(3rem,8vw,4rem)] rounded-lg overflow-hidden bg-secondary">
           <%= image_tag post.images.first, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
           <% if post.images.count > 1 %>
             <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span class="text-white text-sm font-bold">+<%= post.images.count - 1 %></span>
+              <span class="text-white text-xs sm:text-sm font-bold">+<%= post.images.count - 1 %></span>
             </div>
           <% end %>
         </div>
