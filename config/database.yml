@@ -21,28 +21,44 @@ test:
   database: storage/test.sqlite3
 
 
-# Production uses PostgreSQL via DATABASE_URL from Railway
+# Production uses PostgreSQL with individual environment variables
 production:
   primary:
     adapter: postgresql
     encoding: unicode
-    url: <%= ENV["DATABASE_URL"] %>
+    host: <%= ENV.fetch("DB_HOST", "undrew-db") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    database: <%= ENV.fetch("DB_NAME", "undrew_production") %>
+    username: <%= ENV.fetch("DB_USER", "undrew") %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   cache:
     adapter: postgresql
     encoding: unicode
-    url: <%= ENV["DATABASE_URL"] %>
+    host: <%= ENV.fetch("DB_HOST", "undrew-db") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    database: <%= ENV.fetch("DB_NAME", "undrew_production") %>
+    username: <%= ENV.fetch("DB_USER", "undrew") %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     migrations_paths: db/cache_migrate
   queue:
     adapter: postgresql
     encoding: unicode
-    url: <%= ENV["DATABASE_URL"] %>
+    host: <%= ENV.fetch("DB_HOST", "undrew-db") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    database: <%= ENV.fetch("DB_NAME", "undrew_production") %>
+    username: <%= ENV.fetch("DB_USER", "undrew") %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     migrations_paths: db/queue_migrate
   cable:
     adapter: postgresql
     encoding: unicode
-    url: <%= ENV["DATABASE_URL"] %>
+    host: <%= ENV.fetch("DB_HOST", "undrew-db") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    database: <%= ENV.fetch("DB_NAME", "undrew_production") %>
+    username: <%= ENV.fetch("DB_USER", "undrew") %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     migrations_paths: db/cable_migrate
