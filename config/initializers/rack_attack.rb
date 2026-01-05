@@ -85,13 +85,19 @@ class Rack::Attack
   # Block suspicious requests (SQL injection attempts, etc.)
   blocklist("block/malicious") do |req|
     # Block requests with suspicious patterns
-    Rack::Attack::Fail2Ban.filter("pentesters-#{req.ip}", maxretry: 3, findtime: 10.minutes, bantime: 1.hour) do
-      req.path.include?("..") ||
-        req.query_string.include?("UNION") ||
-        req.query_string.include?("SELECT") ||
-        req.path.include?(".php") ||
-        req.path.include?("wp-admin") ||
-        req.path.include?("xmlrpc")
+    # Wrap in rescue to handle cache unavailability during initial deployment
+    begin
+      Rack::Attack::Fail2Ban.filter("pentesters-#{req.ip}", maxretry: 3, findtime: 10.minutes, bantime: 1.hour) do
+        req.path.include?("..") ||
+          req.query_string.include?("UNION") ||
+          req.query_string.include?("SELECT") ||
+          req.path.include?(".php") ||
+          req.path.include?("wp-admin") ||
+          req.path.include?("xmlrpc")
+      end
+    rescue ActiveRecord::StatementInvalid, PG::UndefinedTable => e
+      Rails.logger.warn "[Rack::Attack] Cache unavailable: #{e.message}"
+      false
     end
   end
 

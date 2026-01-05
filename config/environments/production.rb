@@ -69,7 +69,19 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Replace the default in-process memory cache store with a durable alternative.
+  # Use SolidCache if database is ready, otherwise fall back to memory cache
   config.cache_store = :solid_cache_store
+
+  # Handle SolidCache unavailability during initial deployment
+  config.after_initialize do
+    begin
+      Rails.cache.read("health_check")
+    rescue ActiveRecord::StatementInvalid, PG::UndefinedTable => e
+      Rails.logger.warn "SolidCache table not ready, falling back to memory cache: #{e.message}"
+      Rails.application.config.cache_store = :memory_store
+      Rails.cache = ActiveSupport::Cache.lookup_store(:memory_store)
+    end
+  end
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
   config.active_job.queue_adapter = :solid_queue
