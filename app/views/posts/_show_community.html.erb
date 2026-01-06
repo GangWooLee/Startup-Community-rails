@@ -17,6 +17,11 @@
 
       <div class="ml-auto flex items-center gap-2">
         <% if logged_in? && post.user == current_user %>
+          <%= button_to post_path(post), method: :delete,
+              form: { data: { turbo: false, controller: "confirm", confirm_message_value: "정말 이 게시글을 삭제하시겠습니까?" } },
+              class: "text-sm text-destructive link-hover" do %>
+            삭제
+          <% end %>
           <%= link_to edit_post_path(post), class: "text-sm text-muted-foreground link-hover relative" do %>
             수정
           <% end %>

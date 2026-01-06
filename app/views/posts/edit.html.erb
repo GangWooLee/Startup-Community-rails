@@ -254,10 +254,12 @@
 
         <!-- Delete Button -->
         <div class="pt-4 border-t border-border">
-          <%= button_to "게시글 삭제", post_path(@post),
+          <%= button_to post_path(@post),
               method: :delete,
-              form: { data: { turbo_confirm: "정말 삭제하시겠습니까?" } },
-              class: "w-full py-3 rounded-lg border border-destructive text-destructive btn-hover" %>
+              form: { data: { turbo: false, controller: "confirm", confirm_message_value: "정말 이 게시글을 삭제하시겠습니까?\n삭제된 글은 복구할 수 없습니다." } },
+              class: "w-full py-3 rounded-lg border border-destructive text-destructive btn-hover" do %>
+            게시글 삭제
+          <% end %>
         </div>
       </div>
     <% end %>
