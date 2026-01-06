@@ -321,6 +321,7 @@
     <%# Google Analytics 4 (사용자 행동 분석) %>
     <%
       ga_id = Rails.application.credentials.dig(:google, :analytics_id)
+      ga_id ||= ENV['GOOGLE_ANALYTICS_ID']  # Docker 환경 폴백
     %>
     <% if ga_id.present? && Rails.env.production? %>
       <!-- GA4 Script -->
