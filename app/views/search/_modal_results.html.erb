@@ -125,18 +125,6 @@
         </div>
       <% end %>
 
-      <%# 전체 검색 페이지로 이동 링크 %>
-      <div class="px-4 py-3 bg-stone-50/50">
-        <%= link_to search_path(q: query),
-                    data: { action: "click->search-modal#resultClick" },
-                    class: "flex items-center justify-center gap-2 text-sm text-stone-500 hover:text-stone-700 font-medium py-2" do %>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          "<%= query %>" 전체 검색 결과 보기
-        <% end %>
-      </div>
-
     </div>
   <% end %>
 </turbo-frame>
