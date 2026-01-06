@@ -9,6 +9,9 @@ export default class extends Controller {
 
   // Enter로 전송, Shift+Enter로 줄바꿈
   handleKeydown(event) {
+    // 한글 IME 조합 중이면 무시 (중복 전송 방지)
+    if (event.isComposing) return
+
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
       if (this.hasInputTarget && this.inputTarget.value.trim() !== "") {

@@ -149,6 +149,7 @@ Rails.application.routes.draw do
       post :cancel_deal
       get :profile_overlay
       delete :leave  # 채팅방 나가기 (소프트 삭제)
+      post :mark_as_read  # 실시간 메시지 수신 시 읽음 처리
     end
     resources :messages, only: [ :create ] do
       collection do

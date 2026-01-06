@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_05_081039) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -81,7 +81,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_081039) do
     t.integer "chat_room_id", null: false
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
-    t.boolean "hidden", default: false, null: false
     t.datetime "last_read_at"
     t.integer "unread_count", default: 0, null: false
     t.datetime "updated_at", null: false

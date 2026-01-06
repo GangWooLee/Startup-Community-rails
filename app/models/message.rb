@@ -20,6 +20,9 @@ class Message < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :chronological, -> { order(created_at: :asc) }
 
+  # 순서 중요! mark_sender_as_read가 먼저 실행되어야 broadcast 시점에 읽음 상태가 반영됨
+  after_create_commit :mark_sender_as_read
+  after_create_commit :increment_recipient_unread_count
   after_create_commit :broadcast_message
   after_create_commit :notify_recipient, unless: :system_message?
   after_create_commit :resurrect_hidden_participants
@@ -81,6 +84,21 @@ class Message < ApplicationRecord
 
   private
 
+  # 메시지 전송 시 발신자의 읽음 상태를 먼저 업데이트
+  # broadcast_message보다 먼저 실행되어야 함
+  def mark_sender_as_read
+    participant = chat_room.participants.find_by(user_id: sender_id)
+    # update_columns로 callback/validation 없이 직접 업데이트 (성능 최적화)
+    participant&.update_columns(last_read_at: Time.current, unread_count: 0)
+  end
+
+  # 수신자들의 unread_count 컬럼 증가 (캐시 컬럼 업데이트)
+  def increment_recipient_unread_count
+    chat_room.participants
+             .where.not(user_id: sender_id)
+             .update_all("unread_count = unread_count + 1")
+  end
+
   def broadcast_message
     # chat_room을 reload하여 touch로 업데이트된 last_message_at 반영
     chat_room.reload
@@ -131,15 +149,23 @@ class Message < ApplicationRecord
   end
 
   # 채팅방을 나간(숨긴) 참여자가 있으면 다시 보이게 복구
+  # BUG FIX: 복구 시 실제 안읽은 메시지 수 재계산 (deleted 상태에서 받은 메시지 반영)
   def resurrect_hidden_participants
     hidden_participants = chat_room.participants.where.not(deleted_at: nil)
     return if hidden_participants.empty?
 
-    # 숨겨진 모든 참여자를 다시 보이게 복구
-    hidden_participants.update_all(deleted_at: nil)
+    # 각 참여자별로 실제 안읽은 메시지 수 계산 후 복구
+    hidden_participants.each do |participant|
+      # deleted 상태에서 받은 메시지 포함하여 실제 unread_count 계산
+      actual_unread = chat_room.messages
+                               .where.not(sender_id: participant.user_id)
+                               .where("created_at > COALESCE(?, '1970-01-01')", participant.last_read_at)
+                               .count
+      participant.update!(deleted_at: nil, unread_count: actual_unread)
+    end
 
     # 복구된 참여자들에게 채팅 목록 업데이트 알림
-    hidden_participants.each do |participant|
+    hidden_participants.reload.each do |participant|
       broadcast_replace_to "user_#{participant.user_id}_chat_badge",
                            target: "chat_unread_badge",
                            partial: "shared/chat_unread_badge",

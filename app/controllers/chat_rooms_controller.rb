@@ -219,6 +219,19 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  # 실시간 메시지 수신 시 읽음 처리 (클라이언트에서 호출)
+  def mark_as_read
+    @chat_room = ChatRoom.find(params[:id])
+    participant = @chat_room.participants.find_by(user: current_user)
+
+    if participant
+      participant.mark_as_read!
+      head :ok
+    else
+      head :forbidden
+    end
+  end
+
   private
 
   def set_chat_room
@@ -252,19 +265,20 @@ class ChatRoomsController < ApplicationController
     # ✅ 최적화: SQL 집계 사용 (N+1 쿼리 방지)
     # BEFORE: Ruby 배열 반복 (1 + N 쿼리)
     # AFTER: SQL SUM 사용 (3 쿼리로 고정)
+    # NOTE: deleted_at으로 통일 (hidden 컬럼 deprecated)
     @total_unread = current_user.chat_room_participants
-                                .where(hidden: false)
+                                .active  # where(deleted_at: nil)
                                 .sum(:unread_count)
 
     @received_unread = current_user.chat_room_participants
-                                   .where(hidden: false)
+                                   .active
                                    .joins(chat_room: :source_post)
                                    .where("posts.user_id = ? AND chat_rooms.initiator_id != ?",
                                           current_user.id, current_user.id)
                                    .sum(:unread_count)
 
     @sent_unread = current_user.chat_room_participants
-                               .where(hidden: false)
+                               .active
                                .joins(:chat_room)
                                .where("chat_rooms.initiator_id = ?", current_user.id)
                                .sum(:unread_count)

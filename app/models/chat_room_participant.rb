@@ -17,9 +17,9 @@ class ChatRoomParticipant < ApplicationRecord
              .count
   end
 
-  # 읽음 처리
+  # 읽음 처리 (last_read_at + unread_count 컬럼 모두 업데이트)
   def mark_as_read!
-    update!(last_read_at: Time.current)
+    update!(last_read_at: Time.current, unread_count: 0)
   end
 
   # 소프트 삭제 (사용자에게만 숨김)

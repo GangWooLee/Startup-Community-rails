@@ -78,6 +78,68 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - app/views/onboarding/landing.html.erb (사용처)
 ```
 
+## 📋 Plan Mode 규칙 (필수!)
+
+### references 폴더 참조 필수
+**Plan mode 진입 시 반드시 다음 파일을 읽고 템플릿을 적용:**
+```
+.claude/references/cc-feature-implementer-main/
+├── SKILL.md         # Feature planner 가이드라인
+└── plan-template.md # Phase 기반 계획 템플릿
+```
+
+### TDD 워크플로우 (Red-Green-Refactor)
+각 Phase에서 반드시 준수:
+1. 🔴 **RED**: 테스트 먼저 작성 (실패 확인)
+2. 🟢 **GREEN**: 최소 코드로 테스트 통과
+3. 🔵 **REFACTOR**: 코드 품질 개선 (테스트 유지)
+4. ✋ **Quality Gate**: 모든 검증 항목 체크 후 다음 Phase
+
+### Phase 구조 (3-7개로 분리)
+```markdown
+### Phase N: [목표]
+**Goal**: 이 Phase에서 달성할 구체적 기능
+
+#### 🔴 RED: Write Failing Tests First
+- [ ] Test N.1: [테스트 설명]
+  - File: `test/[테스트파일].rb`
+  - Expected: 테스트 실패 확인
+
+#### 🟢 GREEN: Implement to Make Tests Pass
+- [ ] Task N.2: [구현 설명]
+
+#### 🔵 REFACTOR: Clean Up Code
+- [ ] Task N.3: [리팩토링 설명]
+
+#### Quality Gate ✋
+- [ ] All tests pass (`bin/rails test`)
+- [ ] No linting errors (`rubocop`)
+- [ ] New functionality works
+- [ ] No regressions
+```
+
+### Quality Gate 체크리스트
+각 Phase 완료 후 **반드시** 검증:
+- [ ] **Build**: 프로젝트 빌드/컴파일 오류 없음
+- [ ] **Tests**: 모든 기존 테스트 통과
+- [ ] **New Tests**: 새 기능에 대한 테스트 추가됨
+- [ ] **Coverage**: 비즈니스 로직 80% 이상
+- [ ] **Linting**: Rubocop 통과
+- [ ] **Manual Test**: 수동 테스트 확인
+- [ ] **No Regression**: 기존 기능 정상 작동
+
+### ⛔ Plan Mode에서 금지 사항
+❌ TDD 없이 구현만 진행
+❌ Quality Gate 생략
+❌ Phase 건너뛰기
+❌ 테스트 없이 다음 Phase 진행
+❌ 기존 코드 불필요한 수정 (최소 변경 원칙)
+
+### 계획 파일 위치
+```
+.claude/plans/[plan-name].md
+```
+
 ## 핵심 파일 Quick Reference
 
 ### 라우팅 & 컨트롤러
@@ -123,6 +185,9 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-06]** Plan Mode 규칙 추가 (TDD, Quality Gate, references 폴더)
+- **[2026-01-06]** GA4 맞춤 이벤트 12개 구현 (회원가입, 로그인, 게시글, 좋아요 등)
+- **[2026-01-06]** Kaminari pagination initializer 추가
 - **[2025-12-31]** Agent OS/Design OS 기반 .claude 폴더 구조 개선
   - `standards/` 폴더: rails-backend.md, tailwind-frontend.md, testing.md
   - `workflows/` 폴더: feature-development.md
@@ -374,6 +439,14 @@ main          # 프로덕션 브랜치
 ├── workflows/                   # 작업 프로세스 (Design OS 스타일)
 │   └── feature-development.md   # 기능 개발 5단계
 │
+├── references/                  # 📋 Plan Mode 참조 문서 (필수!)
+│   └── cc-feature-implementer-main/
+│       ├── SKILL.md             # Feature planner 가이드라인
+│       └── plan-template.md     # Phase 기반 계획 템플릿
+│
+├── plans/                       # 계획 파일 저장소
+│   └── [plan-name].md           # 진행 중인 계획 문서
+│
 └── skills/                      # Claude Skills (17개)
     ├── README.md                # 스킬 가이드 및 사용법
     ├── rails-resource/          # 리소스 생성
@@ -388,6 +461,7 @@ main          # 프로덕션 브랜치
 | 유형 | 목적 | 사용 시점 |
 |------|------|----------|
 | **Standards** | 코드 작성 시 준수할 규칙 | 코드 작성 중 참조 |
+| **References** | Plan Mode 템플릿 및 가이드 | Plan Mode 진입 시 **반드시** 참조 |
 | **Workflows** | 작업 단계별 프로세스 | 새 기능 개발 시작 시 |
 | **Skills** | 자동화된 작업 수행 | 키워드로 자동 활성화 |
 
