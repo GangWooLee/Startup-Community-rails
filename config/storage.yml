@@ -12,10 +12,10 @@ amazon:
   service: S3
   access_key_id: <%= Rails.application.credentials.dig(:production, :aws, :access_key_id) %>
   secret_access_key: <%= Rails.application.credentials.dig(:production, :aws, :secret_access_key) %>
-  region: <%= Rails.application.credentials.dig(:production, :aws, :region) || 'ap-northeast-2' %>
+  region: <%= Rails.application.credentials.dig(:production, :aws, :region) || 'ap-southeast-2' %>
   bucket: <%= Rails.application.credentials.dig(:production, :aws, :bucket) || "startup-community-#{Rails.env}" %>
-  # 이미지는 public 읽기 허용 (프로필 이미지, 게시글 이미지 등)
-  public: true
+  # 버킷이 ACL 비활성화 상태이므로 public: true 제거
+  # 공개 읽기는 버킷 정책으로 설정됨
 
 # Remember not to checkin your GCS keyfile to a repository
 # google:

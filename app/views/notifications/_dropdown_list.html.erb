@@ -14,7 +14,7 @@
       <div class="flex-shrink-0 relative">
         <% if notification.actor.has_profile_image? %>
           <% if notification.actor.avatar.attached? %>
-            <%= image_tag notification.actor.avatar.variant(:thumb),
+            <%= image_tag notification.actor.avatar,
                 class: "w-10 h-10 rounded-full object-cover ring-2 ring-white",
                 alt: notification.actor.name %>
           <% else %>
