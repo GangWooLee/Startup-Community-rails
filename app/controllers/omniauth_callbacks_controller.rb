@@ -39,6 +39,14 @@ class OmniauthCallbacksController < ApplicationController
       # 로그인 처리 (세션 ID 재생성 + pending_analysis_key/pending_input_key 보존)
       log_in(@user)
 
+      # GA4 이벤트: 신규 사용자 = sign_up, 기존 사용자 = login
+      ga4_method = auth.provider == "google_oauth2" ? "google" : "github"
+      if result[:new_user]
+        track_ga4_event("sign_up", { method: ga4_method })
+      else
+        track_ga4_event("login", { method: ga4_method })
+      end
+
       # 1순위: 대기 중인 입력 → AI 분석 실행 (Lazy Registration)
       if (analysis = restore_pending_input_and_analyze)
         Rails.logger.info "OAuth login with pending input (Lazy Registration): #{provider_name} - User #{@user.id}"

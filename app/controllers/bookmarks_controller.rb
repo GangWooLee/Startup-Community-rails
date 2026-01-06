@@ -8,13 +8,25 @@ class BookmarksController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "bookmark-button-#{@post.id}",
-          partial: "shared/bookmark_button",
-          locals: { post: @post, bookmarked: @post.bookmarked_by?(current_user) }
-        )
+        streams = [
+          turbo_stream.replace(
+            "bookmark-button-#{@post.id}",
+            partial: "shared/bookmark_button",
+            locals: { post: @post, bookmarked: @post.bookmarked_by?(current_user) }
+          )
+        ]
+        # GA4 스크랩 이벤트 (스크랩 추가 시에만, 프로덕션에서만)
+        if bookmarked && Rails.env.production?
+          streams << turbo_stream.append("ga4-events") do
+            "<script>if(typeof gtag==='function'){gtag('event','bookmark_post',{post_id:#{@post.id}});}</script>".html_safe
+          end
+        end
+        render turbo_stream: streams
       end
-      format.html { redirect_back fallback_location: post_path(@post) }
+      format.html do
+        track_ga4_event("bookmark_post", { post_id: @post.id }) if bookmarked
+        redirect_back fallback_location: post_path(@post)
+      end
       format.json do
         render json: {
           bookmarked: @post.bookmarked_by?(current_user),

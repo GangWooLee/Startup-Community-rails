@@ -87,6 +87,9 @@ class UsersController < ApplicationController
       EmailVerification.where(email: email).destroy_all
       log_in(@user)
 
+      # GA4 회원가입 이벤트
+      track_ga4_event("sign_up", { method: "email" })
+
       # 1순위: 대기 중인 입력 → AI 분석 실행 (Lazy Registration)
       if (analysis = restore_pending_input_and_analyze)
         flash[:notice] = "회원가입이 완료되었습니다! AI 분석 결과를 확인하세요."

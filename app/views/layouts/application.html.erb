@@ -342,6 +342,31 @@
       </script>
     <% end %>
 
+    <%# GA4 맞춤 이벤트 처리 (Flash 기반) %>
+    <% if flash[:ga4_event].present? && ga_id.present? %>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof gtag === 'function') {
+            gtag('event', '<%= flash[:ga4_event][:name] %>', <%= (flash[:ga4_event][:params] || {}).to_json.html_safe %>);
+          }
+        });
+      </script>
+    <% end %>
+    <% if flash[:ga4_events].present? && ga_id.present? %>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof gtag === 'function') {
+            <% flash[:ga4_events].each do |event| %>
+              gtag('event', '<%= event[:name] %>', <%= (event[:params] || {}).to_json.html_safe %>);
+            <% end %>
+          }
+        });
+      </script>
+    <% end %>
+
+    <%# GA4 Turbo Stream 이벤트 컨테이너 %>
+    <div id="ga4-events" style="display: none;"></div>
+
     <%# 카카오 JavaScript SDK (공유 기능용) %>
     <%
       # 카카오 JavaScript 키 (credentials에서 가져옴)

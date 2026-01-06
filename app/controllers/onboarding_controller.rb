@@ -56,6 +56,9 @@ class OnboardingController < ApplicationController
     end
 
     if logged_in?
+      # GA4 AI 분석 시작 이벤트
+      track_ga4_event("ai_analysis_start", { idea_length: @idea.length })
+
       # 로그인 사용자: 바로 AI 분석 실행
       execute_and_save_analysis
     else
@@ -77,6 +80,13 @@ class OnboardingController < ApplicationController
     @analysis = @idea_analysis.parsed_result
     @is_real_analysis = @idea_analysis.is_real_analysis
     @partial_analysis = @idea_analysis.partial_success
+
+    # GA4 AI 분석 완료 이벤트
+    track_ga4_event("ai_analysis_complete", {
+      analysis_id: @idea_analysis.id,
+      is_real: @is_real_analysis,
+      score: @analysis.dig(:score, :overall)
+    })
 
     # 추천 전문가 찾기 + 점수 향상 예측
     @recommended_experts = find_recommended_experts_with_predictions

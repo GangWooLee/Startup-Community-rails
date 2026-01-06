@@ -66,6 +66,11 @@ class PaymentsController < ApplicationController
     if existing_payment&.done?
       # 이미 승인 완료된 결제 - API 호출 생략
       Rails.logger.info "[PaymentsController#success] Payment already approved: #{order_id}"
+      # GA4 결제 완료 이벤트 (중복 방문 시에도 트래킹)
+      track_ga4_event("payment_complete", {
+        order_id: existing_payment.order_id,
+        amount: existing_payment.amount
+      })
       redirect_to success_order_path(existing_payment.order), notice: "결제가 완료되었습니다!"
       return
     end
@@ -83,6 +88,11 @@ class PaymentsController < ApplicationController
       @order = @payment&.order
 
       if @order
+        # GA4 결제 완료 이벤트
+        track_ga4_event("payment_complete", {
+          order_id: @order.id,
+          amount: @payment&.amount
+        })
         redirect_to success_order_path(@order), notice: "결제가 완료되었습니다!"
       else
         redirect_to root_path, alert: "주문 정보를 찾을 수 없습니다."

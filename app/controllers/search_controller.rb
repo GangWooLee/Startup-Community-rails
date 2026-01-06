@@ -53,8 +53,15 @@ class SearchController < ApplicationController
       @posts_total_pages = 0
     end
 
-    # 실시간 검색이 아닐 때만 최근 검색어 저장
-    save_recent_search if logged_in? && @query.present? && !live_search_request?
+    # 실시간 검색이 아닐 때만 최근 검색어 저장 + GA4 이벤트
+    if logged_in? && @query.present? && !live_search_request?
+      save_recent_search
+      # GA4 검색 이벤트
+      track_ga4_event("search", {
+        search_term: @query.truncate(100),
+        tab: @tab
+      })
+    end
 
     # 최근 검색어 로드
     @recent_searches = load_recent_searches

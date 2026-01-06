@@ -72,6 +72,9 @@ class ChatRoomsController < ApplicationController
       )
       @chat_room.touch(:last_message_at)
 
+      # GA4 채팅 시작 이벤트
+      track_ga4_event("chat_start", { chat_room_id: @chat_room.id, from_post: false })
+
       respond_to do |format|
         format.turbo_stream {
           prepare_chat_list_data
@@ -127,6 +130,9 @@ class ChatRoomsController < ApplicationController
       initiator: current_user,
       post_author: post.user
     )
+
+    # GA4 채팅 시작 이벤트 (게시글에서 시작)
+    track_ga4_event("chat_start", { chat_room_id: @chat_room.id, from_post: true, post_id: post.id })
 
     redirect_to @chat_room
   end

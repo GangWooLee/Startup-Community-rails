@@ -58,8 +58,13 @@ class PostsController < ApplicationController
                      .includes(:user, :likes, replies: [:user, :likes])
                      .oldest
 
-    # 외주 글일 경우 비슷한 프로젝트 쿼리
+    # 외주 글일 경우 비슷한 프로젝트 쿼리 + GA4 이벤트
     if @post.outsourcing?
+      # GA4 외주 공고 조회 이벤트
+      track_ga4_event("job_post_view", {
+        post_id: @post.id,
+        category: @post.category
+      })
       @similar_posts = Post.published
                            .includes(:user, images_attachments: :blob)
                            .where(category: @post.category)
@@ -105,6 +110,12 @@ class PostsController < ApplicationController
     end
 
     if @post.save
+      # GA4 게시글 작성 이벤트
+      track_ga4_event("post_create", {
+        category: @post.category,
+        post_type: @post.outsourcing? ? "outsourcing" : "community"
+      })
+
       # 카테고리에 따라 적절한 페이지로 리다이렉트
       if @post.outsourcing?
         redirect_to job_posts_path, notice: '게시글이 작성되었습니다.'

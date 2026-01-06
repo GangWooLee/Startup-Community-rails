@@ -11,8 +11,16 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       if @comment.save
+        # GA4 댓글 작성 이벤트 데이터 저장 (Turbo Stream에서 사용)
+        @ga4_event = {
+          name: "comment_create",
+          params: { post_id: @post.id, is_reply: @comment.parent_id.present? }
+        }
         format.turbo_stream { render_comment_turbo_stream(:create) }
-        format.html { redirect_to post_path(@post), notice: "댓글이 작성되었습니다." }
+        format.html do
+          track_ga4_event("comment_create", { post_id: @post.id, is_reply: @comment.parent_id.present? })
+          redirect_to post_path(@post), notice: "댓글이 작성되었습니다."
+        end
         format.json { render json: comment_json(@comment), status: :created }
       else
         format.html { redirect_to post_path(@post), alert: @comment.errors.full_messages.join(", ") }
@@ -99,16 +107,27 @@ class CommentsController < ApplicationController
   end
 
   def render_comment_turbo_stream(action)
+    # GA4 이벤트 스크립트 (프로덕션에서만)
+    ga4_script = if Rails.env.production? && @ga4_event.present?
+      turbo_stream.append("ga4-events") do
+        "<script>if(typeof gtag==='function'){gtag('event','#{@ga4_event[:name]}',#{@ga4_event[:params].to_json});}</script>".html_safe
+      end
+    end
+
     case action
     when :create
       if @comment.reply?
-        render turbo_stream: turbo_stream.append(
-          "replies-#{@comment.parent_id}",
-          partial: "comments/comment",
-          locals: { comment: @comment, post: @post, current_user: current_user }
-        )
+        streams = [
+          turbo_stream.append(
+            "replies-#{@comment.parent_id}",
+            partial: "comments/comment",
+            locals: { comment: @comment, post: @post, current_user: current_user }
+          )
+        ]
+        streams << ga4_script if ga4_script
+        render turbo_stream: streams
       else
-        render turbo_stream: [
+        streams = [
           turbo_stream.append(
             "comments-list",
             partial: "comments/comment",
@@ -118,6 +137,8 @@ class CommentsController < ApplicationController
           turbo_stream.replace("comment-form", partial: "comments/form", locals: { post: @post, comment: Comment.new }),
           turbo_stream.remove("comments-empty")
         ]
+        streams << ga4_script if ga4_script
+        render turbo_stream: streams
       end
     when :destroy
       render turbo_stream: [

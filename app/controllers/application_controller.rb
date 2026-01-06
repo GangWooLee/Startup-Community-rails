@@ -2,6 +2,9 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
+  # GA4 이벤트 추적 헬퍼
+  include Ga4Helper
+
   # 페이지네이션 상수
   POSTS_PER_PAGE = 50          # 메인 피드 글 수
   PROFILE_POSTS_LIMIT = 10     # 프로필 페이지 글 수

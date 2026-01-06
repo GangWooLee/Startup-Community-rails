@@ -9,13 +9,25 @@ class LikesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "like-button-#{@post.id}",
-          partial: "shared/like_button",
-          locals: { post: @post, liked: @post.liked_by?(current_user) }
-        )
+        streams = [
+          turbo_stream.replace(
+            "like-button-#{@post.id}",
+            partial: "shared/like_button",
+            locals: { post: @post, liked: @post.liked_by?(current_user) }
+          )
+        ]
+        # GA4 좋아요 이벤트 (좋아요 추가 시에만, 프로덕션에서만)
+        if liked && Rails.env.production?
+          streams << turbo_stream.append("ga4-events") do
+            "<script>if(typeof gtag==='function'){gtag('event','like_post',{post_id:#{@post.id}});}</script>".html_safe
+          end
+        end
+        render turbo_stream: streams
       end
-      format.html { redirect_back fallback_location: post_path(@post) }
+      format.html do
+        track_ga4_event("like_post", { post_id: @post.id }) if liked
+        redirect_back fallback_location: post_path(@post)
+      end
       format.json do
         render json: {
           liked: @post.liked_by?(current_user),
