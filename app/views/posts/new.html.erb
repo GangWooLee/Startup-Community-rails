@@ -24,7 +24,7 @@
 
   <!-- Main Content -->
   <main class="max-w-screen-xl mx-auto px-4 py-6" data-controller="post-form">
-    <%= form_with model: @post, id: "post-form", local: true, html: { multipart: true }, data: { action: "input->post-form#validateForm" } do |f| %>
+    <%= form_with model: @post, id: "post-form", local: true, html: { multipart: true }, data: { turbo: false, action: "input->post-form#validateForm" } do |f| %>
       <% if @post.errors.any? %>
         <div class="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
           <div class="flex items-start gap-3">
