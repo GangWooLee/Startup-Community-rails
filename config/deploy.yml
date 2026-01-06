@@ -1,6 +1,11 @@
 # Name of your application. Used to uniquely configure containers.
 service: undrew
 
+# SSHKit 설정 - 타임아웃 및 연결 안정성 개선
+sshkit:
+  max_concurrent_starts: 1
+  pool_idle_timeout: 900
+
 # Name of the container image (use your-user/app-name on external registries).
 image: kbmsrs8739/undrew
 
@@ -79,9 +84,11 @@ builder:
   #   - GITHUB_TOKEN
   #   - RAILS_MASTER_KEY
 
-# Use a different ssh user than root
-# ssh:
-#   user: app
+# SSH 연결 설정 - 디버그 로그 활성화
+ssh:
+  user: root
+  log_level: debug
+  config: true
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
