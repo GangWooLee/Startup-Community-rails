@@ -87,9 +87,12 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # ===== 이메일 설정 =====
-  # 이메일 발송 활성화 (회원가입, 알림 등)
-  config.action_mailer.delivery_method = :smtp
+  # ===== 이메일 설정 (Resend HTTP API) =====
+  # SMTP 포트(587) 차단 우회를 위해 HTTP API 사용
+  config.action_mailer.delivery_method = :resend
+  config.action_mailer.resend_settings = {
+    api_key: Rails.application.credentials.dig(:resend, :api_key)
+  }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 
@@ -97,17 +100,6 @@ Rails.application.configure do
   config.action_mailer.default_url_options = {
     host: ENV.fetch("MAILER_HOST") { ENV.fetch("ALLOWED_HOSTS", "").split(",").first || "example.com" },
     protocol: 'https'
-  }
-
-  # SMTP 서버 설정 (credentials에서 로드)
-  config.action_mailer.smtp_settings = {
-    address: "smtp.gmail.com",
-    port: 587,
-    domain: "gmail.com",
-    user_name: Rails.application.credentials.dig(:gmail, :user_name),
-    password: Rails.application.credentials.dig(:gmail, :password),
-    authentication: :plain,
-    enable_starttls_auto: true
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

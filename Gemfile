@@ -78,6 +78,9 @@ gem "gemini-ai"             # Google Gemini API client
 # Pagination
 gem "kaminari"              # Elegant pagination for Rails
 
+# Email delivery via HTTP API (bypasses SMTP port blocking)
+gem "resend"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ], require: "debug/prelude"

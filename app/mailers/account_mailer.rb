@@ -3,7 +3,9 @@
 # - 비밀번호 재설정
 # - OAuth 사용자 안내
 class AccountMailer < ApplicationMailer
-  default from: "undrew1dev@gmail.com"
+  # Resend 테스트용: onboarding@resend.dev
+  # 프로덕션 도메인 연결 시: noreply@undrewai.com 으로 변경
+  default from: "Undrew <onboarding@resend.dev>"
 
   # 회원가입 이메일 인증 코드 발송
   # 5분 유효
