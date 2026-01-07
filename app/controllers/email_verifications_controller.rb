@@ -31,13 +31,27 @@ class EmailVerificationsController < ApplicationController
     )
 
     # 이메일 발송
-    AccountMailer.signup_verification(email, verification.code).deliver_now
+    begin
+      AccountMailer.signup_verification(email, verification.code).deliver_now
 
-    render json: {
-      success: true,
-      expires_in: EmailVerification::EXPIRY_MINUTES * 60,
-      message: "인증 코드를 발송했습니다."
-    }
+      render json: {
+        success: true,
+        expires_in: EmailVerification::EXPIRY_MINUTES * 60,
+        message: "인증 코드를 발송했습니다."
+      }
+    rescue StandardError => e
+      # 실제 에러 로깅 (Sentry + Rails 로그)
+      Rails.logger.error "[EmailVerification] 이메일 발송 실패: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace&.first(5)&.join("\n")
+
+      # 발송 실패한 verification 삭제
+      verification.destroy
+
+      render json: {
+        success: false,
+        message: "이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요."
+      }, status: :service_unavailable
+    end
   end
 
   # POST /email_verifications/verify - 인증 코드 확인
