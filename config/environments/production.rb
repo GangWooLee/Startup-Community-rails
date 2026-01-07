@@ -101,11 +101,11 @@ Rails.application.configure do
 
   # SMTP 서버 설정 (credentials에서 로드)
   config.action_mailer.smtp_settings = {
-    address: Rails.application.credentials.dig(:production, :smtp, :address),
-    port: Rails.application.credentials.dig(:production, :smtp, :port) || 587,
-    domain: Rails.application.credentials.dig(:production, :smtp, :domain),
-    user_name: Rails.application.credentials.dig(:production, :smtp, :user_name),
-    password: Rails.application.credentials.dig(:production, :smtp, :password),
+    address: "smtp.gmail.com",
+    port: 587,
+    domain: "gmail.com",
+    user_name: Rails.application.credentials.dig(:gmail, :user_name),
+    password: Rails.application.credentials.dig(:gmail, :password),
     authentication: :plain,
     enable_starttls_auto: true
   }
