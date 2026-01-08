@@ -65,16 +65,16 @@
       <%= link_to profile_path(post.user_id), class: "flex items-start gap-3 mb-4 group" do %>
         <div class="h-12 w-12 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
           <% if post.user.avatar.attached? %>
-            <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
+            <%= image_tag post.user.avatar, alt: post.user.display_name, class: "h-full w-full object-cover" %>
           <% elsif post.user.avatar_url.present? %>
-            <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
+            <%= image_tag post.user.avatar_url, alt: post.user.display_name, class: "h-full w-full object-cover" %>
           <% else %>
-            <span class="text-xl font-semibold"><%= post.user.name[0] %></span>
+            <span class="text-xl font-semibold"><%= post.user.display_name[0] %></span>
           <% end %>
         </div>
         <div class="flex-1">
           <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors"><%= post.user.name %></h3>
+            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors"><%= post.user.display_name %></h3>
             <% if post.user.role_title.present? %>
               <%= render_badge post.user.role_title, variant: :secondary, class: "text-xs" %>
             <% end %>

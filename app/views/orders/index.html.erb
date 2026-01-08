@@ -33,7 +33,7 @@
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-900 truncate"><%= order.title %></h3>
                   <p class="text-sm text-gray-500 mt-1">
-                    <%= @tab == 'sales' ? '구매자' : '판매자' %>: <%= other_user.name %>
+                    <%= @tab == 'sales' ? '구매자' : '판매자' %>: <%= other_user.display_name %>
                   </p>
                   <p class="text-xs text-gray-400 mt-1">
                     <%= order.created_at.strftime("%Y.%m.%d %H:%M") %>

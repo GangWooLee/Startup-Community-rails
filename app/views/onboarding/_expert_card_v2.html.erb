@@ -48,9 +48,9 @@
       <%# 아바타 (16x16 = 64px) %>
       <div class="w-16 h-16 rounded-full bg-white shadow-md overflow-hidden border-2 border-white flex-shrink-0">
         <% if user.avatar.attached? %>
-          <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+          <%= image_tag user.avatar, alt: user.display_name, class: "w-full h-full object-cover" %>
         <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-          <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+          <%= image_tag user.avatar_url, alt: user.display_name, class: "w-full h-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
           <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 hidden items-center justify-center">
             <span class="text-2xl"><%= role_emoji %></span>
           </div>
@@ -75,7 +75,7 @@
 
     <%# 기본 정보 %>
     <div class="mb-3">
-      <h3 class="font-bold text-slate-800 mb-1 text-lg group-hover:text-blue-600 transition-colors"><%= user.name %></h3>
+      <h3 class="font-bold text-slate-800 mb-1 text-lg group-hover:text-blue-600 transition-colors"><%= user.display_name %></h3>
       <% if user.role_title.present? %>
         <p class="text-slate-600 font-medium"><%= user.role_title %></p>
       <% end %>

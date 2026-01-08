@@ -32,7 +32,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "signup_verification has correct sender" do
     email = AccountMailer.signup_verification("newuser@test.com", @verification_code)
 
-    assert_equal ["undrew1dev@gmail.com"], email.from
+    assert_equal ["noreply@undrewai.com"], email.from
   end
 
   test "signup_verification body contains verification code" do
@@ -79,7 +79,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "password_reset has correct sender" do
     email = AccountMailer.password_reset(@user, @reset_token)
 
-    assert_equal ["undrew1dev@gmail.com"], email.from
+    assert_equal ["noreply@undrewai.com"], email.from
   end
 
   test "password_reset body contains user name" do
@@ -140,7 +140,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "oauth_password_notice has correct sender" do
     email = AccountMailer.oauth_password_notice(@oauth_user)
 
-    assert_equal ["undrew1dev@gmail.com"], email.from
+    assert_equal ["noreply@undrewai.com"], email.from
   end
 
   test "oauth_password_notice body contains user name" do

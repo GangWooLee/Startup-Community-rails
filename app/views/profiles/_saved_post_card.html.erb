@@ -20,7 +20,7 @@
     <div class="flex-1 min-w-0">
       <%# 작성자 + 날짜 %>
       <div class="flex items-center gap-2 mb-1">
-        <span class="text-xs text-stone-500"><%= post.user.name %></span>
+        <span class="text-xs text-stone-500"><%= post.user.display_name %></span>
         <span class="text-xs text-stone-300">·</span>
         <span class="text-xs text-stone-400">
           <%= time_ago_in_words(post.created_at) %> 전

@@ -43,15 +43,20 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
     </svg>
   </div>
+<% elsif user.using_anonymous_avatar? %>
+  <%# 익명 모드 - 흰색 배경 + 익명 아바타 이미지 %>
+  <div class="<%= container_class %> rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 <%= additional_class %>">
+    <%= image_tag "/anonymous#{user.avatar_type.to_i + 1}-.png", alt: user.display_name, class: "h-full w-full object-cover" %>
+  </div>
 <% else %>
-  <%# 정상 사용자 %>
+  <%# 실명 모드 또는 프로필 미완료 %>
   <div class="<%= container_class %> rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0 <%= additional_class %>">
     <% if user.avatar.attached? %>
-      <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+      <%= image_tag user.avatar, alt: user.display_name, class: "h-full w-full object-cover" %>
     <% elsif user.avatar_url.present? %>
-      <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover" %>
+      <%= image_tag user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover" %>
     <% else %>
-      <span class="<%= text_class %> font-semibold text-muted-foreground"><%= user.name[0] %></span>
+      <span class="<%= text_class %> font-semibold text-muted-foreground"><%= user.display_name[0] %></span>
     <% end %>
   </div>
 <% end %>

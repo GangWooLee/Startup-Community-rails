@@ -3,6 +3,9 @@
 
 <% is_following ||= false %>
 
+<%# 익명 사용자 + 타인이 볼 때 정보 제한 %>
+<% show_limited_info = !is_own_profile && user.is_anonymous? %>
+
 <%# Premium ID Card Container %>
 <div class="bg-white/80 backdrop-blur-xl border border-white/50
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden">
@@ -20,77 +23,93 @@
   </div>
 
   <div class="px-5 pb-6">
-    <%# 아바타 섹션 - 링 + 그림자로 분리감 %>
+    <%# 아바타 섹션 - 익명 모드 지원 %>
     <div class="-mt-14 mb-4 flex justify-center">
       <div class="relative">
-        <%# 메인 아바타 - ring은 외부에 그려져 이미지 크기 영향 없음 %>
-        <div class="w-[clamp(5rem,12vw,7rem)] h-[clamp(5rem,12vw,7rem)] rounded-full ring-4 ring-white shadow-xl overflow-hidden">
-          <% if user.avatar.attached? %>
-            <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
+        <%# 메인 아바타 - 컨테이너에 맞게 직접 렌더링 (clamp 반응형 지원) %>
+        <div class="w-[clamp(5rem,12vw,7rem)] h-[clamp(5rem,12vw,7rem)] rounded-full ring-4 ring-white shadow-xl overflow-hidden bg-white border border-gray-200 flex items-center justify-center">
+          <% if user.using_anonymous_avatar? %>
+            <%= image_tag "/anonymous#{user.avatar_type.to_i + 1}-.png", alt: user.display_name, class: "w-full h-full object-cover" %>
+          <% elsif user.avatar.attached? %>
+            <%= image_tag user.avatar, alt: user.display_name, class: "w-full h-full object-cover" %>
           <% elsif user.avatar_url.present? %>
-            <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover" %>
+            <%= image_tag user.avatar_url, alt: user.display_name, class: "w-full h-full object-cover" %>
           <% else %>
-            <div class="w-full h-full flex items-center justify-center
-                        bg-gradient-to-br from-orange-400 to-rose-400
-                        text-white text-3xl font-bold">
-              <%= user.name[0].upcase %>
-            </div>
+            <span class="text-2xl font-semibold text-muted-foreground"><%= user.display_name[0] %></span>
           <% end %>
         </div>
 
       </div>
     </div>
 
-    <%# 상태 뱃지 (Status Badge) - pulse 애니메이션 %>
-    <% if user.status_message.present? || user.has_availability_status? %>
-      <div class="flex items-center justify-center gap-2 mt-2">
-        <span class="w-2 h-2 rounded-full animate-pulse
-                     <%= user.available_for_work? ? 'bg-green-500' : 'bg-amber-400' %>">
-        </span>
-        <span class="text-xs font-medium text-stone-600">
-          <%= user.status_message.presence || user.availability_badges.first&.dig(:label) %>
-        </span>
-      </div>
+    <%# 상태 뱃지 (Status Badge) - 익명일 때 숨김 %>
+    <% unless show_limited_info %>
+      <% if user.status_message.present? || user.has_availability_status? %>
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <span class="w-2 h-2 rounded-full animate-pulse
+                       <%= user.available_for_work? ? 'bg-green-500' : 'bg-amber-400' %>">
+          </span>
+          <span class="text-xs font-medium text-stone-600">
+            <%= user.status_message.presence || user.availability_badges.first&.dig(:label) %>
+          </span>
+        </div>
+      <% end %>
     <% end %>
 
-    <%# 이름 + 역할 %>
+    <%# 이름 + 역할 (display_name 사용) %>
     <div class="text-center mt-6">
-      <h1 class="text-2xl font-bold text-[#2C2825]"><%= user.name %></h1>
-      <% if user.role_title.present? %>
-        <p class="text-sm font-medium text-amber-600 mt-1"><%= user.role_title %></p>
-      <% end %>
-      <% if user.affiliation.present? %>
-        <p class="text-sm text-stone-500 mt-0.5"><%= user.affiliation %></p>
+      <h1 class="text-2xl font-bold text-[#2C2825]"><%= user.display_name %></h1>
+      <% unless show_limited_info %>
+        <% if user.role_title.present? %>
+          <p class="text-sm font-medium text-amber-600 mt-1"><%= user.role_title %></p>
+        <% end %>
+        <% if user.affiliation.present? %>
+          <p class="text-sm text-stone-500 mt-0.5"><%= user.affiliation %></p>
+        <% end %>
+      <% else %>
+        <%# 익명 사용자 표시 %>
+        <p class="text-sm text-stone-400 mt-1">익명 사용자</p>
       <% end %>
     </div>
 
-    <%# 자기소개 - 인용문 스타일 %>
-    <% if user.bio.present? %>
-      <div class="mt-4 px-2">
-        <p class="text-sm text-stone-600 text-center leading-relaxed line-clamp-3 italic">
-          "<%= user.bio %>"
-        </p>
-      </div>
+    <%# 자기소개 - 익명일 때 숨김 %>
+    <% unless show_limited_info %>
+      <% if user.bio.present? %>
+        <div class="mt-4 px-2">
+          <p class="text-sm text-stone-600 text-center leading-relaxed line-clamp-3 italic">
+            "<%= user.bio %>"
+          </p>
+        </div>
+      <% end %>
     <% end %>
 
-    <%# Stats Box (밀도 높이기) %>
+    <%# Stats Box - 익명일 때 게시글 수만 표시 %>
     <div class="bg-stone-50 rounded-2xl p-4 mt-6">
-      <div class="flex justify-between text-center">
-        <div class="flex-1">
-          <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.followers_count) %></span>
-          <p class="text-xs text-stone-400 mt-0.5">팔로워</p>
-        </div>
-        <div class="w-px bg-stone-200 my-1"></div>
-        <div class="flex-1">
-          <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.following_count) %></span>
-          <p class="text-xs text-stone-400 mt-0.5">팔로잉</p>
-        </div>
-        <div class="w-px bg-stone-200 my-1"></div>
-        <div class="flex-1">
+      <% if show_limited_info %>
+        <%# 익명 사용자: 게시글 수만 표시 %>
+        <div class="text-center">
           <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.posts.published.count) %></span>
           <p class="text-xs text-stone-400 mt-0.5">게시글</p>
         </div>
-      </div>
+      <% else %>
+        <%# 실명 또는 본인: 전체 통계 표시 %>
+        <div class="flex justify-between text-center">
+          <div class="flex-1">
+            <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.followers_count) %></span>
+            <p class="text-xs text-stone-400 mt-0.5">팔로워</p>
+          </div>
+          <div class="w-px bg-stone-200 my-1"></div>
+          <div class="flex-1">
+            <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.following_count) %></span>
+            <p class="text-xs text-stone-400 mt-0.5">팔로잉</p>
+          </div>
+          <div class="w-px bg-stone-200 my-1"></div>
+          <div class="flex-1">
+            <span class="text-xl font-bold text-[#2C2825]"><%= number_with_delimiter(user.posts.published.count) %></span>
+            <p class="text-xs text-stone-400 mt-0.5">게시글</p>
+          </div>
+        </div>
+      <% end %>
     </div>
 
     <%# CTA 버튼 영역 - Primary/Secondary 위계 %>
@@ -184,20 +203,23 @@
     <%# Maker's DNA 섹션 - Skills는 About 탭에서만 표시 (중복 제거) %>
     <%# ═══════════════════════════════════════════════════════════════════════ %>
 
-    <%# 활동 지역 %>
-    <% if user.location.present? %>
-      <div class="flex items-center justify-center gap-2 text-xs text-stone-500 mt-4">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        <span><%= user.location %></span>
-      </div>
+    <%# 활동 지역 - 익명일 때 숨김 %>
+    <% unless show_limited_info %>
+      <% if user.location.present? %>
+        <div class="flex items-center justify-center gap-2 text-xs text-stone-500 mt-4">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span><%= user.location %></span>
+        </div>
+      <% end %>
     <% end %>
 
-    <%# 소셜 링크 Dock %>
+    <%# 소셜 링크 Dock - 익명일 때 숨김 %>
+    <% unless show_limited_info %>
     <% if user.linkedin_url.present? || user.github_url.present? || user.portfolio_url.present? || user.open_chat_url.present? %>
       <div class="border-t border-stone-100 pt-5 mt-5">
         <div class="flex justify-center gap-3">
@@ -256,8 +278,10 @@
         </div>
       </div>
     <% end %>
+    <% end %>
 
-    <%# 활동 상태 뱃지 (전체) %>
+    <%# 활동 상태 뱃지 (전체) - 익명일 때 숨김 %>
+    <% unless show_limited_info %>
     <% if user.availability_badges.any? %>
       <div class="flex flex-wrap justify-center gap-2 pt-4 mt-4 border-t border-stone-100">
         <% user.availability_badges.each do |badge| %>
@@ -267,6 +291,19 @@
             <%= badge[:label] %>
           </span>
         <% end %>
+      </div>
+    <% end %>
+    <% end %>
+
+    <%# 익명 사용자일 때 안내 메시지 %>
+    <% if show_limited_info %>
+      <div class="mt-6 p-4 bg-stone-50 rounded-xl text-center">
+        <p class="text-sm text-stone-500">
+          이 사용자는 익명으로 활동 중입니다
+        </p>
+        <p class="text-xs text-stone-400 mt-1">
+          프로필 정보가 제한적으로 표시됩니다
+        </p>
       </div>
     <% end %>
   </div>

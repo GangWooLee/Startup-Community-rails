@@ -27,7 +27,7 @@
             <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>
           <% else %>
             <div class="w-full h-full flex items-center justify-center text-stone-600 font-semibold">
-              <%= post.user.name[0] %>
+              <%= post.user.display_name[0] %>
             </div>
           <% end %>
         </div>
@@ -38,7 +38,7 @@
 
       <%# Name & Service Type %>
       <div class="flex-1 min-w-0">
-        <h4 class="font-semibold text-sm text-stone-900 truncate"><%= post.user.name %></h4>
+        <h4 class="font-semibold text-sm text-stone-900 truncate"><%= post.user.display_name %></h4>
         <span class="text-xs text-stone-500"><%= post.service_type_label %></span>
       </div>
 

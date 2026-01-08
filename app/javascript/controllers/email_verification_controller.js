@@ -236,7 +236,9 @@ export default class extends Controller {
     this.verifyButtonTarget.classList.add("hidden")
     this.verifiedBadgeTarget.classList.remove("hidden")
     this.sendButtonTarget.disabled = true
-    this.emailInputTarget.disabled = true
+    // disabled 대신 readonly 사용 - disabled input은 폼 제출 시 값이 전송되지 않음
+    this.emailInputTarget.readOnly = true
+    this.emailInputTarget.classList.add("bg-muted", "cursor-not-allowed")
     this.timerTarget.classList.add("hidden")
 
     // 회원가입 버튼 활성화

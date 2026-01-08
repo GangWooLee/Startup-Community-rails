@@ -40,20 +40,16 @@
       <%= link_to profile_overlay_chat_room_path(chat_room),
                   class: "flex items-center gap-4 flex-1 min-w-0 group cursor-pointer",
                   data: { turbo_stream: true } do %>
-        <!-- 프로필 이미지 (이니셜 폴백 포함) -->
+        <!-- 프로필 이미지 (익명 모드 지원) -->
         <div class="relative flex-shrink-0">
-          <% if other_user.avatar&.attached? %>
-            <%= image_tag other_user.avatar, class: "w-12 h-12 rounded-full object-cover ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all" %>
-          <% else %>
-            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all <%= avatar_bg_color(other_user.name) %>">
-              <%= other_user.name&.first&.upcase || "?" %>
-            </div>
-          <% end %>
+          <div class="w-12 h-12 rounded-full ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all overflow-hidden">
+            <%= render "shared/avatar", user: other_user, size: "md", class: "w-full h-full" %>
+          </div>
         </div>
 
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <p class="font-bold text-lg text-stone-900 truncate group-hover:text-orange-600 transition-colors"><%= other_user.name %></p>
+            <p class="font-bold text-lg text-stone-900 truncate group-hover:text-orange-600 transition-colors"><%= other_user.display_name %></p>
             <% if other_user.provider.present? %>
               <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -114,7 +110,7 @@
                 class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 transition-colors w-full text-left"
                 data-action="click->dropdown#close click->leave-chat#showModal"
                 data-leave-chat-room-id-param="<%= chat_room.id %>"
-                data-leave-chat-room-name-param="<%= other_user.name %>">
+                data-leave-chat-room-name-param="<%= other_user.display_name %>">
           <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
@@ -125,7 +121,7 @@
                 data-action="click->dropdown#close click->report-modal#open"
                 data-reportable-type="ChatRoom"
                 data-reportable-id="<%= chat_room.id %>"
-                data-target-name="<%= other_user.name %>님과의 채팅방">
+                data-target-name="<%= other_user.display_name %>님과의 채팅방">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
@@ -190,7 +186,7 @@
         <div class="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center mb-6">
           <span class="text-4xl">👋</span>
         </div>
-        <p class="font-bold text-lg text-stone-900 mb-2"><%= other_user.name %>님과의 대화</p>
+        <p class="font-bold text-lg text-stone-900 mb-2"><%= other_user.display_name %>님과의 대화</p>
         <p class="text-sm text-stone-500 text-center max-w-xs mb-6">
           인사말을 건네고 협업의 기회를 잡아보세요!
         </p>

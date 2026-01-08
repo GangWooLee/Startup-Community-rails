@@ -61,7 +61,7 @@
               <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>
             <% else %>
               <div class="w-full h-full flex items-center justify-center text-white font-bold text-xl">
-                <%= post.user.name[0] %>
+                <%= post.user.display_name[0] %>
               </div>
             <% end %>
           </div>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="flex-1 text-white">
-          <h4 class="font-bold text-lg"><%= post.user.name %></h4>
+          <h4 class="font-bold text-lg"><%= post.user.display_name %></h4>
           <div class="flex items-center gap-2 text-sm opacity-80">
             <% if post.user.role_title.present? %>
               <span><%= post.user.role_title %></span>

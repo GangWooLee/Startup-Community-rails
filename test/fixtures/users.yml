@@ -15,6 +15,10 @@ one:
   last_sign_in_at: <%= 1.day.ago %>
   created_at: <%= 1.month.ago %>
   updated_at: <%= 1.day.ago %>
+  profile_completed: true
+  nickname: "테스터원"
+  avatar_type: 0
+  is_anonymous: false
 
 two:
   email: user2@test.com
@@ -29,6 +33,10 @@ two:
   last_sign_in_at: <%= 2.days.ago %>
   created_at: <%= 2.months.ago %>
   updated_at: <%= 2.days.ago %>
+  profile_completed: true
+  nickname: "테스터투"
+  avatar_type: 1
+  is_anonymous: false
 
 three:
   email: user3@test.com
@@ -43,6 +51,10 @@ three:
   last_sign_in_at: <%= 3.days.ago %>
   created_at: <%= 3.months.ago %>
   updated_at: <%= 3.days.ago %>
+  profile_completed: true
+  nickname: "테스터쓰리"
+  avatar_type: 2
+  is_anonymous: true
 
 admin:
   email: admin@test.com
@@ -57,6 +69,10 @@ admin:
   last_sign_in_at: <%= Time.current %>
   created_at: <%= 1.year.ago %>
   updated_at: <%= Time.current %>
+  profile_completed: true
+  nickname: "관리자"
+  avatar_type: 0
+  is_anonymous: false
 
 oauth_user:
   email: oauth@gmail.com
@@ -71,6 +87,10 @@ oauth_user:
   last_sign_in_at: <%= 1.hour.ago %>
   created_at: <%= 1.week.ago %>
   updated_at: <%= 1.hour.ago %>
+  profile_completed: true
+  nickname: "OAuth테스터"
+  avatar_type: 3
+  is_anonymous: false
 
 deleted_user:
   email: deleted@test.com
@@ -86,3 +106,7 @@ deleted_user:
   last_sign_in_at: <%= 2.weeks.ago %>
   created_at: <%= 1.year.ago %>
   updated_at: <%= 1.week.ago %>
+  profile_completed: true
+  nickname: "탈퇴회원"
+  avatar_type: 0
+  is_anonymous: false

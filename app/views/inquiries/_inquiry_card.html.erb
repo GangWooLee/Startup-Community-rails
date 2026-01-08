@@ -51,7 +51,7 @@
         <span class="text-stone-300">•</span>
         <span><%= time_ago_in_words(inquiry.created_at) %> ago</span>
         <span class="text-stone-300">•</span>
-        <span><%= inquiry.user.name.to_s.first(3) %>***</span>
+        <span><%= inquiry.user.display_name.to_s.first(3) %>***</span>
       </p>
     </div>
 

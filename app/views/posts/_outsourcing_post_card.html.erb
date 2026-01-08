@@ -10,15 +10,15 @@
     <%= link_to profile_path(post.user_id), class: "flex items-center gap-3 mb-4 group" do %>
       <div class="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)] rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
         <% if post.user.avatar.attached? %>
-          <%= image_tag post.user.avatar, alt: post.user.name, class: "h-full w-full object-cover" %>
+          <%= image_tag post.user.avatar, alt: post.user.display_name, class: "h-full w-full object-cover" %>
         <% elsif post.user.avatar_url.present? %>
-          <%= image_tag post.user.avatar_url, alt: post.user.name, class: "h-full w-full object-cover" %>
+          <%= image_tag post.user.avatar_url, alt: post.user.display_name, class: "h-full w-full object-cover" %>
         <% else %>
-          <span class="text-lg font-semibold"><%= post.user.name[0] %></span>
+          <span class="text-lg font-semibold"><%= post.user.display_name[0] %></span>
         <% end %>
       </div>
       <div class="flex-1">
-        <p class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors"><%= post.user.name %></p>
+        <p class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors"><%= post.user.display_name %></p>
         <% if post.user.role_title.present? %>
           <p class="text-xs text-muted-foreground"><%= post.user.role_title %></p>
         <% end %>

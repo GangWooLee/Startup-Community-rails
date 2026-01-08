@@ -102,14 +102,14 @@
               <dt class="text-gray-500">판매자</dt>
               <dd class="flex items-center space-x-2">
                 <%= render_user_avatar(@order.seller, size: :xs) %>
-                <span class="text-gray-900"><%= @order.seller.name %></span>
+                <span class="text-gray-900"><%= @order.seller.display_name %></span>
               </dd>
             </div>
             <div class="flex justify-between items-center">
               <dt class="text-gray-500">구매자</dt>
               <dd class="flex items-center space-x-2">
                 <%= render_user_avatar(@order.user, size: :xs) %>
-                <span class="text-gray-900"><%= @order.user.name %></span>
+                <span class="text-gray-900"><%= @order.user.display_name %></span>
               </dd>
             </div>
           </dl>

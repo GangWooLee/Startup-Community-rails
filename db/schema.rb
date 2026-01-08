@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_08_072823) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -413,6 +413,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
     t.integer "ai_analysis_limit"
     t.integer "ai_bonus_credits", default: 0, null: false
     t.json "availability_statuses", default: []
+    t.integer "avatar_type", default: 0
     t.string "avatar_url"
     t.text "bio"
     t.datetime "created_at", null: false
@@ -426,11 +427,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
     t.string "github_url"
     t.datetime "guidelines_accepted_at"
     t.boolean "is_admin", default: false, null: false
+    t.boolean "is_anonymous", default: true
     t.datetime "last_sign_in_at"
     t.string "linkedin_url"
     t.string "location", limit: 50
     t.string "looking_for", limit: 200
     t.string "name", null: false
+    t.string "nickname"
     t.boolean "notifications_enabled", default: true, null: false
     t.string "open_chat_url"
     t.string "password_digest", null: false
@@ -438,6 +441,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
     t.string "password_reset_token"
     t.string "portfolio_url"
     t.datetime "privacy_accepted_at"
+    t.boolean "profile_completed", default: false
     t.string "provider"
     t.string "remember_digest"
     t.string "role_title"
@@ -453,6 +457,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_143013) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["is_admin"], name: "index_users_on_is_admin"
     t.index ["name"], name: "index_users_on_name_for_search"
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
     t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["role_title"], name: "index_users_on_role_title_for_search"

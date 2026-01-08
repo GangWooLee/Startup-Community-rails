@@ -41,23 +41,15 @@
                                   hover:bg-orange-50/50 focus:bg-orange-50/50
                                   hover:ring-1 focus:ring-1 hover:ring-orange-200/50 focus:ring-orange-200/50
                                   transition-all duration-150 group outline-none" do %>
-                <%# 아바타 %>
-                <div class="w-10 h-10 rounded-full bg-stone-200 overflow-hidden flex-shrink-0">
-                  <% if user.avatar.attached? %>
-                    <%= image_tag user.avatar, alt: user.name, class: "w-full h-full object-cover" %>
-                  <% elsif user.avatar_url.present? %>
-                    <%= image_tag user.avatar_url, alt: user.name, class: "w-full h-full object-cover" %>
-                  <% else %>
-                    <div class="w-full h-full flex items-center justify-center bg-stone-300 text-stone-600 font-bold text-sm">
-                      <%= user.name[0].upcase %>
-                    </div>
-                  <% end %>
+                <%# 아바타 (익명 모드 지원) %>
+                <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <%= render "shared/avatar", user: user, size: "md", class: "w-full h-full" %>
                 </div>
 
                 <%# 정보 %>
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-stone-700 group-hover:text-stone-900 truncate">
-                    <%= user.name %>
+                    <%= user.display_name %>
                   </p>
                   <% if user.role_title.present? || user.affiliation.present? %>
                     <p class="text-xs text-stone-400 truncate">
@@ -109,7 +101,7 @@
                     <%= post.title %>
                   </p>
                   <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-xs text-stone-400"><%= post.user.name %></span>
+                    <span class="text-xs text-stone-400"><%= post.user.display_name %></span>
                     <span class="text-xs text-stone-300">·</span>
                     <span class="text-xs text-stone-400"><%= time_ago_in_words(post.created_at) %> 전</span>
                   </div>

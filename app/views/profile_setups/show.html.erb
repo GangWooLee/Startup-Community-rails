@@ -1,0 +1,123 @@
+<%# 회원가입 후 익명 프로필 설정 페이지 (/welcome) %>
+<%# 기능: 닉네임 설정, 아바타 선택, 익명 모드 토글 %>
+
+<div class="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4"
+     data-controller="profile-setup"
+     data-profile-setup-selected-avatar-value="<%= @default_avatar %>">
+
+  <%= form_with url: profile_setup_path, method: :patch, scope: :user,
+                class: "w-full max-w-md", data: { turbo: false } do |f| %>
+
+    <div class="bg-white rounded-3xl shadow-xl p-8">
+      <%# 헤더 %>
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-stone-800 mb-2">
+          환영합니다!
+        </h1>
+        <p class="text-stone-600">
+          Undrew에서 사용할 프로필을 설정해주세요
+        </p>
+        <p class="text-stone-400 text-sm mt-1">
+          익명으로 활동하거나, 본인을 드러낼 수 있습니다
+        </p>
+      </div>
+
+      <%# 아바타 선택 %>
+      <div class="mb-8">
+        <label class="block text-sm font-medium text-stone-600 mb-3 text-center">
+          프로필 이미지
+        </label>
+        <div class="flex justify-center gap-4">
+          <% @avatar_options.each do |index| %>
+            <button type="button"
+                    data-profile-setup-target="avatar"
+                    data-avatar-index="<%= index %>"
+                    data-action="click->profile-setup#selectAvatar"
+                    class="w-16 h-16 rounded-full overflow-hidden transition-all duration-200 cursor-pointer
+                           flex items-center justify-center bg-white border border-gray-200
+                           <%= index == @default_avatar ? 'ring-4 ring-orange-200 scale-110' : 'opacity-50 grayscale' %>"
+                    aria-label="익명 프로필 <%= index + 1 %> 선택">
+              <%# public 폴더의 익명 아바타 이미지 %>
+              <%= image_tag "/anonymous#{index + 1}-.png",
+                            alt: "익명 프로필 #{index + 1}",
+                            class: "w-full h-full object-cover" %>
+            </button>
+          <% end %>
+        </div>
+        <%= f.hidden_field :avatar_type,
+                           value: @default_avatar,
+                           data: { profile_setup_target: "avatarInput" } %>
+        <p class="text-center text-stone-400 text-xs mt-3">
+          아바타는 언제든지 마이페이지에서 변경할 수 있어요
+        </p>
+      </div>
+
+      <%# 닉네임 입력 %>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-stone-600 mb-2 text-center">
+          닉네임
+        </label>
+        <div class="relative">
+          <%= f.text_field :nickname,
+                           value: @suggested_nickname,
+                           data: { profile_setup_target: "nickname" },
+                           class: "w-full h-14 px-4 pr-14 text-center text-lg font-bold
+                                  text-stone-800 bg-stone-50 border-none rounded-xl
+                                  focus:ring-2 focus:ring-orange-500 focus:outline-none
+                                  transition-all duration-200",
+                           placeholder: "닉네임을 입력하세요",
+                           maxlength: 20,
+                           required: true %>
+          <button type="button"
+                  data-action="click->profile-setup#regenerateNickname"
+                  class="absolute right-3 top-1/2 -translate-y-1/2
+                         text-2xl hover:scale-110 transition-transform
+                         focus:outline-none"
+                  title="새로운 닉네임 생성"
+                  aria-label="닉네임 재생성">
+            <span class="text-stone-400 hover:text-orange-500">&#x1F3B2;</span>
+          </button>
+        </div>
+        <p class="text-center text-stone-400 text-xs mt-2">
+          2~20자 이내로 입력해주세요
+        </p>
+        <% if current_user.errors[:nickname].any? %>
+          <p class="text-center text-red-500 text-sm mt-1">
+            <%= current_user.errors[:nickname].first %>
+          </p>
+        <% end %>
+      </div>
+
+      <%# 익명 모드 토글 %>
+      <div class="mb-8">
+        <label class="flex items-center justify-center gap-3 cursor-pointer">
+          <%= f.check_box :is_anonymous,
+                          checked: true,
+                          class: "w-5 h-5 rounded text-orange-500
+                                 focus:ring-orange-500 border-stone-300
+                                 cursor-pointer" %>
+          <span class="text-sm text-stone-600">
+            커뮤니티에서 익명으로 활동하기
+          </span>
+        </label>
+        <p class="text-center text-stone-400 text-xs mt-2">
+          체크 해제 시 실명(<%= current_user.name %>)이 표시됩니다
+        </p>
+      </div>
+
+      <%# CTA 버튼 %>
+      <%= f.submit "Undrew 시작하기",
+                   class: "w-full h-14 bg-[#2C2825] text-white rounded-xl
+                          font-bold text-lg hover:bg-stone-800
+                          transition-colors cursor-pointer
+                          focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2" %>
+    </div>
+
+    <%# 하단 안내 %>
+    <p class="text-center text-stone-400 text-xs mt-6">
+      프로필 설정은 언제든지
+      <span class="text-orange-500 font-medium">마이페이지</span>에서
+      변경할 수 있습니다
+    </p>
+  <% end %>
+</div>

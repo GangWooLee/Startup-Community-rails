@@ -54,12 +54,12 @@
             <div class="relative">
               <%# Avatar %>
               <% if maker.avatar.attached? %>
-                <%= image_tag maker.avatar, alt: maker.name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
+                <%= image_tag maker.avatar, alt: maker.display_name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
               <% elsif maker.avatar_url.present? %>
-                <%= image_tag maker.avatar_url, alt: maker.name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
+                <%= image_tag maker.avatar_url, alt: maker.display_name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
               <% else %>
                 <div class="w-10 h-10 rounded-full ring-2 <%= rank_ring_color(rank) %> bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-sm">
-                  <%= maker.name[0].upcase %>
+                  <%= maker.display_name[0].upcase %>
                 </div>
               <% end %>
               <%# Rank Badge %>
@@ -70,7 +70,7 @@
 
             <div class="flex-1 min-w-0">
               <p class="text-sm font-bold text-stone-900 truncate group-hover:text-orange-600 transition-colors">
-                <%= maker.name %>
+                <%= maker.display_name %>
               </p>
               <p class="text-[10px] text-stone-400 truncate">
                 <%= maker.bio.present? ? truncate(maker.bio, length: 20) : "Undrew 멤버" %>

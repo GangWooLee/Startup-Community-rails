@@ -46,7 +46,7 @@
               </span>
               <span class="text-xs text-stone-400">•</span>
             <% end %>
-            <span class="text-xs text-stone-500"><%= post.user.name %></span>
+            <span class="text-xs text-stone-500"><%= post.user.display_name %></span>
           </div>
           <span class="text-xs text-stone-400"><%= time_ago_in_words(post.created_at) %> 전</span>
         </div>

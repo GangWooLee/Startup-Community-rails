@@ -103,7 +103,7 @@
                 <!-- 중앙: 이름 + 직군/소속 -->
                 <div class="flex-shrink-0 w-28 min-w-0">
                   <p class="font-semibold text-foreground truncate">
-                    <%= highlight_search(user.name, query) %>
+                    <%= highlight_search(user.display_name, query) %>
                   </p>
                   <% if user.role_title.present? %>
                     <p class="text-sm text-muted-foreground truncate">

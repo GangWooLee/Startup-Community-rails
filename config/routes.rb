@@ -50,6 +50,11 @@ Rails.application.routes.draw do
   get   "password/reset/:token",  to: "account_recovery#reset_password_form",  as: :reset_password_form
   patch "password/reset/:token",  to: "account_recovery#reset_password",       as: :reset_password
 
+  # Profile Setup (회원가입 후 익명 프로필 설정)
+  resource :profile_setup, only: [:show, :update], path: "welcome" do
+    post :regenerate_nickname, on: :collection
+  end
+
   # Account Deletion (회원 탈퇴) - 즉시 익명화, 복구 불가
   get  "account/delete", to: "user_deletions#new",    as: :delete_account
   post "account/delete", to: "user_deletions#create"

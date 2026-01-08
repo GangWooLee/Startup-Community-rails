@@ -48,6 +48,7 @@ class MyPageController < ApplicationController
       :toolbox, :currently_learning,             # Phase 9: 도구 & 성장
       :linkedin_url, :github_url, :portfolio_url, :open_chat_url,
       :detailed_bio,                             # ActionText rich text
+      :is_anonymous, :nickname, :avatar_type,    # 익명 설정
       availability_statuses: []
     )
 

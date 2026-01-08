@@ -410,4 +410,182 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "uppercase@test.com", user.email
     user.destroy
   end
+
+  # =========================================
+  # Anonymous Feature - display_name
+  # =========================================
+
+  test "display_name returns name when profile not completed" do
+    @user.profile_completed = false
+    @user.is_anonymous = true
+    @user.nickname = "익명닉네임"
+    assert_equal @user.name, @user.display_name
+  end
+
+  test "display_name returns nickname when anonymous and profile completed" do
+    @user.profile_completed = true
+    @user.is_anonymous = true
+    @user.nickname = "활기찬 개발자"
+    assert_equal "활기찬 개발자", @user.display_name
+  end
+
+  test "display_name returns name when not anonymous" do
+    @user.profile_completed = true
+    @user.is_anonymous = false
+    @user.nickname = "무시될닉네임"
+    assert_equal @user.name, @user.display_name
+  end
+
+  # =========================================
+  # Anonymous Feature - display_avatar_path
+  # =========================================
+
+  test "display_avatar_path returns anonymous avatar when anonymous" do
+    @user.profile_completed = true
+    @user.is_anonymous = true
+    @user.avatar_type = 2
+    # avatar_type 2 → anonymous3-.png (0-based to 1-based)
+    assert_equal "/anonymous3-.png", @user.display_avatar_path
+  end
+
+  test "display_avatar_path returns avatar_url when not anonymous" do
+    @user.profile_completed = true
+    @user.is_anonymous = false
+    @user.avatar_url = "https://example.com/avatar.jpg"
+    assert_equal "https://example.com/avatar.jpg", @user.display_avatar_path
+  end
+
+  test "display_avatar_path returns nil when no image" do
+    @user.profile_completed = true
+    @user.is_anonymous = false
+    @user.avatar_url = nil
+    # avatar가 attached되지 않고 avatar_url도 없으면 nil 반환
+    assert_nil @user.display_avatar_path
+  end
+
+  # =========================================
+  # Anonymous Feature - using_anonymous_avatar?
+  # =========================================
+
+  test "using_anonymous_avatar? returns true when profile complete and anonymous" do
+    @user.profile_completed = true
+    @user.is_anonymous = true
+    assert @user.using_anonymous_avatar?
+  end
+
+  test "using_anonymous_avatar? returns false when not anonymous" do
+    @user.profile_completed = true
+    @user.is_anonymous = false
+    assert_not @user.using_anonymous_avatar?
+  end
+
+  test "using_anonymous_avatar? returns false when profile not completed" do
+    @user.profile_completed = false
+    @user.is_anonymous = true
+    assert_not @user.using_anonymous_avatar?
+  end
+
+  # =========================================
+  # Anonymous Feature - Nickname Validation
+  # =========================================
+
+  test "nickname is required when profile completed" do
+    @user.profile_completed = true
+    @user.nickname = nil
+    assert_not @user.valid?
+    assert_validation_error @user, :nickname
+  end
+
+  test "nickname is not required when profile not completed" do
+    @user.profile_completed = false
+    @user.nickname = nil
+    assert @user.valid?
+  end
+
+  test "nickname must be unique when profile completed" do
+    # 먼저 다른 사용자의 닉네임 설정
+    other_user = users(:two)
+    other_user.update!(profile_completed: true, nickname: "고유닉네임")
+
+    @user.profile_completed = true
+    @user.nickname = "고유닉네임"
+    assert_not @user.valid?
+    assert_validation_error @user, :nickname, "이미 사용 중"
+  end
+
+  test "nickname must be 2-20 characters" do
+    @user.profile_completed = true
+
+    # 1자 - 실패
+    @user.nickname = "A"
+    assert_not @user.valid?
+    assert_validation_error @user, :nickname
+
+    # 21자 - 실패
+    @user.nickname = "A" * 21
+    assert_not @user.valid?
+    assert_validation_error @user, :nickname
+
+    # 2자 - 성공
+    @user.nickname = "AB"
+    assert @user.valid?
+
+    # 20자 - 성공
+    @user.nickname = "A" * 20
+    assert @user.valid?
+  end
+
+  test "avatar_type should be within valid range 0-3" do
+    @user.profile_completed = true
+    @user.nickname = "테스트닉네임"
+
+    (0..3).each do |type|
+      @user.avatar_type = type
+      assert @user.valid?, "avatar_type #{type} should be valid"
+    end
+  end
+
+  # =========================================
+  # Anonymous Feature - Edge Cases
+  # =========================================
+
+  test "display_name handles nil nickname gracefully" do
+    @user.profile_completed = true
+    @user.is_anonymous = true
+    # validation 우회하여 테스트
+    @user.instance_variable_set(:@nickname, nil)
+    @user.define_singleton_method(:nickname) { nil }
+
+    # name으로 fallback되거나 에러 없이 처리되어야 함
+    assert_nothing_raised { @user.display_name }
+  end
+
+  test "anonymous settings ignored when profile not completed" do
+    @user.profile_completed = false
+    @user.is_anonymous = true
+    @user.nickname = "무시될닉네임"
+
+    assert_equal @user.name, @user.display_name
+    assert_not @user.using_anonymous_avatar?
+  end
+
+  test "state transition from real name to anonymous reflects immediately" do
+    @user.profile_completed = true
+    @user.is_anonymous = false
+    assert_equal @user.name, @user.display_name
+
+    @user.is_anonymous = true
+    @user.nickname = "새닉네임"
+    assert_equal "새닉네임", @user.display_name
+  end
+
+  test "state transition from anonymous to real name reflects immediately" do
+    @user.profile_completed = true
+    @user.is_anonymous = true
+    @user.nickname = "익명닉네임"
+    assert_equal "익명닉네임", @user.display_name
+
+    @user.is_anonymous = false
+    assert_equal @user.name, @user.display_name
+  end
 end

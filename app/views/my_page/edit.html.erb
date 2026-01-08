@@ -2,26 +2,33 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3">
-      <div class="flex items-center gap-3">
-        <!-- 뒤로가기 버튼 -->
-        <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: my_page_path, action: "click->navigation#goBack" } do %>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        <% end %>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- 뒤로가기 버튼 -->
+          <%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: my_page_path, action: "click->navigation#goBack" } do %>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          <% end %>
 
-        <!-- 타이틀 -->
-        <div>
-          <h1 class="text-xl font-bold">프로필 수정</h1>
-          <p class="text-xs text-muted-foreground">프로필 정보를 수정하세요</p>
+          <!-- 타이틀 -->
+          <div>
+            <h1 class="text-xl font-bold">프로필 수정</h1>
+            <p class="text-xs text-muted-foreground">프로필 정보를 수정하세요</p>
+          </div>
         </div>
+
+        <!-- 저장 버튼 (우측) -->
+        <%= render_button type: :submit, form: "profile-edit-form", size: :sm, class: "px-4" do %>
+          저장
+        <% end %>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <%= form_with model: @user, url: my_page_path, method: :patch, local: true, class: "space-y-6" do |f| %>
+    <%= form_with model: @user, url: my_page_path, method: :patch, local: true, id: "profile-edit-form", class: "space-y-6" do |f| %>
       <%# Error Messages - render_alert 헬퍼 사용 %>
       <% if @user.errors.any? %>
         <%= render_alert variant: :error, title: "오류가 발생했습니다:" do %>
@@ -33,16 +40,36 @@
         <% end %>
       <% end %>
 
-      <!-- Profile Image - render_user_avatar 헬퍼 사용 -->
-      <div class="rounded-xl border bg-card text-card-foreground p-6">
+      <!-- Profile Image - 이미지 미리보기 기능 -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6"
+           data-controller="image-preview"
+           data-image-preview-max-size-value="2097152">
         <h3 class="text-lg font-semibold mb-4">프로필 사진</h3>
         <div class="flex items-center gap-6">
-          <%= render_user_avatar(@user, size: :xl, class: "flex-shrink-0") %>
+          <%# 프로필 이미지 미리보기 영역 %>
+          <div class="h-24 w-24 rounded-full overflow-hidden flex-shrink-0 bg-secondary flex items-center justify-center">
+            <% if @user.avatar.attached? %>
+              <%= image_tag @user.avatar, alt: @user.display_name,
+                            class: "h-full w-full object-cover",
+                            data: { image_preview_target: "preview" } %>
+            <% elsif @user.avatar_url.present? %>
+              <%= image_tag @user.avatar_url, alt: @user.display_name,
+                            class: "h-full w-full object-cover",
+                            data: { image_preview_target: "preview" } %>
+            <% else %>
+              <%# 기존 아바타가 없을 때 placeholder + 미리보기 이미지 %>
+              <span class="text-3xl font-semibold text-muted-foreground"
+                    data-image-preview-target="placeholder"><%= @user.display_name[0] %></span>
+              <img src="" alt="미리보기" class="h-full w-full object-cover hidden"
+                   data-image-preview-target="preview">
+            <% end %>
+          </div>
           <div class="flex-1">
             <label class="block mb-2">
               <span class="text-sm font-medium text-foreground">새 프로필 사진 업로드</span>
               <%= f.file_field :avatar,
                   accept: "image/*",
+                  data: { image_preview_target: "input", action: "change->image-preview#preview" },
                   class: "mt-2 block w-full text-sm text-muted-foreground
                          file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
                          file:text-sm file:font-medium file:bg-primary file:text-primary-foreground
@@ -53,21 +80,127 @@
         </div>
       </div>
 
-      <!-- Cover Image -->
-      <div class="rounded-xl border bg-card text-card-foreground p-6">
+      <!-- 익명 설정 -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6 space-y-4"
+           data-controller="anonymous-settings">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold">익명 설정</h3>
+            <p class="text-sm text-muted-foreground">커뮤니티에서 익명으로 활동할 수 있습니다</p>
+          </div>
+          <%# 현재 표시 이름 미리보기 %>
+          <div class="text-right">
+            <p class="text-xs text-muted-foreground">현재 표시 이름</p>
+            <p class="font-semibold text-foreground" data-anonymous-settings-target="preview">
+              <%= @user.display_name %>
+            </p>
+          </div>
+        </div>
+
+        <%# 익명 모드 토글 %>
+        <div class="flex items-center gap-3 p-4 rounded-lg border border-border bg-secondary/30">
+          <label class="flex items-center gap-3 cursor-pointer flex-1">
+            <%= f.check_box :is_anonymous,
+                            checked: @user.is_anonymous?,
+                            data: { anonymous_settings_target: "toggle", action: "change->anonymous-settings#toggleMode" },
+                            class: "h-5 w-5 rounded text-primary focus:ring-primary border-border cursor-pointer" %>
+            <div>
+              <span class="font-medium text-foreground">익명 모드 활성화</span>
+              <p class="text-xs text-muted-foreground">
+                활성화하면 닉네임과 익명 아바타로 활동합니다
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <%# 닉네임 입력 (익명 모드일 때만 표시) %>
+        <div data-anonymous-settings-target="nicknameSection"
+             class="<%= @user.is_anonymous? ? '' : 'hidden' %> space-y-4 pt-4 border-t border-border">
+
+          <%# 닉네임 %>
+          <div class="space-y-2">
+            <%= render_label name: "user[nickname]", label: "닉네임" %>
+            <div class="relative">
+              <%= render_input name: "user[nickname]",
+                              type: :text,
+                              id: "user_nickname",
+                              value: @user.nickname,
+                              placeholder: "익명 활동 시 표시될 닉네임",
+                              maxlength: 20,
+                              data: { anonymous_settings_target: "nickname", action: "input->anonymous-settings#updatePreview" },
+                              class: "w-full pr-12" %>
+              <button type="button"
+                      data-action="click->anonymous-settings#regenerateNickname"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-xl hover:scale-110 transition-transform"
+                      title="새로운 닉네임 생성">
+                <span class="text-muted-foreground hover:text-primary">&#x1F3B2;</span>
+              </button>
+            </div>
+            <p class="text-xs text-muted-foreground">2~20자 이내로 입력하세요</p>
+          </div>
+
+          <%# 익명 프로필 선택 %>
+          <div class="space-y-2">
+            <%= render_label name: "user[avatar_type]", label: "익명 프로필" %>
+            <div class="flex justify-start gap-3">
+              <% (0..3).each do |index| %>
+                <button type="button"
+                        data-anonymous-settings-target="avatar"
+                        data-avatar-index="<%= index %>"
+                        data-action="click->anonymous-settings#selectAvatar"
+                        class="w-14 h-14 rounded-full overflow-hidden transition-all duration-200 cursor-pointer
+                               flex items-center justify-center bg-white border border-gray-200
+                               <%= @user.avatar_type == index ? 'ring-4 ring-primary/50 scale-110' : 'opacity-60 grayscale hover:opacity-100 hover:grayscale-0' %>"
+                        aria-label="익명 프로필 <%= index + 1 %> 선택">
+                  <%= image_tag "/anonymous#{index + 1}-.png",
+                                alt: "익명 아바타 #{index + 1}",
+                                class: "w-full h-full object-cover" %>
+                </button>
+              <% end %>
+            </div>
+            <%= f.hidden_field :avatar_type,
+                               value: @user.avatar_type || 0,
+                               data: { anonymous_settings_target: "avatarInput" } %>
+            <p class="text-xs text-muted-foreground">
+              익명 모드에서 사용할 아바타를 선택하세요
+            </p>
+          </div>
+        </div>
+
+        <%# 안내 메시지 %>
+        <div class="text-xs text-muted-foreground bg-secondary/50 rounded-lg p-3">
+          <p class="font-medium text-foreground mb-1">익명 모드란?</p>
+          <ul class="space-y-1">
+            <li>- 게시글, 댓글, 채팅에서 닉네임으로 표시됩니다</li>
+            <li>- 다른 사용자가 내 프로필을 볼 때 제한된 정보만 보입니다</li>
+            <li>- 언제든지 실명 모드로 전환할 수 있습니다</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Cover Image - 이미지 미리보기 기능 -->
+      <div class="rounded-xl border bg-card text-card-foreground p-6"
+           data-controller="image-preview"
+           data-image-preview-max-size-value="5242880">
         <h3 class="text-lg font-semibold mb-4">커버 이미지</h3>
         <p class="text-sm text-muted-foreground mb-4">프로필 상단에 표시되는 배경 이미지입니다.</p>
 
-        <%# 현재 커버 이미지 미리보기 %>
+        <%# 커버 이미지 미리보기 영역 %>
         <div class="mb-4 rounded-xl overflow-hidden h-32 relative">
           <% if @user.has_cover_image? %>
-            <%= image_tag @user.cover_image, alt: "현재 커버 이미지", class: "w-full h-full object-cover" %>
+            <%= image_tag @user.cover_image, alt: "현재 커버 이미지",
+                          class: "w-full h-full object-cover",
+                          data: { image_preview_target: "preview" } %>
           <% else %>
-            <div class="w-full h-full bg-gradient-to-r <%= @user.cover_gradient %>">
+            <%# 기존 이미지가 없을 때 placeholder + 미리보기 이미지 %>
+            <div class="w-full h-full bg-gradient-to-r <%= @user.cover_gradient %>"
+                 data-image-preview-target="placeholder">
               <div class="absolute inset-0 flex items-center justify-center text-stone-400 text-sm">
                 기본 그라디언트 (커버 이미지를 업로드하면 변경됩니다)
               </div>
             </div>
+            <img src="" alt="커버 미리보기" class="w-full h-full object-cover absolute inset-0 hidden"
+                 data-image-preview-target="preview">
           <% end %>
         </div>
 
@@ -76,6 +209,7 @@
             <span class="text-sm font-medium text-foreground">새 커버 이미지 업로드</span>
             <%= f.file_field :cover_image,
                 accept: "image/jpeg,image/png,image/gif,image/webp",
+                data: { image_preview_target: "input", action: "change->image-preview#preview" },
                 class: "mt-2 block w-full text-sm text-muted-foreground
                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
                        file:text-sm file:font-medium file:bg-primary file:text-primary-foreground
@@ -580,15 +714,6 @@
         </div>
       </div>
 
-      <!-- Submit Buttons -->
-      <div class="flex gap-3">
-        <%= render_button variant: :outline, as: :link, href: my_page_path, class: "flex-1 h-11" do %>
-          취소
-        <% end %>
-        <%= render_button class: "flex-1 h-11" do %>
-          저장
-        <% end %>
-      </div>
     <% end %>
   </main>
 

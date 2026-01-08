@@ -10,19 +10,19 @@
   <div class="flex justify-center mb-3">
     <div class="h-16 w-16 rounded-full overflow-hidden bg-secondary flex items-center justify-center ring-2 ring-white shadow group-hover:ring-primary/20 transition-all">
       <% if user.avatar.attached? %>
-        <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+        <%= image_tag user.avatar, alt: user.display_name, class: "h-full w-full object-cover" %>
       <% elsif user.avatar_url.present? %>
-        <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
-        <span class="text-xl font-semibold text-muted-foreground hidden items-center justify-center"><%= user.name&.first&.upcase || "?" %></span>
+        <%= image_tag user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+        <span class="text-xl font-semibold text-muted-foreground hidden items-center justify-center"><%= user.display_name&.first&.upcase || "?" %></span>
       <% else %>
-        <span class="text-xl font-semibold text-muted-foreground"><%= user.name&.first&.upcase || "?" %></span>
+        <span class="text-xl font-semibold text-muted-foreground"><%= user.display_name&.first&.upcase || "?" %></span>
       <% end %>
     </div>
   </div>
 
   <!-- 이름 & 역할 -->
   <div class="text-center mb-2">
-    <p class="font-semibold text-foreground text-sm truncate group-hover:text-primary transition-colors"><%= user.name %></p>
+    <p class="font-semibold text-foreground text-sm truncate group-hover:text-primary transition-colors"><%= user.display_name %></p>
     <% if user.role_title.present? %>
       <p class="text-xs text-muted-foreground truncate"><%= user.role_title %></p>
     <% end %>

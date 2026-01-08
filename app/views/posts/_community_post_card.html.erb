@@ -13,7 +13,7 @@
       <%= render_user_avatar(post.user, size: "md", ring: "ring-2 ring-background group-hover:ring-primary/20 transition-all") %>
       <div class="flex-1">
         <div class="flex items-center gap-2">
-          <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.name %></h3>
+          <h3 class="font-semibold group-hover:text-primary transition-colors"><%= post.user.display_name %></h3>
           <% if post.user.role_title.present? %>
             <%= render_badge post.user.role_title, variant: :secondary, class: "text-xs" %>
           <% end %>

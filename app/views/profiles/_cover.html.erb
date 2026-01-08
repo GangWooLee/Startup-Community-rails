@@ -7,7 +7,7 @@
   <% if user.has_cover_image? %>
     <%# 업로드된 커버 이미지 %>
     <%= image_tag user.cover_image,
-        alt: "#{user.name}님의 커버 이미지",
+        alt: "#{user.display_name}님의 커버 이미지",
         class: "w-full h-full object-cover" %>
   <% else %>
     <%# Organic Gradient Pattern %>

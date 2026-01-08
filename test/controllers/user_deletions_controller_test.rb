@@ -197,9 +197,12 @@ class UserDeletionsControllerTest < ActionDispatch::IntegrationTest
 
   test "create accepts privacy_concern reason category" do
     user = User.create!(
-      email: "test_privacy@test.com",
+      email: "test_privacy_#{SecureRandom.hex(4)}@test.com",
       password: @password,
-      name: "Test Privacy"
+      name: "Test Privacy",
+      profile_completed: true,
+      nickname: "프라이버시#{SecureRandom.hex(4)}",
+      avatar_type: 0
     )
     log_in_as(user)
 
@@ -213,9 +216,12 @@ class UserDeletionsControllerTest < ActionDispatch::IntegrationTest
 
   test "create accepts other reason category" do
     user = User.create!(
-      email: "test_other@test.com",
+      email: "test_other_#{SecureRandom.hex(4)}@test.com",
       password: @password,
-      name: "Test Other"
+      name: "Test Other",
+      profile_completed: true,
+      nickname: "기타#{SecureRandom.hex(4)}",
+      avatar_type: 0
     )
     log_in_as(user)
 
@@ -458,7 +464,10 @@ class UserDeletionsControllerTest < ActionDispatch::IntegrationTest
       email: "oauth_test_#{SecureRandom.hex(4)}@gmail.com",
       password: "temporary_password",  # 초기 설정용
       name: "OAuth Only User",
-      provider: "google"  # oauth_only? 조건 충족
+      provider: "google",  # oauth_only? 조건 충족
+      profile_completed: true,
+      nickname: "OAuth#{SecureRandom.hex(4)}",
+      avatar_type: 0
     )
 
     # OAuth identity 추가

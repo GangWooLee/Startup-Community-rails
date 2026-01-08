@@ -114,6 +114,13 @@ class User < ApplicationRecord
     if: -> { password.present? && provider.blank? }
   validate :password_complexity, if: -> { password.present? && provider.blank? }
   validates :bio, length: { maximum: 500 }, allow_blank: true
+
+  # 익명 프로필 닉네임 유효성 검사 (프로필 완료 시에만)
+  validates :nickname,
+    presence: { message: "을(를) 입력해주세요" },
+    uniqueness: { message: "이(가) 이미 사용 중입니다" },
+    length: { minimum: 2, maximum: 20, message: "은(는) 2자 이상 20자 이하여야 합니다" },
+    if: :profile_completed?
   validates :role_title, length: { maximum: 50 }, allow_blank: true
   validates :affiliation, length: { maximum: 50 }, allow_blank: true
   validates :skills, length: { maximum: 200 }, allow_blank: true
@@ -305,6 +312,36 @@ class User < ApplicationRecord
     elsif avatar_url.present?
       avatar_url
     end
+  end
+
+  # ==========================================================================
+  # 익명 프로필 시스템
+  # ==========================================================================
+
+  # 커뮤니티에서 표시될 이름 (익명 모드 시 닉네임 사용)
+  def display_name
+    return name unless profile_completed?
+    is_anonymous? ? nickname : name
+  end
+
+  # 커뮤니티에서 표시될 아바타 경로
+  # 익명 모드: public 폴더의 익명 아바타 (avatar_type 0-3 → anonymous1-4)
+  # 실명 모드: 업로드한 아바타 또는 OAuth 아바타
+  def display_avatar_path
+    if profile_completed? && is_anonymous?
+      "/anonymous#{avatar_type + 1}-.png"
+    elsif avatar.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true)
+    elsif avatar_url.present?
+      avatar_url
+    else
+      nil
+    end
+  end
+
+  # 익명 아바타 사용 중인지 확인
+  def using_anonymous_avatar?
+    profile_completed? && is_anonymous?
   end
 
   # 프로필 이미지가 있는지 확인

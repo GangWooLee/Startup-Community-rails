@@ -69,9 +69,9 @@
         <%# 아바타 (24x24 = 96px) %>
         <div class="w-24 h-24 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mx-auto mb-5 ring-4 ring-white/30 shadow-xl">
           <% if user.avatar.attached? %>
-            <%= image_tag user.avatar, alt: user.name, class: "h-full w-full object-cover" %>
+            <%= image_tag user.avatar, alt: user.display_name, class: "h-full w-full object-cover" %>
           <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-            <%= image_tag user.avatar_url, alt: user.name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+            <%= image_tag user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
             <span class="text-4xl hidden items-center justify-center"><%= role_emoji %></span>
           <% else %>
             <span class="text-4xl"><%= role_emoji %></span>
@@ -79,7 +79,7 @@
         </div>
 
         <%# 이름 %>
-        <h2 class="text-2xl font-bold mb-2"><%= user.name %></h2>
+        <h2 class="text-2xl font-bold mb-2"><%= user.display_name %></h2>
 
         <%# 역할 뱃지 %>
         <% if user.role_title.present? %>

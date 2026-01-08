@@ -25,16 +25,16 @@
         <div class="w-9 h-9 rounded-full bg-stone-200 overflow-hidden flex-shrink-0
                     ring-2 ring-white shadow-sm">
           <% if current_user.avatar.attached? %>
-            <%= image_tag current_user.avatar, alt: current_user.name,
+            <%= image_tag current_user.avatar, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% elsif current_user.avatar_url.present? %>
-            <%= image_tag current_user.avatar_url, alt: current_user.name,
+            <%= image_tag current_user.avatar_url, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% else %>
             <div class="w-full h-full flex items-center justify-center
                         bg-gradient-to-br from-orange-400 to-rose-400
                         text-white font-bold text-sm">
-              <%= current_user.name[0].upcase %>
+              <%= current_user.display_name[0].upcase %>
             </div>
           <% end %>
         </div>
@@ -42,7 +42,7 @@
         <%# Name + Role %>
         <div class="flex-1 min-w-0 text-left">
           <p class="text-sm font-medium text-stone-800 truncate">
-            <%= current_user.name %>
+            <%= current_user.display_name %>
           </p>
           <p class="text-xs text-stone-400 truncate">
             <%= current_user.role_title.presence || current_user.email.truncate(20) %>
@@ -105,20 +105,20 @@
     <div class="hidden justify-center" data-sidebar-collapse-target="collapsedContent">
       <%= link_to my_page_path,
           class: "block p-1 rounded-lg hover:bg-stone-50 transition-colors",
-          title: current_user.name do %>
+          title: current_user.display_name do %>
         <div class="w-9 h-9 rounded-full bg-stone-200 overflow-hidden
                     ring-2 ring-white shadow-sm">
           <% if current_user.avatar.attached? %>
-            <%= image_tag current_user.avatar, alt: current_user.name,
+            <%= image_tag current_user.avatar, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% elsif current_user.avatar_url.present? %>
-            <%= image_tag current_user.avatar_url, alt: current_user.name,
+            <%= image_tag current_user.avatar_url, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% else %>
             <div class="w-full h-full flex items-center justify-center
                         bg-gradient-to-br from-orange-400 to-rose-400
                         text-white font-bold text-sm">
-              <%= current_user.name[0].upcase %>
+              <%= current_user.display_name[0].upcase %>
             </div>
           <% end %>
         </div>

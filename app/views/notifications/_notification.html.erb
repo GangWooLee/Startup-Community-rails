@@ -12,23 +12,27 @@
       class: "flex items-start gap-3 p-4",
       data: { turbo_method: :get } do %>
 
-    <%# 액터 아바타 %>
+    <%# 액터 아바타 (익명 사용자는 익명 아바타 표시) %>
     <div class="flex-shrink-0 relative">
-      <% if notification.actor.has_profile_image? %>
+      <% if notification.actor.using_anonymous_avatar? %>
+        <%= image_tag notification.actor.display_avatar_path,
+            class: "w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-sm",
+            alt: notification.actor.display_name %>
+      <% elsif notification.actor.has_profile_image? %>
         <% if notification.actor.avatar.attached? %>
           <%= image_tag notification.actor.avatar,
               class: "w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-sm",
-              alt: notification.actor.name %>
+              alt: notification.actor.display_name %>
         <% else %>
           <img src="<%= notification.actor.avatar_url %>"
                class="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-sm"
-               alt="<%= notification.actor.name %>">
+               alt="<%= notification.actor.display_name %>">
         <% end %>
       <% else %>
         <div class="w-11 h-11 rounded-full bg-gradient-to-br from-stone-200 to-stone-300
                     flex items-center justify-center ring-2 ring-white shadow-sm">
           <span class="text-sm font-semibold text-stone-600">
-            <%= notification.actor.name&.first&.upcase %>
+            <%= notification.actor.display_name&.first&.upcase %>
           </span>
         </div>
       <% end %>
@@ -52,7 +56,7 @@
     <%# 알림 내용 %>
     <div class="flex-1 min-w-0">
       <p class="text-sm text-stone-800">
-        <span class="font-semibold"><%= notification.actor.name %></span>
+        <span class="font-semibold"><%= notification.actor.display_name %></span>
         <span class="text-stone-500"><%= notification_action_text(notification.action) %></span>
       </p>
 

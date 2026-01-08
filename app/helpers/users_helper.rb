@@ -4,8 +4,10 @@ module UsersHelper
   # 탈퇴 회원 기본 표시 이름
   DELETED_USER_NAME = "(탈퇴한 회원)".freeze
 
-  # 사용자 이름 표시
-  # 탈퇴한 회원은 "(탈퇴한 회원)"으로 표시
+  # 사용자 이름 표시 (커뮤니티용)
+  # - 탈퇴한 회원: "(탈퇴한 회원)"
+  # - 익명 모드: 닉네임 (UD#1234)
+  # - 실명 모드: 실제 이름
   #
   # @param user [User, nil] 사용자 객체
   # @return [String] 표시할 이름
@@ -13,7 +15,7 @@ module UsersHelper
     return DELETED_USER_NAME if user.nil?
     return DELETED_USER_NAME if user.deleted?
 
-    user.name
+    user.display_name
   end
 
   # 탈퇴 회원용 아바타 렌더링
@@ -77,7 +79,7 @@ module UsersHelper
     if user.nil? || user.deleted?
       content_tag(:span, DELETED_USER_NAME, class: "text-gray-400")
     else
-      link_to user.name, profile_path(user), class: css_class
+      link_to user.display_name, profile_path(user), class: css_class
     end
   end
 
@@ -98,7 +100,7 @@ module UsersHelper
     avatar_html = display_user_avatar(user, size: size)
 
     name_html = if with_link && user.present? && !user.deleted?
-      link_to user.name, profile_path(user), class: "hover:underline font-medium"
+      link_to user.display_name, profile_path(user), class: "hover:underline font-medium"
     else
       content_tag(:span, display_user_name(user), class: user&.deleted? ? "text-gray-400" : "font-medium")
     end

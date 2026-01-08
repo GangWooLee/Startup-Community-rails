@@ -28,7 +28,7 @@
     <div class="flex-1 min-w-0">
       <%# [A] 유저네임 + 댓글 내용 (Inline) %>
       <p class="text-sm leading-snug">
-        <%= link_to comment.user.name, profile_path(comment.user), class: "font-semibold text-foreground hover:underline mr-1" %><span class="text-foreground break-words"><%= comment.content %></span>
+        <%= link_to comment.user.display_name, profile_path(comment.user), class: "font-semibold text-foreground hover:underline mr-1" %><span class="text-foreground break-words"><%= comment.content %></span>
       </p>
 
       <%# [B] 메타데이터 Row: 시간 - 좋아요 수 - 답글 달기 - 삭제 %>
@@ -89,7 +89,7 @@
                 data-action="input->comment-form#input keydown.enter->comment-form#submitOnEnter"
                 rows="1"
                 maxlength="1000"
-                placeholder="@<%= comment.user.name %>에게 답글 작성..."
+                placeholder="@<%= comment.user.display_name %>에게 답글 작성..."
                 class="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               ></textarea>
               <div class="flex items-center justify-end gap-2 mt-2">
