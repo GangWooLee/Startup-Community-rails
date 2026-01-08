@@ -4,7 +4,7 @@
 - **프로젝트**: Startup Community Platform
 - **DBMS**: SQLite3 (dev) / PostgreSQL (prod)
 - **ORM**: ActiveRecord (Rails 8.1)
-- **업데이트**: 2025-12-31
+- **업데이트**: 2026-01-08
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## 문서 정보
 - **프로젝트**: Startup Community Platform
-- **업데이트**: 2025-12-31
+- **업데이트**: 2026-01-08
 
 ---
 
@@ -139,12 +139,26 @@
 
 ## 현재 진행 중인 작업 🔄
 
-### 외주 시스템 Post 모델 통합 (50% → 80%)
+### 이메일 인증 시스템 ✅ 완료 (2026-01-07)
+- [x] ✅ EmailVerification 모델 생성
+- [x] ✅ Resend HTTP API 연동
+- [x] ✅ 6자리 인증 코드, 10분 만료
+- [x] ✅ 에러 처리 및 Sentry 연동
+- [x] ✅ Stimulus 컨트롤러 (email_verification)
+
+### 프로덕션 배포 ✅ 완료 (2026-01-06)
+- [x] ✅ Kamal 배포 설정
+- [x] ✅ 도메인 연결 (undrewai.com)
+- [x] ✅ SSL 인증서
+- [x] ✅ 환경변수 설정 (production)
+- [x] ✅ Sentry 에러 트래킹
+
+### 외주 시스템 Post 모델 통합 (75%)
 - [x] ✅ Post 모델에 hiring/seeking 카테고리 추가
-- [ ] 🔄 job_posts/index에서 Post 모델 사용
-- [ ] 📋 구인/구직 전용 필드 추가 (budget, duration, skills_required)
+- [x] ✅ job_posts/index에서 Post 모델 사용
 - [ ] 📋 지원/문의 기능
 - [ ] 📋 외주 글 필터링 UI 개선
+- [ ] 📋 정산 시스템
 
 ### N+1 쿼리 최적화
 - [ ] 📋 Bullet gem 적용
@@ -156,12 +170,12 @@
 
 ## 향후 계획 📋
 
-### 프로덕션 배포 준비
-- [ ] 📋 SQLite → PostgreSQL 전환
-- [ ] 📋 환경변수 설정 (production)
-- [ ] 📋 Kamal 배포 설정
-- [ ] 📋 도메인 연결
-- [ ] 📋 SSL 인증서
+### 프로덕션 배포 ✅ 완료
+- [x] ✅ Kamal 배포 설정
+- [x] ✅ 환경변수 설정 (production)
+- [x] ✅ 도메인 연결 (undrewai.com)
+- [x] ✅ SSL 인증서
+- [x] ✅ Sentry 에러 트래킹
 
 ### Phase 3: 기능 확장
 - [ ] ⏸️ 실시간 알림 (WebSocket)
@@ -175,13 +189,28 @@
 
 ### 인프라 & DevOps
 - [ ] ⏸️ CI/CD 파이프라인 (GitHub Actions)
-- [ ] ⏸️ 모니터링 (Sentry, New Relic)
+- [x] ✅ 모니터링 (Sentry) - 완료
 - [ ] ⏸️ CDN 설정 (CloudFlare)
 - [ ] ⏸️ 백업 자동화
 
 ---
 
 ## 최근 작업 로그
+
+### 2026-01-08
+- ✅ Claude Code rules 대폭 확장 (53줄 → 1,152줄)
+- ✅ .claude/ 문서 최신성 업데이트
+
+### 2026-01-07
+- ✅ Resend HTTP API 이메일 서비스 연동 (프로덕션)
+- ✅ 이메일 인증 에러 처리 및 Sentry 연동
+- ✅ Resend 전용 initializer 추가
+
+### 2026-01-06
+- ✅ 채팅 시스템 최적화 및 버그 수정
+- ✅ GA4 맞춤 이벤트 12개 구현
+- ✅ Plan Mode 규칙 추가 (TDD, Quality Gate)
+- ✅ Kaminari pagination initializer 추가
 
 ### 2025-12-31
 - ✅ Agent OS/Design OS 기반 .claude 폴더 구조 개선
@@ -245,7 +274,7 @@
 
 ---
 
-## 기능 완성도 현황 (업데이트: 2026-01-01)
+## 기능 완성도 현황 (업데이트: 2026-01-08)
 
 | 기능 | 완성도 | 상태 | 완성된 기능 | 미완성 기능 |
 |------|--------|------|------------|------------|
@@ -257,6 +286,7 @@
 | 검색 | 90% | ✅ | 실시간 라이브 검색, 사용자/게시글, 카테고리 필터, 페이지네이션 | 자동완성, 고급 필터 |
 | 외주 | 75% | ⚠️ | Post 통합(hiring/seeking), Toss 결제, Order/Payment, 채팅 거래 | 지원 버튼, 정산, 리뷰 |
 | 회원 탈퇴 | 95% | ✅ | 즉시 익명화, AES-256 암호화, 5년 보관, 자동 파기, 관리자 열람 로그 | 복구 옵션, 데이터 내보내기 |
+| 이메일 인증 | 95% | ✅ | Resend HTTP API, 6자리 코드, 10분 만료, 에러 처리, Sentry 연동 | 재발송 횟수 제한 |
 
 ### 완성도 산정 기준
 
