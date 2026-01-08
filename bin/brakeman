@@ -2,6 +2,7 @@
 require "rubygems"
 require "bundler/setup"
 
-ARGV.unshift("--ensure-latest")
+# Note: Removed --ensure-latest to prevent CI failures when new version is released
+# Update brakeman regularly via Dependabot instead
 
 load Gem.bin_path("brakeman", "brakeman")
