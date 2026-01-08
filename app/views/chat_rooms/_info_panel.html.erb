@@ -9,7 +9,9 @@
     <div class="p-6 text-center">
       <%# 프로필 이미지 (80px) %>
       <div class="w-20 h-20 rounded-full ring-4 ring-stone-100 overflow-hidden mx-auto mb-4 bg-stone-100">
-        <% if other_user.avatar.attached? %>
+        <% if other_user.using_anonymous_avatar? %>
+          <%= image_tag "/anonymous#{other_user.avatar_type.to_i + 1}-.png", alt: other_user.display_name, class: "h-full w-full object-cover" %>
+        <% elsif other_user.avatar.attached? %>
           <%= image_tag other_user.avatar, alt: other_user.display_name, class: "h-full w-full object-cover" %>
         <% elsif other_user.avatar_url.present? %>
           <%= image_tag other_user.avatar_url, alt: other_user.display_name, class: "h-full w-full object-cover" %>

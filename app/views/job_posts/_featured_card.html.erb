@@ -55,7 +55,9 @@
       <div class="flex items-center gap-4">
         <div class="relative">
           <div class="w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/30 bg-white/10">
-            <% if post.user.avatar.attached? %>
+            <% if post.user.using_anonymous_avatar? %>
+              <%= image_tag "/anonymous#{post.user.avatar_type.to_i + 1}-.png", class: "w-full h-full object-cover" %>
+            <% elsif post.user.avatar.attached? %>
               <%= image_tag post.user.avatar, class: "w-full h-full object-cover" %>
             <% elsif post.user.avatar_url.present? %>
               <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>

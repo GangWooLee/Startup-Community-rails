@@ -52,16 +52,20 @@
           <% rank = index + 1 %>
           <%= link_to profile_path(maker), class: "flex items-center gap-3 p-2 rounded-xl hover:bg-stone-50 transition-colors cursor-pointer group" do %>
             <div class="relative">
-              <%# Avatar %>
-              <% if maker.avatar.attached? %>
-                <%= image_tag maker.avatar, alt: maker.display_name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
-              <% elsif maker.avatar_url.present? %>
-                <%= image_tag maker.avatar_url, alt: maker.display_name, class: "w-10 h-10 rounded-full object-cover ring-2 #{rank_ring_color(rank)}" %>
-              <% else %>
-                <div class="w-10 h-10 rounded-full ring-2 <%= rank_ring_color(rank) %> bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-sm">
-                  <%= maker.display_name[0].upcase %>
-                </div>
-              <% end %>
+              <%# Avatar with proper overflow-hidden container %>
+              <div class="w-10 h-10 rounded-full ring-2 <%= rank_ring_color(rank) %> overflow-hidden flex-shrink-0">
+                <% if maker.using_anonymous_avatar? %>
+                  <%= image_tag "/anonymous#{maker.avatar_type.to_i + 1}-.png", alt: maker.display_name, class: "w-full h-full object-cover" %>
+                <% elsif maker.avatar.attached? %>
+                  <%= image_tag maker.avatar, alt: maker.display_name, class: "w-full h-full object-cover" %>
+                <% elsif maker.avatar_url.present? %>
+                  <%= image_tag maker.avatar_url, alt: maker.display_name, class: "w-full h-full object-cover" %>
+                <% else %>
+                  <div class="w-full h-full bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-sm">
+                    <%= maker.display_name[0].upcase %>
+                  </div>
+                <% end %>
+              </div>
               <%# Rank Badge %>
               <div class="absolute -top-1 -right-1 w-4 h-4 <%= rank_badge_color(rank) %> text-white rounded-full flex items-center justify-center text-[9px] font-bold ring-2 ring-white">
                 <%= rank %>

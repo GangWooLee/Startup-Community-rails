@@ -24,7 +24,10 @@
         <%# Avatar %>
         <div class="w-9 h-9 rounded-full bg-stone-200 overflow-hidden flex-shrink-0
                     ring-2 ring-white shadow-sm">
-          <% if current_user.avatar.attached? %>
+          <% if current_user.using_anonymous_avatar? %>
+            <%= image_tag "/anonymous#{current_user.avatar_type.to_i + 1}-.png", alt: current_user.display_name,
+                class: "w-full h-full object-cover" %>
+          <% elsif current_user.avatar.attached? %>
             <%= image_tag current_user.avatar, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% elsif current_user.avatar_url.present? %>
@@ -108,7 +111,10 @@
           title: current_user.display_name do %>
         <div class="w-9 h-9 rounded-full bg-stone-200 overflow-hidden
                     ring-2 ring-white shadow-sm">
-          <% if current_user.avatar.attached? %>
+          <% if current_user.using_anonymous_avatar? %>
+            <%= image_tag "/anonymous#{current_user.avatar_type.to_i + 1}-.png", alt: current_user.display_name,
+                class: "w-full h-full object-cover" %>
+          <% elsif current_user.avatar.attached? %>
             <%= image_tag current_user.avatar, alt: current_user.display_name,
                 class: "w-full h-full object-cover" %>
           <% elsif current_user.avatar_url.present? %>

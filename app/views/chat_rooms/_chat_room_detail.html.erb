@@ -42,8 +42,16 @@
                   data: { turbo_stream: true } do %>
         <!-- 프로필 이미지 (익명 모드 지원) -->
         <div class="relative flex-shrink-0">
-          <div class="w-12 h-12 rounded-full ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all overflow-hidden">
-            <%= render "shared/avatar", user: other_user, size: "md", class: "w-full h-full" %>
+          <div class="w-12 h-12 rounded-full ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all overflow-hidden flex items-center justify-center bg-secondary">
+            <% if other_user.using_anonymous_avatar? %>
+              <%= image_tag "/anonymous#{other_user.avatar_type.to_i + 1}-.png", alt: other_user.display_name, class: "w-full h-full object-cover" %>
+            <% elsif other_user.avatar.attached? %>
+              <%= image_tag other_user.avatar, alt: other_user.display_name, class: "w-full h-full object-cover" %>
+            <% elsif other_user.avatar_url.present? %>
+              <%= image_tag other_user.avatar_url, alt: other_user.display_name, class: "w-full h-full object-cover" %>
+            <% else %>
+              <span class="text-xl font-semibold text-muted-foreground"><%= other_user.display_name[0] %></span>
+            <% end %>
           </div>
         </div>
 
