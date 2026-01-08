@@ -135,8 +135,9 @@ class ApplicationController < ActionController::Base
     return if skip_profile_setup?
     return if current_user.profile_completed?
 
-    # 원래 가려던 곳 저장 (GET 요청만)
-    store_location if request.get?
+    # 원래 가려던 곳 저장 (GET/HEAD 요청만)
+    # HEAD 요청도 GET과 동일하게 라우팅되므로 포함
+    store_location if request.get? || request.head?
 
     Rails.logger.info "[PROFILE] User##{current_user.id} redirected to profile setup"
     redirect_to profile_setup_path
