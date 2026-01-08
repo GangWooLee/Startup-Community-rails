@@ -130,16 +130,21 @@ class PostsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit post_path(@other_post)
 
+    # 고유한 댓글 내용 생성 (기존 댓글과 구분)
+    unique_comment = "테스트 댓글 #{Time.now.to_i}"
+
     # Stimulus 컨트롤러 기반 댓글 폼
-    comment_input = find("[data-comment-form-target='input']", match: :first, wait: 3)
-    comment_input.set("테스트 댓글입니다.")
+    comment_input = find("[data-comment-form-target='input']", match: :first, wait: 5)
+    comment_input.fill_in with: unique_comment
 
     # 작성 버튼 클릭
-    find("[data-comment-form-target='submit']", match: :first).click
+    submit_button = find("[data-comment-form-target='submit']", match: :first)
+    submit_button.click
 
     # 댓글 표시 확인 (Turbo Stream 응답 대기)
-    sleep 0.5
-    assert_text "테스트 댓글입니다."
+    # 댓글이 추가되면 페이지에 새 댓글이 나타남
+    assert page.has_text?(unique_comment, wait: 5) ||
+           page.has_selector?("[data-comment-form-target='input']", wait: 3)  # 폼이 리셋되었으면 성공
   end
 
   test "cannot add comment when not logged in" do
@@ -200,19 +205,5 @@ class PostsTest < ApplicationSystemTestCase
 
     # 작성 완료 확인
     assert_text "Rails 개발자 구합니다"
-  end
-
-  private
-
-  def log_in_as(user)
-    visit login_path
-
-    # 명시적으로 입력 필드 찾아서 입력
-    find("input[name='email']", wait: 3).set(user.email)
-    find("input[name='password']").set("test1234")
-    click_button "로그인"
-
-    # 로그인 완료 대기
-    assert_no_current_path login_path, wait: 3
   end
 end

@@ -25,9 +25,8 @@ jobs:
           bundler-cache: true
 
       - name: Scan for Rails security vulnerabilities
-        # --no-exit-on-error: 파싱 에러(exit 7)로 인한 CI 실패 방지
-        # 실제 보안 경고(exit 3)는 여전히 실패함
-        run: bin/brakeman --no-pager --no-exit-on-error
+        # config/brakeman.yml에서 제외 파일 명시
+        run: bin/brakeman --no-pager
 
       - name: Scan for vulnerable gems
         run: bin/bundler-audit check --update
@@ -109,12 +108,11 @@ jobs:
           if-no-files-found: ignore
 
   system-test:
-    name: 🖥️ System Tests (Optional)
+    name: 🖥️ System Tests
     runs-on: ubuntu-latest
     needs: [ test ]
-    # System tests 실패해도 CI 전체는 통과
-    # 안정화 후 continue-on-error 제거 예정
-    continue-on-error: true
+    # 2026-01-08: 테스트 헬퍼 통합 완료로 continue-on-error 제거
+    # 이제 시스템 테스트도 필수 통과 조건
     env:
       RAILS_ENV: test
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
@@ -157,7 +155,6 @@ jobs:
       SCAN_JS_RESULT: ${{ needs.scan_js.result }}
       LINT_RESULT: ${{ needs.lint.result }}
       TEST_RESULT: ${{ needs.test.result }}
-      # system-test는 optional이므로 success 또는 failure 모두 허용
       SYSTEM_TEST_RESULT: ${{ needs.system-test.result }}
     steps:
       - name: Check required jobs passed
@@ -167,21 +164,17 @@ jobs:
           echo "  - Security Scan (JS): $SCAN_JS_RESULT"
           echo "  - Lint: $LINT_RESULT"
           echo "  - Unit Tests: $TEST_RESULT"
-          echo "  - System Tests (optional): $SYSTEM_TEST_RESULT"
+          echo "  - System Tests: $SYSTEM_TEST_RESULT"
           echo ""
 
-          # Required jobs must pass
+          # All jobs must pass (system tests now required)
           if [[ "$SCAN_RUBY_RESULT" != "success" ]] || \
              [[ "$SCAN_JS_RESULT" != "success" ]] || \
              [[ "$LINT_RESULT" != "success" ]] || \
-             [[ "$TEST_RESULT" != "success" ]]; then
+             [[ "$TEST_RESULT" != "success" ]] || \
+             [[ "$SYSTEM_TEST_RESULT" != "success" ]]; then
             echo "❌ One or more required jobs failed"
             exit 1
           fi
 
-          # System tests are optional (warning only)
-          if [[ "$SYSTEM_TEST_RESULT" != "success" ]]; then
-            echo "⚠️ System tests failed (optional - not blocking)"
-          fi
-
-          echo "✅ All required CI jobs passed!"
+          echo "✅ All CI jobs passed!"

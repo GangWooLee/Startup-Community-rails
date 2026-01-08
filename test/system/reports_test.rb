@@ -171,18 +171,4 @@ class ReportsTest < ApplicationSystemTestCase
       assert_selector "input[type='radio'][value='other']"
     end
   end
-
-  private
-
-  def log_in_as(user)
-    visit login_path
-
-    # 명시적으로 입력 필드 찾아서 입력
-    find("input[name='email']", wait: 3).set(user.email)
-    find("input[name='password']").set("test1234")
-    click_button "로그인"
-
-    # 로그인 완료 대기
-    assert_no_current_path login_path, wait: 3
-  end
 end
