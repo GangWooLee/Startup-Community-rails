@@ -40,7 +40,10 @@ class EmailVerificationsController < ApplicationController
         message: "인증 코드를 발송했습니다."
       }
     rescue StandardError => e
-      # 실제 에러 로깅 (Sentry + Rails 로그)
+      # Sentry에 에러 전송 (대시보드에서 확인 가능)
+      Sentry.capture_exception(e)
+
+      # 실제 에러 로깅 (Rails 로그)
       Rails.logger.error "[EmailVerification] 이메일 발송 실패: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace&.first(5)&.join("\n")
 
