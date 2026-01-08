@@ -8,7 +8,7 @@ class CreateChatRoomParticipants < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :chat_room_participants, [:chat_room_id, :user_id], unique: true
-    add_index :chat_room_participants, [:user_id, :chat_room_id]
+    add_index :chat_room_participants, [ :chat_room_id, :user_id ], unique: true
+    add_index :chat_room_participants, [ :user_id, :chat_room_id ]
   end
 end

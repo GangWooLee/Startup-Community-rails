@@ -4,7 +4,7 @@
 # 경로: /welcome
 class ProfileSetupsController < ApplicationController
   before_action :require_login
-  before_action :redirect_if_completed, only: [:show]
+  before_action :redirect_if_completed, only: [ :show ]
 
   # GET /welcome - 프로필 설정 페이지
   def show

@@ -32,9 +32,9 @@ class CreateOrders < ActiveRecord::Migration[8.1]
 
     # 인덱스
     add_index :orders, :order_number, unique: true
-    add_index :orders, [:user_id, :created_at]
-    add_index :orders, [:seller_id, :created_at]
-    add_index :orders, [:post_id, :status]
+    add_index :orders, [ :user_id, :created_at ]
+    add_index :orders, [ :seller_id, :created_at ]
+    add_index :orders, [ :post_id, :status ]
     add_index :orders, :status
     add_index :orders, :order_type
   end

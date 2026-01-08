@@ -1,8 +1,8 @@
 class OnboardingController < ApplicationController
   # AI 분석 결과 페이지만 로그인 필수 (분석은 비로그인으로 가능)
-  before_action :require_login, only: [:ai_result]
-  before_action :hide_floating_button, only: [:ai_input, :ai_result]
-  before_action :check_usage_limit, only: [:ai_analyze]
+  before_action :require_login, only: [ :ai_result ]
+  before_action :hide_floating_button, only: [ :ai_input, :ai_result ]
+  before_action :check_usage_limit, only: [ :ai_analyze ]
 
   # 무료 체험 최대 사용 횟수
   MAX_FREE_ANALYSES = 5
@@ -287,7 +287,7 @@ class OnboardingController < ApplicationController
       summary: "초기 창업자를 위한 커뮤니티 기반 네트워킹 플랫폼",
       target_users: {
         primary: "20-30대 초기 창업자 및 예비 창업자",
-        characteristics: ["IT/스타트업에 관심 있는 대학생", "사이드프로젝트를 찾는 개발자/디자이너", "첫 창업을 준비하는 직장인"],
+        characteristics: [ "IT/스타트업에 관심 있는 대학생", "사이드프로젝트를 찾는 개발자/디자이너", "첫 창업을 준비하는 직장인" ],
         personas: [
           {
             name: "열정적 대학생 창업가",
@@ -305,7 +305,7 @@ class OnboardingController < ApplicationController
         potential: "높음",
         market_size: "국내 스타트업 지원 플랫폼 시장 규모 약 3,000억원 (2024년 기준), 연평균 12% 성장 중",
         trends: "AI 기반 매칭 서비스와 커뮤니티 중심 네트워킹 플랫폼이 성장세. 특히 초기 창업자 대상 서비스가 급성장 중.",
-        competitors: ["블라인드", "리멤버", "로켓펀치", "원티드", "디스콰이어트"],
+        competitors: [ "블라인드", "리멤버", "로켓펀치", "원티드", "디스콰이어트" ],
         differentiation: "커뮤니티 활동과 외주 매칭을 통합한 신뢰 기반 플랫폼. 활동 기반 프로필로 신뢰도 검증 가능."
       },
       recommendations: {
@@ -329,8 +329,8 @@ class OnboardingController < ApplicationController
       },
       score: {
         overall: 72,
-        weak_areas: ["시장 분석", "수익 모델"],
-        strong_areas: ["아이디어 독창성", "타겟 명확성"],
+        weak_areas: [ "시장 분석", "수익 모델" ],
+        strong_areas: [ "아이디어 독창성", "타겟 명확성" ],
         improvement_tips: [
           "타겟 시장의 규모를 구체화하세요",
           "수익화 모델을 명확히 정의하세요",

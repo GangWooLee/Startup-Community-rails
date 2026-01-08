@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::ReportsController < Admin::BaseController
-  before_action :set_report, only: [:show, :update]
+  before_action :set_report, only: [ :show, :update ]
 
   def index
     @reports = Report.includes(:reporter, :reportable, :resolved_by).recent

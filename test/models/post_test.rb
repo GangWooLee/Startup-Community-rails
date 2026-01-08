@@ -346,7 +346,7 @@ class PostTest < ActiveSupport::TestCase
 
   test "skills_array should split skills string" do
     post = Post.new(skills: "Ruby, Rails, JavaScript")
-    assert_equal ["Ruby", "Rails", "JavaScript"], post.skills_array
+    assert_equal [ "Ruby", "Rails", "JavaScript" ], post.skills_array
   end
 
   test "skills_array should return empty array for blank skills" do

@@ -68,7 +68,7 @@ module Users
         github_url: "https://github.com/test",
         portfolio_url: "https://test.com",
         open_chat_url: "https://open.kakao.com/test",
-        availability_statuses: ["외주 가능", "팀 구하는 중"],
+        availability_statuses: [ "외주 가능", "팀 구하는 중" ],
         custom_status: "Test"  # Must be <= 10 characters
       )
 
@@ -352,7 +352,7 @@ module Users
         user_snapshot: {},
         activity_stats: {}
       )
-      errors = ["Test error"]
+      errors = [ "Test error" ]
 
       result = Users::DeletionService::Result.new(
         success?: true,
@@ -407,7 +407,7 @@ module Users
         github_url: "https://github.com",
         portfolio_url: "https://portfolio.com",
         open_chat_url: "https://open.kakao.com",
-        availability_statuses: ["외주 가능"],
+        availability_statuses: [ "외주 가능" ],
         custom_status: "Status"
       )
 

@@ -14,7 +14,7 @@ class ProfilesController < ApplicationController
       location: "서울, 한국",
       email: "kim@startup-a.com",
       website: "https://startup-a.com",
-      skills: ["제품 기획", "팀 빌딩", "비즈니스 전략", "투자 유치"],
+      skills: [ "제품 기획", "팀 빌딩", "비즈니스 전략", "투자 유치" ],
       posts: [
         {
           id: "1",
@@ -22,7 +22,7 @@ class ProfilesController < ApplicationController
           category: "팀 빌딩",
           likes: 42,
           comments: 12,
-          created_at: "2시간 전",
+          created_at: "2시간 전"
         },
         {
           id: "4",
@@ -30,8 +30,8 @@ class ProfilesController < ApplicationController
           category: "투자/펀딩",
           likes: 28,
           comments: 8,
-          created_at: "1주일 전",
-        },
+          created_at: "1주일 전"
+        }
       ],
       job_postings: [
         {
@@ -41,11 +41,11 @@ class ProfilesController < ApplicationController
           category: "개발",
           budget: "300-500만원",
           duration: "3개월",
-          skills: ["Next.js", "Node.js", "TypeScript", "PostgreSQL"],
-          posted_at: "1일 전",
-        },
+          skills: [ "Next.js", "Node.js", "TypeScript", "PostgreSQL" ],
+          posted_at: "1일 전"
+        }
       ],
-      talent_postings: [],
+      talent_postings: []
     }
   end
 end

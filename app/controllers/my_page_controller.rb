@@ -1,6 +1,6 @@
 class MyPageController < ApplicationController
   before_action :require_login
-  before_action :hide_floating_button, only: [:edit]
+  before_action :hide_floating_button, only: [ :edit ]
 
   def show
     @user = current_user
@@ -9,13 +9,13 @@ class MyPageController < ApplicationController
     # 커뮤니티 글 (free, question, promotion)
     @posts = @user.posts.published
                   .includes(images_attachments: :blob)
-                  .where(category: [:free, :question, :promotion])
+                  .where(category: [ :free, :question, :promotion ])
                   .recent.limit(PROFILE_POSTS_LIMIT)
 
     # 외주 글 (hiring, seeking)
     @outsourcing_posts = @user.posts.published
                               .includes(images_attachments: :blob)
-                              .where(category: [:hiring, :seeking])
+                              .where(category: [ :hiring, :seeking ])
                               .recent.limit(PROFILE_POSTS_LIMIT)
   end
 

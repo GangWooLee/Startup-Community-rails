@@ -49,7 +49,7 @@ class Components::BadgeHelperTest < ActionView::TestCase
   end
 
   test "render_badge with destructive variants" do
-    [:error, :danger, :alert, :destructive].each do |variant|
+    [ :error, :danger, :alert, :destructive ].each do |variant|
       result = render_badge("Error", variant: variant)
       assert_match /bg-destructive/, result, "Expected destructive class for #{variant}"
     end

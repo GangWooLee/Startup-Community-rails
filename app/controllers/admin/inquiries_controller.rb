@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::InquiriesController < Admin::BaseController
-  before_action :set_inquiry, only: [:show, :update]
+  before_action :set_inquiry, only: [ :show, :update ]
 
   def index
     @inquiries = Inquiry.includes(:user, :responded_by).recent

@@ -209,7 +209,7 @@ module Ai
 
       def build_messages
         format_messages_for_gemini(
-          [{ role: "user", content: user_prompt }],
+          [ { role: "user", content: user_prompt } ],
           system_prompt: system_prompt
         )
       end
@@ -217,7 +217,7 @@ module Ai
       # Grounding 검색 결과를 포함한 메시지 빌드
       def build_grounded_messages(search_context)
         format_messages_for_gemini(
-          [{ role: "user", content: user_prompt_with_grounding(search_context) }],
+          [ { role: "user", content: user_prompt_with_grounding(search_context) } ],
           system_prompt: system_prompt_with_grounding
         )
       end

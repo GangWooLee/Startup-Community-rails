@@ -144,19 +144,19 @@ class Ai::Orchestrators::AnalysisOrchestratorTest < ActiveSupport::TestCase
 
   def json_response(agent_type)
     content = case agent_type
-              when :summary
+    when :summary
                 { summary: "테스트 요약", core_value: "테스트 가치", problem_statement: "테스트 문제" }
-              when :target_user
+    when :target_user
                 { target_users: { primary: "대학생", characteristics: [], personas: [] }, user_pain_points: [], user_goals: [] }
-              when :market_analysis
+    when :market_analysis
                 { market_analysis: { potential: "High" }, market_opportunities: [], market_risks: [] }
-              when :strategy
+    when :strategy
                 { recommendations: { mvp_features: [], challenges: [], next_steps: [] }, actions: [] }
-              when :scoring
+    when :scoring
                 { score: { overall: 70, weak_areas: [], strong_areas: [], improvement_tips: [] }, required_expertise: { roles: [], skills: [], description: "" }, confidence_level: "Medium" }
-              else
+    else
                 {}
-              end
+    end
 
     {
       candidates: [ {

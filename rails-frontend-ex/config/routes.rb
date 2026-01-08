@@ -5,13 +5,13 @@ Rails.application.routes.draw do
   root "community#index"
 
   # Community routes
-  resources :community, only: [:index, :show, :new, :create]
+  resources :community, only: [ :index, :show, :new, :create ]
 
   # Profile routes
   get 'profile/:id', to: 'profiles#show', as: :profile
 
   # Freelance routes
-  resources :freelance, only: [:index] do
+  resources :freelance, only: [ :index ] do
     collection do
       get 'new'
     end

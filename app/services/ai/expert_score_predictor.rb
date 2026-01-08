@@ -75,7 +75,7 @@ module Ai
     # 분석 결과에서 약점 영역 추출
     def extract_weak_areas
       weak_areas = @analysis.dig(:score, :weak_areas) || []
-      return ["기술 구체화", "시장 분석"] if weak_areas.empty? # 기본값
+      return [ "기술 구체화", "시장 분석" ] if weak_areas.empty? # 기본값
 
       weak_areas
     end
@@ -101,7 +101,7 @@ module Ai
         if match_result[:score] > best_match[:score_boost]
           best_match = {
             area: weak_area,
-            score_boost: [[match_result[:score], MAX_SCORE_BOOST].min, MIN_SCORE_BOOST].max,
+            score_boost: [ [ match_result[:score], MAX_SCORE_BOOST ].min, MIN_SCORE_BOOST ].max,
             matched_skills: match_result[:matched_skills],
             role_matched: match_result[:role_matched]
           }

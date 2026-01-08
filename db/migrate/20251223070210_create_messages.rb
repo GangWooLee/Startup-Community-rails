@@ -8,7 +8,7 @@ class CreateMessages < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :messages, [:chat_room_id, :created_at]
+    add_index :messages, [ :chat_room_id, :created_at ]
     # sender_id index is already created by t.references
   end
 end

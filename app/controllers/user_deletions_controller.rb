@@ -2,7 +2,7 @@
 # - 탈퇴 확인 페이지
 # - 탈퇴 처리 (즉시 익명화, 복구 불가)
 class UserDeletionsController < ApplicationController
-  before_action :require_login, only: [:new, :create]
+  before_action :require_login, only: [ :new, :create ]
 
   # GET /account/delete - 탈퇴 확인 페이지
   def new

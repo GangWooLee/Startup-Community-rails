@@ -66,14 +66,14 @@ module Ai
         # system 역할은 Gemini에서 지원하지 않으므로 user로 변환
         role = "user" if role == "system"
 
-        { role: role, parts: [{ text: content }] }
+        { role: role, parts: [ { text: content } ] }
       end
 
       # system_prompt가 있으면 맨 앞에 추가
       if system_prompt.present?
-        formatted.unshift({ role: "user", parts: [{ text: system_prompt }] })
+        formatted.unshift({ role: "user", parts: [ { text: system_prompt } ] })
         # Gemini는 user/model 교대로 와야 하므로 빈 model 응답 추가
-        formatted.insert(1, { role: "model", parts: [{ text: "네, 알겠습니다. 지시에 따르겠습니다." }] })
+        formatted.insert(1, { role: "model", parts: [ { text: "네, 알겠습니다. 지시에 따르겠습니다." } ] })
       end
 
       formatted

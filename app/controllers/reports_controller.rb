@@ -59,7 +59,7 @@ class ReportsController < ApplicationController
     # 자신의 게시글을 신고할 수 없음
     if reportable_type == "Post" && @reportable.user_id == current_user.id
       redirect_back fallback_location: root_path, alert: "자신의 게시글은 신고할 수 없습니다."
-      return
+      nil
     end
   end
 

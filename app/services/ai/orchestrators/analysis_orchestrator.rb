@@ -18,7 +18,7 @@ module Ai
     #
     class AnalysisOrchestrator < BaseAgent
       # 에이전트 실행 순서 정의
-      AGENT_SEQUENCE = [:summary, :target_user, :market_analysis, :strategy, :scoring].freeze
+      AGENT_SEQUENCE = [ :summary, :target_user, :market_analysis, :strategy, :scoring ].freeze
 
       # 에이전트 타입 → 클래스 매핑
       AGENT_CLASSES = {

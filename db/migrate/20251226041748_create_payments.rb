@@ -38,7 +38,7 @@ class CreatePayments < ActiveRecord::Migration[8.1]
     # 인덱스
     add_index :payments, :payment_key, unique: true
     add_index :payments, :toss_order_id, unique: true
-    add_index :payments, [:user_id, :created_at]
+    add_index :payments, [ :user_id, :created_at ]
     add_index :payments, :status
   end
 end

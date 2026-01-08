@@ -11,6 +11,6 @@ class CreateNotifications < ActiveRecord::Migration[8.1]
     end
 
     # 사용자별 최신 알림 조회 최적화
-    add_index :notifications, [:recipient_id, :read_at, :created_at], name: "index_notifications_on_recipient_and_status"
+    add_index :notifications, [ :recipient_id, :read_at, :created_at ], name: "index_notifications_on_recipient_and_status"
   end
 end

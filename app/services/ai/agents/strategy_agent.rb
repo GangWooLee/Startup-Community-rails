@@ -29,9 +29,9 @@ module Ai
       def fallback_result
         {
           recommendations: {
-            mvp_features: ["MVP 기능 정의 필요"],
-            challenges: ["도전 과제 분석 필요"],
-            next_steps: ["다음 단계 계획 필요"]
+            mvp_features: [ "MVP 기능 정의 필요" ],
+            challenges: [ "도전 과제 분석 필요" ],
+            next_steps: [ "다음 단계 계획 필요" ]
           },
           actions: [
             { title: "핵심 타깃 정의", description: "타겟 사용자를 구체화하세요" },
@@ -45,7 +45,7 @@ module Ai
 
       def build_messages
         format_messages_for_gemini(
-          [{ role: "user", content: user_prompt }],
+          [ { role: "user", content: user_prompt } ],
           system_prompt: system_prompt
         )
       end

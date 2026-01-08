@@ -23,7 +23,7 @@ if Rails.application.credentials.dig(:sentry, :dsn).present?
     config.dsn = Rails.application.credentials.dig(:sentry, :dsn)
 
     # Capture breadcrumbs from Rails logger and HTTP requests
-    config.breadcrumbs_logger = [:active_support_logger, :http_logger]
+    config.breadcrumbs_logger = [ :active_support_logger, :http_logger ]
 
     # Performance monitoring (sample 10% of transactions)
     config.traces_sample_rate = 0.1

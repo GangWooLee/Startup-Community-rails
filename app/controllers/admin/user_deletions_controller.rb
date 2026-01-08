@@ -2,7 +2,7 @@
 # - 탈퇴 회원 목록/상세
 # - 암호화된 개인정보 열람 (로깅 필수)
 class Admin::UserDeletionsController < Admin::BaseController
-  before_action :set_deletion, only: [:show, :reveal]
+  before_action :set_deletion, only: [ :show, :reveal ]
 
   # GET /admin/user_deletions - 탈퇴 회원 목록
   def index

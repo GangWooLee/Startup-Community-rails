@@ -31,7 +31,7 @@ Rails.application.routes.draw do
   post   "/signup", to: "users#create"
 
   # Email Verification (회원가입 이메일 인증)
-  resources :email_verifications, only: [:create] do
+  resources :email_verifications, only: [ :create ] do
     collection do
       post :verify
     end
@@ -40,7 +40,7 @@ Rails.application.routes.draw do
   # OAuth Authentication
   # OAuth 요청 전 return_to 저장을 위한 중간 경로
   post "/oauth/:provider", to: "oauth#passthru", as: :oauth_passthru
-  match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [:get, :post]
+  match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 
   # Account Recovery (비밀번호 찾기)
@@ -51,7 +51,7 @@ Rails.application.routes.draw do
   patch "password/reset/:token",  to: "account_recovery#reset_password",       as: :reset_password
 
   # Profile Setup (회원가입 후 익명 프로필 설정)
-  resource :profile_setup, only: [:show, :update], path: "welcome" do
+  resource :profile_setup, only: [ :show, :update ], path: "welcome" do
     post :regenerate_nickname, on: :collection
   end
 
@@ -60,13 +60,13 @@ Rails.application.routes.draw do
   post "account/delete", to: "user_deletions#create"
 
   # Posts (Community)
-  resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+  resources :posts, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     member do
       post :like, to: "likes#toggle"
       post :bookmark, to: "bookmarks#toggle"
       delete :remove_image
     end
-    resources :comments, only: [:create, :destroy] do
+    resources :comments, only: [ :create, :destroy ] do
       member do
         post :like
       end
@@ -74,17 +74,17 @@ Rails.application.routes.draw do
   end
 
   # Profiles
-  resources :profiles, only: [:show] do
+  resources :profiles, only: [ :show ] do
     member do
       post :follow, to: "follows#toggle"  # 팔로우 토글
     end
   end
 
   # Job Posts (Freelance/Outsourcing) - 외주 마켓플레이스 인덱스
-  resources :job_posts, only: [:index]
+  resources :job_posts, only: [ :index ]
 
   # Payments (결제)
-  resources :payments, only: [:new, :create] do
+  resources :payments, only: [ :new, :create ] do
     collection do
       get :success
       get :fail
@@ -93,7 +93,7 @@ Rails.application.routes.draw do
   end
 
   # Orders (주문)
-  resources :orders, only: [:index, :show] do
+  resources :orders, only: [ :index, :show ] do
     member do
       get :success
       get :receipt
@@ -113,10 +113,10 @@ Rails.application.routes.draw do
   patch "settings", to: "settings#update"
 
   # Reports (신고)
-  resources :reports, only: [:create]
+  resources :reports, only: [ :create ]
 
   # Inquiries (문의)
-  resources :inquiries, only: [:index, :new, :create, :show]
+  resources :inquiries, only: [ :index, :new, :create, :show ]
 
   # shadcn UI Test Page (development only)
   get "shadcn_test", to: "pages#shadcn_test" if Rails.env.development?
@@ -137,7 +137,7 @@ Rails.application.routes.draw do
   delete "search/recent/all", to: "search#clear_recent", as: :clear_recent_searches
 
   # Notifications
-  resources :notifications, only: [:index, :show, :destroy] do
+  resources :notifications, only: [ :index, :show, :destroy ] do
     collection do
       get :dropdown
       post :mark_all_read
@@ -175,25 +175,25 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
 
-    resources :users, only: [:index, :show] do
+    resources :users, only: [ :index, :show ] do
       member do
         get :chat_rooms  # 해당 사용자의 채팅방 목록
       end
     end
 
-    resources :chat_rooms, only: [:show]  # 채팅방 대화 내용 열람
+    resources :chat_rooms, only: [ :show ]  # 채팅방 대화 내용 열람
 
-    resources :user_deletions, only: [:index, :show] do
+    resources :user_deletions, only: [ :index, :show ] do
       member do
         post :reveal  # 암호화된 개인정보 열람 (로깅 필수)
       end
     end
 
-    resources :reports, only: [:index, :show, :update]
-    resources :inquiries, only: [:index, :show, :update]
+    resources :reports, only: [ :index, :show, :update ]
+    resources :inquiries, only: [ :index, :show, :update ]
 
     # AI 분석 사용량 관리
-    resources :ai_usages, only: [:index, :show] do
+    resources :ai_usages, only: [ :index, :show ] do
       member do
         patch :update_limit           # limit 수정
         patch :update_bonus           # 보너스 크레딧 수정

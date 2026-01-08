@@ -99,8 +99,8 @@ module ApplicationHelper
 
     if query_pos
       # 검색어 앞뒤로 텍스트 추출
-      start_pos = [query_pos - 30, 0].max
-      end_pos = [query_pos + query.length + 70, text.length].min
+      start_pos = [ query_pos - 30, 0 ].max
+      end_pos = [ query_pos + query.length + 70, text.length ].min
 
       snippet = text[start_pos...end_pos]
       snippet = "..." + snippet if start_pos > 0
@@ -118,7 +118,7 @@ module ApplicationHelper
   # 반환: 페이지 번호 배열 (... 은 :ellipsis로 표시)
   def pagination_range(current_page, total_pages)
     return [] if total_pages <= 0
-    return [1] if total_pages == 1
+    return [ 1 ] if total_pages == 1
 
     # 표시할 최대 페이지 수
     max_visible = 5
@@ -135,12 +135,12 @@ module ApplicationHelper
       # 현재 페이지 주변 계산
       if current_page <= 3
         # 앞쪽에 있을 때: 1 2 3 4 ... 10
-        pages.concat((2..[4, total_pages - 1].min).to_a)
+        pages.concat((2..[ 4, total_pages - 1 ].min).to_a)
         pages << :ellipsis if total_pages > 5
       elsif current_page >= total_pages - 2
         # 뒤쪽에 있을 때: 1 ... 7 8 9 10
         pages << :ellipsis if total_pages > 5
-        pages.concat(([total_pages - 3, 2].max..total_pages - 1).to_a)
+        pages.concat(([ total_pages - 3, 2 ].max..total_pages - 1).to_a)
       else
         # 중간에 있을 때: 1 ... 5 6 7 ... 10
         pages << :ellipsis

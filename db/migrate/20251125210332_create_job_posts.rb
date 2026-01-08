@@ -13,7 +13,7 @@ class CreateJobPosts < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :job_posts, [:user_id, :created_at]
+    add_index :job_posts, [ :user_id, :created_at ]
     add_index :job_posts, :category
     add_index :job_posts, :status
     add_index :job_posts, :created_at

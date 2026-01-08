@@ -99,7 +99,7 @@ Rails.application.configure do
   # 호스트 설정 (이메일 링크용)
   config.action_mailer.default_url_options = {
     host: ENV.fetch("MAILER_HOST") { ENV.fetch("ALLOWED_HOSTS", "").split(",").first || "example.com" },
-    protocol: 'https'
+    protocol: "https"
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

@@ -25,7 +25,7 @@ class AiAnalysisJobTest < ActiveJob::TestCase
   end
 
   test "can be enqueued with correct arguments" do
-    assert_enqueued_with(job: AiAnalysisJob, args: [@analyzing_analysis.id]) do
+    assert_enqueued_with(job: AiAnalysisJob, args: [ @analyzing_analysis.id ]) do
       AiAnalysisJob.perform_later(@analyzing_analysis.id)
     end
   end
@@ -291,7 +291,7 @@ class AiAnalysisJobTest < ActiveJob::TestCase
 
   test "updates score from analysis result" do
     mock_result = build_mock_orchestrator_result
-    mock_result[:score] = { overall: 92, weak_areas: [], strong_areas: ["innovation"] }
+    mock_result[:score] = { overall: 92, weak_areas: [], strong_areas: [ "innovation" ] }
 
     mock_orchestrator = Minitest::Mock.new
     mock_orchestrator.expect(:analyze, mock_result)
@@ -592,7 +592,7 @@ class AiAnalysisJobTest < ActiveJob::TestCase
       problem_statement: "Solving user pain points",
       target_users: {
         primary: "Young entrepreneurs",
-        characteristics: ["Tech-savvy", "Ambitious"],
+        characteristics: [ "Tech-savvy", "Ambitious" ],
         personas: []
       },
       market_analysis: {
@@ -601,21 +601,21 @@ class AiAnalysisJobTest < ActiveJob::TestCase
         trends: "Growing AI adoption"
       },
       recommendations: {
-        mvp_features: ["Core feature 1", "Core feature 2"],
-        challenges: ["User acquisition"],
-        next_steps: ["Launch beta"]
+        mvp_features: [ "Core feature 1", "Core feature 2" ],
+        challenges: [ "User acquisition" ],
+        next_steps: [ "Launch beta" ]
       },
       score: {
         overall: 85,
-        weak_areas: ["Marketing"],
-        strong_areas: ["Innovation", "Technology"]
+        weak_areas: [ "Marketing" ],
+        strong_areas: [ "Innovation", "Technology" ]
       },
       actions: [
         { title: "Define MVP", description: "Focus on core features" }
       ],
       required_expertise: {
-        roles: ["Developer", "Designer"],
-        skills: ["Ruby", "React"],
+        roles: [ "Developer", "Designer" ],
+        skills: [ "Ruby", "React" ],
         description: "Full-stack team needed"
       },
       analyzed_at: Time.current,

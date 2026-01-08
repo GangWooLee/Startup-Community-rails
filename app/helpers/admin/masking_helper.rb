@@ -14,7 +14,7 @@ module Admin::MaskingHelper
     if local.length <= 3
       masked_local = local[0] + "*" * (local.length - 1)
     else
-      masked_local = local[0..2] + "*" * [local.length - 3, 3].min
+      masked_local = local[0..2] + "*" * [ local.length - 3, 3 ].min
     end
 
     "#{masked_local}@#{domain}"

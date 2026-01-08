@@ -9,7 +9,7 @@ class AccountRecoveryController < ApplicationController
 
   # 이미 로그인된 사용자는 리다이렉트
   before_action :redirect_if_logged_in
-  before_action :find_user_by_token, only: [:reset_password_form, :reset_password]
+  before_action :find_user_by_token, only: [ :reset_password_form, :reset_password ]
 
   # ========================================
   # 비밀번호 찾기/재설정

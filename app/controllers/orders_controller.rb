@@ -2,10 +2,10 @@
 # 주문 조회, 결제 완료 페이지, 취소 처리, 거래 확정
 class OrdersController < ApplicationController
   before_action :require_login
-  before_action :set_order, only: [:show, :success, :cancel, :receipt, :confirm]
-  before_action :authorize_order_access, only: [:show, :success, :receipt]
-  before_action :authorize_order_cancel, only: [:cancel]
-  before_action :authorize_order_confirm, only: [:confirm]
+  before_action :set_order, only: [ :show, :success, :cancel, :receipt, :confirm ]
+  before_action :authorize_order_access, only: [ :show, :success, :receipt ]
+  before_action :authorize_order_cancel, only: [ :cancel ]
+  before_action :authorize_order_confirm, only: [ :confirm ]
 
   # GET /orders
   # 주문 목록 (구매 + 판매)

@@ -2,7 +2,7 @@
 
 class InquiriesController < ApplicationController
   before_action :require_login
-  before_action :set_inquiry, only: [:show]
+  before_action :set_inquiry, only: [ :show ]
 
   def index
     @filter = params[:filter] || "all"
@@ -21,9 +21,9 @@ class InquiriesController < ApplicationController
     # 상태 필터 적용
     case @filter
     when "pending"
-      @inquiries = @inquiries.where(status: [:pending, :in_progress])
+      @inquiries = @inquiries.where(status: [ :pending, :in_progress ])
     when "answered"
-      @inquiries = @inquiries.where(status: [:resolved, :closed])
+      @inquiries = @inquiries.where(status: [ :resolved, :closed ])
     end
 
     @inquiries = @inquiries.page(params[:page]).per(10)

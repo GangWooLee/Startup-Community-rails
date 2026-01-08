@@ -12,15 +12,15 @@ class Post < ApplicationRecord
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images do |attachable|
-    attachable.variant :thumb, resize_to_fill: [160, 160]
-    attachable.variant :medium, resize_to_limit: [600, 600]
-    attachable.variant :large, resize_to_limit: [1200, 1200]
+    attachable.variant :thumb, resize_to_fill: [ 160, 160 ]
+    attachable.variant :medium, resize_to_limit: [ 600, 600 ]
+    attachable.variant :large, resize_to_limit: [ 1200, 1200 ]
   end
 
   # 이미지 파일 검증 (보안: 악성 파일 업로드 방지)
   MAX_IMAGES = 5
   MAX_IMAGE_SIZE = 5.megabytes
-  ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"].freeze
+  ALLOWED_IMAGE_TYPES = [ "image/jpeg", "image/png", "image/gif", "image/webp" ].freeze
 
   validates :images,
     content_type: {
@@ -103,8 +103,8 @@ class Post < ApplicationRecord
   scope :published, -> { where(status: :published) }
   scope :recent, -> { order(created_at: :desc) }
   scope :popular, -> { order(likes_count: :desc, views_count: :desc) }
-  scope :community, -> { where(category: [:free, :question, :promotion]) }
-  scope :outsourcing, -> { where(category: [:hiring, :seeking]) }
+  scope :community, -> { where(category: [ :free, :question, :promotion ]) }
+  scope :outsourcing, -> { where(category: [ :hiring, :seeking ]) }
   scope :by_category, ->(cat) { where(category: cat) if cat.present? }
 
   # Instance methods
@@ -177,8 +177,8 @@ class Post < ApplicationRecord
 
     if query_pos
       # 검색어 앞뒤로 텍스트 추출
-      start_pos = [query_pos - 30, 0].max
-      end_pos = [query_pos + query.length + 70, content.length].min
+      start_pos = [ query_pos - 30, 0 ].max
+      end_pos = [ query_pos + query.length + 70, content.length ].min
 
       snippet = content[start_pos...end_pos]
       snippet = "..." + snippet if start_pos > 0

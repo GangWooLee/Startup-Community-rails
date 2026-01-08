@@ -44,7 +44,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "should require valid email format" do
-    invalid_emails = ["invalid", "user@", "@domain.com", "user@.com"]
+    invalid_emails = [ "invalid", "user@", "@domain.com", "user@.com" ]
     invalid_emails.each do |email|
       user = User.new(email: email, password: "test1234", name: "Test")
       assert_not user.valid?, "#{email} should be invalid"
@@ -235,7 +235,7 @@ class UserTest < ActiveSupport::TestCase
 
   test "skills_array should return array of skills" do
     @user.skills = "Ruby, Rails, JavaScript"
-    assert_equal ["Ruby", "Rails", "JavaScript"], @user.skills_array
+    assert_equal [ "Ruby", "Rails", "JavaScript" ], @user.skills_array
   end
 
   test "skills_array should return empty array for blank skills" do
@@ -244,12 +244,12 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "skills_array= should set skills from array" do
-    @user.skills_array = ["Python", "Django"]
+    @user.skills_array = [ "Python", "Django" ]
     assert_equal "Python, Django", @user.skills
   end
 
   test "availability_badges should return badges array" do
-    @user.availability_statuses = ["available_for_work"]
+    @user.availability_statuses = [ "available_for_work" ]
     badges = @user.availability_badges
     assert badges.any? { |b| b[:label] == "외주 가능" }
   end

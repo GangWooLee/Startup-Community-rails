@@ -247,7 +247,7 @@ module Orders
     test "Result provides access to order, payment, and errors" do
       order = orders(:pending_order)
       payment = payments(:pending_payment)
-      errors = ["Test error"]
+      errors = [ "Test error" ]
 
       result = Orders::CreateService::Result.new(
         success?: true,

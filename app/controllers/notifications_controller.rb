@@ -1,6 +1,6 @@
 class NotificationsController < ApplicationController
   before_action :require_login
-  before_action :set_notification, only: [:show, :destroy]
+  before_action :set_notification, only: [ :show, :destroy ]
 
   # GET /notifications
   # 알림 목록 페이지

@@ -7,7 +7,7 @@ class Bookmark < ApplicationRecord
   belongs_to :bookmarkable, polymorphic: true
 
   # Validations
-  validates :user_id, uniqueness: { scope: [:bookmarkable_type, :bookmarkable_id], message: "already bookmarked this" }
+  validates :user_id, uniqueness: { scope: [ :bookmarkable_type, :bookmarkable_id ], message: "already bookmarked this" }
   validates :bookmarkable_type, inclusion: {
     in: VALID_BOOKMARKABLE_TYPES,
     message: "is not a valid bookmarkable type"

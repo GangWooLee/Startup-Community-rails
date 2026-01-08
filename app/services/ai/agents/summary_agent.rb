@@ -37,7 +37,7 @@ module Ai
 
       def build_messages
         format_messages_for_gemini(
-          [{ role: "user", content: user_prompt }],
+          [ { role: "user", content: user_prompt } ],
           system_prompt: system_prompt
         )
       end

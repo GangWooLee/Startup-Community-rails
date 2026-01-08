@@ -60,7 +60,7 @@ class UserDeletion < ApplicationRecord
   def days_until_destruction
     return 0 unless destroy_scheduled_at
     days = ((destroy_scheduled_at - Time.current) / 1.day).ceil
-    [days, 0].max
+    [ days, 0 ].max
   end
 
   # 스냅샷 데이터 파싱 (암호화된 JSON)

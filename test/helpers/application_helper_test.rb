@@ -57,7 +57,7 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_includes result, 'property="og:title"'
     assert_includes result, 'content="Undrew - 창업자 커뮤니티"'
     assert_includes result, 'property="og:description"'
-    assert_includes result, '아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티'
+    assert_includes result, "아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티"
     assert_includes result, 'property="og:type"'
     assert_includes result, 'content="website"'
     assert_includes result, 'property="og:site_name"'
@@ -254,12 +254,12 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   test "pagination_range returns single page for total_pages of 1" do
-    assert_equal [1], pagination_range(1, 1)
+    assert_equal [ 1 ], pagination_range(1, 1)
   end
 
   test "pagination_range returns all pages when total_pages <= 5" do
-    assert_equal [1, 2, 3], pagination_range(1, 3)
-    assert_equal [1, 2, 3, 4, 5], pagination_range(3, 5)
+    assert_equal [ 1, 2, 3 ], pagination_range(1, 3)
+    assert_equal [ 1, 2, 3, 4, 5 ], pagination_range(3, 5)
   end
 
   test "pagination_range shows first pages with ellipsis when current page is at start" do

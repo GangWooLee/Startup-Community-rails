@@ -35,6 +35,6 @@ class CreateUserDeletions < ActiveRecord::Migration[8.1]
 
     add_index :user_deletions, :status
     add_index :user_deletions, :restorable_until
-    add_index :user_deletions, [:user_id, :status]
+    add_index :user_deletions, [ :user_id, :status ]
   end
 end

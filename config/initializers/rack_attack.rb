@@ -115,7 +115,7 @@ class Rack::Attack
         "Content-Type" => "application/json",
         "Retry-After" => retry_after.to_s
       },
-      [{ error: "요청이 너무 많습니다. #{retry_after}초 후에 다시 시도해주세요." }.to_json]
+      [ { error: "요청이 너무 많습니다. #{retry_after}초 후에 다시 시도해주세요." }.to_json ]
     ]
   end
 
@@ -126,7 +126,7 @@ class Rack::Attack
     [
       403,
       { "Content-Type" => "application/json" },
-      [{ error: "접근이 차단되었습니다." }.to_json]
+      [ { error: "접근이 차단되었습니다." }.to_json ]
     ]
   end
 

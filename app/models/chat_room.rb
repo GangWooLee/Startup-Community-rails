@@ -6,7 +6,7 @@ class ChatRoom < ApplicationRecord
   has_many :reports, as: :reportable, dependent: :destroy
 
   # 현재 활성화된 주문 (취소/환불 제외)
-  has_one :active_order, -> { where.not(status: [:cancelled, :refunded]).order(created_at: :desc) }, class_name: "Order"
+  has_one :active_order, -> { where.not(status: [ :cancelled, :refunded ]).order(created_at: :desc) }, class_name: "Order"
 
   # 컨텍스트: 어떤 게시글을 통해 시작된 대화인지
   belongs_to :source_post, class_name: "Post", optional: true

@@ -1,6 +1,6 @@
 class OmniauthCallbacksController < ApplicationController
   # OAuth 콜백은 외부에서 오므로 CSRF 검증 스킵 필요
-  skip_before_action :verify_authenticity_token, only: [:create, :failure]
+  skip_before_action :verify_authenticity_token, only: [ :create, :failure ]
 
   # OAuth 콜백 처리 (Google, GitHub 공통)
   def create

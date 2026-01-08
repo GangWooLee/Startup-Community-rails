@@ -8,7 +8,7 @@ class Like < ApplicationRecord
   has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations
-  validates :user_id, uniqueness: { scope: [:likeable_type, :likeable_id], message: "already liked this" }
+  validates :user_id, uniqueness: { scope: [ :likeable_type, :likeable_id ], message: "already liked this" }
   validates :likeable_type, inclusion: {
     in: VALID_LIKEABLE_TYPES,
     message: "is not a valid likeable type"

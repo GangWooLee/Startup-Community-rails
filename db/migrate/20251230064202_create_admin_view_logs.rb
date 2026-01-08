@@ -12,7 +12,7 @@ class CreateAdminViewLogs < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :admin_view_logs, [:target_type, :target_id]
+    add_index :admin_view_logs, [ :target_type, :target_id ]
     add_index :admin_view_logs, :created_at
   end
 end

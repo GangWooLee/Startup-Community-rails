@@ -1,14 +1,14 @@
 class PostsController < ApplicationController
-  before_action :require_login, only: [:new, :create, :edit, :update, :destroy, :remove_image]
-  before_action :redirect_to_onboarding, only: [:index]
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :remove_image]
-  before_action :authorize_post, only: [:edit, :update, :destroy, :remove_image]
-  before_action :hide_floating_button, only: [:new, :edit, :show]
+  before_action :require_login, only: [ :new, :create, :edit, :update, :destroy, :remove_image ]
+  before_action :redirect_to_onboarding, only: [ :index ]
+  before_action :set_post, only: [ :show, :edit, :update, :destroy, :remove_image ]
+  before_action :authorize_post, only: [ :edit, :update, :destroy, :remove_image ]
+  before_action :hide_floating_button, only: [ :new, :edit, :show ]
 
   def index
     # 커뮤니티 섹션: 커뮤니티 글만 표시 (free, question, promotion)
     # 구인/구직은 외주 섹션(/job_posts)에서 표시
-    @page = [params[:page].to_i, 1].max
+    @page = [ params[:page].to_i, 1 ].max
     @per_page = POSTS_PER_PAGE
 
     base_query = Post.published
@@ -18,9 +18,9 @@ class PostsController < ApplicationController
     # 정렬 방식 적용
     base_query = if params[:sort] == "popular"
                    base_query.popular
-                 else
+    else
                    base_query.recent
-                 end
+    end
 
     # 전체 개수 확인 (다음 페이지 존재 여부)
     @total_count = base_query.count
@@ -55,7 +55,7 @@ class PostsController < ApplicationController
     @post.increment_views!
     # 최상위 댓글만 가져오고, 대댓글은 댓글 안에서 로드
     @comments = @post.comments.root_comments
-                     .includes(:user, :likes, replies: [:user, :likes])
+                     .includes(:user, :likes, replies: [ :user, :likes ])
                      .oldest
 
     # 외주 글일 경우 비슷한 프로젝트 쿼리 + GA4 이벤트
@@ -86,10 +86,10 @@ class PostsController < ApplicationController
 
   def new
     @post = Post.new
-    @initial_type = params[:type] || 'community'
+    @initial_type = params[:type] || "community"
 
     # 타입에 따른 기본 카테고리 설정
-    if @initial_type == 'outsourcing'
+    if @initial_type == "outsourcing"
       @post.category = :hiring
     else
       @post.category = :free
@@ -118,18 +118,18 @@ class PostsController < ApplicationController
 
       # 카테고리에 따라 적절한 페이지로 리다이렉트
       if @post.outsourcing?
-        redirect_to job_posts_path, notice: '게시글이 작성되었습니다.'
+        redirect_to job_posts_path, notice: "게시글이 작성되었습니다."
       else
-        redirect_to community_path, notice: '게시글이 작성되었습니다.'
+        redirect_to community_path, notice: "게시글이 작성되었습니다."
       end
     else
-      @initial_type = @post.outsourcing? ? 'outsourcing' : 'community'
+      @initial_type = @post.outsourcing? ? "outsourcing" : "community"
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @initial_type = @post.outsourcing? ? 'outsourcing' : 'community'
+    @initial_type = @post.outsourcing? ? "outsourcing" : "community"
   end
 
   def update
@@ -152,16 +152,16 @@ class PostsController < ApplicationController
     end
 
     if @post.update(permitted_params)
-      redirect_to post_path(@post), notice: '게시글이 수정되었습니다.'
+      redirect_to post_path(@post), notice: "게시글이 수정되었습니다."
     else
-      @initial_type = @post.outsourcing? ? 'outsourcing' : 'community'
+      @initial_type = @post.outsourcing? ? "outsourcing" : "community"
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     @post.destroy
-    redirect_to posts_path, notice: '게시글이 삭제되었습니다.'
+    redirect_to posts_path, notice: "게시글이 삭제되었습니다."
   end
 
   def remove_image
@@ -177,12 +177,12 @@ class PostsController < ApplicationController
             turbo_stream.update("image-counter", "#{@post.images.count}/5")
           ]
         end
-        format.html { redirect_to edit_post_path(@post), notice: '이미지가 삭제되었습니다.' }
+        format.html { redirect_to edit_post_path(@post), notice: "이미지가 삭제되었습니다." }
       end
     else
       respond_to do |format|
         format.turbo_stream { head :not_found }
-        format.html { redirect_to edit_post_path(@post), alert: '이미지를 찾을 수 없습니다.' }
+        format.html { redirect_to edit_post_path(@post), alert: "이미지를 찾을 수 없습니다." }
       end
     end
   end
@@ -195,7 +195,7 @@ class PostsController < ApplicationController
 
   def authorize_post
     unless @post.user == current_user
-      redirect_to posts_path, alert: '권한이 없습니다.'
+      redirect_to posts_path, alert: "권한이 없습니다."
     end
   end
 

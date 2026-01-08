@@ -10,6 +10,6 @@ class AddVirtualAccountToPayments < ActiveRecord::Migration[8.1]
     add_column :payments, :due_date, :datetime       # 입금 기한
 
     # 가상계좌 상태 조회용 인덱스 (입금 대기 중인 가상계좌)
-    add_index :payments, [:status, :due_date], name: "index_payments_on_virtual_account_pending"
+    add_index :payments, [ :status, :due_date ], name: "index_payments_on_virtual_account_pending"
   end
 end

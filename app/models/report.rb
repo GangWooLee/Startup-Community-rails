@@ -30,7 +30,7 @@ class Report < ApplicationRecord
   validates :reason, presence: true, inclusion: { in: REASONS.keys, message: "유효하지 않은 신고 사유입니다" }
   validates :status, inclusion: { in: STATUSES.keys }
   validates :reporter_id, uniqueness: {
-    scope: [:reportable_type, :reportable_id],
+    scope: [ :reportable_type, :reportable_id ],
     message: "이미 신고한 항목입니다"
   }
   validates :reportable_type, inclusion: {

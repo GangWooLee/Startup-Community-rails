@@ -5,47 +5,55 @@ on:
   push:
     branches: [ main ]
 
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # ===== Security Scans (병렬 실행) =====
   scan_ruby:
+    name: 🔒 Security Scan (Ruby)
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
+      - name: Scan for Rails security vulnerabilities
         run: bin/brakeman --no-pager
-      
-      - name: Scan for known security vulnerabilities in gems used
-        run: bin/bundler-audit
-      
-  scan_js:
-    runs-on: ubuntu-latest
 
+      - name: Scan for vulnerable gems
+        run: bin/bundler-audit check --update
+
+  scan_js:
+    name: 🔒 Security Scan (JS)
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
-      - name: Scan for security vulnerabilities in JavaScript dependencies
+      - name: Scan JS dependencies
         run: bin/importmap audit
 
+  # ===== Code Quality =====
   lint:
+    name: 🎨 Lint (Rubocop)
     runs-on: ubuntu-latest
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -65,60 +73,95 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  # ===== Tests =====
   test:
+    name: 🧪 Unit & Integration Tests
     runs-on: ubuntu-latest
-
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    needs: [ lint ]
+    env:
+      RAILS_ENV: test
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      GEMINI_API_KEY: "test_dummy_key"
+      RESEND_API_KEY: "test_dummy_key"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Prepare database
+        run: bin/rails db:test:prepare
 
       - name: Run tests
-        env:
-          RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
+        run: bin/rails test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: ignore
 
   system-test:
+    name: 🖥️ System Tests
     runs-on: ubuntu-latest
-
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    needs: [ test ]
+    env:
+      RAILS_ENV: test
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      GEMINI_API_KEY: "test_dummy_key"
+      RESEND_API_KEY: "test_dummy_key"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
-      - name: Run System Tests
-        env:
-          RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test:system
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
 
-      - name: Keep screenshots from failed system tests
+      - name: Prepare database
+        run: bin/rails db:test:prepare
+
+      - name: Run System Tests
+        run: bin/rails test:system
+
+      - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  # ===== CI Success Gate =====
+  ci-success:
+    name: ✅ CI Success
+    runs-on: ubuntu-latest
+    needs: [ scan_ruby, scan_js, lint, test, system-test ]
+    if: always()
+    env:
+      SCAN_RUBY_RESULT: ${{ needs.scan_ruby.result }}
+      SCAN_JS_RESULT: ${{ needs.scan_js.result }}
+      LINT_RESULT: ${{ needs.lint.result }}
+      TEST_RESULT: ${{ needs.test.result }}
+      SYSTEM_TEST_RESULT: ${{ needs.system-test.result }}
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [[ "$SCAN_RUBY_RESULT" != "success" ]] || \
+             [[ "$SCAN_JS_RESULT" != "success" ]] || \
+             [[ "$LINT_RESULT" != "success" ]] || \
+             [[ "$TEST_RESULT" != "success" ]] || \
+             [[ "$SYSTEM_TEST_RESULT" != "success" ]]; then
+            echo "❌ One or more jobs failed"
+            exit 1
+          fi
+          echo "✅ All CI jobs passed!"

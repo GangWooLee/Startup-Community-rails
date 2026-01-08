@@ -7,11 +7,11 @@ require "ostruct"
 
 class PaymentsController < ApplicationController
   # 웹훅은 외부 서비스에서 호출하므로 인증/CSRF 제외
-  skip_before_action :verify_authenticity_token, only: [:webhook]
+  skip_before_action :verify_authenticity_token, only: [ :webhook ]
 
-  before_action :require_login, except: [:webhook]
-  before_action :set_payment_context, only: [:new, :create]
-  before_action :validate_payment_eligibility, only: [:new, :create]
+  before_action :require_login, except: [ :webhook ]
+  before_action :set_payment_context, only: [ :new, :create ]
+  before_action :validate_payment_eligibility, only: [ :new, :create ]
 
   # GET /payments/new?post_id=:id 또는 GET /payments/new?offer_message_id=:id
   # 결제 위젯 페이지 렌더링
@@ -202,7 +202,7 @@ class PaymentsController < ApplicationController
     # 제안을 보낸 사람이 아닌 상대방만 결제 가능
     if @offer_message.sender == current_user
       redirect_to chat_room_path(@chat_room), alert: "본인이 보낸 제안은 결제할 수 없습니다."
-      return
+      nil
     end
   end
 
@@ -233,7 +233,7 @@ class PaymentsController < ApplicationController
 
     if @post.paid_by?(current_user)
       redirect_to post_path(@post), alert: "이미 결제한 글입니다."
-      return
+      nil
     end
   end
 
@@ -261,7 +261,7 @@ class PaymentsController < ApplicationController
     amount = offer_data[:amount].to_i
     if amount <= 0
       redirect_to chat_room_path(@chat_room), alert: "유효하지 않은 금액입니다."
-      return
+      nil
     end
   end
 

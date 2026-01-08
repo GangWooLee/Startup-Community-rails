@@ -1,7 +1,7 @@
 # 관리자 AI 분석 사용량 관리 컨트롤러
 # 사용량 통계, 사용자별 limit 수정, 분석 기록 삭제
 class Admin::AiUsagesController < Admin::BaseController
-  before_action :set_user, only: [:show, :update_limit, :update_bonus, :set_remaining, :reset, :destroy_analysis, :destroy_selected]
+  before_action :set_user, only: [ :show, :update_limit, :update_bonus, :set_remaining, :reset, :destroy_analysis, :destroy_selected ]
 
   # GET /admin/ai_usages
   # 전체 AI 분석 통계 + 사용자 검색
@@ -54,7 +54,7 @@ class Admin::AiUsagesController < Admin::BaseController
   # 보너스 크레딧 직접 설정
   def update_bonus
     bonus = params[:bonus].to_i
-    @user.update!(ai_bonus_credits: [bonus, 0].max)
+    @user.update!(ai_bonus_credits: [ bonus, 0 ].max)
 
     flash[:notice] = "#{@user.name}의 보너스 크레딧이 #{bonus}개로 설정되었습니다."
     redirect_to admin_ai_usage_path(@user)
@@ -65,7 +65,7 @@ class Admin::AiUsagesController < Admin::BaseController
   def set_remaining
     desired_remaining = params[:remaining].to_i
     bonus = @user.calculate_bonus_for_remaining(desired_remaining)
-    @user.update!(ai_bonus_credits: [bonus, 0].max)
+    @user.update!(ai_bonus_credits: [ bonus, 0 ].max)
 
     flash[:notice] = "#{@user.name}의 잔여횟수가 #{@user.ai_analyses_remaining}회로 설정되었습니다."
     redirect_to admin_ai_usage_path(@user)

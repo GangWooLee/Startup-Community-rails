@@ -8,13 +8,13 @@ class ProfilesController < ApplicationController
     # 커뮤니티 글 (free, question, promotion)
     @posts = @user.posts.published
                   .includes(images_attachments: :blob)
-                  .where(category: [:free, :question, :promotion])
+                  .where(category: [ :free, :question, :promotion ])
                   .recent.limit(PROFILE_POSTS_LIMIT)
 
     # 외주 글 (hiring, seeking)
     @outsourcing_posts = @user.posts.published
                               .includes(images_attachments: :blob)
-                              .where(category: [:hiring, :seeking])
+                              .where(category: [ :hiring, :seeking ])
                               .recent.limit(PROFILE_POSTS_LIMIT)
 
     # 현재 사용자가 본인 프로필인지 확인

@@ -35,7 +35,7 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
     # In test environment without webhook_secret, it allows the request (200)
     # In production with secret, invalid signature would return 401
     assert_not_equal 302, response.status, "Webhook should not redirect to login"
-    assert_includes [200, 400, 401], response.status
+    assert_includes [ 200, 400, 401 ], response.status
   end
 
   # ============================================================================
@@ -158,7 +158,7 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
     assert payment.done?
 
     # Ensure service is NOT called
-    TossPayments::ApproveService.stub :new, ->{ flunk "Should not call ApproveService" } do
+    TossPayments::ApproveService.stub :new, -> { flunk "Should not call ApproveService" } do
       get success_payments_path(
         paymentKey: payment.payment_key,
         orderId: payment.toss_order_id,
@@ -388,5 +388,4 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
       end
     end
   end
-
 end

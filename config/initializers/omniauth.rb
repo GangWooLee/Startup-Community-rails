@@ -1,7 +1,7 @@
 # OmniAuth 보안 설정 (provider 설정 전에 먼저 적용)
 # GET과 POST 모두 허용
 # 참고: CSRF 보호는 oauth_controller#passthru에서 Rails의 CSRF 토큰 검증으로 처리됨
-OmniAuth.config.allowed_request_methods = [:get, :post]
+OmniAuth.config.allowed_request_methods = [ :get, :post ]
 
 # 인증 실패 시 예외 발생 대신 failure 엔드포인트로 리다이렉트
 OmniAuth.config.on_failure = proc { |env|

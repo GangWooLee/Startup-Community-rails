@@ -9,6 +9,6 @@ class CreateEmailVerifications < ActiveRecord::Migration[8.1]
       t.timestamps
     end
     add_index :email_verifications, :email
-    add_index :email_verifications, [:email, :code]
+    add_index :email_verifications, [ :email, :code ]
   end
 end

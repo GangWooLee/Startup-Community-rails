@@ -15,7 +15,7 @@ class User < ApplicationRecord
   # 아바타 파일 검증 (보안: 악성 파일 업로드 방지)
   MAX_AVATAR_SIZE = 2.megabytes
   MAX_COVER_SIZE = 5.megabytes
-  ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"].freeze
+  ALLOWED_AVATAR_TYPES = [ "image/jpeg", "image/png", "image/gif", "image/webp" ].freeze
 
   # 커버 이미지 기본 그라디언트 (업로드 없을 때 사용)
   COVER_GRADIENTS = [
@@ -643,12 +643,12 @@ class User < ApplicationRecord
   # 남은 AI 분석 횟수 반환 (보너스 포함)
   # remaining = limit - used + bonus
   def ai_analyses_remaining
-    [effective_ai_limit - idea_analyses.count + ai_bonus_credits.to_i, 0].max
+    [ effective_ai_limit - idea_analyses.count + ai_bonus_credits.to_i, 0 ].max
   end
 
   # 보너스 제외 기본 잔여 횟수
   def base_remaining
-    [effective_ai_limit - idea_analyses.count, 0].max
+    [ effective_ai_limit - idea_analyses.count, 0 ].max
   end
 
   # AI 분석 limit에 도달했는지 확인

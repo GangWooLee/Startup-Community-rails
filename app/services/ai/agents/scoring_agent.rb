@@ -40,13 +40,13 @@ module Ai
         {
           score: {
             overall: 50,
-            weak_areas: ["시장 분석", "기술 구체화"],
-            strong_areas: ["아이디어 독창성"],
-            improvement_tips: ["분석 결과를 기반으로 개선점을 확인하세요"]
+            weak_areas: [ "시장 분석", "기술 구체화" ],
+            strong_areas: [ "아이디어 독창성" ],
+            improvement_tips: [ "분석 결과를 기반으로 개선점을 확인하세요" ]
           },
           required_expertise: {
-            roles: ["Developer", "Designer"],
-            skills: ["MVP", "스타트업"],
+            roles: [ "Developer", "Designer" ],
+            skills: [ "MVP", "스타트업" ],
             description: "분석 기반 전문성 추천이 필요합니다"
           },
           confidence_level: "Medium"
@@ -57,7 +57,7 @@ module Ai
 
       def build_messages
         format_messages_for_gemini(
-          [{ role: "user", content: user_prompt }],
+          [ { role: "user", content: user_prompt } ],
           system_prompt: system_prompt
         )
       end
@@ -210,7 +210,7 @@ module Ai
         return fallback_result[:score] unless score.is_a?(Hash)
 
         overall = score[:overall].to_i
-        overall = [[overall, 0].max, 100].min # 0-100 범위로 제한
+        overall = [ [ overall, 0 ].max, 100 ].min # 0-100 범위로 제한
 
         # weak_areas 표준화 (ExpertScorePredictor와 매칭을 위해)
         weak_areas = standardize_weak_areas(score[:weak_areas])

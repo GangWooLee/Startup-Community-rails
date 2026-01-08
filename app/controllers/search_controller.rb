@@ -221,7 +221,7 @@ class SearchController < ApplicationController
 
     @users_total_count = base_query.count
     @users_total_pages = (@users_total_count.to_f / USERS_PER_PAGE).ceil
-    @users_page = [[@page, 1].max, [@users_total_pages, 1].max].min
+    @users_page = [ [ @page, 1 ].max, [ @users_total_pages, 1 ].max ].min
 
     offset = (@users_page - 1) * USERS_PER_PAGE
     @users = base_query.order(created_at: :desc).offset(offset).limit(USERS_PER_PAGE)
@@ -259,7 +259,7 @@ class SearchController < ApplicationController
 
     @posts_total_count = base_query.count
     @posts_total_pages = (@posts_total_count.to_f / POSTS_PER_PAGE).ceil
-    @posts_page = [[@page, 1].max, [@posts_total_pages, 1].max].min
+    @posts_page = [ [ @page, 1 ].max, [ @posts_total_pages, 1 ].max ].min
 
     offset = (@posts_page - 1) * POSTS_PER_PAGE
     @posts = base_query.order(created_at: :desc).offset(offset).limit(POSTS_PER_PAGE)
@@ -269,7 +269,7 @@ class SearchController < ApplicationController
   def apply_category_filter(query)
     case @category
     when "community"
-      query.where(category: [:free, :question, :promotion])
+      query.where(category: [ :free, :question, :promotion ])
     when "hiring"
       query.where(category: :hiring)
     when "seeking"

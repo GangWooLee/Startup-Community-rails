@@ -54,7 +54,7 @@ Rails.application.configure do
   # OAuth 세션 쿠키 설정: IPv4/IPv6 혼용 문제 해결
   # Google OAuth 콜백이 ::1(IPv6)로 돌아올 때 127.0.0.1(IPv4) 세션과 불일치하는 문제 방지
   config.session_store :cookie_store,
-    key: '_startup_community_session',
+    key: "_startup_community_session",
     domain: :all,  # 모든 서브도메인/IP에서 쿠키 공유
     same_site: :lax
 

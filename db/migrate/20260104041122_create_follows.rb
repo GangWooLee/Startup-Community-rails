@@ -8,9 +8,9 @@ class CreateFollows < ActiveRecord::Migration[8.1]
     end
 
     # Unique constraint: A user can only follow another user once
-    add_index :follows, [:follower_id, :followed_id], unique: true
+    add_index :follows, [ :follower_id, :followed_id ], unique: true
 
     # For efficient follower/following list queries
-    add_index :follows, [:followed_id, :created_at]
+    add_index :follows, [ :followed_id, :created_at ]
   end
 end

@@ -349,5 +349,4 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     # Controller uses includes(:user, :seller, :post, :payments) in set_order
     # This prevents N+1 queries for associations
   end
-
 end

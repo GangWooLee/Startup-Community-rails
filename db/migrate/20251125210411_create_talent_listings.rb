@@ -13,7 +13,7 @@ class CreateTalentListings < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :talent_listings, [:user_id, :created_at]
+    add_index :talent_listings, [ :user_id, :created_at ]
     add_index :talent_listings, :category
     add_index :talent_listings, :status
     add_index :talent_listings, :created_at

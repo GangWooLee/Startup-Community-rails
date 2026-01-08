@@ -74,7 +74,7 @@ module Ai
       else
         # OpenAI API 호출
         response = llm.chat(
-          messages: [{ role: "system", content: SYSTEM_PROMPT }] + messages
+          messages: [ { role: "system", content: SYSTEM_PROMPT } ] + messages
         )
         log_token_usage(response, "FollowUpGenerator")
         response.chat_completion

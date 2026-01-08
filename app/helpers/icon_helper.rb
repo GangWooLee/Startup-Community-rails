@@ -40,7 +40,7 @@ module IconHelper
 
     # size를 Tailwind 클래스로 변환하여 추가
     size_class = SIZE_CLASSES[size.to_s] || SIZE_CLASSES["md"]
-    final_class = [size_class, base_class].compact.join(" ")
+    final_class = [ size_class, base_class ].compact.join(" ")
 
     # rails_icons gem 직접 호출 (재귀 방지)
     RailsIcons::Icon.new(

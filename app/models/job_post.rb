@@ -31,26 +31,26 @@ class JobPost < ApplicationRecord
 
   def category_i18n
     {
-      development: '개발',
-      design: '디자인',
-      pm: 'PM/기획',
-      marketing: '마케팅'
+      development: "개발",
+      design: "디자인",
+      pm: "PM/기획",
+      marketing: "마케팅"
     }[category.to_sym]
   end
 
   def project_type_i18n
     {
-      short_term: '단기',
-      long_term: '장기',
-      one_time: '단발'
+      short_term: "단기",
+      long_term: "장기",
+      one_time: "단발"
     }[project_type.to_sym]
   end
 
   def status_i18n
     {
-      open: '모집중',
-      closed: '마감',
-      filled: '완료'
+      open: "모집중",
+      closed: "마감",
+      filled: "완료"
     }[status.to_sym]
   end
 end

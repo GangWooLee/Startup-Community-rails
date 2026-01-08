@@ -59,7 +59,7 @@ class Ai::BaseAgentTest < ActiveSupport::TestCase
   end
 
   test "initializes with provided tools" do
-    tools = [:tool1, :tool2]
+    tools = [ :tool1, :tool2 ]
     agent = TestAgent.new(llm: @mock_llm, tools: tools)
     assert_equal tools, agent.tools
   end
@@ -134,7 +134,7 @@ class Ai::BaseAgentTest < ActiveSupport::TestCase
   test "parse_json_response handles nested JSON" do
     json_text = '{"data": {"nested": {"deep": true}}, "array": [1, 2, 3]}'
     result = @agent.parse_test(json_text)
-    assert_equal({ data: { nested: { deep: true } }, array: [1, 2, 3] }, result)
+    assert_equal({ data: { nested: { deep: true } }, array: [ 1, 2, 3 ] }, result)
   end
 
   # ─────────────────────────────────────────────────
@@ -151,34 +151,34 @@ class Ai::BaseAgentTest < ActiveSupport::TestCase
 
     assert_equal 2, result.length
     assert_equal "user", result[0][:role]
-    assert_equal [{ text: "Hello" }], result[0][:parts]
+    assert_equal [ { text: "Hello" } ], result[0][:parts]
     assert_equal "assistant", result[1][:role]
-    assert_equal [{ text: "Hi there" }], result[1][:parts]
+    assert_equal [ { text: "Hi there" } ], result[1][:parts]
   end
 
   test "format_messages_for_gemini converts system to user" do
-    messages = [{ role: "system", content: "You are a helpful assistant" }]
+    messages = [ { role: "system", content: "You are a helpful assistant" } ]
     result = @agent.format_test(messages)
 
     assert_equal "user", result[0][:role]
-    assert_equal [{ text: "You are a helpful assistant" }], result[0][:parts]
+    assert_equal [ { text: "You are a helpful assistant" } ], result[0][:parts]
   end
 
   test "format_messages_for_gemini handles string keys" do
-    messages = [{ "role" => "user", "content" => "String key test" }]
+    messages = [ { "role" => "user", "content" => "String key test" } ]
     result = @agent.format_test(messages)
 
     assert_equal "user", result[0][:role]
-    assert_equal [{ text: "String key test" }], result[0][:parts]
+    assert_equal [ { text: "String key test" } ], result[0][:parts]
   end
 
   test "format_messages_for_gemini adds system_prompt with model response" do
-    messages = [{ role: "user", content: "Question" }]
+    messages = [ { role: "user", content: "Question" } ]
     result = @agent.format_test(messages, system_prompt: "Be helpful")
 
     assert_equal 3, result.length
     assert_equal "user", result[0][:role]
-    assert_equal [{ text: "Be helpful" }], result[0][:parts]
+    assert_equal [ { text: "Be helpful" } ], result[0][:parts]
     assert_equal "model", result[1][:role]
     assert_equal "user", result[2][:role]
   end

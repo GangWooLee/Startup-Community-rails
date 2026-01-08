@@ -1,7 +1,7 @@
 # 관리자 회원 관리 컨트롤러
 # 회원 검색, 상세 정보, 채팅방 목록 확인
 class Admin::UsersController < Admin::BaseController
-  before_action :set_user, only: [:show, :chat_rooms]
+  before_action :set_user, only: [ :show, :chat_rooms ]
 
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능

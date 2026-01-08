@@ -128,7 +128,7 @@ module AiMockHelpers
       "candidates" => [
         {
           "content" => {
-            "parts" => [{ "text" => content }]
+            "parts" => [ { "text" => content } ]
           },
           "finishReason" => "STOP"
         }
@@ -140,11 +140,11 @@ module AiMockHelpers
   def mock_analysis_result
     {
       summary: "이것은 테스트 아이디어입니다.",
-      target_users: ["초기 창업자", "대학생"],
+      target_users: [ "초기 창업자", "대학생" ],
       market_analysis: {
         size: "1조원 규모",
         growth_rate: "연 15%",
-        competitors: ["경쟁사A", "경쟁사B"]
+        competitors: [ "경쟁사A", "경쟁사B" ]
       },
       strategy: {
         go_to_market: "온라인 마케팅 집중",

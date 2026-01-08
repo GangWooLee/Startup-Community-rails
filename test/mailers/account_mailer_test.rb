@@ -20,7 +20,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "signup_verification sends email to correct recipient" do
     email = AccountMailer.signup_verification("newuser@test.com", @verification_code)
 
-    assert_equal ["newuser@test.com"], email.to
+    assert_equal [ "newuser@test.com" ], email.to
   end
 
   test "signup_verification has correct subject" do
@@ -32,7 +32,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "signup_verification has correct sender" do
     email = AccountMailer.signup_verification("newuser@test.com", @verification_code)
 
-    assert_equal ["noreply@undrewai.com"], email.from
+    assert_equal [ "noreply@undrewai.com" ], email.from
   end
 
   test "signup_verification body contains verification code" do
@@ -67,7 +67,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "password_reset sends email to user's email address" do
     email = AccountMailer.password_reset(@user, @reset_token)
 
-    assert_equal [@user.email], email.to
+    assert_equal [ @user.email ], email.to
   end
 
   test "password_reset has correct subject" do
@@ -79,7 +79,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "password_reset has correct sender" do
     email = AccountMailer.password_reset(@user, @reset_token)
 
-    assert_equal ["noreply@undrewai.com"], email.from
+    assert_equal [ "noreply@undrewai.com" ], email.from
   end
 
   test "password_reset body contains user name" do
@@ -128,7 +128,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "oauth_password_notice sends email to user's email address" do
     email = AccountMailer.oauth_password_notice(@oauth_user)
 
-    assert_equal [@oauth_user.email], email.to
+    assert_equal [ @oauth_user.email ], email.to
   end
 
   test "oauth_password_notice has correct subject" do
@@ -140,7 +140,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "oauth_password_notice has correct sender" do
     email = AccountMailer.oauth_password_notice(@oauth_user)
 
-    assert_equal ["noreply@undrewai.com"], email.from
+    assert_equal [ "noreply@undrewai.com" ], email.from
   end
 
   test "oauth_password_notice body contains user name" do
@@ -269,7 +269,7 @@ class AccountMailerTest < ActionMailer::TestCase
 
     test_emails.each do |test_email|
       email = AccountMailer.signup_verification(test_email, @verification_code)
-      assert_equal [test_email], email.to, "Failed for email: #{test_email}"
+      assert_equal [ test_email ], email.to, "Failed for email: #{test_email}"
     end
   end
 

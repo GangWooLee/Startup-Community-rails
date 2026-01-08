@@ -30,6 +30,6 @@ class EmailVerification < ApplicationRecord
   end
 
   def remaining_seconds
-    [(expires_at - Time.current).to_i, 0].max
+    [ (expires_at - Time.current).to_i, 0 ].max
   end
 end

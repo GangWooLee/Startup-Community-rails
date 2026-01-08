@@ -50,7 +50,7 @@ class Order < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :for_buyer, ->(user) { where(user: user) }
   scope :for_seller, ->(user) { where(seller: user) }
-  scope :active, -> { where.not(status: [:cancelled, :refunded]) }
+  scope :active, -> { where.not(status: [ :cancelled, :refunded ]) }
 
   # === 정산 관련 ===
 
@@ -233,10 +233,10 @@ class Order < ApplicationRecord
     return unless offer_message.present?
 
     new_status = case status
-                 when "paid", "in_progress" then "paid"
-                 when "completed" then "completed"
-                 when "cancelled", "refunded" then "cancelled"
-                 end
+    when "paid", "in_progress" then "paid"
+    when "completed" then "completed"
+    when "cancelled", "refunded" then "cancelled"
+    end
 
     offer_message.update_offer_status!(new_status) if new_status
   end
@@ -246,15 +246,15 @@ class Order < ApplicationRecord
     return unless chat_room.present?
 
     message_content = case status
-                      when "paid"
+    when "paid"
                         "💸 결제가 완료되었습니다! 플랫폼이 #{formatted_amount}을 안전하게 보관 중입니다."
-                      when "completed"
+    when "completed"
                         "✅ 거래가 확정되었습니다! #{seller.name}님에게 #{formatted_settlement_amount}이 정산됩니다."
-                      when "cancelled"
+    when "cancelled"
                         "❌ 주문이 취소되었습니다."
-                      when "refunded"
+    when "refunded"
                         "💰 환불이 완료되었습니다."
-                      end
+    end
 
     return unless message_content
 

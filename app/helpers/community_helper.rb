@@ -53,9 +53,9 @@ module CommunityHelper
       # 카테고리 필터 적용
       base_query = if category.present?
                      base_query.where(category: category)
-                   else
+      else
                      base_query.community
-                   end
+      end
 
       post = base_query.where("posts.created_at >= ?", 7.days.ago)
                        .select("posts.*, (COALESCE(likes_count, 0) * 2 + COALESCE(comments_count, 0) + COALESCE(views_count, 0) / 10) AS popularity_score")
@@ -82,7 +82,7 @@ module CommunityHelper
     @top_makers ||= begin
       User.active
           .joins(:posts)
-          .where(posts: { status: :published, category: [:free, :question, :promotion] })
+          .where(posts: { status: :published, category: [ :free, :question, :promotion ] })
           .where("posts.created_at >= ?", 30.days.ago)
           .group("users.id")
           .select("users.*, (SUM(COALESCE(posts.likes_count, 0)) + SUM(COALESCE(posts.comments_count, 0))) AS engagement_score")
@@ -106,7 +106,7 @@ module CommunityHelper
       # 최근 N일 이내 게시글의 skills 수집
       recent_skills = Post.published
                           .where(created_at: days.days.ago..)
-                          .where.not(skills: [nil, ""])
+                          .where.not(skills: [ nil, "" ])
                           .pluck(:skills)
 
       # 모든 스킬을 파싱하여 카운트

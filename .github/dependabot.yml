@@ -1,12 +1,49 @@
+# Dependabot - 자동 의존성 업데이트
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
 version: 2
 updates:
-- package-ecosystem: bundler
-  directory: "/"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 10
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 10
+  # Ruby gems (Bundler)
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ruby"
+    commit-message:
+      prefix: "[deps]"
+    groups:
+      # Rails 관련 gem 그룹화
+      rails:
+        patterns:
+          - "rails*"
+          - "actioncable*"
+          - "actionmailer*"
+          - "actionpack*"
+          - "activerecord*"
+          - "activesupport*"
+      # 개발/테스트 도구 그룹화
+      dev-tools:
+        patterns:
+          - "rubocop*"
+          - "brakeman"
+          - "bundler-audit"
+          - "simplecov"
+          - "debug"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "[deps]"

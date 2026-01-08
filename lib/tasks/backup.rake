@@ -80,7 +80,7 @@ namespace :backup do
   end
 
   desc "Restore database from backup"
-  task :restore, [:timestamp] => :environment do |_t, args|
+  task :restore, [ :timestamp ] => :environment do |_t, args|
     unless args[:timestamp]
       puts "Usage: rails backup:restore[TIMESTAMP]"
       puts "Example: rails backup:restore[20260105_040000]"

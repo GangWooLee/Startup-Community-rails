@@ -205,9 +205,9 @@ module SkillHelper
     icon_class = SKILL_ICONS[skill_name]
 
     size_class = case size
-                 when "sm" then "text-base"
-                 when "lg" then "text-2xl"
-                 else "text-xl"
+    when "sm" then "text-base"
+    when "lg" then "text-2xl"
+    else "text-xl"
     end
 
     if icon_class.present?
@@ -239,9 +239,9 @@ module SkillHelper
   # 폴백 배지 (첫 글자)
   def fallback_skill_badge(skill_name, size)
     badge_size = case size
-                 when "sm" then "w-5 h-5 text-[10px]"
-                 when "lg" then "w-8 h-8 text-sm"
-                 else "w-6 h-6 text-xs"
+    when "sm" then "w-5 h-5 text-[10px]"
+    when "lg" then "w-8 h-8 text-sm"
+    else "w-6 h-6 text-xs"
     end
 
     color_class = skill_color_class(skill_name)

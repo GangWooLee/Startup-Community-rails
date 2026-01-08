@@ -51,7 +51,7 @@ namespace :data do
 
       # work_period가 없으면 기본값 설정
       if post.work_period.blank?
-        periods = ["1주일", "2주", "1개월", "2개월", "3개월", "협의"]
+        periods = [ "1주일", "2주", "1개월", "2개월", "3개월", "협의" ]
         updates[:work_period] = periods.sample
       end
 
