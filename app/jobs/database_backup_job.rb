@@ -18,6 +18,9 @@ class DatabaseBackupJob < ApplicationJob
   def perform
     Rails.logger.info "[DatabaseBackupJob] Starting database backup..."
 
+    # Load rake tasks (required in Solid Queue job context)
+    Rails.application.load_tasks
+
     # Run the backup rake task
     Rake::Task["backup:database"].reenable
     Rake::Task["backup:database"].invoke
