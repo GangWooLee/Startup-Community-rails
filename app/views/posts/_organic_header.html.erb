@@ -83,19 +83,7 @@
         <%# User Avatar / Login Button %>
         <% if logged_in? %>
           <%= link_to my_page_path, class: "block" do %>
-            <div class="h-10 w-10 rounded-full bg-stone-200 overflow-hidden border border-white shadow-md cursor-pointer hover:ring-2 hover:ring-stone-200 transition-all">
-              <% if current_user.using_anonymous_avatar? %>
-                <%= image_tag "/anonymous#{current_user.avatar_type.to_i + 1}-.png", alt: current_user.display_name, class: "h-full w-full object-cover" %>
-              <% elsif current_user.avatar.attached? %>
-                <%= image_tag current_user.avatar, alt: current_user.display_name, class: "h-full w-full object-cover" %>
-              <% elsif current_user.avatar_url.present? %>
-                <%= image_tag current_user.avatar_url, alt: current_user.display_name, class: "h-full w-full object-cover" %>
-              <% else %>
-                <div class="h-full w-full flex items-center justify-center bg-stone-300 text-stone-600 font-bold text-sm">
-                  <%= current_user.display_name[0].upcase %>
-                </div>
-              <% end %>
-            </div>
+            <%= render_user_avatar(current_user, size: "md", class: "border border-white shadow-md cursor-pointer hover:ring-2 hover:ring-stone-200 transition-all") %>
           <% end %>
         <% else %>
           <%= link_to login_path, class: "flex items-center justify-center gap-2 bg-[#2C2825] hover:bg-stone-800 text-[#FDFBF7] px-5 py-2.5 rounded-full font-medium shadow-md shadow-stone-900/5 transition-all hover:-translate-y-0.5 text-sm" do %>

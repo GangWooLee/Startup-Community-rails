@@ -7,19 +7,9 @@
   <%# ===== TOP 60%: 프로필 섹션 (Sticky Header) ===== %>
   <div class="sticky top-0 z-10 bg-white border-b border-stone-100">
     <div class="p-6 text-center">
-      <%# 프로필 이미지 (80px) %>
-      <div class="w-20 h-20 rounded-full ring-4 ring-stone-100 overflow-hidden mx-auto mb-4 bg-stone-100">
-        <% if other_user.using_anonymous_avatar? %>
-          <%= image_tag "/anonymous#{other_user.avatar_type.to_i + 1}-.png", alt: other_user.display_name, class: "h-full w-full object-cover" %>
-        <% elsif other_user.avatar.attached? %>
-          <%= image_tag other_user.avatar, alt: other_user.display_name, class: "h-full w-full object-cover" %>
-        <% elsif other_user.avatar_url.present? %>
-          <%= image_tag other_user.avatar_url, alt: other_user.display_name, class: "h-full w-full object-cover" %>
-        <% else %>
-          <div class="h-full w-full flex items-center justify-center">
-            <span class="text-2xl font-semibold text-stone-400"><%= other_user.display_name&.first&.upcase || "?" %></span>
-          </div>
-        <% end %>
+      <%# 프로필 이미지 (80px) - 헬퍼 사용으로 익명 모드 자동 지원 %>
+      <div class="mx-auto mb-4">
+        <%= render_user_avatar(other_user, size: "2xl", ring: "ring-4 ring-stone-100", class: "w-20 h-20", fallback_bg: "bg-stone-100", fallback_text_color: "text-stone-400") %>
       </div>
 
       <%# 이름 + 인증 뱃지 %>

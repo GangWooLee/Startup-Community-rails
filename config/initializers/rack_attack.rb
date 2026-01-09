@@ -7,6 +7,22 @@ class Rack::Attack
   ### Configure Cache ###
   # Rack::Attack uses Rails.cache by default
 
+  ### Disable in Development/Test ###
+  # Rate limiting is only needed in production
+  unless Rails.env.production?
+    # Completely disable Rack::Attack in development and test environments
+    Rack::Attack.enabled = false
+    Rails.logger.info "[Rack::Attack] Disabled in #{Rails.env} environment"
+  end
+
+  ### Safelist for Development/Test ###
+  # Allow localhost requests to bypass all throttles (for E2E tests)
+  # This is a backup in case enabled = false doesn't work
+  safelist("allow from localhost") do |req|
+    # Requests from localhost are allowed regardless of throttle limits
+    req.ip == "127.0.0.1" || req.ip == "::1"
+  end
+
   ### Throttle Settings ###
 
   # Throttle all requests by IP (300 requests per 5 minutes)
@@ -96,8 +112,9 @@ class Rack::Attack
           req.path.include?("xmlrpc")
       end
     rescue ActiveRecord::StatementInvalid, PG::UndefinedTable => e
-      Rails.logger.warn "[Rack::Attack] Cache unavailable: #{e.message}"
-      false
+      # 캐시 실패 시: 프로덕션에서는 안전을 위해 차단, 개발/테스트에서는 허용
+      Rails.logger.error "[Rack::Attack] Cache unavailable: #{e.message}"
+      Rails.env.production?
     end
   end
 

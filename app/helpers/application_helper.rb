@@ -226,23 +226,36 @@ module ApplicationHelper
     }
 
     sizes = size_classes[size] || size_classes["md"]
+
+    # 익명 모드일 때는 흰색 배경 + 테두리 사용
+    is_anonymous = user.respond_to?(:using_anonymous_avatar?) && user.using_anonymous_avatar?
+    bg_class = is_anonymous ? "bg-white border border-gray-200" : fallback_bg
+
     container_class = [
       sizes[:container],
       "rounded-full overflow-hidden flex items-center justify-center flex-shrink-0",
-      fallback_bg,
+      bg_class,
       ring_class,
       extra_class
     ].reject(&:blank?).join(" ")
 
     # 아바타 이미지 또는 폴백 렌더링
-    content = if user.respond_to?(:avatar) && user.avatar.attached?
+    # ★ 핵심: 익명 모드 우선 체크 (Single Source of Truth)
+    content = if is_anonymous
+      # 익명 아바타 이미지
+      avatar_type = user.respond_to?(:avatar_type) ? user.avatar_type.to_i : 0
+      image_tag("/anonymous#{avatar_type + 1}-.png",
+                alt: user.display_name,
+                class: "h-full w-full object-cover")
+    elsif user.respond_to?(:avatar) && user.avatar.attached?
       img_src = variant ? user.avatar.variant(variant) : user.avatar
-      image_tag(img_src, alt: user.name, class: "h-full w-full object-cover")
+      image_tag(img_src, alt: user.display_name, class: "h-full w-full object-cover")
     elsif user.respond_to?(:avatar_url) && user.avatar_url.present?
-      image_tag(user.avatar_url, alt: user.name, class: "h-full w-full object-cover")
+      image_tag(user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover")
     else
-      # 폴백: 이름 첫 글자
-      initial = user.name&.first&.upcase || "?"
+      # 폴백: display_name 첫 글자 (익명이면 닉네임 첫 글자)
+      display = user.respond_to?(:display_name) ? user.display_name : user.name
+      initial = display&.first&.upcase || "?"
       content_tag(:span, initial, class: "#{sizes[:text]} font-semibold #{fallback_text_color}")
     end
 

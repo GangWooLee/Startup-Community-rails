@@ -65,6 +65,12 @@ moat-tasks-detail.json
 # Test coverage
 coverage/
 
+# Playwright E2E test artifacts
+playwright-report/
+test-results/
+playwright/.cache/
+e2e/screenshots/
+
 # Design reference files
 design-sample/
 

@@ -11,8 +11,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # 공통 헬퍼 포함
   include SystemTestHelpers
 
-  # Fixture 로드
-  fixtures :all
+  # Fixture 로드 - 필요한 것만 명시적으로 로드 (성능 최적화)
+  # 각 시스템 테스트에서 추가 fixture 필요 시 개별 선언
+  fixtures :users, :posts
 
   # 각 테스트 전 실행
   setup do

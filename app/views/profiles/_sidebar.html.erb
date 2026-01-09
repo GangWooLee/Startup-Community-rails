@@ -26,18 +26,8 @@
     <%# 아바타 섹션 - 익명 모드 지원 %>
     <div class="-mt-14 mb-4 flex justify-center">
       <div class="relative">
-        <%# 메인 아바타 - 컨테이너에 맞게 직접 렌더링 (clamp 반응형 지원) %>
-        <div class="w-[clamp(5rem,12vw,7rem)] h-[clamp(5rem,12vw,7rem)] rounded-full ring-4 ring-white shadow-xl overflow-hidden bg-white border border-gray-200 flex items-center justify-center">
-          <% if user.using_anonymous_avatar? %>
-            <%= image_tag "/anonymous#{user.avatar_type.to_i + 1}-.png", alt: user.display_name, class: "w-full h-full object-cover" %>
-          <% elsif user.avatar.attached? %>
-            <%= image_tag user.avatar, alt: user.display_name, class: "w-full h-full object-cover" %>
-          <% elsif user.avatar_url.present? %>
-            <%= image_tag user.avatar_url, alt: user.display_name, class: "w-full h-full object-cover" %>
-          <% else %>
-            <span class="text-2xl font-semibold text-muted-foreground"><%= user.display_name[0] %></span>
-          <% end %>
-        </div>
+        <%# 메인 아바타 - 헬퍼 사용 (익명 모드 자동 지원) %>
+        <%= render_user_avatar(user, size: "2xl", ring: "ring-4 ring-white shadow-xl", class: "w-[clamp(5rem,12vw,7rem)] h-[clamp(5rem,12vw,7rem)]") %>
 
       </div>
     </div>
