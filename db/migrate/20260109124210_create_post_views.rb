@@ -8,6 +8,6 @@ class CreatePostViews < ActiveRecord::Migration[8.1]
     end
 
     # 중복 방지: User + Post 조합은 고유해야 함
-    add_index :post_views, [:user_id, :post_id], unique: true
+    add_index :post_views, [ :user_id, :post_id ], unique: true
   end
 end
