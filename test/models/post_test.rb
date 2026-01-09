@@ -317,10 +317,70 @@ class PostTest < ActiveSupport::TestCase
     assert_equal "Projects", @seeking_post.category_label
   end
 
-  test "increment_views! should increase views_count" do
-    initial_views = @free_post.views_count
-    @free_post.increment_views!
-    assert_equal initial_views + 1, @free_post.reload.views_count
+  # =========================================
+  # View Recording (record_view)
+  # =========================================
+
+  test "record_view should increase views_count for new viewer" do
+    other_user = users(:two)
+    # 다른 사람의 게시글을 조회
+    post = posts(:one)
+    initial_views = post.views_count
+
+    result = post.record_view(other_user)
+
+    assert result, "record_view should return true"
+    assert_equal initial_views + 1, post.reload.views_count
+  end
+
+  test "record_view should not increase views_count for author (self-view)" do
+    post = posts(:one)
+    author = post.user
+    initial_views = post.views_count
+
+    result = post.record_view(author)
+
+    assert_not result, "record_view should return false for author"
+    assert_equal initial_views, post.reload.views_count
+  end
+
+  test "record_view should not increase views_count for nil user (not logged in)" do
+    post = posts(:one)
+    initial_views = post.views_count
+
+    result = post.record_view(nil)
+
+    assert_not result, "record_view should return false for nil user"
+    assert_equal initial_views, post.reload.views_count
+  end
+
+  test "record_view should not increase views_count for duplicate view" do
+    other_user = users(:two)
+    post = posts(:one)
+
+    # 첫 번째 조회
+    post.record_view(other_user)
+    views_after_first = post.reload.views_count
+
+    # 두 번째 조회 (중복)
+    result = post.record_view(other_user)
+
+    assert_not result, "record_view should return false for duplicate view"
+    assert_equal views_after_first, post.reload.views_count
+  end
+
+  test "viewed_by? should return true after viewing" do
+    other_user = users(:two)
+    post = posts(:one)
+
+    assert_not post.viewed_by?(other_user)
+    post.record_view(other_user)
+    assert post.viewed_by?(other_user)
+  end
+
+  test "viewed_by? should return false for nil user" do
+    post = posts(:one)
+    assert_not post.viewed_by?(nil)
   end
 
   # =========================================

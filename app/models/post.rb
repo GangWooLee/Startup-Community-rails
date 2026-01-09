@@ -9,6 +9,8 @@ class Post < ApplicationRecord
   has_many :notifications, as: :notifiable, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_many :reports, as: :reportable, dependent: :destroy
+  has_many :post_views, dependent: :destroy
+  has_many :viewers, through: :post_views, source: :user
 
   # Active Storage - 이미지 첨부 (최대 5개)
   has_many_attached :images do |attachable|
@@ -108,8 +110,26 @@ class Post < ApplicationRecord
   scope :by_category, ->(cat) { where(category: cat) if cat.present? }
 
   # Instance methods
-  def increment_views!
-    increment!(:views_count)
+
+  # 조회수 기록 (DB 기반 중복 방지 + 본인 제외)
+  # @param user [User, nil] 조회한 사용자
+  # @return [Boolean] 조회수가 증가했으면 true
+  def record_view(user)
+    return false if user.nil?           # 비로그인 제외
+    return false if user_id == user.id  # 본인 제외
+    return false if post_views.exists?(user: user)  # 이미 조회함
+
+    # 새 조회 기록 생성 (counter_cache가 자동 증가)
+    post_views.create!(user: user)
+    true
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+    false  # Race condition 또는 유효성 검사 실패
+  end
+
+  # 해당 사용자가 이 게시글을 조회했는지 확인
+  def viewed_by?(user)
+    return false if user.nil?
+    post_views.exists?(user: user)
   end
 
   # 외주 글인지 확인

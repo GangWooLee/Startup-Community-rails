@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_08_072823) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -311,6 +311,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_08_072823) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "post_views", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "post_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["post_id"], name: "index_post_views_on_post_id"
+    t.index ["user_id", "post_id"], name: "index_post_views_on_user_id_and_post_id", unique: true
+    t.index ["user_id"], name: "index_post_views_on_user_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.boolean "available_now", default: true
     t.integer "category", default: 0, null: false
@@ -493,6 +503,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_08_072823) do
   add_foreign_key "orders", "users", column: "seller_id"
   add_foreign_key "payments", "orders"
   add_foreign_key "payments", "users"
+  add_foreign_key "post_views", "posts"
+  add_foreign_key "post_views", "users"
   add_foreign_key "posts", "users"
   add_foreign_key "reports", "users", column: "reporter_id"
   add_foreign_key "reports", "users", column: "resolved_by_id"

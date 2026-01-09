@@ -52,7 +52,7 @@ class PostsController < ApplicationController
   end
 
   def show
-    @post.increment_views!
+    @post.record_view(current_user)  # 로그인 사용자만, 중복/본인 제외
     # 최상위 댓글만 가져오고, 대댓글은 댓글 안에서 로드
     @comments = @post.comments.root_comments
                      .includes(:user, :likes, replies: [ :user, :likes ])
