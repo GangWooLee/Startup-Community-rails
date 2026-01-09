@@ -22,6 +22,9 @@ class ReportsTest < ApplicationSystemTestCase
       find("button[data-action*='dropdown#toggle']").click
     end
 
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
+
     # 신고하기 버튼 확인 및 클릭
     within("[data-dropdown-target='menu']") do
       assert_selector "button", text: "신고하기"
@@ -114,6 +117,8 @@ class ReportsTest < ApplicationSystemTestCase
     within("[data-testid='post-actions-dropdown']") do
       find("button[data-action*='dropdown#toggle']").click
     end
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -137,6 +142,8 @@ class ReportsTest < ApplicationSystemTestCase
     within("[data-testid='post-actions-dropdown']") do
       find("button[data-action*='dropdown#toggle']").click
     end
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -158,6 +165,8 @@ class ReportsTest < ApplicationSystemTestCase
     within("[data-testid='post-actions-dropdown']") do
       find("button[data-action*='dropdown#toggle']").click
     end
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
