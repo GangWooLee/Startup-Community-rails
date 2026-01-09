@@ -34,27 +34,9 @@
     <div class="flex items-center justify-between p-5 pb-3">
       <%# Left: Avatar + Name + Role Badge %>
       <div class="flex items-center gap-3 min-w-0 flex-1">
-        <%# Avatar with Status Dot %>
-        <div class="relative flex-shrink-0">
-          <div class="w-12 h-12 rounded-full overflow-hidden bg-stone-100">
-            <% if post.user.avatar.attached? %>
-              <%= image_tag post.user.avatar, class: "w-full h-full object-cover" %>
-            <% elsif post.user.avatar_url.present? %>
-              <%= image_tag post.user.avatar_url, class: "w-full h-full object-cover" %>
-            <% else %>
-              <div class="w-full h-full flex items-center justify-center text-stone-600 font-bold text-lg">
-                <%= post.user.display_name[0] %>
-              </div>
-            <% end %>
-          </div>
-          <%# Status Dot %>
-          <% if post.seeking? && post.available_now? %>
-            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full
-                         bg-green-500 ring-2 ring-white"></span>
-          <% else %>
-            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full
-                         bg-stone-300 ring-2 ring-white"></span>
-          <% end %>
+        <%# Avatar %>
+        <div class="flex-shrink-0">
+          <%= render_user_avatar(post.user, size: "lg") %>
         </div>
 
         <%# Name (Drawbridge Task #121: Role Badge 제거) %>

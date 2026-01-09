@@ -117,23 +117,13 @@
                 <%= index + 1 %>
               </span>
 
-              <%# Avatar %>
-              <div class="w-9 h-9 rounded-full overflow-hidden bg-stone-100 flex-shrink-0">
-                <% if user.avatar.attached? %>
-                  <%= image_tag user.avatar, class: "w-full h-full object-cover" %>
-                <% elsif user.avatar_url.present? %>
-                  <%= image_tag user.avatar_url, class: "w-full h-full object-cover" %>
-                <% else %>
-                  <div class="w-full h-full flex items-center justify-center text-stone-600 font-semibold">
-                    <%= user.name[0] %>
-                  </div>
-                <% end %>
-              </div>
+              <%# Avatar (익명 모드 지원) %>
+              <%= render_user_avatar(user, size: "sm") %>
 
-              <%# Info %>
+              <%# Info (익명 모드 지원) %>
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-sm text-stone-900 truncate group-hover:text-orange-600 transition-colors">
-                  <%= user.name %>
+                  <%= user.display_name %>
                 </p>
                 <p class="text-xs text-stone-500 truncate"><%= user.role_title.presence || '멤버' %></p>
               </div>
