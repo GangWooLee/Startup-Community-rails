@@ -171,31 +171,43 @@
   </div>
 
   <!-- 오른쪽: 탭 콘텐츠 -->
-  <div class="flex-1 min-w-0">
+  <div class="flex-1 min-w-0" data-controller="tabs" data-tabs-default-value="chatrooms">
     <!-- 탭 네비게이션 -->
     <div class="bg-card rounded-xl border border-border overflow-hidden">
       <div class="border-b border-border">
-        <nav class="flex -mb-px">
-          <button class="px-6 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5"
-                  data-tab="chatrooms">
+        <nav class="flex -mb-px" role="tablist" data-tabs-target="list">
+          <button type="button"
+                  class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover [&.is-active]:text-primary [&.is-active]:border-b-2 [&.is-active]:border-primary [&.is-active]:bg-primary/5"
+                  data-tabs-target="trigger"
+                  data-tab-id="chatrooms"
+                  data-action="click->tabs#select"
+                  role="tab">
             <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             채팅방 (<%= @chat_rooms.count %>)
           </button>
-          <button class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover"
-                  data-tab="posts" disabled>
+          <button type="button"
+                  class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover [&.is-active]:text-primary [&.is-active]:border-b-2 [&.is-active]:border-primary [&.is-active]:bg-primary/5"
+                  data-tabs-target="trigger"
+                  data-tab-id="posts"
+                  data-action="click->tabs#select"
+                  role="tab">
             <%= icon "document-text", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             게시글 (<%= @posts_count %>)
           </button>
-          <button class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover"
-                  data-tab="payments" disabled>
-            <%= icon "credit-card", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
-            결제 내역
+          <button type="button"
+                  class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover [&.is-active]:text-primary [&.is-active]:border-b-2 [&.is-active]:border-primary [&.is-active]:bg-primary/5"
+                  data-tabs-target="trigger"
+                  data-tab-id="comments"
+                  data-action="click->tabs#select"
+                  role="tab">
+            <%= icon "chat-bubble-bottom-center-text", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
+            댓글 (<%= @comments_count %>)
           </button>
         </nav>
       </div>
 
       <!-- 채팅방 목록 -->
-      <div class="p-4" id="tab-chatrooms">
+      <div class="p-4" data-tabs-target="panel" data-tab-id="chatrooms" role="tabpanel">
         <% if @chat_rooms.any? %>
           <div class="space-y-3">
             <% @chat_rooms.each do |room| %>
@@ -270,6 +282,167 @@
             <%= icon "chat-bubble-left-right", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
             <h3 class="mt-2 text-sm font-medium text-foreground">채팅방 없음</h3>
             <p class="mt-1 text-sm text-muted-foreground">이 사용자는 참여 중인 채팅방이 없습니다.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 게시글 목록 -->
+      <div class="p-4 hidden" data-tabs-target="panel" data-tab-id="posts" role="tabpanel">
+        <% if @posts.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-border">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">제목</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">카테고리</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">반응</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">작성일</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <% @posts.each do |post| %>
+                  <tr class="card-hover">
+                    <td class="px-4 py-3">
+                      <%= link_to post.title.truncate(40), post_path(post), class: "text-sm font-medium text-foreground link-hover relative", target: "_blank" %>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        <%= case post.category
+                            when 'free' then 'bg-gray-100 text-gray-800'
+                            when 'question' then 'bg-blue-100 text-blue-800'
+                            when 'promotion' then 'bg-purple-100 text-purple-800'
+                            when 'hiring' then 'bg-green-100 text-green-800'
+                            when 'seeking' then 'bg-orange-100 text-orange-800'
+                            else 'bg-gray-100 text-gray-800'
+                            end %>">
+                        <%= post.category_label %>
+                      </span>
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span class="flex items-center gap-1">
+                          <%= icon "heart", variant: :solid, css_class: "w-4 h-4 text-red-400" %>
+                          <%= post.likes_count %>
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <%= icon "chat-bubble-left", variant: :solid, css_class: "w-4 h-4 text-blue-400" %>
+                          <%= post.comments_count %>
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <%= icon "eye", variant: :solid, css_class: "w-4 h-4 text-gray-400" %>
+                          <%= post.views_count %>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-muted-foreground">
+                      <%= time_ago_in_words(post.created_at) %> 전
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <%= button_to destroy_post_admin_user_path(@user, post_id: post.id),
+                          method: :delete,
+                          form: { data: { turbo_confirm: "정말 이 게시글을 삭제하시겠습니까?\n\n제목: #{post.title}\n\n이 작업은 되돌릴 수 없으며, 관련 댓글도 함께 삭제됩니다." } },
+                          class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg btn-hover" do %>
+                        <%= icon "trash", variant: :outline, css_class: "w-4 h-4" %>
+                        삭제
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 페이지네이션 -->
+          <% if @posts.total_pages > 1 %>
+            <div class="mt-4 flex justify-center">
+              <%= paginate @posts, param_name: :posts_page %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="py-12 text-center">
+            <%= icon "document-text", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+            <h3 class="mt-2 text-sm font-medium text-foreground">게시글 없음</h3>
+            <p class="mt-1 text-sm text-muted-foreground">이 사용자는 작성한 게시글이 없습니다.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 댓글 목록 -->
+      <div class="p-4 hidden" data-tabs-target="panel" data-tab-id="comments" role="tabpanel">
+        <% if @comments.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-border">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">내용</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">게시글</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">반응</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">작성일</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <% @comments.each do |comment| %>
+                  <tr class="card-hover">
+                    <td class="px-4 py-3 max-w-xs">
+                      <p class="text-sm text-foreground truncate" title="<%= comment.content %>">
+                        <% if comment.reply? %>
+                          <span class="text-muted-foreground">↳ </span>
+                        <% end %>
+                        <%= comment.content.truncate(60) %>
+                      </p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <% if comment.post %>
+                        <%= link_to comment.post.title.truncate(30), post_path(comment.post), class: "text-sm text-muted-foreground link-hover relative", target: "_blank" %>
+                      <% else %>
+                        <span class="text-sm text-muted-foreground italic">삭제된 게시글</span>
+                      <% end %>
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span class="flex items-center gap-1">
+                          <%= icon "heart", variant: :solid, css_class: "w-4 h-4 text-red-400" %>
+                          <%= comment.likes_count %>
+                        </span>
+                        <% if comment.root? && comment.replies_count > 0 %>
+                          <span class="flex items-center gap-1">
+                            <%= icon "chat-bubble-left", variant: :solid, css_class: "w-4 h-4 text-blue-400" %>
+                            <%= comment.replies_count %>
+                          </span>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-muted-foreground">
+                      <%= time_ago_in_words(comment.created_at) %> 전
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <%= button_to destroy_comment_admin_user_path(@user, comment_id: comment.id),
+                          method: :delete,
+                          form: { data: { turbo_confirm: "정말 이 댓글을 삭제하시겠습니까?\n\n내용: #{comment.content.truncate(50)}\n\n이 작업은 되돌릴 수 없습니다." } },
+                          class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg btn-hover" do %>
+                        <%= icon "trash", variant: :outline, css_class: "w-4 h-4" %>
+                        삭제
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 페이지네이션 -->
+          <% if @comments.total_pages > 1 %>
+            <div class="mt-4 flex justify-center">
+              <%= paginate @comments, param_name: :comments_page %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="py-12 text-center">
+            <%= icon "chat-bubble-bottom-center-text", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+            <h3 class="mt-2 text-sm font-medium text-foreground">댓글 없음</h3>
+            <p class="mt-1 text-sm text-muted-foreground">이 사용자는 작성한 댓글이 없습니다.</p>
           </div>
         <% end %>
       </div>

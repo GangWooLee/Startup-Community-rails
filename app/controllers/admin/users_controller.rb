@@ -1,7 +1,7 @@
 # 관리자 회원 관리 컨트롤러
 # 회원 검색, 상세 정보, 채팅방 목록 확인
 class Admin::UsersController < Admin::BaseController
-  before_action :set_user, only: [ :show, :chat_rooms ]
+  before_action :set_user, only: [ :show, :chat_rooms, :destroy_post, :destroy_comment ]
 
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능
@@ -42,12 +42,18 @@ class Admin::UsersController < Admin::BaseController
   end
 
   # GET /admin/users/:id
-  # 회원 상세 정보 + 참여 채팅방 목록
+  # 회원 상세 정보 + 참여 채팅방 목록 + 게시글/댓글
   def show
     # 이 사용자가 참여한 모든 채팅방 (N+1 방지)
     @chat_rooms = @user.chat_rooms
                        .includes(:users, :messages)
                        .order(last_message_at: :desc)
+
+    # 사용자의 게시글 (최신순, 페이지네이션)
+    @posts = @user.posts.order(created_at: :desc).page(params[:posts_page]).per(10)
+
+    # 사용자의 댓글 (최신순, 게시글 정보 포함)
+    @comments = @user.comments.includes(:post).order(created_at: :desc).page(params[:comments_page]).per(10)
 
     # 사용자 통계
     @posts_count = @user.posts.count
@@ -62,6 +68,40 @@ class Admin::UsersController < Admin::BaseController
   # show 페이지로 리다이렉트 (채팅방 목록이 이미 show에 포함됨)
   def chat_rooms
     redirect_to admin_user_path(@user)
+  end
+
+  # DELETE /admin/users/:id/destroy_post
+  # 관리자 권한으로 게시글 삭제
+  # 외래 키 제약으로 인해 연관 레코드를 먼저 처리
+  def destroy_post
+    @post = @user.posts.find(params[:post_id])
+
+    ActiveRecord::Base.transaction do
+      # 채팅방의 source_post_id 참조 해제 (외래 키 제약 우회)
+      ChatRoom.where(source_post_id: @post.id).update_all(source_post_id: nil)
+
+      # 주문의 post_id 참조 해제 (외래 키 제약 우회)
+      Order.where(post_id: @post.id).update_all(post_id: nil)
+
+      # 이제 게시글 삭제 (comments, notifications, reports는 dependent: :destroy로 처리됨)
+      @post.destroy!
+    end
+
+    flash[:notice] = "게시글이 삭제되었습니다."
+    redirect_to admin_user_path(@user, anchor: "posts")
+  rescue ActiveRecord::RecordNotDestroyed => e
+    flash[:alert] = "게시글 삭제 실패: #{e.message}"
+    redirect_to admin_user_path(@user, anchor: "posts")
+  end
+
+  # DELETE /admin/users/:id/destroy_comment
+  # 관리자 권한으로 댓글 삭제
+  def destroy_comment
+    @comment = @user.comments.find(params[:comment_id])
+    @comment.destroy
+
+    flash[:notice] = "댓글이 삭제되었습니다."
+    redirect_to admin_user_path(@user, anchor: "comments")
   end
 
   private

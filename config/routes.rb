@@ -177,7 +177,9 @@ Rails.application.routes.draw do
 
     resources :users, only: [ :index, :show ] do
       member do
-        get :chat_rooms  # 해당 사용자의 채팅방 목록
+        get :chat_rooms         # 해당 사용자의 채팅방 목록
+        delete :destroy_post    # 관리자 권한으로 게시글 삭제
+        delete :destroy_comment # 관리자 권한으로 댓글 삭제
       end
     end
 
