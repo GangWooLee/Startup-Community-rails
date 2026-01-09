@@ -19,11 +19,13 @@ class ReportsTest < ApplicationSystemTestCase
 
     # 더보기 버튼 클릭 (data-testid로 특정)
     within("[data-testid='post-actions-dropdown']") do
-      find("button[data-action*='dropdown#toggle']").click
+      toggle_button = find("button[data-action*='dropdown#toggle']")
+      sleep 0.3  # Stimulus 컨트롤러 연결 대기
+      toggle_button.click
     end
 
-    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
-    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
 
     # 신고하기 버튼 확인 및 클릭
     within("[data-dropdown-target='menu']") do
@@ -115,10 +117,12 @@ class ReportsTest < ApplicationSystemTestCase
 
     # 더보기 → 신고하기 (data-testid로 특정)
     within("[data-testid='post-actions-dropdown']") do
-      find("button[data-action*='dropdown#toggle']").click
+      toggle_button = find("button[data-action*='dropdown#toggle']")
+      sleep 0.3  # Stimulus 컨트롤러 연결 대기
+      toggle_button.click
     end
-    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
-    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -140,10 +144,12 @@ class ReportsTest < ApplicationSystemTestCase
 
     # 더보기 → 신고하기 (data-testid로 특정)
     within("[data-testid='post-actions-dropdown']") do
-      find("button[data-action*='dropdown#toggle']").click
+      toggle_button = find("button[data-action*='dropdown#toggle']")
+      sleep 0.3  # Stimulus 컨트롤러 연결 대기
+      toggle_button.click
     end
-    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
-    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
@@ -163,10 +169,12 @@ class ReportsTest < ApplicationSystemTestCase
 
     # 더보기 → 신고하기 (data-testid로 특정)
     within("[data-testid='post-actions-dropdown']") do
-      find("button[data-action*='dropdown#toggle']").click
+      toggle_button = find("button[data-action*='dropdown#toggle']")
+      sleep 0.3  # Stimulus 컨트롤러 연결 대기
+      toggle_button.click
     end
-    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 대기
-    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 5
+    # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
     within("[data-dropdown-target='menu']") do
       find("button", text: "신고하기").click
     end
