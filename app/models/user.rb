@@ -1,9 +1,10 @@
 class User < ApplicationRecord
+  # Concerns
+  include Authenticatable  # Remember Me 인증
+  include Deletable        # 회원 탈퇴 관련
+
   # OAuth 사용자는 비밀번호가 없을 수 있으므로 validations: false
   has_secure_password validations: false
-
-  # Remember Me 토큰 (DB에 저장되지 않는 가상 속성)
-  attr_accessor :remember_token
 
   # Active Storage - 프로필 이미지
   has_one_attached :avatar
@@ -87,8 +88,7 @@ class User < ApplicationRecord
   # AI 분석 사용량 제한 (관리자 설정 가능)
   DEFAULT_AI_ANALYSIS_LIMIT = 5
 
-  # 회원 탈퇴 기록
-  has_many :user_deletions, dependent: :destroy
+  # Note: user_deletions association은 Deletable concern으로 이동
 
   # 신고/문의
   has_many :reports, foreign_key: :reporter_id, dependent: :destroy  # 내가 한 신고
@@ -135,8 +135,7 @@ class User < ApplicationRecord
   validates :portfolio_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
   validates :open_chat_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
 
-  # 재가입 방지: 탈퇴한 이메일로는 재가입 불가
-  validate :check_blacklisted_email, on: :create
+  # Note: check_blacklisted_email validation은 Deletable concern으로 이동
 
   # ===== 약관 동의 관련 =====
   CURRENT_TERMS_VERSION = "1.0".freeze
@@ -187,8 +186,7 @@ class User < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :oauth_users, -> { joins(:oauth_identities).distinct }
   scope :local_users, -> { left_joins(:oauth_identities).where(oauth_identities: { id: nil }) }
-  scope :active, -> { where(deleted_at: nil) }
-  scope :deleted, -> { where.not(deleted_at: nil) }
+  # Note: active, deleted scopes는 Deletable concern으로 이동
 
   # OAuth 사용자 생성 또는 찾기
   # 1. oauth_identities에서 provider + uid로 기존 연결 찾기
@@ -260,37 +258,9 @@ class User < ApplicationRecord
     !oauth_only?
   end
 
-  # Remember Me: 영구 세션용 토큰 생성 및 저장
-  def remember
-    self.remember_token = SecureRandom.urlsafe_base64
-    update_column(:remember_digest, BCrypt::Password.create(remember_token))
-  end
+  # Note: remember, forget, authenticated? 메서드는 Authenticatable concern으로 이동
 
-  # Remember Me: 토큰 삭제 (로그아웃 시)
-  def forget
-    update_column(:remember_digest, nil)
-  end
-
-  # Remember Me: 쿠키의 토큰이 유효한지 확인
-  def authenticated?(remember_token)
-    return false if remember_digest.nil?
-    BCrypt::Password.new(remember_digest).is_password?(remember_token)
-  end
-
-  # 탈퇴한 사용자인지 확인
-  def deleted?
-    deleted_at.present?
-  end
-
-  # 활성 사용자인지 확인
-  def active?
-    deleted_at.nil?
-  end
-
-  # 가장 최근 탈퇴 기록 가져오기 (관리자용)
-  def last_deletion
-    user_deletions.order(created_at: :desc).first
-  end
+  # Note: deleted?, active?, last_deletion 메서드는 Deletable concern으로 이동
 
   # Rails 8.1 토큰 시스템 사용
   # 비밀번호 재설정: user.generate_token_for(:password_reset) / User.find_by_token_for(:password_reset, token)
@@ -682,15 +652,7 @@ class User < ApplicationRecord
     self.email = email.downcase if email.present?
   end
 
-  # 재가입 방지: 탈퇴한 이메일 해시와 비교
-  def check_blacklisted_email
-    return if email.blank?
-
-    email_hash = Digest::SHA256.hexdigest(email.to_s.downcase.strip)
-    if UserDeletion.exists?(email_hash: email_hash)
-      errors.add(:email, "이전에 탈퇴한 이메일입니다. 다른 이메일로 가입하거나 고객센터에 문의해주세요.")
-    end
-  end
+  # Note: check_blacklisted_email은 Deletable concern으로 이동
 
   # 비밀번호 복잡성 검증 (영문+숫자 조합 필수)
   def password_complexity
