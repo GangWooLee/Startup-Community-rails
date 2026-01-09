@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { delay } from "controllers/mixins/animation_helpers"
 
 /**
  * AI Input Controller - "Premium macOS Native App"
@@ -575,14 +576,6 @@ export default class extends Controller {
     this.previousAnswerTarget.classList.add("animate-slide-in-up")
   }
 
-  // ========== Utility Methods ==========
-
-  /**
-   * Delay helper for animation sequences
-   * @param {number} ms - Milliseconds to delay
-   * @returns {Promise} Promise that resolves after delay
-   */
-  delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
+  // Note: Animation helpers imported from ./mixins/animation_helpers
+  // delay(ms) function is now imported, not a class method
 }

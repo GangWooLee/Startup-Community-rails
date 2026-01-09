@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { getCsrfToken, handleUnauthorized, animateIcon } from "controllers/mixins/toggle_button_mixin"
 
 // 좋아요 버튼 컨트롤러
 // 사용법: data-controller="like-button"
@@ -20,26 +21,24 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
 
-    // 로그인 확인은 서버에서 처리
     try {
       const response = await fetch(this.urlValue, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken,
+          "X-CSRF-Token": getCsrfToken(),
           "Accept": "application/json"
         }
       })
+
+      if (handleUnauthorized(response)) return
 
       if (response.ok) {
         const data = await response.json()
         this.likedValue = data.liked
         this.updateCount(data.likes_count)
         this.updateUI()
-        this.animateHeart()
-      } else if (response.status === 401) {
-        // 로그인 필요
-        window.location.href = "/login"
+        animateIcon(this.iconTarget, 150)
       }
     } catch (error) {
       console.error("Like toggle failed:", error)
@@ -47,18 +46,17 @@ export default class extends Controller {
   }
 
   updateUI() {
-    if (this.hasIconTarget) {
-      if (this.likedValue) {
-        // 좋아요된 상태: 빨간 하트
-        this.iconTarget.innerHTML = this.filledHeartSVG
-        this.iconTarget.classList.add("text-red-500")
-        this.iconTarget.classList.remove("text-muted-foreground")
-      } else {
-        // 좋아요 안된 상태: 빈 하트
-        this.iconTarget.innerHTML = this.outlineHeartSVG
-        this.iconTarget.classList.remove("text-red-500")
-        this.iconTarget.classList.add("text-muted-foreground")
-      }
+    if (!this.hasIconTarget) return
+
+    if (this.likedValue) {
+      // Static SVG - no XSS risk (hardcoded content, not user input)
+      this.iconTarget.innerHTML = this.filledHeartSVG
+      this.iconTarget.classList.add("text-red-500")
+      this.iconTarget.classList.remove("text-muted-foreground")
+    } else {
+      this.iconTarget.innerHTML = this.outlineHeartSVG
+      this.iconTarget.classList.remove("text-red-500")
+      this.iconTarget.classList.add("text-muted-foreground")
     }
   }
 
@@ -66,19 +64,6 @@ export default class extends Controller {
     if (this.hasCountTarget) {
       this.countTarget.textContent = count
     }
-  }
-
-  animateHeart() {
-    if (this.hasIconTarget) {
-      this.iconTarget.classList.add("scale-125")
-      setTimeout(() => {
-        this.iconTarget.classList.remove("scale-125")
-      }, 150)
-    }
-  }
-
-  get csrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || ""
   }
 
   get filledHeartSVG() {

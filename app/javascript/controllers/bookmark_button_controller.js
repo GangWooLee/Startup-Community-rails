@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { getCsrfToken, handleUnauthorized, animateIcon } from "controllers/mixins/toggle_button_mixin"
 
 // 스크랩 버튼 컨트롤러
 // 사용법: data-controller="bookmark-button"
@@ -25,19 +26,18 @@ export default class extends Controller {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken,
+          "X-CSRF-Token": getCsrfToken(),
           "Accept": "application/json"
         }
       })
+
+      if (handleUnauthorized(response)) return
 
       if (response.ok) {
         const data = await response.json()
         this.bookmarkedValue = data.bookmarked
         this.updateUI()
-        this.animateBookmark()
-      } else if (response.status === 401) {
-        // 로그인 필요
-        window.location.href = "/login"
+        animateIcon(this.iconTarget, 150)
       }
     } catch (error) {
       console.error("Bookmark toggle failed:", error)
@@ -45,32 +45,18 @@ export default class extends Controller {
   }
 
   updateUI() {
-    if (this.hasIconTarget) {
-      if (this.bookmarkedValue) {
-        // 스크랩된 상태: 채워진 북마크
-        this.iconTarget.innerHTML = this.filledBookmarkSVG
-        this.iconTarget.classList.add("text-yellow-500")
-        this.iconTarget.classList.remove("text-muted-foreground")
-      } else {
-        // 스크랩 안된 상태: 빈 북마크
-        this.iconTarget.innerHTML = this.outlineBookmarkSVG
-        this.iconTarget.classList.remove("text-yellow-500")
-        this.iconTarget.classList.add("text-muted-foreground")
-      }
-    }
-  }
+    if (!this.hasIconTarget) return
 
-  animateBookmark() {
-    if (this.hasIconTarget) {
-      this.iconTarget.classList.add("scale-125")
-      setTimeout(() => {
-        this.iconTarget.classList.remove("scale-125")
-      }, 150)
+    if (this.bookmarkedValue) {
+      // Static SVG - no XSS risk (hardcoded content, not user input)
+      this.iconTarget.innerHTML = this.filledBookmarkSVG
+      this.iconTarget.classList.add("text-yellow-500")
+      this.iconTarget.classList.remove("text-muted-foreground")
+    } else {
+      this.iconTarget.innerHTML = this.outlineBookmarkSVG
+      this.iconTarget.classList.remove("text-yellow-500")
+      this.iconTarget.classList.add("text-muted-foreground")
     }
-  }
-
-  get csrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || ""
   }
 
   get filledBookmarkSVG() {

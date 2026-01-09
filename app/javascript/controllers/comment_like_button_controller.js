@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { getCsrfToken, handleUnauthorized, animateIcon } from "controllers/mixins/toggle_button_mixin"
 
 export default class extends Controller {
   static values = { url: String, liked: Boolean, commentId: Number }
@@ -13,19 +14,19 @@ export default class extends Controller {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken,
+          "X-CSRF-Token": getCsrfToken(),
           "Accept": "application/json"
         }
       })
+
+      if (handleUnauthorized(response)) return
 
       if (response.ok) {
         const data = await response.json()
         this.likedValue = data.liked
         this.updateIconUI()
         this.updateMetadataUI(data.likes_count)
-        this.animateLike()
-      } else if (response.status === 401) {
-        window.location.href = "/login"
+        animateIcon(this.iconTarget, 150)
       }
     } catch (error) {
       console.error("Comment like toggle failed:", error)
@@ -34,12 +35,13 @@ export default class extends Controller {
 
   // 우측 아이콘 업데이트
   updateIconUI() {
-    if (this.hasIconTarget) {
-      this.iconTarget.innerHTML = this.likedValue ? this.filledHeartSVG : this.outlineHeartSVG
-      this.iconTarget.classList.toggle("text-red-500", this.likedValue)
-      this.iconTarget.classList.toggle("text-muted-foreground", !this.likedValue)
-      this.iconTarget.classList.toggle("hover:text-red-500", !this.likedValue)
-    }
+    if (!this.hasIconTarget) return
+
+    // Static SVG - no XSS risk (hardcoded content, not user input)
+    this.iconTarget.innerHTML = this.likedValue ? this.filledHeartSVG : this.outlineHeartSVG
+    this.iconTarget.classList.toggle("text-red-500", this.likedValue)
+    this.iconTarget.classList.toggle("text-muted-foreground", !this.likedValue)
+    this.iconTarget.classList.toggle("hover:text-red-500", !this.likedValue)
   }
 
   // 메타데이터 영역 좋아요 개수 업데이트
@@ -50,46 +52,40 @@ export default class extends Controller {
 
     if (count > 0) {
       if (metadataContainer) {
-        // 기존 요소 업데이트
         const countSpan = metadataContainer.querySelector('[data-comment-likes-count]')
         if (countSpan) {
+          // Using textContent for count - safe from XSS
           countSpan.textContent = `${count}개`
         }
       } else if (metadataRow) {
-        // 새로 생성 (시간 요소 뒤에 삽입)
         const timeSpan = metadataRow.querySelector('span.text-xs.text-muted-foreground')
         if (timeSpan) {
+          // Static HTML template with dynamic count inserted via textContent
           const newLikesSpan = document.createElement('span')
           newLikesSpan.id = `comment-likes-count-${commentId}`
           newLikesSpan.className = 'inline-flex items-center gap-1 text-xs font-medium text-muted-foreground'
-          newLikesSpan.innerHTML = `
-            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
-            </svg>
-            <span data-comment-likes-count>${count}개</span>
-          `
+
+          // Build DOM structure safely
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          svg.setAttribute('class', 'h-3 w-3')
+          svg.setAttribute('fill', 'currentColor')
+          svg.setAttribute('viewBox', '0 0 24 24')
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+          path.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z')
+          svg.appendChild(path)
+
+          const countSpan = document.createElement('span')
+          countSpan.setAttribute('data-comment-likes-count', '')
+          countSpan.textContent = `${count}개`
+
+          newLikesSpan.appendChild(svg)
+          newLikesSpan.appendChild(countSpan)
           timeSpan.insertAdjacentElement('afterend', newLikesSpan)
         }
       }
-    } else {
-      // 0개면 삭제
-      if (metadataContainer) {
-        metadataContainer.remove()
-      }
+    } else if (metadataContainer) {
+      metadataContainer.remove()
     }
-  }
-
-  animateLike() {
-    if (this.hasIconTarget) {
-      this.iconTarget.classList.add("scale-125")
-      setTimeout(() => {
-        this.iconTarget.classList.remove("scale-125")
-      }, 150)
-    }
-  }
-
-  get csrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || ""
   }
 
   get filledHeartSVG() {
