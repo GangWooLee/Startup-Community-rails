@@ -1,5 +1,6 @@
 class SettingsController < ApplicationController
   before_action :require_login
+  before_action :hide_floating_button
 
   def show
     @user = current_user

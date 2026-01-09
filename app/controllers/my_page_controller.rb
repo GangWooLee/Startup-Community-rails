@@ -1,6 +1,6 @@
 class MyPageController < ApplicationController
   before_action :require_login
-  before_action :hide_floating_button, only: [ :edit ]
+  before_action :hide_floating_button
 
   def show
     @user = current_user

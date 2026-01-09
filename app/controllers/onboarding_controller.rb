@@ -1,7 +1,7 @@
 class OnboardingController < ApplicationController
   # AI 분석 결과 페이지만 로그인 필수 (분석은 비로그인으로 가능)
   before_action :require_login, only: [ :ai_result ]
-  before_action :hide_floating_button, only: [ :ai_input, :ai_result ]
+  before_action :hide_floating_button, only: [ :landing, :ai_input, :ai_result ]
   before_action :check_usage_limit, only: [ :ai_analyze ]
 
   # 무료 체험 최대 사용 횟수

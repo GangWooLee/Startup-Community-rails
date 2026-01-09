@@ -1,4 +1,6 @@
 class ProfilesController < ApplicationController
+  before_action :hide_floating_button
+
   def show
     # N+1 쿼리 방지를 위해 includes 사용
     @user = User.includes(:posts, :oauth_identities, avatar_attachment: :blob, cover_image_attachment: :blob)
