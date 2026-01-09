@@ -40,10 +40,11 @@ class Admin::AiUsagesController < Admin::BaseController
 
     if new_limit <= 0
       # 0 이하면 기본값 사용 (NULL)
-      @user.update!(ai_analysis_limit: nil)
+      # update_column: 유효성 검증 우회 (다른 필드 검증 실패 방지)
+      @user.update_column(:ai_analysis_limit, nil)
       flash[:notice] = "#{@user.name}의 limit이 기본값(#{User::DEFAULT_AI_ANALYSIS_LIMIT}회)으로 설정되었습니다."
     else
-      @user.update!(ai_analysis_limit: new_limit)
+      @user.update_column(:ai_analysis_limit, new_limit)
       flash[:notice] = "#{@user.name}의 limit이 #{new_limit}회로 설정되었습니다."
     end
 
@@ -54,7 +55,8 @@ class Admin::AiUsagesController < Admin::BaseController
   # 보너스 크레딧 직접 설정
   def update_bonus
     bonus = params[:bonus].to_i
-    @user.update!(ai_bonus_credits: [ bonus, 0 ].max)
+    # update_column: 유효성 검증 우회 (다른 필드 검증 실패 방지)
+    @user.update_column(:ai_bonus_credits, [ bonus, 0 ].max)
 
     flash[:notice] = "#{@user.name}의 보너스 크레딧이 #{bonus}개로 설정되었습니다."
     redirect_to admin_ai_usage_path(@user)
@@ -65,7 +67,8 @@ class Admin::AiUsagesController < Admin::BaseController
   def set_remaining
     desired_remaining = params[:remaining].to_i
     bonus = @user.calculate_bonus_for_remaining(desired_remaining)
-    @user.update!(ai_bonus_credits: [ bonus, 0 ].max)
+    # update_column: 유효성 검증 우회 (다른 필드 검증 실패 방지)
+    @user.update_column(:ai_bonus_credits, [ bonus, 0 ].max)
 
     flash[:notice] = "#{@user.name}의 잔여횟수가 #{@user.ai_analyses_remaining}회로 설정되었습니다."
     redirect_to admin_ai_usage_path(@user)
