@@ -3,6 +3,7 @@
 
 <div class="min-h-screen bg-[#E8E3DC]" data-controller="idea-modal"
      data-idea-modal-analyze-url-value="<%= onboarding_ai_analyze_path %>"
+     data-idea-modal-questions-url-value="<%= onboarding_ai_questions_path %>"
      data-idea-modal-csrf-token-value="<%= form_authenticity_token %>"
      data-action="keydown@window->idea-modal#keydown">
 
@@ -249,8 +250,8 @@
           </svg>
         </button>
 
-        <%# Modal Content %>
-        <div class="relative z-10">
+        <%# ========== STEP 1: 아이디어 입력 ========== %>
+        <div class="relative z-10" data-idea-modal-target="step1">
           <div class="text-center mb-[clamp(1.5rem,5vw,2rem)]">
             <h3 class="text-[clamp(1.125rem,3.5vw,1.875rem)] font-bold landing-text-primary leading-tight mb-[clamp(0.5rem,1.5vw,0.75rem)]">
               지금 머릿속에 있는 생각,<br>
@@ -282,11 +283,54 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span data-idea-modal-target="buttonText">아이디어 스케치 시작하기</span>
+            <span data-idea-modal-target="buttonText">다음</span>
             <svg data-idea-modal-target="buttonIcon" class="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
           </button>
+        </div>
+
+        <%# ========== STEP 2: 추가질문 ========== %>
+        <div class="relative z-10 hidden" data-idea-modal-target="step2">
+          <div class="text-center mb-[clamp(1.25rem,4vw,1.5rem)]">
+            <h3 class="text-[clamp(1.125rem,3.5vw,1.5rem)] font-bold landing-text-primary leading-tight mb-[clamp(0.375rem,1vw,0.5rem)]">
+              좀 더 알려주세요
+            </h3>
+            <p class="landing-text-muted text-[clamp(0.75rem,1.5vw,0.875rem)]">
+              더 정확한 분석을 위해 몇 가지 질문이 있어요
+            </p>
+          </div>
+
+          <%# 질문 동적 렌더링 영역 %>
+          <div data-idea-modal-target="questionsContainer" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+            <%# JavaScript로 동적 생성됨 %>
+          </div>
+
+          <%# 버튼 영역 %>
+          <div class="flex gap-3 mt-[clamp(1.25rem,4vw,1.5rem)]">
+            <button type="button"
+                    data-action="click->idea-modal#goBack"
+                    class="flex-shrink-0 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[clamp(0.875rem,2vw,1rem)] font-medium rounded-xl transition-colors flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              이전
+            </button>
+            <button type="button"
+                    data-idea-modal-target="step2SubmitButton"
+                    data-action="click->idea-modal#submitWithAnswers"
+                    class="flex-1 h-[clamp(2.75rem,6vw,3.5rem)] bg-[#2C4A6B] hover:bg-[#1e3548] text-white text-[clamp(0.875rem,2vw,1.125rem)] font-semibold rounded-xl transition-all group shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+              <%# Loading spinner (hidden by default) %>
+              <svg data-idea-modal-target="step2LoadingSpinner" class="hidden animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span data-idea-modal-target="step2ButtonText">분석 시작하기</span>
+              <svg class="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
