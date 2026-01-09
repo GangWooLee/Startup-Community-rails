@@ -206,63 +206,20 @@ class PaymentsController < ApplicationController
     end
   end
 
-  # 결제 가능 여부 검증
+  # 결제 가능 여부 검증 (Service Object 위임)
   def validate_payment_eligibility
-    if @post.present?
-      validate_post_payment_eligibility
-    elsif @offer_message.present?
-      validate_offer_payment_eligibility
-    end
-  end
+    result = Payments::EligibilityValidator.new(
+      user: current_user,
+      post: @post,
+      offer_message: @offer_message,
+      chat_room: @chat_room
+    ).call
 
-  def validate_post_payment_eligibility
-    unless @post.outsourcing?
-      redirect_to post_path(@post), alert: "외주 글만 결제할 수 있습니다."
-      return
-    end
+    return if result.success?
 
-    unless @post.payable?
-      redirect_to post_path(@post), alert: "가격이 설정되지 않은 글입니다."
-      return
-    end
-
-    if @post.owned_by?(current_user)
-      redirect_to post_path(@post), alert: "본인의 글은 결제할 수 없습니다."
-      return
-    end
-
-    if @post.paid_by?(current_user)
-      redirect_to post_path(@post), alert: "이미 결제한 글입니다."
-      nil
-    end
-  end
-
-  def validate_offer_payment_eligibility
-    offer_data = @offer_message.offer_data
-
-    unless offer_data.present?
-      redirect_to chat_room_path(@chat_room), alert: "거래 제안 정보가 올바르지 않습니다."
-      return
-    end
-
-    # 이미 결제된 제안인지 확인
-    if @offer_message.offer_paid? || @offer_message.offer_completed?
-      redirect_to chat_room_path(@chat_room), alert: "이미 결제된 거래입니다."
-      return
-    end
-
-    # 취소된 제안인지 확인
-    if @offer_message.offer_cancelled?
-      redirect_to chat_room_path(@chat_room), alert: "취소된 거래 제안입니다."
-      return
-    end
-
-    # 금액 검증
-    amount = offer_data[:amount].to_i
-    if amount <= 0
-      redirect_to chat_room_path(@chat_room), alert: "유효하지 않은 금액입니다."
-      nil
-    end
+    # 리다이렉트 처리
+    path_info = result.redirect_path
+    redirect_to send(path_info.first, *path_info[1..]), alert: result.alert_message
   end
 
   # 기존 주문 찾기 또는 새로 생성
