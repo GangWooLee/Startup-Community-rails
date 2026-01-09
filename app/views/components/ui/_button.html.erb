@@ -5,7 +5,8 @@
     <%= text %>
   <% end %>
 <% when :button %>
-  <%= button_tag class: button_classes, data: data do %>
+  <%# type: submit이 기본값, form: 외부 폼 ID 연결 지원 %>
+  <%= button_tag class: button_classes, data: data, type: (type || :submit), form: form do %>
     <%= text %>
   <% end %>
 <% end %>
