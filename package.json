@@ -2,6 +2,8 @@
   "name": "startup-community-rails",
   "private": true,
   "devDependencies": {
+    "@playwright/mcp": "^0.0.54",
+    "@playwright/test": "^1.57.0",
     "tailwindcss-animate": "^1.0.7"
   }
 }
