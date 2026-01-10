@@ -23,7 +23,7 @@
           한 줄 소개
         </h3>
         <p class="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap pl-2
-                  border-l-2 border-amber-200"><%= user.bio %></p>
+                  border-l-2 border-amber-200"><%= linkify_urls(user.bio) %></p>
       </div>
     </section>
   <% end %>
@@ -88,7 +88,7 @@
         <span class="text-lg">🔍</span>
         Looking For
       </h3>
-      <p class="text-sm text-stone-700 leading-relaxed"><%= user.looking_for %></p>
+      <p class="text-sm text-stone-700 leading-relaxed"><%= linkify_urls(user.looking_for) %></p>
     </section>
   <% end %>
 
@@ -133,7 +133,7 @@
       </h3>
 
       <p class="text-sm text-stone-600 leading-relaxed">
-        <%= user.currently_learning %>
+        <%= linkify_urls(user.currently_learning) %>
       </p>
     </section>
   <% end %>

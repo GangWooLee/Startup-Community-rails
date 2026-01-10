@@ -139,7 +139,7 @@
               <span class="text-xl">📊</span>
               경험 및 전문성
             </h3>
-            <p class="text-slate-700 leading-relaxed"><%= user.bio %></p>
+            <p class="text-slate-700 leading-relaxed"><%= linkify_urls(user.bio) %></p>
           </div>
         <% end %>
 

@@ -67,7 +67,7 @@
       <% if user.bio.present? %>
         <div class="mt-4 px-2">
           <p class="text-sm text-stone-600 text-center leading-relaxed line-clamp-3 italic">
-            "<%= user.bio %>"
+            "<%= linkify_urls(user.bio) %>"
           </p>
         </div>
       <% end %>

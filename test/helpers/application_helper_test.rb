@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "rails_autolink/helpers"  # For auto_link method in linkify_urls tests
 
 class ApplicationHelperTest < ActionView::TestCase
   include ApplicationHelper
   include ERB::Util  # For h() method
-  include ActionView::Helpers::TextHelper  # For auto_link from rails_autolink gem
 
   # ============================================================================
   # Setup
