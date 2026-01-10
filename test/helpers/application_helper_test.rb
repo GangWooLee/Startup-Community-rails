@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "rails_autolink/helpers"  # For auto_link method in linkify_urls tests
 
 class ApplicationHelperTest < ActionView::TestCase
   include ApplicationHelper
   include ERB::Util  # For h() method
+  include ActionView::Helpers::TextHelper  # For auto_link from rails_autolink gem
 
   # ============================================================================
   # Setup
@@ -768,5 +770,93 @@ class ApplicationHelperTest < ActionView::TestCase
   test "collapsible_sidebar_nav_item returns html_safe string" do
     result = collapsible_sidebar_nav_item("Home", "/", :home, is_active: false)
     assert result.html_safe?
+  end
+
+  # =============================================================================
+  # linkify_urls Tests (URL 자동 하이퍼링크 변환)
+  # =============================================================================
+
+  # ----- 기본 동작 -----
+  test "linkify_urls returns empty string for blank text" do
+    assert_equal "", linkify_urls("")
+    assert_equal "", linkify_urls(nil)
+  end
+
+  test "linkify_urls returns html_safe string" do
+    result = linkify_urls("Hello")
+    assert result.html_safe?
+  end
+
+  test "linkify_urls leaves plain text unchanged" do
+    result = linkify_urls("일반 텍스트입니다")
+    assert_equal "일반 텍스트입니다", result
+  end
+
+  # ----- URL 변환 -----
+  test "linkify_urls converts https URL to link" do
+    result = linkify_urls("Visit https://google.com today")
+
+    # 속성 순서는 다를 수 있으므로 개별 속성으로 검증
+    assert_includes result, 'href="https://google.com"'
+    assert_includes result, 'target="_blank"'
+    assert_includes result, 'rel="noopener noreferrer"'
+    assert_includes result, "<a "  # 링크 태그 존재 확인
+  end
+
+  test "linkify_urls converts http URL to link" do
+    result = linkify_urls("Check http://example.com/path?q=1")
+
+    assert_includes result, 'href="http://example.com/path?q=1"'
+  end
+
+  test "linkify_urls converts www URL to link" do
+    result = linkify_urls("Visit www.naver.com")
+
+    # rails_autolink은 www URL을 http://로 변환
+    assert_includes result, 'href="http://www.naver.com"'
+  end
+
+  test "linkify_urls converts multiple URLs" do
+    text = "Visit https://a.com and https://b.com"
+    result = linkify_urls(text)
+
+    assert_includes result, 'href="https://a.com"'
+    assert_includes result, 'href="https://b.com"'
+  end
+
+  # ----- 보안 (XSS 방지) -----
+  test "linkify_urls removes dangerous HTML tags" do
+    result = linkify_urls("<script>alert('xss')</script>")
+
+    # sanitize는 <script> 태그를 완전히 제거함 (더 안전한 동작)
+    assert_not_includes result, "<script>"
+    assert_not_includes result, "</script>"
+    # 태그 내용만 남음
+    assert_equal "alert('xss')", result
+  end
+
+  test "linkify_urls does not convert javascript URLs" do
+    result = linkify_urls("javascript:alert(1)")
+
+    assert_not_includes result, '<a href="javascript:'
+  end
+
+  # ----- 링크 속성 -----
+  test "linkify_urls adds target blank" do
+    result = linkify_urls("https://example.com")
+
+    assert_includes result, 'target="_blank"'
+  end
+
+  test "linkify_urls adds rel noopener noreferrer" do
+    result = linkify_urls("https://example.com")
+
+    assert_includes result, 'rel="noopener noreferrer"'
+  end
+
+  test "linkify_urls adds styling class" do
+    result = linkify_urls("https://example.com")
+
+    assert_includes result, 'class="text-primary hover:underline break-all"'
   end
 end
