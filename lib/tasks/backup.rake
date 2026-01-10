@@ -43,8 +43,8 @@ namespace :backup do
     end
 
     if backed_up_files.empty?
-      puts "[Backup] No databases to backup"
-      return
+      puts "[Backup] No databases to backup (SQLite files not found)"
+      next
     end
 
     # Upload to S3 if configured

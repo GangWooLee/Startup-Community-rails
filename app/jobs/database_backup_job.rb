@@ -2,12 +2,15 @@
 
 # DatabaseBackupJob
 #
-# Runs daily at 4am KST to backup SQLite databases to S3.
-# Configured in config/recurring.yml for Solid Queue.
+# ⚠️ DEPRECATED in Production (PostgreSQL 환경)
+# Production에서 PostgreSQL 사용 시 이 Job은 비활성화됩니다.
+# DigitalOcean Managed Database의 자동 백업을 사용하세요.
 #
-# Manual execution:
+# SQLite 환경 (Development)에서만 사용:
 #   DatabaseBackupJob.perform_later
 #   bin/rails backup:database
+#
+# 활성화하려면 config/recurring.yml에서 database_backup 주석 해제
 #
 class DatabaseBackupJob < ApplicationJob
   queue_as :default

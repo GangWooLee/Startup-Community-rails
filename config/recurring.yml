@@ -19,7 +19,9 @@ production:
     class: DestroyExpiredDeletionsJob
     schedule: at 3am every day
 
-  # 데이터베이스 자동 백업 (매일 새벽 4시 KST)
-  database_backup:
-    class: DatabaseBackupJob
-    schedule: at 4am every day
+  # 데이터베이스 자동 백업 (비활성화)
+  # ⚠️ Production에서 PostgreSQL 사용 시 불필요 (DigitalOcean Managed DB 자동 백업 사용)
+  # SQLite 환경에서만 활성화하세요.
+  # database_backup:
+  #   class: DatabaseBackupJob
+  #   schedule: at 4am every day
