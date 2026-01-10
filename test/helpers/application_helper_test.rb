@@ -857,4 +857,17 @@ class ApplicationHelperTest < ActionView::TestCase
 
     assert_includes result, 'class="text-primary hover:underline break-all"'
   end
+
+  # ----- variant 옵션 -----
+  test "linkify_urls with light variant uses white text class" do
+    result = linkify_urls("https://example.com", variant: :light)
+
+    assert_includes result, 'class="text-white underline break-all"'
+  end
+
+  test "linkify_urls with default variant uses primary text class" do
+    result = linkify_urls("https://example.com", variant: :default)
+
+    assert_includes result, 'class="text-primary hover:underline break-all"'
+  end
 end

@@ -303,8 +303,18 @@ module ApplicationHelper
   #
   # 참고: rails_autolink gem의 내부 메서드 auto_link_urls와 충돌 방지를 위해
   #       linkify_urls로 명명
-  def linkify_urls(text)
+  def linkify_urls(text, variant: :default)
     return "".html_safe if text.blank?
+
+    # 컨텍스트별 링크 스타일
+    link_class = case variant
+                 when :light
+                   # 채팅용 (흰색 링크)
+                   "text-white underline break-all"
+                 else
+                   # 기본 (게시글, 댓글, 프로필 등)
+                   "text-primary hover:underline break-all"
+                 end
 
     # rails_autolink gem의 auto_link 사용
     # link: :urls - URL만 링크로 변환 (이메일 제외)
@@ -313,7 +323,7 @@ module ApplicationHelper
       html: {
         target: "_blank",
         rel: "noopener noreferrer",
-        class: "text-primary hover:underline break-all"
+        class: link_class
       },
       link: :urls,
       sanitize: true
