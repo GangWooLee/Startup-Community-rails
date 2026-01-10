@@ -45,7 +45,7 @@
     <%# 메시지 버블과 시간/읽음 표시를 같은 줄에 %>
     <div class="flex items-end gap-1.5 <%= is_mine ? 'flex-row-reverse' : '' %>">
       <div class="<%= bubble_class %> <%= bubble_radius %> px-4 py-2.5 shadow-sm">
-        <p class="whitespace-pre-wrap break-words text-sm leading-relaxed"><%= message.content %></p>
+        <p class="whitespace-pre-wrap break-words text-sm leading-relaxed"><%= linkify_urls(message.content) %></p>
       </div>
 
       <%# 시간 또는 읽음 표시가 필요한 경우 %>

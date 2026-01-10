@@ -82,7 +82,7 @@
 
       <%# Post Content %>
       <div class="prose max-w-none mb-6">
-        <p class="text-foreground leading-relaxed whitespace-pre-wrap"><%= post.content %></p>
+        <p class="text-foreground leading-relaxed whitespace-pre-wrap"><%= linkify_urls(post.content) %></p>
       </div>
 
       <%# Post Images %>

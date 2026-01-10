@@ -28,7 +28,7 @@
     <div class="flex-1 min-w-0">
       <%# [A] 유저네임 + 댓글 내용 (Inline) %>
       <p class="text-sm leading-snug">
-        <%= link_to comment.user.display_name, profile_path(comment.user), class: "font-semibold text-foreground hover:underline mr-1" %><span class="text-foreground break-words"><%= comment.content %></span>
+        <%= link_to comment.user.display_name, profile_path(comment.user), class: "font-semibold text-foreground hover:underline mr-1" %><span class="text-foreground break-words"><%= linkify_urls(comment.content) %></span>
       </p>
 
       <%# [B] 메타데이터 Row: 시간 - 좋아요 수 - 답글 달기 - 삭제 %>

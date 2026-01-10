@@ -279,6 +279,48 @@ module ApplicationHelper
   end
 
   # ============================================================================
+  # URL 자동 링크 변환 Helpers (rails_autolink gem 사용)
+  # ============================================================================
+
+  # 텍스트 내 URL을 클릭 가능한 하이퍼링크로 변환
+  # rails_autolink gem을 사용하여 안전하고 검증된 방식으로 변환
+  #
+  # @param text [String] 변환할 텍스트
+  # @return [ActiveSupport::SafeBuffer] 링크가 포함된 HTML safe 문자열
+  #
+  # 사용 예시:
+  #   <%= linkify_urls("https://google.com 방문하세요") %>
+  #   => <a href="https://google.com" ...>https://google.com</a> 방문하세요
+  #
+  # 지원 형식:
+  #   - http://, https:// URL
+  #   - www. 로 시작하는 URL
+  #
+  # 보안:
+  #   - XSS 방지: sanitize: true (기본값)
+  #   - 새 탭 열기: target="_blank"
+  #   - 보안 속성: rel="noopener noreferrer"
+  #
+  # 참고: rails_autolink gem의 내부 메서드 auto_link_urls와 충돌 방지를 위해
+  #       linkify_urls로 명명
+  def linkify_urls(text)
+    return "".html_safe if text.blank?
+
+    # rails_autolink gem의 auto_link 사용
+    # link: :urls - URL만 링크로 변환 (이메일 제외)
+    # sanitize: true - XSS 방지 (기본값)
+    auto_link(text, {
+      html: {
+        target: "_blank",
+        rel: "noopener noreferrer",
+        class: "text-primary hover:underline break-all"
+      },
+      link: :urls,
+      sanitize: true
+    })
+  end
+
+  # ============================================================================
   # Global Sidebar Layout Helpers
   # ============================================================================
 
