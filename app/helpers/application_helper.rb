@@ -308,13 +308,13 @@ module ApplicationHelper
 
     # 컨텍스트별 링크 스타일
     link_class = case variant
-                 when :light
+    when :light
                    # 채팅용 (흰색 링크)
                    "text-white underline break-all"
-                 else
+    else
                    # 기본 (게시글, 댓글, 프로필 등)
                    "text-primary hover:underline break-all"
-                 end
+    end
 
     # rails_autolink gem의 auto_link 사용
     # link: :urls - URL만 링크로 변환 (이메일 제외)
