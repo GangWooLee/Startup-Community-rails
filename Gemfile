@@ -79,7 +79,7 @@ gem "gemini-ai"             # Google Gemini API client
 gem "kaminari"              # Elegant pagination for Rails
 
 # Text Processing
-gem "rails_autolink"        # Auto-link URLs in text (extracted from Rails core)
+gem "rails_autolink", "~> 1.1.8"  # Auto-link URLs in text (extracted from Rails core)
 
 # Email delivery via HTTP API (bypasses SMTP port blocking)
 gem "resend"

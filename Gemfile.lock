@@ -726,7 +726,7 @@ DEPENDENCIES
   rack-attack
   rails (~> 8.1.1)
   rails-controller-testing
-  rails_autolink
+  rails_autolink (~> 1.1.8)
   rails_icons (~> 1.5)
   resend
   rubocop-rails-omakase

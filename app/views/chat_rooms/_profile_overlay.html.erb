@@ -87,7 +87,7 @@
       <!-- 한줄 소개 -->
       <% if user.bio.present? %>
         <div class="px-6 py-4 border-b border-border">
-          <p class="text-sm text-muted-foreground text-center leading-relaxed">"<%= user.bio %>"</p>
+          <p class="text-sm text-muted-foreground text-center leading-relaxed">"<%= linkify_urls(user.bio) %>"</p>
         </div>
       <% end %>
 
