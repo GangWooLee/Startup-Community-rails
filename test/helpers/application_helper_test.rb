@@ -870,4 +870,34 @@ class ApplicationHelperTest < ActionView::TestCase
 
     assert_includes result, 'class="text-primary hover:underline break-all"'
   end
+
+  # ----- 엣지 케이스 -----
+  test "linkify_urls does not convert email addresses" do
+    result = linkify_urls("contact user@example.com for info")
+
+    # link: :urls 옵션으로 이메일은 링크로 변환되지 않음
+    assert_not_includes result, '<a href="mailto:'
+    assert_not_includes result, 'href="user@'
+  end
+
+  test "linkify_urls handles URL with fragment" do
+    result = linkify_urls("See https://example.com/docs#section for details")
+
+    assert_includes result, 'href="https://example.com/docs#section"'
+  end
+
+  test "linkify_urls handles URL in parentheses" do
+    result = linkify_urls("Check this (https://example.com) link")
+
+    assert_includes result, 'href="https://example.com"'
+    # 닫는 괄호가 URL에 포함되지 않아야 함
+    assert_not_includes result, 'href="https://example.com)"'
+  end
+
+  test "linkify_urls ignores malformed URLs" do
+    result = linkify_urls("Visit htp://typo.com today")
+
+    # htp:// 는 유효한 프로토콜이 아니므로 링크로 변환되지 않음
+    assert_not_includes result, '<a href'
+  end
 end
