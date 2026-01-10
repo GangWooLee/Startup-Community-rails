@@ -898,6 +898,6 @@ class ApplicationHelperTest < ActionView::TestCase
     result = linkify_urls("Visit htp://typo.com today")
 
     # htp:// 는 유효한 프로토콜이 아니므로 링크로 변환되지 않음
-    assert_not_includes result, '<a href'
+    assert_not_includes result, "<a href"
   end
 end
