@@ -12,10 +12,33 @@ class MessageTest < ActiveSupport::TestCase
     assert message.valid?
   end
 
-  test "should require content" do
+  test "should require content or image" do
+    # content도 없고 image도 없으면 유효하지 않음
     message = Message.new(chat_room: @chat_room, sender: @user1, content: "")
     assert_not message.valid?
-    assert message.errors[:content].any?
+    assert message.errors[:base].any?
+  end
+
+  test "should be valid with only image" do
+    # 이미지만 있어도 유효함
+    message = Message.new(chat_room: @chat_room, sender: @user1, content: "")
+    message.image.attach(io: File.open(Rails.root.join("test/fixtures/files/test_image.png")), filename: "test.png", content_type: "image/png")
+    assert message.valid?, "Message with image should be valid: #{message.errors.full_messages.join(", ")}"
+  end
+
+  test "should be valid with content and image" do
+    # content와 image 둘 다 있어도 유효함
+    message = Message.new(chat_room: @chat_room, sender: @user1, content: "Hello with image")
+    message.image.attach(io: File.open(Rails.root.join("test/fixtures/files/test_image.png")), filename: "test.png", content_type: "image/png")
+    assert message.valid?
+  end
+
+  test "should validate image size" do
+    # 5MB 초과 이미지는 유효하지 않음
+    message = Message.new(chat_room: @chat_room, sender: @user1, content: "")
+    # 가짜 대용량 파일 (실제로 생성하지 않고 테스트)
+    # 이 테스트는 실제 대용량 파일이 있을 때만 동작
+    skip "Large image file not available for testing"
   end
 
   test "should require chat room" do

@@ -77,3 +77,6 @@ design-sample/
 # Claude temporary files (keep main .claude/ folder for team sharing)
 .claude/plans/
 .claude/*.md
+
+# MCP (Model Context Protocol) configuration - local settings
+.mcp.json

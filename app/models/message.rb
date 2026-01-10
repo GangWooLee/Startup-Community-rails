@@ -5,6 +5,12 @@ class Message < ApplicationRecord
   # 거래 제안 메시지는 주문과 연결될 수 있음
   has_one :order, foreign_key: :offer_message_id, dependent: :nullify
 
+  # 채팅 이미지 첨부 (1장만 허용)
+  has_one_attached :image do |attachable|
+    attachable.variant :thumb, resize_to_fill: [ 200, 200 ]
+    attachable.variant :preview, resize_to_limit: [ 400, 400 ]
+  end
+
   # 메시지 타입: text(일반), system(시스템), profile_card(프로필 전송), deal_confirm(거래 확정), offer_card(거래 제안)
   enum :message_type, {
     text: "text",
@@ -15,7 +21,18 @@ class Message < ApplicationRecord
     offer_card: "offer_card"
   }, default: :text
 
-  validates :content, presence: true, length: { maximum: 2000 }
+  # 이미지 파일 검증 (보안)
+  MAX_IMAGE_SIZE = 5.megabytes
+  ALLOWED_IMAGE_TYPES = [ "image/jpeg", "image/png", "image/gif", "image/webp" ].freeze
+
+  validates :content, length: { maximum: 2000 }
+  validates :image,
+    content_type: { in: ALLOWED_IMAGE_TYPES, message: "는 JPEG, PNG, GIF, WebP만 허용됩니다" },
+    size: { less_than: MAX_IMAGE_SIZE, message: "는 5MB 이하만 허용됩니다" },
+    if: -> { image.attached? }
+
+  # content 또는 image 중 하나는 필수 (일반 텍스트/이미지 메시지의 경우)
+  validate :content_or_image_present, if: :user_message?
 
   scope :recent, -> { order(created_at: :desc) }
   scope :chronological, -> { order(created_at: :asc) }
@@ -83,6 +100,13 @@ class Message < ApplicationRecord
   end
 
   private
+
+  # content 또는 image 중 하나는 필수
+  def content_or_image_present
+    if content.blank? && !image.attached?
+      errors.add(:base, "메시지 내용 또는 이미지가 필요합니다")
+    end
+  end
 
   # 메시지 전송 시 발신자의 읽음 상태를 먼저 업데이트
   # broadcast_message보다 먼저 실행되어야 함

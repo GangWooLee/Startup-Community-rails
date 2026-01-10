@@ -51,6 +51,10 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Action Controller/Active Storage URL 생성 시 호스트 설정
+  # Turbo Stream 브로드캐스트 시 request 객체가 없어서 필요함
+  config.action_controller.default_url_options = { host: "localhost", port: 3000 }
+
   # OAuth 세션 쿠키 설정: IPv4/IPv6 혼용 문제 해결
   # Google OAuth 콜백이 ::1(IPv6)로 돌아올 때 127.0.0.1(IPv4) 세션과 불일치하는 문제 방지
   config.session_store :cookie_store,

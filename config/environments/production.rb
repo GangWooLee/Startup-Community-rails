@@ -102,6 +102,13 @@ Rails.application.configure do
     protocol: "https"
   }
 
+  # Action Controller URL 생성 시 호스트 설정
+  # Turbo Stream 브로드캐스트 시 request 객체가 없어서 필요함
+  config.action_controller.default_url_options = {
+    host: ENV.fetch("MAILER_HOST") { ENV.fetch("ALLOWED_HOSTS", "").split(",").first || "example.com" },
+    protocol: "https"
+  }
+
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true

@@ -262,3 +262,46 @@ export async function debugScreenshot(page: Page, name: string): Promise<void> {
     fullPage: true
   });
 }
+
+/**
+ * 이미지 업로드 테스트 헬퍼
+ */
+export async function uploadTestImage(
+  page: Page,
+  fileInputSelector: string = 'input[type="file"]'
+): Promise<void> {
+  const fileInput = page.locator(fileInputSelector);
+  await fileInput.setInputFiles('e2e/fixtures/test-image.png');
+}
+
+/**
+ * 여러 이미지 업로드
+ */
+export async function uploadMultipleImages(
+  page: Page,
+  count: number,
+  fileInputSelector: string = 'input[type="file"]'
+): Promise<void> {
+  const fileInput = page.locator(fileInputSelector);
+  const files = Array(count).fill('e2e/fixtures/test-image.png');
+  await fileInput.setInputFiles(files);
+}
+
+/**
+ * alert 다이얼로그 핸들러 설정
+ */
+export function setupDialogHandler(
+  page: Page,
+  expectedMessage?: string
+): Promise<string> {
+  return new Promise((resolve) => {
+    page.once('dialog', async (dialog) => {
+      const message = dialog.message();
+      if (expectedMessage) {
+        expect(message).toContain(expectedMessage);
+      }
+      await dialog.accept();
+      resolve(message);
+    });
+  });
+}
