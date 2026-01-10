@@ -5,6 +5,7 @@ one:
   post: one
   user: two
   content: 좋은 글이네요! 도움이 많이 되었습니다.
+  depth: 0
   created_at: <%= 12.hours.ago %>
   updated_at: <%= 12.hours.ago %>
 
@@ -12,6 +13,7 @@ two:
   post: one
   user: three
   content: 저도 공감합니다. 추가로 질문이 있는데요...
+  depth: 0
   created_at: <%= 6.hours.ago %>
   updated_at: <%= 6.hours.ago %>
 
@@ -21,6 +23,7 @@ reply_to_one:
   user: one
   parent: one
   content: 감사합니다! 더 궁금한 점 있으시면 말씀해주세요.
+  depth: 1
   created_at: <%= 3.hours.ago %>
   updated_at: <%= 3.hours.ago %>
 
@@ -29,6 +32,7 @@ answer_comment:
   post: two
   user: one
   content: includes는 eager loading, joins는 inner join입니다. N+1 해결에는 includes를 사용하세요!
+  depth: 0
   created_at: <%= 1.day.ago %>
   updated_at: <%= 1.day.ago %>
 
@@ -37,6 +41,7 @@ hiring_comment:
   post: hiring_post
   user: two
   content: 관심있습니다. 연락 드려도 될까요?
+  depth: 0
   created_at: <%= 5.hours.ago %>
   updated_at: <%= 5.hours.ago %>
 
@@ -45,5 +50,6 @@ deleted_user_comment:
   post: one
   user: deleted_user
   content: "[삭제된 사용자의 댓글입니다]"
+  depth: 0
   created_at: <%= 2.weeks.ago %>
   updated_at: <%= 2.weeks.ago %>

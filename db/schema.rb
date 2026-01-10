@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_10_141734) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -89,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
     t.index ["chat_room_id"], name: "index_chat_room_participants_on_chat_room_id"
     t.index ["deleted_at"], name: "index_chat_room_participants_on_deleted_at"
     t.index ["user_id", "chat_room_id"], name: "index_chat_room_participants_on_user_id_and_chat_room_id"
+    t.index ["user_id", "deleted_at"], name: "index_participants_on_user_and_deleted"
     t.index ["user_id"], name: "index_chat_room_participants_on_user_id"
   end
 
@@ -108,6 +109,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.integer "depth", default: 0, null: false
     t.integer "likes_count", default: 0
     t.integer "parent_id"
     t.integer "post_id", null: false
@@ -217,6 +219,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
     t.datetime "updated_at", null: false
     t.index ["chat_room_id", "created_at"], name: "index_messages_on_chat_room_id_and_created_at"
     t.index ["chat_room_id"], name: "index_messages_on_chat_room_id"
+    t.index ["created_at"], name: "index_messages_on_created_at_desc", order: :desc
     t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
@@ -229,6 +232,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_09_124210) do
     t.datetime "read_at"
     t.integer "recipient_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["actor_id", "created_at"], name: "index_notifications_on_actor_and_created"
     t.index ["actor_id"], name: "index_notifications_on_actor_id"
     t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
     t.index ["recipient_id", "read_at", "created_at"], name: "index_notifications_on_recipient_and_status"

@@ -113,18 +113,33 @@ class ChatRoom < ApplicationRecord
   end
 
   # 상대방 가져오기
+  # includes(:users)로 preload된 경우 추가 쿼리 없이 Ruby에서 처리
   def other_participant(current_user)
-    users.where.not(id: current_user.id).first
+    if users.loaded?
+      users.find { |u| u.id != current_user.id }
+    else
+      users.where.not(id: current_user.id).first
+    end
   end
 
   # 마지막 메시지
+  # includes(:messages)로 preload된 경우 추가 쿼리 없이 Ruby에서 처리
   def last_message
-    messages.order(created_at: :desc).first
+    if messages.loaded?
+      messages.max_by(&:created_at)
+    else
+      messages.order(created_at: :desc).first
+    end
   end
 
   # 특정 사용자의 안읽은 메시지 수
+  # includes(:participants)로 preload된 경우 추가 쿼리 없이 Ruby에서 처리
   def unread_count_for(user)
-    participant = participants.find_by(user: user)
+    participant = if participants.loaded?
+      participants.find { |p| p.user_id == user.id }
+    else
+      participants.find_by(user: user)
+    end
     return 0 unless participant
 
     participant.unread_count

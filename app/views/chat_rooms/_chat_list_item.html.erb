@@ -4,7 +4,7 @@
   other_user = room.other_participant(current_user)
   is_active = local_assigns.fetch(:is_active, false)
   unread = room.unread_count_for(current_user)
-  last_msg = room.messages.order(created_at: :desc).first
+  last_msg = room.last_message  # N+1 방지: includes로 preload된 경우 Ruby에서 처리
   is_deleted_user = other_user.nil?
 %>
 

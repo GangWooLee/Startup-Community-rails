@@ -23,7 +23,8 @@ class Comment < ApplicationRecord
   scope :oldest, -> { order(created_at: :asc) }
   scope :root_comments, -> { where(parent_id: nil) }
 
-  # Callbacks - 알림 생성
+  # Callbacks
+  before_validation :set_depth, on: :create
   after_create_commit :notify_recipient
 
   # 대댓글인지 확인
@@ -36,19 +37,19 @@ class Comment < ApplicationRecord
     parent_id.nil?
   end
 
-  # 현재 댓글의 깊이 계산
+  # 현재 댓글의 깊이 (컬럼에서 직접 읽음 - N+1 쿼리 방지)
+  # depth 컬럼이 추가되어 이 메서드는 사실상 attribute reader 역할
+  # 기존 코드 호환성을 위해 메서드 유지 (read_attribute 폴백)
   def depth
-    return 0 unless parent_id
-    count = 0
-    current = parent
-    while current
-      count += 1
-      current = current.parent
-    end
-    count
+    read_attribute(:depth) || 0
   end
 
   private
+
+  # 댓글 생성 시 depth 자동 설정
+  def set_depth
+    self.depth = parent_id.present? ? (parent&.depth.to_i + 1) : 0
+  end
 
   # 부모 댓글이 같은 게시글에 속하는지 검증
   def parent_belongs_to_same_post

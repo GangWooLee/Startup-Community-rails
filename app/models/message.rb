@@ -37,12 +37,16 @@ class Message < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :chronological, -> { order(created_at: :asc) }
 
-  # 순서 중요! mark_sender_as_read가 먼저 실행되어야 broadcast 시점에 읽음 상태가 반영됨
-  after_create_commit :mark_sender_as_read
-  after_create_commit :increment_recipient_unread_count
-  after_create_commit :broadcast_message
-  after_create_commit :notify_recipient, unless: :system_message?
-  after_create_commit :resurrect_hidden_participants
+  # ==========================================================================
+  # Callbacks - Service Object로 위임
+  # ==========================================================================
+  # 이전: 5개의 개별 콜백 (순서 의존성 문제)
+  # 현재: 1개의 콜백으로 통합, Service에서 순서 보장
+  after_create_commit :handle_post_creation
+
+  # ==========================================================================
+  # Query Methods
+  # ==========================================================================
 
   # 시스템 메시지인지 확인
   def system_message?
@@ -58,6 +62,10 @@ class Message < ApplicationRecord
   def card_message?
     profile_card? || contact_card? || offer_card?
   end
+
+  # ==========================================================================
+  # 거래 제안 카드 관련 메서드
+  # ==========================================================================
 
   # 거래 제안 카드 데이터 접근
   # metadata 구조:
@@ -108,92 +116,17 @@ class Message < ApplicationRecord
     end
   end
 
-  # 메시지 전송 시 발신자의 읽음 상태를 먼저 업데이트
-  # broadcast_message보다 먼저 실행되어야 함
-  def mark_sender_as_read
-    participant = chat_room.participants.find_by(user_id: sender_id)
-    # update_columns로 callback/validation 없이 직접 업데이트 (성능 최적화)
-    participant&.update_columns(last_read_at: Time.current, unread_count: 0)
-  end
-
-  # 수신자들의 unread_count 컬럼 증가 (캐시 컬럼 업데이트)
-  def increment_recipient_unread_count
-    chat_room.participants
-             .where.not(user_id: sender_id)
-             .update_all("unread_count = unread_count + 1")
-  end
-
-  def broadcast_message
-    # chat_room을 reload하여 touch로 업데이트된 last_message_at 반영
-    chat_room.reload
-
-    # 각 참여자에게 개별 브로드캐스트 (각자의 관점에 맞게)
-    chat_room.participants.each do |participant|
-      is_sender = participant.user_id == sender_id
-
-      # 해당 사용자의 채팅방 스트림으로 브로드캐스트
-      broadcast_append_to "chat_room_#{chat_room.id}_user_#{participant.user_id}",
-                          target: "messages",
-                          partial: "messages/message",
-                          locals: {
-                            message: self,
-                            current_user: participant.user,
-                            is_read: is_sender ? false : true,  # 보낸 사람: 상대방이 안 읽음, 받는 사람: 읽음 표시 불필요
-                            show_profile: true,
-                            show_time: true
-                          }
-
-      # 채팅 목록 아이템 업데이트 (제자리에서 교체 후 JS로 정렬)
-      # replace를 사용하면 DOM 변경이 한 번만 발생하여 화면이 튀지 않음
-      broadcast_replace_to "user_#{participant.user_id}_chat_list",
-                           target: "chat_room_#{chat_room.id}",
-                           partial: "chat_rooms/chat_list_item",
-                           locals: { room: chat_room, current_user: participant.user, is_active: is_sender }
-
-      # 상대방에게만 뱃지 업데이트 (보낸 사람은 이미 해당 채팅방에 있으므로 불필요)
-      unless is_sender
-        # 채팅 뱃지 업데이트 (헤더/네비게이션)
-        broadcast_replace_to "user_#{participant.user_id}_chat_badge",
-                             target: "chat_unread_badge",
-                             partial: "shared/chat_unread_badge",
-                             locals: { count: participant.user.total_unread_messages }
-      end
-    end
-  end
-
-  def notify_recipient
-    chat_room.participants.where.not(user_id: sender_id).each do |participant|
-      Notification.create(
-        recipient: participant.user,
-        actor: sender,
-        action: "message",
-        notifiable: self
-      )
-    end
-  end
-
-  # 채팅방을 나간(숨긴) 참여자가 있으면 다시 보이게 복구
-  # BUG FIX: 복구 시 실제 안읽은 메시지 수 재계산 (deleted 상태에서 받은 메시지 반영)
-  def resurrect_hidden_participants
-    hidden_participants = chat_room.participants.where.not(deleted_at: nil)
-    return if hidden_participants.empty?
-
-    # 각 참여자별로 실제 안읽은 메시지 수 계산 후 복구
-    hidden_participants.each do |participant|
-      # deleted 상태에서 받은 메시지 포함하여 실제 unread_count 계산
-      actual_unread = chat_room.messages
-                               .where.not(sender_id: participant.user_id)
-                               .where("created_at > COALESCE(?, '1970-01-01')", participant.last_read_at)
-                               .count
-      participant.update!(deleted_at: nil, unread_count: actual_unread)
-    end
-
-    # 복구된 참여자들에게 채팅 목록 업데이트 알림
-    hidden_participants.reload.each do |participant|
-      broadcast_replace_to "user_#{participant.user_id}_chat_badge",
-                           target: "chat_unread_badge",
-                           partial: "shared/chat_unread_badge",
-                           locals: { count: participant.user.reload.total_unread_messages }
-    end
+  # ==========================================================================
+  # Post-Creation Handler
+  # ==========================================================================
+  # 메시지 생성 후 필요한 작업들을 Service로 위임
+  # 처리 순서:
+  # 1. 발신자 읽음 상태 업데이트
+  # 2. 수신자 미읽음 수 증가
+  # 3. Turbo Streams 브로드캐스트
+  # 4. 알림 생성 (시스템 메시지 제외)
+  # 5. 숨긴 참여자 복구
+  def handle_post_creation
+    Messages::PostCreationService.call(self)
   end
 end

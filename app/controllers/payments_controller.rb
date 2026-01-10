@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # 결제 컨트롤러
 # 토스페이먼츠 결제 위젯 페이지 및 결제 처리
 # 지원 방식:
@@ -13,10 +15,13 @@ class PaymentsController < ApplicationController
   before_action :set_payment_context, only: [ :new, :create ]
   before_action :validate_payment_eligibility, only: [ :new, :create ]
 
+  # ==========================================================================
+  # 결제 위젯 & 주문 생성
+  # ==========================================================================
+
   # GET /payments/new?post_id=:id 또는 GET /payments/new?offer_message_id=:id
   # 결제 위젯 페이지 렌더링
   def new
-    # 기존 주문이 있으면 재사용, 없으면 새로 생성
     result = find_or_create_order
 
     if result.success?
@@ -45,12 +50,13 @@ class PaymentsController < ApplicationController
         customer_email: current_user.email
       }
     else
-      render json: {
-        success: false,
-        errors: result.errors
-      }, status: :unprocessable_entity
+      render json: { success: false, errors: result.errors }, status: :unprocessable_entity
     end
   end
+
+  # ==========================================================================
+  # 결제 결과 처리
+  # ==========================================================================
 
   # GET /payments/success
   # 토스페이먼츠에서 결제 완료 후 리다이렉트
@@ -64,46 +70,21 @@ class PaymentsController < ApplicationController
     existing_payment = Payment.find_by_toss_order_id(order_id)
 
     if existing_payment&.done?
-      # 이미 승인 완료된 결제 - API 호출 생략
-      Rails.logger.info "[PaymentsController#success] Payment already approved: #{order_id}"
-      # GA4 결제 완료 이벤트 (중복 방문 시에도 트래킹)
-      track_ga4_event("payment_complete", {
-        order_id: existing_payment.order_id,
-        amount: existing_payment.amount
-      })
-      redirect_to success_order_path(existing_payment.order), notice: "결제가 완료되었습니다!"
+      handle_already_approved_payment(existing_payment)
       return
     end
 
     # 2. 결제 승인 처리 (첫 요청)
-    service = TossPayments::ApproveService.new
-    result = service.call(
+    result = TossPayments::ApproveService.new.call(
       payment_key: payment_key,
       order_id: order_id,
       amount: amount
     )
 
     if result.success?
-      @payment = Payment.find_by_toss_order_id(order_id)
-      @order = @payment&.order
-
-      if @order
-        # GA4 결제 완료 이벤트
-        track_ga4_event("payment_complete", {
-          order_id: @order.id,
-          amount: @payment&.amount
-        })
-        redirect_to success_order_path(@order), notice: "결제가 완료되었습니다!"
-      else
-        redirect_to root_path, alert: "주문 정보를 찾을 수 없습니다."
-      end
+      handle_successful_approval(order_id)
     else
-      Rails.logger.error "[PaymentsController#success] Payment approval failed: #{result.error&.message}"
-      redirect_to payments_fail_path(
-        code: result.error&.code,
-        message: result.error&.message,
-        orderId: order_id
-      )
+      handle_failed_approval(result, order_id)
     end
   end
 
@@ -114,7 +95,6 @@ class PaymentsController < ApplicationController
     @error_message = params[:message]
     @order_id = params[:orderId]
 
-    # 결제 실패 기록
     if @order_id.present?
       payment = Payment.find_by_toss_order_id(@order_id)
       payment&.mark_as_failed!(code: @error_code, message: @error_message)
@@ -123,6 +103,10 @@ class PaymentsController < ApplicationController
     Rails.logger.warn "[PaymentsController#fail] Payment failed: #{@error_code} - #{@error_message}"
   end
 
+  # ==========================================================================
+  # 웹훅
+  # ==========================================================================
+
   # POST /payments/webhook
   # 토스페이먼츠 웹훅 (결제 상태 변경 알림)
   # 보안: HMAC-SHA256 서명 검증 (Production 필수)
@@ -130,8 +114,9 @@ class PaymentsController < ApplicationController
     raw_body = request.body.read
     signature = request.headers["TossPayments-Signature"]
 
-    # 서명 검증 - Production에서는 필수
-    unless verify_webhook_with_signature(raw_body, signature)
+    # 서명 검증
+    verifier = Payments::WebhookSignatureVerifier.new(raw_body, signature)
+    unless verifier.valid?
       head :unauthorized
       return
     end
@@ -145,16 +130,8 @@ class PaymentsController < ApplicationController
       return
     end
 
-    event_type = payload[:eventType]
-
-    Rails.logger.info "[PaymentsController#webhook] Received: #{event_type}"
-
-    case event_type
-    when "PAYMENT_STATUS_CHANGED"
-      handle_payment_status_change(payload)
-    when "DEPOSIT_CALLBACK"
-      handle_virtual_account_deposit(payload)
-    end
+    # 웹훅 처리 위임
+    Payments::WebhookHandler.call(payload)
 
     head :ok
   rescue JSON::ParserError => e
@@ -164,7 +141,10 @@ class PaymentsController < ApplicationController
 
   private
 
-  # 결제 컨텍스트 설정 (Post 또는 채팅 거래 제안)
+  # ==========================================================================
+  # 결제 컨텍스트 설정
+  # ==========================================================================
+
   def set_payment_context
     if params[:post_id].present?
       set_post_context
@@ -177,10 +157,7 @@ class PaymentsController < ApplicationController
 
   def set_post_context
     @post = Post.find_by(id: params[:post_id])
-
-    unless @post
-      redirect_to root_path, alert: "게시글을 찾을 수 없습니다."
-    end
+    redirect_to root_path, alert: "게시글을 찾을 수 없습니다." unless @post
   end
 
   def set_offer_context
@@ -193,20 +170,20 @@ class PaymentsController < ApplicationController
 
     @chat_room = @offer_message.chat_room
 
-    # 채팅방 참여자만 결제 가능
     unless @chat_room.users.include?(current_user)
       redirect_to root_path, alert: "접근 권한이 없습니다."
       return
     end
 
-    # 제안을 보낸 사람이 아닌 상대방만 결제 가능
     if @offer_message.sender == current_user
       redirect_to chat_room_path(@chat_room), alert: "본인이 보낸 제안은 결제할 수 없습니다."
-      nil
     end
   end
 
-  # 결제 가능 여부 검증 (Service Object 위임)
+  # ==========================================================================
+  # Validation & Order Creation
+  # ==========================================================================
+
   def validate_payment_eligibility
     result = Payments::EligibilityValidator.new(
       user: current_user,
@@ -217,12 +194,10 @@ class PaymentsController < ApplicationController
 
     return if result.success?
 
-    # 리다이렉트 처리
     path_info = result.redirect_path
     redirect_to send(path_info.first, *path_info[1..]), alert: result.alert_message
   end
 
-  # 기존 주문 찾기 또는 새로 생성
   def find_or_create_order
     if @post.present?
       find_or_create_post_order
@@ -232,38 +207,24 @@ class PaymentsController < ApplicationController
   end
 
   def find_or_create_post_order
-    # 대기 중인 주문이 있으면 재사용
     existing_order = current_user.orders.pending.find_by(post: @post)
 
     if existing_order
       payment = existing_order.payments.pending.first || create_new_payment(existing_order)
-      return OpenStruct.new(
-        success?: true,
-        order: existing_order,
-        payment: payment,
-        errors: []
-      )
+      return OpenStruct.new(success?: true, order: existing_order, payment: payment, errors: [])
     end
 
-    # 새 주문 생성
     Orders::CreateService.new(user: current_user, post: @post).call
   end
 
   def find_or_create_offer_order
-    # 해당 거래 제안에 대한 대기 중인 주문이 있으면 재사용
     existing_order = current_user.orders.pending.find_by(offer_message: @offer_message)
 
     if existing_order
       payment = existing_order.payments.pending.first || create_new_payment(existing_order)
-      return OpenStruct.new(
-        success?: true,
-        order: existing_order,
-        payment: payment,
-        errors: []
-      )
+      return OpenStruct.new(success?: true, order: existing_order, payment: payment, errors: [])
     end
 
-    # 새 주문 생성
     Orders::CreateService.new(
       user: current_user,
       chat_room: @chat_room,
@@ -271,16 +232,41 @@ class PaymentsController < ApplicationController
     ).call
   end
 
-  # 새 결제 레코드 생성 (기존 주문에 대해)
   def create_new_payment(order)
-    Payment.create!(
-      order: order,
-      user: current_user,
-      amount: order.amount
+    Payment.create!(order: order, user: current_user, amount: order.amount)
+  end
+
+  # ==========================================================================
+  # Success/Fail Handlers
+  # ==========================================================================
+
+  def handle_already_approved_payment(payment)
+    Rails.logger.info "[PaymentsController#success] Payment already approved: #{payment.toss_order_id}"
+    track_ga4_event("payment_complete", { order_id: payment.order_id, amount: payment.amount })
+    redirect_to success_order_path(payment.order), notice: "결제가 완료되었습니다!"
+  end
+
+  def handle_successful_approval(order_id)
+    @payment = Payment.find_by_toss_order_id(order_id)
+    @order = @payment&.order
+
+    if @order
+      track_ga4_event("payment_complete", { order_id: @order.id, amount: @payment&.amount })
+      redirect_to success_order_path(@order), notice: "결제가 완료되었습니다!"
+    else
+      redirect_to root_path, alert: "주문 정보를 찾을 수 없습니다."
+    end
+  end
+
+  def handle_failed_approval(result, order_id)
+    Rails.logger.error "[PaymentsController#success] Payment approval failed: #{result.error&.message}"
+    redirect_to payments_fail_path(
+      code: result.error&.code,
+      message: result.error&.message,
+      orderId: order_id
     )
   end
 
-  # 결제 컨텍스트에 따른 리다이렉트
   def redirect_back_or_root(message)
     if @post.present?
       redirect_to post_path(@post), alert: message
@@ -291,9 +277,10 @@ class PaymentsController < ApplicationController
     end
   end
 
-  # 토스페이먼츠 클라이언트 키
-  # Production: credentials 필수
-  # Development/Test: 테스트 키 폴백 허용
+  # ==========================================================================
+  # Configuration
+  # ==========================================================================
+
   def toss_client_key
     key = Rails.application.credentials.dig(:toss, :client_key)
 
@@ -304,94 +291,6 @@ class PaymentsController < ApplicationController
     else
       Rails.logger.warn "[PaymentsController] Using test client key (development only)"
       "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm"
-    end
-  end
-
-  # 환경별 웹훅 서명 검증
-  # Production: 서명 검증 필수 (webhook_secret 미설정 시 거부)
-  # Development/Test: webhook_secret 미설정 시 경고 후 허용
-  def verify_webhook_with_signature(payload, signature)
-    secret = webhook_secret
-
-    if secret.blank?
-      if Rails.env.production?
-        # Production에서는 webhook_secret 필수
-        Rails.logger.error "[PaymentsController#webhook] SECURITY: webhook_secret not configured in production. Rejecting webhook."
-        return false
-      else
-        # Development/Test에서는 경고만 출력하고 허용
-        Rails.logger.warn "[PaymentsController#webhook] webhook_secret not configured. Skipping signature verification (development only)."
-        return true
-      end
-    end
-
-    # 서명 검증 수행
-    unless verify_webhook_signature(payload, signature)
-      Rails.logger.warn "[PaymentsController#webhook] Invalid signature"
-      return false
-    end
-
-    true
-  end
-
-  # 웹훅 서명 검증 (HMAC-SHA256)
-  # 토스페이먼츠 공식 문서: https://docs.tosspayments.com/guides/webhook#서명-검증
-  def verify_webhook_signature(payload, signature)
-    return false if signature.blank?
-
-    expected_signature = OpenSSL::HMAC.hexdigest(
-      OpenSSL::Digest.new("sha256"),
-      webhook_secret,
-      payload
-    )
-
-    # 타이밍 공격 방지를 위한 secure_compare 사용
-    ActiveSupport::SecurityUtils.secure_compare(expected_signature, signature)
-  end
-
-  # 웹훅 시크릿 키
-  def webhook_secret
-    Rails.application.credentials.dig(:toss, :webhook_secret)
-  end
-
-  # 웹훅: 결제 상태 변경 처리
-  def handle_payment_status_change(payload)
-    data = payload[:data]
-    payment_key = data[:paymentKey]
-    status = data[:status]
-
-    payment = Payment.find_by(payment_key: payment_key)
-    return unless payment
-
-    case status
-    when "DONE"
-      payment.update!(status: :done) unless payment.done?
-    when "CANCELED"
-      payment.mark_as_cancelled!
-    end
-  end
-
-  # 웹훅: 가상계좌 입금 확인 처리
-  def handle_virtual_account_deposit(payload)
-    data = payload[:data]
-    order_id = data[:orderId]
-    status = data[:status]
-
-    payment = Payment.find_by_toss_order_id(order_id)
-    return unless payment
-
-    Rails.logger.info "[PaymentsController#webhook] Virtual account deposit: #{order_id}, status: #{status}"
-
-    case status
-    when "DONE"
-      # 입금 완료
-      if payment.confirm_virtual_account_deposit!(data)
-        Rails.logger.info "[PaymentsController#webhook] Virtual account deposit confirmed: #{order_id}"
-      end
-    when "CANCELED"
-      # 가상계좌 취소 (입금 기한 초과 등)
-      payment.mark_as_cancelled!
-      Rails.logger.info "[PaymentsController#webhook] Virtual account cancelled: #{order_id}"
     end
   end
 end

@@ -1,61 +1,46 @@
 class User < ApplicationRecord
-  # Concerns
-  include Authenticatable  # Remember Me 인증
-  include Deletable        # 회원 탈퇴 관련
+  # ==========================================================================
+  # Concerns - 기능별 모듈 분리
+  # ==========================================================================
+  include Authenticatable       # Remember Me 인증
+  include Deletable             # 회원 탈퇴 관련
+  include Oauthable             # OAuth 인증 (Google, GitHub)
+  include Profileable           # 프로필 (익명, 아바타, 스킬 등)
+  include Experienceable        # 경력/학력/프로젝트 타임라인
+  include AvailabilityStatusable # 활동 상태 (외주 가능, 팀원 모집)
+  include AiAnalyzable          # AI 분석 사용량 관리
+  include Termable              # 약관 동의
+
+  # ==========================================================================
+  # Security & Configuration
+  # ==========================================================================
 
   # OAuth 사용자는 비밀번호가 없을 수 있으므로 validations: false
   has_secure_password validations: false
 
-  # Active Storage - 프로필 이미지
+  # 비밀번호 정책 상수
+  MIN_PASSWORD_LENGTH = 8
+  # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)
+
+  # ==========================================================================
+  # Active Storage - 프로필/커버 이미지
+  # ==========================================================================
   has_one_attached :avatar
   has_one_attached :cover_image
 
   # ActionText - Rich Text 상세 소개
   has_rich_text :detailed_bio
 
-  # 아바타 파일 검증 (보안: 악성 파일 업로드 방지)
+  # 파일 업로드 보안 상수
   MAX_AVATAR_SIZE = 2.megabytes
   MAX_COVER_SIZE = 5.megabytes
   ALLOWED_AVATAR_TYPES = [ "image/jpeg", "image/png", "image/gif", "image/webp" ].freeze
 
-  # 커버 이미지 기본 그라디언트 (업로드 없을 때 사용)
-  COVER_GRADIENTS = [
-    "from-amber-100 via-orange-50 to-rose-50",
-    "from-sky-100 via-blue-50 to-indigo-50",
-    "from-emerald-100 via-teal-50 to-cyan-50",
-    "from-violet-100 via-purple-50 to-fuchsia-50",
-    "from-slate-100 via-gray-50 to-zinc-50",
-    "from-lime-100 via-green-50 to-emerald-50"
-  ].freeze
-
-  validates :avatar,
-    content_type: {
-      in: ALLOWED_AVATAR_TYPES,
-      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
-    },
-    size: {
-      less_than: MAX_AVATAR_SIZE,
-      message: "는 2MB 이하만 허용됩니다"
-    }
-
-  validates :cover_image,
-    content_type: {
-      in: ALLOWED_AVATAR_TYPES,
-      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
-    },
-    size: {
-      less_than: MAX_COVER_SIZE,
-      message: "는 5MB 이하만 허용됩니다"
-    }
-
-  # 활동 상태 옵션 (다중 선택 가능)
-  AVAILABILITY_OPTIONS = {
-    "available_for_work" => { label: "외주 가능", color: "bg-green-500" },
-    "hiring" => { label: "팀원 모집 중", color: "bg-purple-500" }
-  }.freeze
-
+  # ==========================================================================
   # Associations
-  has_many :oauth_identities, dependent: :destroy
+  # ==========================================================================
+
+  # 게시글/댓글/좋아요/스크랩
   has_many :posts, dependent: :destroy
   has_many :job_posts, dependent: :destroy
   has_many :talent_listings, dependent: :destroy
@@ -85,11 +70,6 @@ class User < ApplicationRecord
   # AI 아이디어 분석
   has_many :idea_analyses, dependent: :destroy
 
-  # AI 분석 사용량 제한 (관리자 설정 가능)
-  DEFAULT_AI_ANALYSIS_LIMIT = 5
-
-  # Note: user_deletions association은 Deletable concern으로 이동
-
   # 신고/문의
   has_many :reports, foreign_key: :reporter_id, dependent: :destroy  # 내가 한 신고
   has_many :received_reports, class_name: "Report", as: :reportable, dependent: :destroy  # 나를 신고
@@ -101,21 +81,43 @@ class User < ApplicationRecord
   has_many :following, through: :active_follows, source: :followed
   has_many :followers, through: :passive_follows, source: :follower
 
-  # 비밀번호 정책 상수
-  MIN_PASSWORD_LENGTH = 8
-  # Rails 8.1 has_secure_password는 자동으로 generates_token_for :password_reset 제공 (15분 만료)
-
+  # ==========================================================================
   # Validations
+  # ==========================================================================
+
+  # 아바타 파일 검증 (보안: 악성 파일 업로드 방지)
+  validates :avatar,
+    content_type: {
+      in: ALLOWED_AVATAR_TYPES,
+      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
+    },
+    size: {
+      less_than: MAX_AVATAR_SIZE,
+      message: "는 2MB 이하만 허용됩니다"
+    }
+
+  validates :cover_image,
+    content_type: {
+      in: ALLOWED_AVATAR_TYPES,
+      message: "는 JPEG, PNG, GIF, WebP 형식만 허용됩니다"
+    },
+    size: {
+      less_than: MAX_COVER_SIZE,
+      message: "는 5MB 이하만 허용됩니다"
+    }
+
+  # 기본 필드 검증
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true, length: { minimum: 1, maximum: 50 }
+
   # 일반 로그인 사용자만 비밀번호 필수 (최소 8자, 영문+숫자 조합 권장)
   validates :password,
     length: { minimum: MIN_PASSWORD_LENGTH, message: "는 최소 #{MIN_PASSWORD_LENGTH}자 이상이어야 합니다" },
     if: -> { password.present? && provider.blank? }
   validate :password_complexity, if: -> { password.present? && provider.blank? }
-  validates :bio, length: { maximum: 500 }, allow_blank: true
 
-  # 익명 프로필 닉네임 유효성 검사 (프로필 완료 시에만)
+  # 프로필 필드 검증
+  validates :bio, length: { maximum: 500 }, allow_blank: true
   validates :nickname,
     presence: { message: "을(를) 입력해주세요" },
     uniqueness: { message: "이(가) 이미 사용 중입니다" },
@@ -135,331 +137,23 @@ class User < ApplicationRecord
   validates :portfolio_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
   validates :open_chat_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
 
-  # Note: check_blacklisted_email validation은 Deletable concern으로 이동
-
-  # ===== 약관 동의 관련 =====
-  CURRENT_TERMS_VERSION = "1.0".freeze
-
-  # 약관 동의 여부 확인 메서드
-  def terms_accepted?
-    terms_accepted_at.present?
-  end
-
-  def privacy_accepted?
-    privacy_accepted_at.present?
-  end
-
-  def guidelines_accepted?
-    guidelines_accepted_at.present?
-  end
-
-  def all_terms_accepted?
-    terms_accepted_at.present? &&
-    privacy_accepted_at.present? &&
-    guidelines_accepted_at.present?
-  end
-
-  # 약관 동의 처리 (OAuth 사용자용)
-  def accept_terms!(version: CURRENT_TERMS_VERSION)
-    now = Time.current
-    update!(
-      terms_accepted_at: now,
-      privacy_accepted_at: now,
-      guidelines_accepted_at: now,
-      terms_version: version
-    )
-  end
-
-  # 약관 동의 시간 일괄 설정 (회원가입 시 사용)
-  def set_terms_accepted!
-    now = Time.current
-    self.terms_accepted_at = now
-    self.privacy_accepted_at = now
-    self.guidelines_accepted_at = now
-    self.terms_version = CURRENT_TERMS_VERSION
-  end
-
+  # ==========================================================================
   # Callbacks
+  # ==========================================================================
   before_save :downcase_email
 
+  # ==========================================================================
   # Scopes
+  # ==========================================================================
   scope :recent, -> { order(created_at: :desc) }
-  scope :oauth_users, -> { joins(:oauth_identities).distinct }
-  scope :local_users, -> { left_joins(:oauth_identities).where(oauth_identities: { id: nil }) }
-  # Note: active, deleted scopes는 Deletable concern으로 이동
 
-  # OAuth 사용자 생성 또는 찾기
-  # 1. oauth_identities에서 provider + uid로 기존 연결 찾기
-  # 2. 없으면 이메일로 기존 사용자 찾고, OAuth 연결 추가
-  # 3. 없으면 새 사용자 생성 + OAuth 연결 추가
-  # 보안: 트랜잭션으로 데이터 무결성 보장
-  # 반환: { user:, deleted:, new_user: } - new_user가 true면 신규 가입자 (약관 동의 필요)
-  def self.from_omniauth(auth)
-    email = auth.info.email&.downcase
-    provider = auth.provider
-    uid = auth.uid
-
-    # 1. oauth_identities에서 찾기 (트랜잭션 외부 - 읽기만)
-    identity = OauthIdentity.find_by(provider: provider, uid: uid)
-    if identity
-      user = identity.user
-      # 탈퇴한 사용자 확인
-      return { user: user, deleted: user.deleted?, new_user: false }
-    end
-
-    # 2, 3단계는 트랜잭션으로 묶어서 원자성 보장
-    transaction do
-      # 2. 이메일로 기존 사용자 찾기 (삭제된 사용자 포함)
-      user = unscoped.find_by(email: email)
-
-      if user
-        # 탈퇴한 사용자 확인
-        if user.deleted?
-          return { user: user, deleted: true, new_user: false }
-        end
-
-        # 기존 사용자에게 새 OAuth 연결 추가
-        user.oauth_identities.create!(provider: provider, uid: uid)
-        # 프로필 사진이 없을 때만 OAuth 사진 사용
-        user.update(avatar_url: auth.info.image) if user.avatar_url.blank? && auth.info.image.present?
-        return { user: user, deleted: false, new_user: false }
-      end
-
-      # 3. 새 사용자 생성 + OAuth 연결 (최초 가입 시에만 OAuth 사진 사용)
-      # 약관 동의 필드는 비워둠 - OAuth 약관 동의 페이지에서 설정
-      user = create!(
-        email: email,
-        name: auth.info.name || auth.info.nickname || "User",
-        password: SecureRandom.hex(20),
-        avatar_url: auth.info.image
-      )
-      user.oauth_identities.create!(provider: provider, uid: uid)
-      { user: user, deleted: false, new_user: true }
-    end
-  end
-
-  # OAuth 사용자인지 확인
-  def oauth_user?
-    oauth_identities.exists?
-  end
-
-  # 일반 로그인 사용자인지 확인
-  def local_user?
-    !oauth_user?
-  end
-
-  # OAuth만으로 가입한 사용자인지 확인 (비밀번호 재설정 불가)
-  def oauth_only?
-    oauth_user? && provider.present?
-  end
-
-  # 비밀번호 재설정이 가능한지 확인
-  def can_reset_password?
-    !oauth_only?
-  end
-
-  # Note: remember, forget, authenticated? 메서드는 Authenticatable concern으로 이동
-
-  # Note: deleted?, active?, last_deletion 메서드는 Deletable concern으로 이동
-
-  # Rails 8.1 토큰 시스템 사용
-  # 비밀번호 재설정: user.generate_token_for(:password_reset) / User.find_by_token_for(:password_reset, token)
+  # ==========================================================================
+  # Instance Methods
+  # ==========================================================================
 
   # 관리자인지 확인
   def admin?
     is_admin == true
-  end
-
-  # 연결된 OAuth provider 목록
-  def connected_providers
-    oauth_identities.pluck(:provider)
-  end
-
-  # 프로필 이미지 URL 반환 (Active Storage 우선, 없으면 OAuth URL, 없으면 nil)
-  def profile_image_url
-    if avatar.attached?
-      Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true)
-    elsif avatar_url.present?
-      avatar_url
-    end
-  end
-
-  # ==========================================================================
-  # 익명 프로필 시스템
-  # ==========================================================================
-
-  # 커뮤니티에서 표시될 이름 (익명 모드 시 닉네임 사용)
-  def display_name
-    return name unless profile_completed?
-    is_anonymous? ? nickname : name
-  end
-
-  # 커뮤니티에서 표시될 아바타 경로
-  # 익명 모드: public 폴더의 익명 아바타 (avatar_type 0-3 → anonymous1-4)
-  # 실명 모드: 업로드한 아바타 또는 OAuth 아바타
-  def display_avatar_path
-    if profile_completed? && is_anonymous?
-      "/anonymous#{avatar_type + 1}-.png"
-    elsif avatar.attached?
-      Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true)
-    elsif avatar_url.present?
-      avatar_url
-    else
-      nil
-    end
-  end
-
-  # 익명 아바타 사용 중인지 확인
-  def using_anonymous_avatar?
-    profile_completed? && is_anonymous?
-  end
-
-  # 프로필 이미지가 있는지 확인
-  def has_profile_image?
-    avatar.attached? || avatar_url.present?
-  end
-
-  # 스킬을 배열로 반환
-  def skills_array
-    return [] if skills.blank?
-    skills.split(",").map(&:strip).reject(&:blank?)
-  end
-
-  # 스킬 배열을 문자열로 저장
-  def skills_array=(arr)
-    self.skills = arr.is_a?(Array) ? arr.join(", ") : arr
-  end
-
-  # 주요 성과/포트폴리오를 배열로 반환 (줄바꿈으로 구분)
-  def achievements_array
-    return [] if achievements.blank?
-    achievements.split("\n").map(&:strip).reject(&:blank?)
-  end
-
-  # 성과 배열을 문자열로 저장
-  def achievements_array=(arr)
-    self.achievements = arr.is_a?(Array) ? arr.join("\n") : arr
-  end
-
-  # 도구 & 장비를 배열로 반환 (쉼표 구분)
-  def toolbox_array
-    return [] if toolbox.blank?
-    toolbox.split(",").map(&:strip).reject(&:blank?)
-  end
-
-  # 도구 배열을 문자열로 저장
-  def toolbox_array=(arr)
-    self.toolbox = arr.is_a?(Array) ? arr.join(", ") : arr
-  end
-
-  # 작업 스타일 Q&A 파싱 (JSON 형식)
-  # 예: [{"question": "선호 커뮤니케이션", "answer": "슬랙 DM"}]
-  def work_style_items
-    return [] if work_style.blank?
-    items = JSON.parse(work_style, symbolize_names: true)
-    items.is_a?(Array) ? items : []
-  rescue JSON::ParserError
-    []
-  end
-
-  # 작업 스타일 설정 (배열 또는 JSON 문자열)
-  def work_style_items=(arr)
-    self.work_style = arr.is_a?(Array) ? arr.to_json : arr
-  end
-
-  # ==========================================================================
-  # Experience Timeline (JSON 컬럼)
-  # 구조: [{ type: "work|education|project", title: "직책/학위",
-  #          organization: "회사/학교", period: "2023.03 - 현재",
-  #          description: "설명", is_current: true/false }]
-  # ==========================================================================
-
-  EXPERIENCE_TYPES = {
-    "work" => { icon: "briefcase", label: "경력", color: "bg-blue-100 text-blue-700" },
-    "education" => { icon: "academic-cap", label: "학력", color: "bg-purple-100 text-purple-700" },
-    "project" => { icon: "rocket-launch", label: "프로젝트", color: "bg-orange-100 text-orange-700" },
-    "award" => { icon: "trophy", label: "수상", color: "bg-amber-100 text-amber-700" },
-    "certification" => { icon: "check-badge", label: "자격증", color: "bg-green-100 text-green-700" }
-  }.freeze
-
-  # Experience 배열 반환 (nil 방지)
-  def experiences_array
-    experiences || []
-  end
-
-  # 타입별로 그룹화된 경험 반환
-  def grouped_experiences
-    experiences_array.group_by { |exp| exp["type"] || "work" }
-  end
-
-  # 정렬된 경험 반환 (현재 진행 중인 것 우선, 그 다음 최신순)
-  def sorted_experiences
-    experiences_array.sort_by do |exp|
-      [
-        exp["is_current"] ? 0 : 1,  # 현재 진행 중인 것 우선
-        -(exp["sort_order"] || 999) # sort_order 역순
-      ]
-    end
-  end
-
-  # Experience가 있는지 확인
-  def has_experiences?
-    experiences_array.any?
-  end
-
-  # 현재 진행 중인 경험만 반환
-  def current_experiences
-    experiences_array.select { |exp| exp["is_current"] }
-  end
-
-  # 특정 타입의 경험만 반환
-  def experiences_by_type(type)
-    experiences_array.select { |exp| exp["type"] == type.to_s }
-  end
-
-  # 활동 상태 배열 반환 (JSON 컬럼)
-  def availability_statuses_array
-    availability_statuses || []
-  end
-
-  # 활동 상태가 있는지 확인
-  def has_availability_status?
-    availability_statuses_array.any? || custom_status.present?
-  end
-
-  # 모든 활동 상태 뱃지 정보 반환 (label, color 포함)
-  def availability_badges
-    badges = []
-
-    # 선택된 기본 상태들
-    availability_statuses_array.each do |status|
-      if AVAILABILITY_OPTIONS[status]
-        badges << {
-          label: AVAILABILITY_OPTIONS[status][:label],
-          color: AVAILABILITY_OPTIONS[status][:color]
-        }
-      end
-    end
-
-    # 기타(사용자 정의) 상태
-    if custom_status.present?
-      badges << {
-        label: custom_status,
-        color: "bg-pink-500"
-      }
-    end
-
-    badges
-  end
-
-  # 특정 상태가 선택되어 있는지 확인
-  def has_status?(status_key)
-    availability_statuses_array.include?(status_key)
-  end
-
-  # 외주 가능 상태인지 확인
-  def available_for_work?
-    has_status?("available_for_work")
   end
 
   # ==========================================================================
@@ -485,6 +179,10 @@ class User < ApplicationRecord
     activities.sort_by(&:created_at).reverse.first(limit)
   end
 
+  # ==========================================================================
+  # 알림 관련 메서드
+  # ==========================================================================
+
   # 읽지 않은 알림 수
   def unread_notifications_count
     notifications.unread.count
@@ -495,7 +193,11 @@ class User < ApplicationRecord
     notifications.unread.exists?
   end
 
-  # 읽지 않은 메시지 총 수 (N+1 방지: 단일 SQL 쿼리)
+  # ==========================================================================
+  # 메시지 관련 메서드 (N+1 방지: 단일 SQL 쿼리)
+  # ==========================================================================
+
+  # 읽지 않은 메시지 총 수
   def total_unread_messages
     sql = <<~SQL
       SELECT COUNT(*)
@@ -533,6 +235,10 @@ class User < ApplicationRecord
       ActiveRecord::Base.sanitize_sql([ sql, id, id ])
     ) == 1
   end
+
+  # ==========================================================================
+  # 결제 관련 메서드
+  # ==========================================================================
 
   # 토스페이먼츠 고객 키 (결제 시 사용)
   def toss_customer_key
@@ -580,79 +286,11 @@ class User < ApplicationRecord
     end
   end
 
-  # ==========================================================================
-  # 커버 이미지 관련 메서드
-  # ==========================================================================
-
-  # 커버 이미지 기본 그라디언트 반환 (사용자 ID 기반)
-  def cover_gradient
-    COVER_GRADIENTS[id % COVER_GRADIENTS.length]
-  end
-
-  # 커버 이미지 URL 반환 (업로드 이미지 우선)
-  def cover_image_url
-    if cover_image.attached?
-      Rails.application.routes.url_helpers.rails_blob_path(cover_image, only_path: true)
-    end
-  end
-
-  # 커버 이미지가 있는지 확인
-  def has_cover_image?
-    cover_image.attached?
-  end
-
-  # ==========================================================================
-  # AI 분석 사용량 관리 메서드
-  # ==========================================================================
-
-  # 사용자의 유효 AI 분석 limit 반환 (nil이면 기본값 사용)
-  def effective_ai_limit
-    ai_analysis_limit || DEFAULT_AI_ANALYSIS_LIMIT
-  end
-
-  # 남은 AI 분석 횟수 반환 (보너스 포함)
-  # remaining = limit - used + bonus
-  def ai_analyses_remaining
-    [ effective_ai_limit - idea_analyses.count + ai_bonus_credits.to_i, 0 ].max
-  end
-
-  # 보너스 제외 기본 잔여 횟수
-  def base_remaining
-    [ effective_ai_limit - idea_analyses.count, 0 ].max
-  end
-
-  # AI 분석 limit에 도달했는지 확인
-  def ai_limit_reached?
-    ai_analyses_remaining <= 0
-  end
-
-  # 원하는 잔여횟수를 설정하기 위해 필요한 보너스 계산
-  def calculate_bonus_for_remaining(desired_remaining)
-    base = effective_ai_limit - idea_analyses.count
-    desired_remaining - base
-  end
-
-  # AI 분석 사용량 통계 (관리자용)
-  def ai_usage_stats
-    {
-      used: idea_analyses.count,
-      limit: effective_ai_limit,
-      bonus: ai_bonus_credits.to_i,
-      remaining: ai_analyses_remaining,
-      base_remaining: base_remaining,
-      is_custom_limit: ai_analysis_limit.present?,
-      has_bonus: ai_bonus_credits.to_i > 0,
-      reached: ai_limit_reached?
-    }
-  end
-
   private
 
   def downcase_email
     self.email = email.downcase if email.present?
   end
-
-  # Note: check_blacklisted_email은 Deletable concern으로 이동
 
   # 비밀번호 복잡성 검증 (영문+숫자 조합 필수)
   def password_complexity
