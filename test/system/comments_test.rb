@@ -126,5 +126,4 @@ class CommentsTest < ApplicationSystemTestCase
     assert_text unique_comment, wait: 5
     assert_match /작성/, submit_button.text
   end
-
 end
