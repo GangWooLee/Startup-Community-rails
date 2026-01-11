@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginAs, waitForPageLoad } from '../utils/test-helpers';
+import { loginAs, waitForPageLoad, createTestPost } from '../utils/test-helpers';
 
 /**
  * 토글 버튼 E2E 테스트
@@ -19,6 +19,11 @@ test.describe('좋아요 버튼', () => {
   test.beforeEach(async ({ page }) => {
     // 테스트 전 로그인
     await loginAs(page, 'test@example.com', 'password123');
+
+    // CI 환경에서 테스트 게시글 생성
+    if (process.env.CI) {
+      await createTestPost(page, { title: '좋아요 테스트 게시글' });
+    }
   });
 
   test('로그인 사용자 - 좋아요 클릭 시 아이콘 색상 변경', async ({ page }) => {
@@ -161,6 +166,11 @@ test.describe('좋아요 버튼', () => {
 test.describe('북마크 버튼', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
+
+    // CI 환경에서 테스트 게시글 생성
+    if (process.env.CI) {
+      await createTestPost(page, { title: '북마크 테스트 게시글' });
+    }
   });
 
   test('로그인 사용자 - 북마크 클릭 시 아이콘 색상 변경', async ({ page }) => {
@@ -263,6 +273,11 @@ test.describe('북마크 버튼', () => {
 test.describe('댓글 좋아요 버튼', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
+
+    // CI 환경에서 테스트 게시글 생성
+    if (process.env.CI) {
+      await createTestPost(page, { title: '댓글 좋아요 테스트 게시글' });
+    }
   });
 
   test('댓글 좋아요 클릭 시 아이콘 색상 변경', async ({ page }) => {
@@ -356,6 +371,11 @@ test.describe('댓글 좋아요 버튼', () => {
 test.describe('애니메이션 검증', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
+
+    // CI 환경에서 테스트 게시글 생성
+    if (process.env.CI) {
+      await createTestPost(page, { title: '애니메이션 테스트 게시글' });
+    }
   });
 
   test('좋아요 클릭 시 scale 애니메이션 적용', async ({ page }) => {

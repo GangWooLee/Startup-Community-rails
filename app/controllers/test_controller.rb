@@ -59,6 +59,42 @@ class TestController < ApplicationController
     }, status: :unprocessable_entity
   end
 
+  # POST /test/create_post
+  # 테스트용 게시글 생성
+  #
+  # 요청 예시:
+  # {
+  #   "title": "테스트 게시글",
+  #   "content": "테스트 내용입니다.",
+  #   "user_email": "test@example.com",
+  #   "post_type": "community"  # community, outsourcing
+  # }
+  def create_post
+    user = User.find_by(email: params[:user_email] || "test@example.com")
+    unless user
+      render json: { success: false, error: "User not found. Create user first." }, status: :unprocessable_entity
+      return
+    end
+
+    post = Post.create!(
+      title: params[:title] || "테스트 게시글",
+      content: params[:content] || "E2E 테스트를 위한 게시글입니다.",
+      user: user,
+      post_type: params[:post_type] || "community"
+    )
+
+    render json: {
+      success: true,
+      post: {
+        id: post.id,
+        title: post.title,
+        post_type: post.post_type
+      }
+    }, status: :created
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
   # DELETE /test/cleanup
   # 테스트 데이터 정리
   def cleanup

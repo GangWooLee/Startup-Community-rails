@@ -18,8 +18,8 @@ import {
  * - 이미지 삭제
  */
 
-// 게시물 작성 폼의 이미지 업로드 입력 셀렉터
-const POST_IMAGE_INPUT = '#post_images';
+// 게시물 작성 폼의 이미지 업로드 입력 셀렉터 (Stimulus target 기반)
+const POST_IMAGE_INPUT = '[data-image-upload-target="input"]';
 
 test.describe('게시물 이미지 업로드', () => {
   test.beforeEach(async ({ page }) => {

@@ -37,6 +37,42 @@ async function ensureTestUserExists(
 }
 
 /**
+ * 테스트 게시글 생성 (CI 환경용)
+ * 테스트 환경에서 /test/create_post API를 호출하여 게시글 생성
+ */
+export async function createTestPost(
+  page: Page,
+  options: {
+    title?: string;
+    content?: string;
+    userEmail?: string;
+    postType?: 'community' | 'outsourcing';
+  } = {}
+): Promise<{ id: number; title: string } | null> {
+  try {
+    const response = await page.request.post('/test/create_post', {
+      data: {
+        title: options.title || '테스트 게시글',
+        content: options.content || 'E2E 테스트를 위한 게시글입니다.',
+        user_email: options.userEmail || TEST_USER.email,
+        post_type: options.postType || 'community'
+      }
+    });
+
+    if (response.ok()) {
+      const data = await response.json();
+      return data.post;
+    } else {
+      console.warn(`Failed to create test post: ${response.status()}`);
+      return null;
+    }
+  } catch (error) {
+    console.log('Test post creation skipped (route not available)');
+    return null;
+  }
+}
+
+/**
  * 이메일/비밀번호로 로그인
  */
 export async function loginAs(

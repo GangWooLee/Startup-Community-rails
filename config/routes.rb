@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # production에서는 TestController#ensure_test_environment에서 404 반환
   if Rails.env.test?
     post "test/create_user", to: "test#create_user"
+    post "test/create_post", to: "test#create_post"
     delete "test/cleanup", to: "test#cleanup"
   end
 
