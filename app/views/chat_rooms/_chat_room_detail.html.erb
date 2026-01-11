@@ -39,7 +39,7 @@
       <%# 정상 사용자 - 프로필 링크 활성화 %>
       <%= link_to profile_overlay_chat_room_path(chat_room),
                   class: "flex items-center gap-4 flex-1 min-w-0 group cursor-pointer",
-                  data: { turbo_stream: true } do %>
+                  data: { turbo_stream: true, turbo_frame: "_top" } do %>
         <!-- 프로필 이미지 (익명 모드 지원) -->
         <div class="relative flex-shrink-0">
           <%= render_user_avatar(other_user, size: "lg", ring: "ring-2 ring-stone-100 group-hover:ring-orange-200 transition-all") %>
@@ -96,7 +96,7 @@
            data-dropdown-target="menu">
         <%= link_to profile_overlay_chat_room_path(chat_room),
                     class: "flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 transition-colors",
-                    data: { turbo_stream: true, action: "click->dropdown#close" } do %>
+                    data: { turbo_stream: true, turbo_frame: "_top", action: "click->dropdown#close" } do %>
           <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
