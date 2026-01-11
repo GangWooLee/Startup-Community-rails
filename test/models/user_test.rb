@@ -588,4 +588,105 @@ class UserTest < ActiveSupport::TestCase
     @user.is_anonymous = false
     assert_equal @user.name, @user.display_name
   end
+
+  # =========================================
+  # Privacy Visibility Methods (섹션별 공개/비공개)
+  # =========================================
+
+  test "about_visible_to? returns true when not anonymous" do
+    @user.is_anonymous = false
+    @user.privacy_about = false
+    viewer = users(:two)
+
+    assert @user.about_visible_to?(viewer)
+  end
+
+  test "about_visible_to? returns true when viewer is self" do
+    @user.is_anonymous = true
+    @user.privacy_about = false
+
+    assert @user.about_visible_to?(@user)
+  end
+
+  test "about_visible_to? returns privacy_about value when anonymous and not self" do
+    @user.is_anonymous = true
+    viewer = users(:two)
+
+    @user.privacy_about = true
+    assert @user.about_visible_to?(viewer)
+
+    @user.privacy_about = false
+    assert_not @user.about_visible_to?(viewer)
+  end
+
+  test "about_visible_to? returns privacy_about for nil viewer (non-logged in)" do
+    @user.is_anonymous = true
+
+    @user.privacy_about = true
+    assert @user.about_visible_to?(nil)
+
+    @user.privacy_about = false
+    assert_not @user.about_visible_to?(nil)
+  end
+
+  test "posts_visible_to? follows same pattern as about_visible_to?" do
+    viewer = users(:two)
+
+    # 익명 모드 아님 - 항상 공개
+    @user.is_anonymous = false
+    @user.privacy_posts = false
+    assert @user.posts_visible_to?(viewer)
+
+    # 본인 - 항상 공개
+    @user.is_anonymous = true
+    @user.privacy_posts = false
+    assert @user.posts_visible_to?(@user)
+
+    # 타인 - 설정값 따름
+    @user.privacy_posts = true
+    assert @user.posts_visible_to?(viewer)
+
+    @user.privacy_posts = false
+    assert_not @user.posts_visible_to?(viewer)
+  end
+
+  test "activity_visible_to? follows same pattern as about_visible_to?" do
+    viewer = users(:two)
+
+    @user.is_anonymous = false
+    assert @user.activity_visible_to?(viewer)
+
+    @user.is_anonymous = true
+    assert @user.activity_visible_to?(@user)
+
+    @user.privacy_activity = true
+    assert @user.activity_visible_to?(viewer)
+
+    @user.privacy_activity = false
+    assert_not @user.activity_visible_to?(viewer)
+  end
+
+  test "experience_visible_to? follows same pattern as about_visible_to?" do
+    viewer = users(:two)
+
+    @user.is_anonymous = false
+    assert @user.experience_visible_to?(viewer)
+
+    @user.is_anonymous = true
+    assert @user.experience_visible_to?(@user)
+
+    @user.privacy_experience = true
+    assert @user.experience_visible_to?(viewer)
+
+    @user.privacy_experience = false
+    assert_not @user.experience_visible_to?(viewer)
+  end
+
+  test "privacy fields default to false (private)" do
+    new_user = User.new(email: "privacy@test.com", password: "test1234", name: "Privacy Test")
+    assert_equal false, new_user.privacy_about
+    assert_equal false, new_user.privacy_posts
+    assert_equal false, new_user.privacy_activity
+    assert_equal false, new_user.privacy_experience
+  end
 end
