@@ -118,3 +118,24 @@ jobs:
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/id_ed25519
           kamal deploy
+
+      - name: Health check after deploy
+        run: |
+          echo "Waiting for deployment to stabilize..."
+          sleep 30
+
+          for i in {1..5}; do
+            if curl -sf https://undrewai.com/up; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i/5 failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "Health check failed after 5 attempts"
+          echo "Rolling back..."
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
+          kamal rollback || echo "Rollback failed or no previous version"
+          exit 1

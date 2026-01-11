@@ -17,23 +17,25 @@ SimpleCov.start "rails" do
   add_group "Jobs", "app/jobs"
   add_group "Mailers", "app/mailers"
 
-  # Coverage Policy (2026-01-08 기준: 2% 커버리지)
+  # Coverage Policy (2026-01-11 업데이트)
   #
-  # 현재 전략: 리포트 생성 + 점진적 개선
-  # - 현재 커버리지가 낮아 강제 기준 설정 시 CI 실패
+  # 전략: 커버리지 하락 방지 + 점진적 개선
   # - coverage/ 폴더는 GitHub Actions Artifact로 업로드됨
-  # - 향후 개선 목표: 3개월 내 20%, 6개월 내 40%
+  # - refuse_coverage_drop: 현재 커버리지보다 하락 시 CI 실패
+  # - 목표: 현재(2.2%) → Phase 1(5%) → Phase 2(10%) → Phase 3(20%)
   #
   # 개선 우선순위:
   # 1. 인증/인가 로직 (100% 목표)
   # 2. 결제 로직 (100% 목표)
   # 3. 핵심 모델 validations (80% 목표)
   #
-  minimum_coverage 0  # 현재: 리포트만 생성, 실패 조건 없음
+  # 커버리지 하락 방지 (리그레션 보호)
+  refuse_coverage_drop
 
-  # 커버리지가 개선되면 아래 주석 해제:
-  # minimum_coverage 20  # Phase 1: 3개월 후
-  # minimum_coverage 40  # Phase 2: 6개월 후
+  # 점진적 최소 커버리지 목표 (달성 시 주석 해제)
+  # minimum_coverage 5   # Phase 1: 달성 후 활성화
+  # minimum_coverage 10  # Phase 2: 달성 후 활성화
+  # minimum_coverage 20  # Phase 3: 달성 후 활성화
 end
 
 ENV["RAILS_ENV"] ||= "test"

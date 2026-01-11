@@ -13,6 +13,30 @@ export const TEST_USER = {
 };
 
 /**
+ * 테스트 사용자 생성 (CI 환경용)
+ * 테스트 환경에서 /test/create_user API를 호출하여 사용자 생성
+ */
+async function ensureTestUserExists(
+  page: Page,
+  email: string,
+  password: string,
+  name: string = '테스트 유저'
+): Promise<void> {
+  try {
+    const response = await page.request.post('/test/create_user', {
+      data: { email, password, name }
+    });
+
+    if (!response.ok()) {
+      console.warn(`Failed to create test user: ${response.status()}`);
+    }
+  } catch (error) {
+    // 라우트가 없는 경우 (개발 환경 등) 무시
+    console.log('Test user creation skipped (route not available)');
+  }
+}
+
+/**
  * 이메일/비밀번호로 로그인
  */
 export async function loginAs(
@@ -20,6 +44,11 @@ export async function loginAs(
   email: string = TEST_USER.email,
   password: string = TEST_USER.password
 ): Promise<void> {
+  // CI 환경에서는 테스트 사용자를 먼저 생성
+  if (process.env.CI) {
+    await ensureTestUserExists(page, email, password);
+  }
+
   await page.goto('/login');
 
   await page.fill('input[name="email"]', email);
@@ -37,6 +66,12 @@ export async function loginAs(
   // 로그인 성공 확인 - URL이 /login이 아니면 성공
   const currentUrl = page.url();
   if (currentUrl.includes('/login')) {
+    // 디버깅을 위한 추가 정보 로깅
+    if (process.env.CI) {
+      console.error(`Login failed. Email: ${email}, URL: ${currentUrl}`);
+      const pageContent = await page.content();
+      console.error(`Page contains error: ${pageContent.includes('error') || pageContent.includes('Error')}`);
+    }
     throw new Error(`Login failed - still on login page. URL: ${currentUrl}`);
   }
 }
