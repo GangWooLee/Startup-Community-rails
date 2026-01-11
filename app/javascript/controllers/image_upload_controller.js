@@ -130,6 +130,12 @@ export default class extends Controller {
       button.dataset.action = 'click->image-upload#removeNewImage'
       button.dataset.index = index
 
+      // 수동 이벤트 리스너 추가 (Stimulus 동적 요소 이벤트 위임 문제 해결)
+      button.addEventListener('click', (event) => {
+        event.preventDefault()
+        this.removeNewImage(event)
+      })
+
       // SVG 아이콘 (DOM API로 안전하게 생성)
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
       svg.setAttribute('class', 'h-4 w-4')

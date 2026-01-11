@@ -2,7 +2,8 @@
 
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
+  # 테스트 환경에서는 스킵 (Playwright HTTP 클라이언트의 User-Agent 문제 방지)
+  allow_browser versions: :modern, unless: -> { Rails.env.test? }
 
   # ==========================================================================
   # Concerns
