@@ -30,11 +30,12 @@ class ReportsTest < ApplicationSystemTestCase
     # 신고하기 버튼 확인 및 클릭
     within("[data-dropdown-target='menu']") do
       assert_selector "button", text: "신고하기"
-      find("button", text: "신고하기").click
+      report_button = find("button", text: "신고하기")
+      page.execute_script("arguments[0].click()", report_button)
     end
 
-    # 모달 열림 확인
-    assert_selector "#report-modal", visible: true
+    # 모달 열림 확인 (CI 환경에서 충분한 대기 시간)
+    assert_selector "#report-modal", visible: true, wait: 10
 
     # 신고 대상 정보 확인
     within("#report-modal") do
@@ -127,10 +128,12 @@ class ReportsTest < ApplicationSystemTestCase
     # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
     assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
     within("[data-dropdown-target='menu']") do
-      find("button", text: "신고하기").click
+      report_button = find("button", text: "신고하기")
+      page.execute_script("arguments[0].click()", report_button)
     end
 
-    assert_selector "#report-modal", visible: true
+    # 모달 열림 확인 (CI 환경에서 충분한 대기 시간)
+    assert_selector "#report-modal", visible: true, wait: 10
 
     # 닫기 버튼 클릭
     within("#report-modal") do

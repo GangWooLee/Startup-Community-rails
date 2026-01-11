@@ -336,24 +336,26 @@ export async function debugScreenshot(page: Page, name: string): Promise<void> {
 
 /**
  * 이미지 업로드 테스트 헬퍼
+ * 여러 요소와 매칭되는 경우 첫 번째 요소 사용
  */
 export async function uploadTestImage(
   page: Page,
   fileInputSelector: string = 'input[type="file"]'
 ): Promise<void> {
-  const fileInput = page.locator(fileInputSelector);
+  const fileInput = page.locator(fileInputSelector).first();
   await fileInput.setInputFiles('e2e/fixtures/test-image.png');
 }
 
 /**
  * 여러 이미지 업로드
+ * 여러 요소와 매칭되는 경우 첫 번째 요소 사용
  */
 export async function uploadMultipleImages(
   page: Page,
   count: number,
   fileInputSelector: string = 'input[type="file"]'
 ): Promise<void> {
-  const fileInput = page.locator(fileInputSelector);
+  const fileInput = page.locator(fileInputSelector).first();
   const files = Array(count).fill('e2e/fixtures/test-image.png');
   await fileInput.setInputFiles(files);
 }

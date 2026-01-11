@@ -111,7 +111,9 @@ class TestController < ApplicationController
   private
 
   def ensure_test_environment
-    return if Rails.env.test?
+    # test/development 환경에서만 동작 허용
+    # production에서는 라우트 자체가 등록되지 않지만, 이중 보호
+    return if Rails.env.test? || Rails.env.development?
 
     render json: { error: "Not allowed in #{Rails.env} environment" }, status: :not_found
   end

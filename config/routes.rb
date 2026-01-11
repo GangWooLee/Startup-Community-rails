@@ -5,9 +5,10 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # 테스트 환경 전용 라우트 (E2E 테스트용)
+  # 테스트/개발 환경 전용 라우트 (E2E 테스트용)
   # production에서는 TestController#ensure_test_environment에서 404 반환
-  if Rails.env.test?
+  # Note: E2E 테스트에서 Rails 서버가 development로 실행될 수 있으므로 두 환경 모두 허용
+  unless Rails.env.production?
     post "test/create_user", to: "test#create_user"
     post "test/create_post", to: "test#create_post"
     delete "test/cleanup", to: "test#cleanup"
