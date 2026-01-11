@@ -5,6 +5,7 @@ export default class extends Controller {
   static targets = ["input", "submit", "counter"]
 
   connect() {
+    this.isSubmitting = false
     this.updateCounter()
     this.updateSubmitState()
   }
@@ -55,22 +56,32 @@ export default class extends Controller {
   async submit(event) {
     event.preventDefault()
 
+    // 중복 제출 방지
+    if (this.isSubmitting) {
+      console.warn("[CommentForm] Submit already in progress, ignoring")
+      return
+    }
+
     if (!this.hasInputTarget || !this.inputTarget.value.trim()) {
       return
     }
 
+    this.isSubmitting = true
+
+    // parent_id 한 번만 읽어서 재사용
+    const parentId = this.element.dataset.parentId
+    const isReply = Boolean(parentId)
+
     const formData = new FormData()
     formData.append("comment[content]", this.inputTarget.value.trim())
 
-    // parent_id 처리 (대댓글인 경우)
-    const parentId = this.element.dataset.parentId
-    if (parentId) {
+    if (isReply) {
       formData.append("comment[parent_id]", parentId)
     }
 
     try {
       this.submitTarget.disabled = true
-      this.submitTarget.textContent = parentId ? "답글 중..." : "작성 중..."
+      this.submitTarget.textContent = isReply ? "답글 중..." : "작성 중..."
 
       const response = await fetch(this.urlValue, {
         method: "POST",
@@ -95,7 +106,7 @@ export default class extends Controller {
         this.updateSubmitState()
 
         // 대댓글 폼이면 폼 컨테이너 숨기기
-        if (parentId) {
+        if (isReply) {
           // reply-toggle-target="form" 인 부모 요소를 찾아서 숨김
           const formContainer = this.element.closest('[data-reply-toggle-target="form"]')
           if (formContainer) {
@@ -118,10 +129,10 @@ export default class extends Controller {
       console.error("Comment submit failed:", error)
       alert("댓글 작성에 실패했습니다.")
     } finally {
+      this.isSubmitting = false
       this.submitTarget.disabled = false
       // 대댓글이면 "답글", 일반 댓글이면 "작성"
-      const parentId = this.element.dataset.parentId
-      this.submitTarget.textContent = parentId ? "답글" : "작성"
+      this.submitTarget.textContent = isReply ? "답글" : "작성"
       this.updateSubmitState()
     }
   }
