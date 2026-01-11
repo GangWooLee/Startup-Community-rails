@@ -1,6 +1,7 @@
 <%# 게시글 탭 콘텐츠 Partial %>
-<%# locals: user, posts %>
+<%# locals: user, posts, viewer %>
 
+<%= privacy_blur_wrapper(visible: user.posts_visible_to?(local_assigns[:viewer])) do %>
 <div class="space-y-4">
   <% if posts.any? %>
     <% posts.each do |post| %>
@@ -108,3 +109,4 @@
         description: "커뮤니티에서 첫 글을 작성해보세요" %>
   <% end %>
 </div>
+<% end %>

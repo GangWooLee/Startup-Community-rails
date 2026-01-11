@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_10_141734) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_11_050426) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -454,7 +454,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_10_141734) do
     t.datetime "password_reset_sent_at"
     t.string "password_reset_token"
     t.string "portfolio_url"
+    t.boolean "privacy_about", default: false, null: false
     t.datetime "privacy_accepted_at"
+    t.boolean "privacy_activity", default: false, null: false
+    t.boolean "privacy_experience", default: false, null: false
+    t.boolean "privacy_posts", default: false, null: false
     t.boolean "profile_completed", default: false
     t.string "provider"
     t.string "remember_digest"

@@ -22,6 +22,9 @@ class ProfilesController < ApplicationController
     # 현재 사용자가 본인 프로필인지 확인
     @is_own_profile = logged_in? && current_user.id == @user.id
 
+    # 프라이버시 블러 처리를 위한 viewer 설정
+    @viewer = current_user
+
     # 팔로우 상태 확인 (로그인 시)
     @is_following = logged_in? && current_user.following?(@user)
   end

@@ -11,7 +11,7 @@ import { Controller } from "@hotwired/stimulus"
  * - 랜덤 닉네임 생성
  */
 export default class extends Controller {
-  static targets = ["toggle", "nicknameSection", "nickname", "avatar", "avatarInput", "preview"]
+  static targets = ["toggle", "nicknameSection", "privacySection", "nickname", "avatar", "avatarInput", "preview"]
 
   connect() {
     this.updatePreview()
@@ -25,6 +25,7 @@ export default class extends Controller {
 
     if (isAnonymous) {
       this.nicknameSectionTarget.classList.remove("hidden")
+      // 프라이버시 섹션도 표시 (nicknameSection 안에 있으므로 자동으로 표시됨)
       // 닉네임이 없으면 자동 생성
       if (!this.nicknameTarget.value.trim()) {
         this.regenerateNickname()

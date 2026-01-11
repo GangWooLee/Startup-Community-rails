@@ -1,5 +1,5 @@
 <%# 탭 네비게이션 + 탭 콘텐츠 - Modern Archive Style %>
-<%# locals: user, posts, outsourcing_posts, is_own_profile %>
+<%# locals: user, posts, outsourcing_posts, is_own_profile, viewer %>
 
 <div data-controller="tabs" data-tabs-default-value="about">
 
@@ -119,15 +119,15 @@
   <%# 탭 콘텐츠 - 상단 여백 추가 %>
   <div class="pt-6">
     <div data-tabs-target="panel" data-tab-id="about" role="tabpanel">
-      <%= render "profiles/about_tab", user: user %>
+      <%= render "profiles/about_tab", user: user, viewer: viewer %>
     </div>
 
     <div data-tabs-target="panel" data-tab-id="posts" class="hidden" role="tabpanel">
-      <%= render "profiles/posts_tab", user: user, posts: posts %>
+      <%= render "profiles/posts_tab", user: user, posts: posts, viewer: viewer %>
     </div>
 
     <div data-tabs-target="panel" data-tab-id="activity" class="hidden" role="tabpanel">
-      <%= render "profiles/activity_tab", user: user %>
+      <%= render "profiles/activity_tab", user: user, viewer: viewer %>
     </div>
 
     <div data-tabs-target="panel" data-tab-id="market" class="hidden" role="tabpanel">

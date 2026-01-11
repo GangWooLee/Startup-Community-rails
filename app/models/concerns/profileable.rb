@@ -59,6 +59,40 @@ module Profileable
     profile_completed? && is_anonymous?
   end
 
+  # ==========================================================================
+  # 프로필 섹션별 가시성 (익명 모드 시 세분화된 공개/비공개 설정)
+  # ==========================================================================
+
+  # 소개 탭 가시성 확인
+  # @param viewer [User, nil] 조회하는 사용자 (nil이면 비로그인)
+  # @return [Boolean] true면 공개, false면 블러 처리
+  def about_visible_to?(viewer)
+    return true unless is_anonymous?       # 익명 모드가 아니면 항상 공개
+    return true if viewer == self          # 본인은 항상 볼 수 있음
+    privacy_about                          # 설정값에 따라 공개 여부 결정
+  end
+
+  # 게시글 탭 가시성 확인
+  def posts_visible_to?(viewer)
+    return true unless is_anonymous?
+    return true if viewer == self
+    privacy_posts
+  end
+
+  # 활동 탭 가시성 확인
+  def activity_visible_to?(viewer)
+    return true unless is_anonymous?
+    return true if viewer == self
+    privacy_activity
+  end
+
+  # 경력/프로젝트 탭 가시성 확인
+  def experience_visible_to?(viewer)
+    return true unless is_anonymous?
+    return true if viewer == self
+    privacy_experience
+  end
+
   # 프로필 이미지가 있는지 확인
   def has_profile_image?
     avatar.attached? || avatar_url.present?

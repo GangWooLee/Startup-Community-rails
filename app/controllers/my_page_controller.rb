@@ -5,6 +5,7 @@ class MyPageController < ApplicationController
   def show
     @user = current_user
     @is_own_profile = true  # 마이페이지는 항상 본인
+    @viewer = current_user  # 프라이버시 블러 처리용 (본인은 항상 전체 공개)
 
     # 커뮤니티 글 (free, question, promotion)
     @posts = @user.posts.published
@@ -49,6 +50,7 @@ class MyPageController < ApplicationController
       :linkedin_url, :github_url, :portfolio_url, :open_chat_url,
       :detailed_bio,                             # ActionText rich text
       :is_anonymous, :nickname, :avatar_type,    # 익명 설정
+      :privacy_about, :privacy_posts, :privacy_activity, :privacy_experience,  # 섹션별 공개 설정
       availability_statuses: []
     )
 

@@ -165,6 +165,61 @@
               익명 모드에서 사용할 아바타를 선택하세요
             </p>
           </div>
+
+          <%# 섹션별 공개 설정 %>
+          <div class="space-y-3 pt-4 border-t border-border"
+               data-anonymous-settings-target="privacySection">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-medium text-foreground">프로필 섹션 공개 설정</p>
+              <span class="text-xs text-muted-foreground">체크 시 공개</span>
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+                <%= f.check_box :privacy_about,
+                                checked: @user.privacy_about,
+                                class: "w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" %>
+                <div class="flex-1">
+                  <span class="text-sm font-medium">소개</span>
+                  <p class="text-xs text-muted-foreground">기술 스택, 경력, 성과 등</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+                <%= f.check_box :privacy_posts,
+                                checked: @user.privacy_posts,
+                                class: "w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" %>
+                <div class="flex-1">
+                  <span class="text-sm font-medium">게시글</span>
+                  <p class="text-xs text-muted-foreground">작성한 게시글 목록</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+                <%= f.check_box :privacy_activity,
+                                checked: @user.privacy_activity,
+                                class: "w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" %>
+                <div class="flex-1">
+                  <span class="text-sm font-medium">활동</span>
+                  <p class="text-xs text-muted-foreground">댓글, 좋아요 등 활동 내역</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+                <%= f.check_box :privacy_experience,
+                                checked: @user.privacy_experience,
+                                class: "w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" %>
+                <div class="flex-1">
+                  <span class="text-sm font-medium">경력/프로젝트</span>
+                  <p class="text-xs text-muted-foreground">경력, 학력, 프로젝트 타임라인</p>
+                </div>
+              </label>
+            </div>
+
+            <p class="text-xs text-muted-foreground">
+              체크하지 않은 섹션은 다른 사용자에게 블러 처리됩니다
+            </p>
+          </div>
         </div>
 
         <%# 안내 메시지 %>
@@ -172,7 +227,8 @@
           <p class="font-medium text-foreground mb-1">익명 모드란?</p>
           <ul class="space-y-1">
             <li>- 게시글, 댓글, 채팅에서 닉네임으로 표시됩니다</li>
-            <li>- 다른 사용자가 내 프로필을 볼 때 제한된 정보만 보입니다</li>
+            <li>- 위에서 선택한 섹션만 다른 사용자에게 공개됩니다</li>
+            <li>- 비공개 섹션은 블러 처리되어 표시됩니다</li>
             <li>- 언제든지 실명 모드로 전환할 수 있습니다</li>
           </ul>
         </div>

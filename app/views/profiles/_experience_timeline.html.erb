@@ -1,7 +1,8 @@
 <%# Experience Timeline Partial %>
-<%# locals: user %>
+<%# locals: user, viewer %>
 
 <% if user.has_experiences? %>
+  <%= privacy_blur_wrapper(visible: user.experience_visible_to?(local_assigns[:viewer])) do %>
   <section class="p-6 rounded-xl bg-white/80 backdrop-blur-xl
                   border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
     <h3 class="flex items-center gap-2 text-sm font-bold text-[#2C2825] mb-4">
@@ -111,4 +112,5 @@
       </div>
     </div>
   </section>
+  <% end %>
 <% end %>

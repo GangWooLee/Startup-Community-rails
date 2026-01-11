@@ -1,8 +1,12 @@
 <%# 소개 탭 콘텐츠 Partial - Modern Maker Archive Style %>
-<%# locals: user %>
+<%# locals: user, viewer %>
 
 <%# relative z-0: 탭 헤더(z-40)보다 낮은 stacking context로 backdrop-blur 겹침 방지 %>
 <div class="space-y-5 relative z-0">
+
+  <%# 소개 섹션 프라이버시 블러 적용 %>
+  <%= privacy_blur_wrapper(visible: user.about_visible_to?(local_assigns[:viewer])) do %>
+  <div class="space-y-5">
 
   <%# 한 줄 소개 (Headline) - Featured Quote Style %>
   <% if user.bio.present? %>
@@ -197,9 +201,6 @@
     </section>
   <% end %>
 
-  <%# Experience Timeline (경력 & 경험) %>
-  <%= render "profiles/experience_timeline", user: user %>
-
   <%# 빈 상태 (정보가 없을 때) - Friendly Empty State %>
   <% if user.bio.blank? && user.skills_array.empty? && user.achievements_array.empty? %>
     <section class="p-8 rounded-xl bg-white/80 backdrop-blur-xl
@@ -230,5 +231,12 @@
       <% end %>
     </section>
   <% end %>
+
+  </div>
+  <% end %>
+  <%# 소개 섹션 프라이버시 블러 끝 %>
+
+  <%# Experience Timeline (경력 & 경험) - 별도 프라이버시 컨트롤 %>
+  <%= render "profiles/experience_timeline", user: user, viewer: local_assigns[:viewer] %>
 
 </div>

@@ -1,6 +1,7 @@
 <%# 활동 탭 콘텐츠 Partial - "이 사람이 살아있는 유저인가?" %>
-<%# locals: user %>
+<%# locals: user, viewer %>
 
+<%= privacy_blur_wrapper(visible: user.activity_visible_to?(local_assigns[:viewer])) do %>
 <%# relative z-0: 탭 헤더(z-40)보다 낮은 stacking context로 backdrop-blur 겹침 방지 %>
 <div class="space-y-4 relative z-0">
   <% activities = user.recent_activities(limit: 20) %>
@@ -21,3 +22,4 @@
         action_path: community_path %>
   <% end %>
 </div>
+<% end %>
