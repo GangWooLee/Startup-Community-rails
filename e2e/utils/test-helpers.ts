@@ -48,7 +48,7 @@ export async function createTestPost(
     userEmail?: string;
     postType?: 'community' | 'outsourcing';
   } = {}
-): Promise<{ id: number; title: string } | null> {
+): Promise<{ id: number; title: string; post_type: string } | null> {
   try {
     const response = await page.request.post('/test/create_post', {
       data: {
@@ -61,6 +61,7 @@ export async function createTestPost(
 
     if (response.ok()) {
       const data = await response.json();
+      console.log(`Test post created: ID=${data.post.id}, Title=${data.post.title}`);
       return data.post;
     } else {
       console.warn(`Failed to create test post: ${response.status()}`);
@@ -70,6 +71,28 @@ export async function createTestPost(
     console.log('Test post creation skipped (route not available)');
     return null;
   }
+}
+
+/**
+ * 테스트 게시글 생성 후 해당 페이지로 이동
+ * toggle-buttons 등 게시글 상세 페이지가 필요한 테스트용
+ */
+export async function createAndNavigateToTestPost(
+  page: Page,
+  options: {
+    title?: string;
+    content?: string;
+    userEmail?: string;
+    postType?: 'community' | 'outsourcing';
+  } = {}
+): Promise<{ id: number; title: string } | null> {
+  const post = await createTestPost(page, options);
+  if (post) {
+    await page.goto(`/posts/${post.id}`);
+    await waitForPageLoad(page);
+    return post;
+  }
+  return null;
 }
 
 /**

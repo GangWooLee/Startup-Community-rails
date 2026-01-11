@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginAs, waitForPageLoad, createTestPost } from '../utils/test-helpers';
+import { loginAs, waitForPageLoad, createTestPost, createAndNavigateToTestPost } from '../utils/test-helpers';
 
 /**
  * 토글 버튼 E2E 테스트
@@ -19,19 +19,12 @@ test.describe('좋아요 버튼', () => {
   test.beforeEach(async ({ page }) => {
     // 테스트 전 로그인
     await loginAs(page, 'test@example.com', 'password123');
-
-    // CI 환경에서 테스트 게시글 생성
-    if (process.env.CI) {
-      await createTestPost(page, { title: '좋아요 테스트 게시글' });
-    }
   });
 
   test('로그인 사용자 - 좋아요 클릭 시 아이콘 색상 변경', async ({ page }) => {
-    await page.goto('/community');
-
-    // 첫 번째 게시글 상세 페이지로 이동
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    // 테스트 게시글 생성 및 해당 페이지로 이동
+    const post = await createAndNavigateToTestPost(page, { title: '좋아요 테스트 게시글' });
+    expect(post).not.toBeNull();
 
     // 좋아요 버튼 찾기
     const likeBtn = page.locator('[data-controller="like-button"]').first();
@@ -56,9 +49,8 @@ test.describe('좋아요 버튼', () => {
   });
 
   test('좋아요 클릭 시 카운트 업데이트', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '좋아요 카운트 테스트' });
+    expect(post).not.toBeNull();
 
     const likeBtn = page.locator('[data-controller="like-button"]').first();
     const countTarget = likeBtn.locator('[data-like-button-target="count"]');
@@ -80,13 +72,9 @@ test.describe('좋아요 버튼', () => {
   });
 
   test('비로그인 사용자 - 게시글 접근 시 로그인/랜딩 페이지로 리다이렉트', async ({ page }) => {
-    // 먼저 로그인 후 게시글 상세 페이지로 이동
-    await page.goto('/community');
-    await waitForPageLoad(page);
-
-    // 게시글 상세로 이동
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    // 테스트 게시글 생성 및 해당 페이지로 이동
+    const post = await createAndNavigateToTestPost(page, { title: '비로그인 접근 테스트' });
+    expect(post).not.toBeNull();
 
     // 현재 URL 저장 (게시글 상세 페이지)
     const postUrl = page.url();
@@ -109,9 +97,8 @@ test.describe('좋아요 버튼', () => {
   });
 
   test('좋아요 후 새로고침 - 상태 유지', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '좋아요 상태 유지 테스트' });
+    expect(post).not.toBeNull();
 
     const likeBtn = page.locator('[data-controller="like-button"]').first();
 
@@ -139,9 +126,8 @@ test.describe('좋아요 버튼', () => {
   });
 
   test('빠른 연속 클릭 - 정상 토글', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '연속 클릭 테스트' });
+    expect(post).not.toBeNull();
 
     const likeBtn = page.locator('[data-controller="like-button"]').first();
 
@@ -166,17 +152,11 @@ test.describe('좋아요 버튼', () => {
 test.describe('북마크 버튼', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
-
-    // CI 환경에서 테스트 게시글 생성
-    if (process.env.CI) {
-      await createTestPost(page, { title: '북마크 테스트 게시글' });
-    }
   });
 
   test('로그인 사용자 - 북마크 클릭 시 아이콘 색상 변경', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '북마크 색상 테스트' });
+    expect(post).not.toBeNull();
 
     const bookmarkBtn = page.locator('[data-controller="bookmark-button"]').first();
     const iconTarget = bookmarkBtn.locator('[data-bookmark-button-target="icon"]');
@@ -194,10 +174,9 @@ test.describe('북마크 버튼', () => {
   });
 
   test('비로그인 사용자 - 게시글 접근 시 로그인/랜딩 페이지로 리다이렉트', async ({ page }) => {
-    // 먼저 로그인 후 게시글 상세 페이지로 이동
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    // 테스트 게시글 생성 및 해당 페이지로 이동
+    const post = await createAndNavigateToTestPost(page, { title: '북마크 비로그인 테스트' });
+    expect(post).not.toBeNull();
 
     // 현재 URL 저장
     const postUrl = page.url();
@@ -220,12 +199,8 @@ test.describe('북마크 버튼', () => {
   });
 
   test('북마크 후 내 스크랩 목록에서 확인', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
-
-    // 현재 URL 저장
-    const postUrl = page.url();
+    const post = await createAndNavigateToTestPost(page, { title: '스크랩 목록 테스트' });
+    expect(post).not.toBeNull();
 
     // 북마크 클릭
     const bookmarkBtn = page.locator('[data-controller="bookmark-button"]').first();
@@ -245,10 +220,8 @@ test.describe('북마크 버튼', () => {
   });
 
   test('북마크 취소 후 목록에서 제거', async ({ page }) => {
-    // 먼저 북마크 추가
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '북마크 취소 테스트' });
+    expect(post).not.toBeNull();
 
     const bookmarkBtn = page.locator('[data-controller="bookmark-button"]').first();
     const iconTarget = bookmarkBtn.locator('[data-bookmark-button-target="icon"]');
@@ -273,18 +246,12 @@ test.describe('북마크 버튼', () => {
 test.describe('댓글 좋아요 버튼', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
-
-    // CI 환경에서 테스트 게시글 생성
-    if (process.env.CI) {
-      await createTestPost(page, { title: '댓글 좋아요 테스트 게시글' });
-    }
   });
 
   test('댓글 좋아요 클릭 시 아이콘 색상 변경', async ({ page }) => {
-    // 댓글이 있는 게시글로 이동
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    // 테스트 게시글 생성 및 해당 페이지로 이동 (댓글은 없지만 버튼 존재 확인용)
+    const post = await createAndNavigateToTestPost(page, { title: '댓글 좋아요 테스트' });
+    expect(post).not.toBeNull();
 
     // 댓글 좋아요 버튼 찾기
     const commentLikeBtn = page.locator('[data-controller="comment-like-button"]').first();
@@ -307,10 +274,9 @@ test.describe('댓글 좋아요 버튼', () => {
   });
 
   test('비로그인 - 게시글 접근 시 로그인/랜딩 페이지로 리다이렉트', async ({ page }) => {
-    // 먼저 로그인 후 게시글 상세 페이지로 이동
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    // 테스트 게시글 생성 및 해당 페이지로 이동
+    const post = await createAndNavigateToTestPost(page, { title: '댓글 비로그인 테스트' });
+    expect(post).not.toBeNull();
 
     // 현재 URL 저장
     const postUrl = page.url();
@@ -333,9 +299,8 @@ test.describe('댓글 좋아요 버튼', () => {
   });
 
   test('여러 댓글 각각 좋아요 - 독립적 상태 관리', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '다중 댓글 좋아요 테스트' });
+    expect(post).not.toBeNull();
 
     const commentLikeBtns = page.locator('[data-controller="comment-like-button"]');
     const count = await commentLikeBtns.count();
@@ -371,17 +336,11 @@ test.describe('댓글 좋아요 버튼', () => {
 test.describe('애니메이션 검증', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'test@example.com', 'password123');
-
-    // CI 환경에서 테스트 게시글 생성
-    if (process.env.CI) {
-      await createTestPost(page, { title: '애니메이션 테스트 게시글' });
-    }
   });
 
   test('좋아요 클릭 시 scale 애니메이션 적용', async ({ page }) => {
-    await page.goto('/community');
-    await page.locator('main a[href^="/posts/"]').first().click();
-    await waitForPageLoad(page);
+    const post = await createAndNavigateToTestPost(page, { title: '애니메이션 테스트' });
+    expect(post).not.toBeNull();
 
     const likeBtn = page.locator('[data-controller="like-button"]').first();
     const iconTarget = likeBtn.locator('[data-like-button-target="icon"]');
