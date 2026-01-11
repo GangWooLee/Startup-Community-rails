@@ -42,19 +42,19 @@ module Ai
               potential: "높음",
               market_size: "약 5조원",
               trends: "성장 중",
-              competitors: ["경쟁사A", "경쟁사B"],
+              competitors: [ "경쟁사A", "경쟁사B" ],
               differentiation: "차별점"
             },
-            market_opportunities: ["기회1", "기회2"],
-            market_risks: ["리스크1", "리스크2"]
+            market_opportunities: [ "기회1", "기회2" ],
+            market_risks: [ "리스크1", "리스크2" ]
           }
 
           result = @validator.validate(input)
 
           assert_equal "높음", result[:market_analysis][:potential]
           assert_equal "약 5조원", result[:market_analysis][:market_size]
-          assert_equal ["기회1", "기회2"], result[:market_opportunities]
-          assert_equal ["리스크1", "리스크2"], result[:market_risks]
+          assert_equal [ "기회1", "기회2" ], result[:market_opportunities]
+          assert_equal [ "리스크1", "리스크2" ], result[:market_risks]
         end
 
         # ==========================================================================
@@ -89,7 +89,7 @@ module Ai
               potential: "높음"
               # market_size, trends, competitors, differentiation 누락
             },
-            market_opportunities: ["기회1"],
+            market_opportunities: [ "기회1" ],
             market_risks: []
           }
 

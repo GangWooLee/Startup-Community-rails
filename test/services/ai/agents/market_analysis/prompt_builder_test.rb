@@ -22,9 +22,9 @@ module Ai
             target_user: {
               target_users: {
                 primary: "20-30대 초기 창업자",
-                characteristics: ["IT 관심", "사이드프로젝트"]
+                characteristics: [ "IT 관심", "사이드프로젝트" ]
               },
-              user_pain_points: ["멘토 부족", "팀원 구하기 어려움"]
+              user_pain_points: [ "멘토 부족", "팀원 구하기 어려움" ]
             }
           }
         end

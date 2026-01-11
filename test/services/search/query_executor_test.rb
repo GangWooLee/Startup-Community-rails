@@ -49,7 +49,7 @@ module Search
       assert result.page >= 1
 
       result = executor.search_users_paginated(page: 9999, per_page: 10)
-      assert result.page <= [result.total_pages, 1].max
+      assert result.page <= [ result.total_pages, 1 ].max
     end
 
     # ==========================================================================

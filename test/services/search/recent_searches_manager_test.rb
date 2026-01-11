@@ -16,7 +16,7 @@ module Search
     test "save adds query to recent searches" do
       @manager.save("창업")
 
-      assert_equal ["창업"], @manager.all
+      assert_equal [ "창업" ], @manager.all
     end
 
     test "save moves duplicate to front" do
@@ -24,7 +24,7 @@ module Search
       @manager.save("개발자")
       @manager.save("창업")
 
-      assert_equal ["창업", "개발자"], @manager.all
+      assert_equal [ "창업", "개발자" ], @manager.all
     end
 
     test "save limits to MAX_RECENT_SEARCHES" do
@@ -66,14 +66,14 @@ module Search
       @manager.save("개발자")
       @manager.delete("창업")
 
-      assert_equal ["개발자"], @manager.all
+      assert_equal [ "개발자" ], @manager.all
     end
 
     test "delete does nothing for non-existent query" do
       @manager.save("창업")
       @manager.delete("존재하지않음")
 
-      assert_equal ["창업"], @manager.all
+      assert_equal [ "창업" ], @manager.all
     end
 
     # ==========================================================================

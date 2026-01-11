@@ -121,7 +121,7 @@ module Onboarding
     test "has_bonus? returns boolean for user" do
       checker = UsageLimitChecker.new(user: @user, cookies: @cookies)
 
-      assert_includes [true, false], checker.has_bonus?
+      assert_includes [ true, false ], checker.has_bonus?
     end
 
     test "has_bonus? returns false for guests" do
@@ -159,7 +159,7 @@ module Onboarding
     test "last_one? returns boolean" do
       checker = UsageLimitChecker.new(user: @user, cookies: @cookies)
 
-      assert_includes [true, false], checker.last_one?
+      assert_includes [ true, false ], checker.last_one?
     end
 
     test "last_one? returns true when guest has 1 remaining" do
