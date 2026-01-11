@@ -26,7 +26,7 @@
     <div class="rounded-xl border bg-card text-card-foreground shadow-xl p-8">
       <h2 class="text-xl font-semibold text-foreground mb-6 text-center">로그인</h2>
 
-      <%= form_with url: login_path, method: :post, local: true, class: "space-y-4" do |f| %>
+      <%= form_with url: login_path, method: :post, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
         <!-- Email Field -->
         <div class="space-y-2">
           <%= render_label name: "email", label: "이메일" %>
