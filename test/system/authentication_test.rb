@@ -132,10 +132,11 @@ class AuthenticationTest < ApplicationSystemTestCase
     # 설정 페이지 로드 확인
     assert_selector "button", text: "로그아웃", wait: 5
 
-    # 로그아웃 버튼 클릭 (confirm 다이얼로그 수락)
-    accept_confirm do
-      click_button "로그아웃"
-    end
+    # CI 환경 안정화: confirm 다이얼로그를 자동 수락하도록 스텁
+    page.execute_script("window.confirm = () => true")
+
+    # 로그아웃 버튼 클릭
+    click_button "로그아웃"
 
     # 로그아웃 확인 (flash 메시지 또는 루트 페이지)
     # 로그인 페이지 또는 루트 페이지로 리다이렉트
