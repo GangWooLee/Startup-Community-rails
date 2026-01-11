@@ -39,17 +39,23 @@ class PostsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit new_post_path
 
-    # placeholder로 찾거나 name으로 찾기
-    fill_in "post[title]", with: "테스트 게시글 제목"
-    fill_in "post[content]", with: "테스트 게시글 내용입니다."
+    # 명확한 셀렉터로 입력 (fill_in 대신 set 사용)
+    find("input[name='post[title]']", wait: 5).set("테스트 게시글 제목")
+    find("textarea[name='post[content]']").set("테스트 게시글 내용입니다.")
 
-    # 등록 버튼 클릭 (submit 버튼이 처음에 disabled이므로 기다림)
+    # 등록 버튼 활성화 및 클릭
     find("#submit-button", wait: 3)
     page.execute_script("document.getElementById('submit-button').disabled = false")
-    click_button "등록"
+
+    # JavaScript 클릭 (폼 제출 안정화)
+    submit_button = find("#submit-button")
+    page.execute_script("arguments[0].click()", submit_button)
+
+    # 폼 제출 완료 및 페이지 이동 대기
+    assert_no_current_path new_post_path, wait: 10
 
     # 작성 완료 확인
-    assert_text "테스트 게시글 제목"
+    assert_text "테스트 게시글 제목", wait: 5
   end
 
   test "cannot create post without title" do
@@ -57,7 +63,7 @@ class PostsTest < ApplicationSystemTestCase
     visit new_post_path
 
     # 제목 없이 내용만 입력
-    fill_in "post[content]", with: "내용만 입력"
+    find("textarea[name='post[content]']", wait: 5).set("내용만 입력")
 
     # 제출 버튼이 disabled 상태인지 확인
     assert_selector "#submit-button[disabled]"
@@ -79,16 +85,20 @@ class PostsTest < ApplicationSystemTestCase
     visit edit_post_path(@post)
 
     # 폼이 있는지 확인
-    assert_selector "form#post-form, form[action*='posts']", wait: 3
+    assert_selector "form#post-form, form[action*='posts']", wait: 5
 
-    fill_in "post[title]", with: "수정된 제목"
+    # 명확한 셀렉터로 입력
+    find("input[name='post[title]']", wait: 5).set("수정된 제목")
 
-    # 저장 버튼 클릭 (edit 페이지는 disabled가 아님)
-    click_button "저장"
+    # 저장 버튼 클릭 (JavaScript로 안정적으로)
+    save_button = find("button", text: "저장", wait: 5)
+    page.execute_script("arguments[0].click()", save_button)
 
-    # 수정 완료 확인 (제목 변경 또는 페이지 이동)
-    sleep 0.5
-    assert page.has_text?("수정된 제목") || !page.has_current_path?(edit_post_path(@post))
+    # 폼 제출 완료 및 페이지 이동 대기
+    assert_no_current_path edit_post_path(@post), wait: 10
+
+    # 수정 완료 확인 (게시글 상세 페이지에서)
+    assert_text "수정된 제목", wait: 5
   end
 
   test "cannot edit other users post" do
@@ -190,20 +200,26 @@ class PostsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit new_post_path(type: "outsourcing")
 
-    fill_in "post[title]", with: "Rails 개발자 구합니다"
-    fill_in "post[content]", with: "풀스택 개발자를 찾고 있습니다."
+    # 명확한 셀렉터로 입력
+    find("input[name='post[title]']", wait: 5).set("Rails 개발자 구합니다")
+    find("textarea[name='post[content]']").set("풀스택 개발자를 찾고 있습니다.")
 
     # 서비스 분야 선택 (외주 필수 필드)
-    if page.has_select?("post[service_type]")
+    if page.has_select?("post[service_type]", wait: 2)
       select "개발", from: "post[service_type]"
     end
 
-    # 등록 버튼 활성화 및 클릭
+    # 등록 버튼 활성화 및 클릭 (JavaScript로 안정적으로)
     find("#submit-button", wait: 3)
     page.execute_script("document.getElementById('submit-button').disabled = false")
-    click_button "등록"
+
+    submit_button = find("#submit-button")
+    page.execute_script("arguments[0].click()", submit_button)
+
+    # 폼 제출 완료 및 페이지 이동 대기
+    assert_no_current_path new_post_path(type: "outsourcing"), wait: 10
 
     # 작성 완료 확인
-    assert_text "Rails 개발자 구합니다"
+    assert_text "Rails 개발자 구합니다", wait: 5
   end
 end
