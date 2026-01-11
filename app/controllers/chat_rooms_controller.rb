@@ -17,14 +17,23 @@ class ChatRoomsController < ApplicationController
     if query.present? && query.length >= 1
       @users = User.where.not(id: current_user.id)
                    .with_attached_avatar  # ✅ 최적화: Active Storage N+1 방지
-                   .where("name LIKE ? OR email LIKE ?", "%#{query}%", "%#{query}%")
+                   .where("name LIKE ? OR email LIKE ? OR nickname LIKE ?",
+                          "%#{query}%", "%#{query}%", "%#{query}%")
                    .limit(10)
     else
       @users = []
     end
 
-    # JSON 응답만 지원 (JavaScript fetch에서 사용)
-    render json: @users.map { |u| { id: u.id, name: u.name, role_title: u.role_title, avatar_url: u.avatar.attached? ? url_for(u.avatar) : nil } }
+    # JSON 응답 - 익명 모드 지원
+    render json: @users.map { |u|
+      {
+        id: u.id,
+        name: u.display_name,  # 익명 모드면 닉네임, 아니면 실명
+        role_title: u.is_anonymous? ? nil : u.role_title,  # 익명이면 역할 숨김
+        avatar_url: avatar_url_for_search(u),  # 익명이면 익명 아바타
+        is_anonymous: u.is_anonymous?
+      }
+    }
   end
 
   def index
@@ -236,6 +245,17 @@ class ChatRoomsController < ApplicationController
 
   def set_chat_room
     @chat_room = ChatRoom.find(params[:id])
+  end
+
+  # 검색 결과용 아바타 URL (익명 모드 지원)
+  def avatar_url_for_search(user)
+    if user.using_anonymous_avatar?
+      "/anonymous#{user.avatar_type + 1}-.png"
+    elsif user.avatar.attached?
+      url_for(user.avatar)
+    else
+      nil
+    end
   end
 
   def prepare_chat_list_data
