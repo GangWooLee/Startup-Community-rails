@@ -12,6 +12,7 @@ module Ai
       1. 아이디어에서 명확하지 않은 부분을 파악하는 질문
       2. 구체적이고 답변하기 쉬운 질문 (open-ended 지양)
       3. 타겟 사용자, 해결하려는 문제, 차별화 포인트 중심
+      4. 각 질문에 사용자가 클릭해서 선택할 수 있는 예시 2-3개 제공
 
       ## 출력 형식 (JSON)
       반드시 아래 형식의 JSON으로만 응답하세요:
@@ -21,19 +22,22 @@ module Ai
           {
             "id": "target",
             "question": "주요 타겟 사용자는 누구인가요?",
-            "placeholder": "예: 20-30대 직장인, 대학생 등",
+            "placeholder": "타겟 사용자를 입력해주세요",
+            "examples": ["20-30대 직장인", "대학생", "1인 가구"],
             "required": true
           },
           {
             "id": "problem",
             "question": "해결하려는 가장 큰 문제는 무엇인가요?",
-            "placeholder": "현재 겪고 있는 불편함이나 니즈",
+            "placeholder": "현재 겪고 있는 불편함을 입력해주세요",
+            "examples": ["시간 부족", "비용 문제", "정보 부족"],
             "required": true
           },
           {
             "id": "differentiator",
             "question": "기존 솔루션과 다른 점은 무엇인가요?",
-            "placeholder": "차별화 포인트",
+            "placeholder": "차별화 포인트를 입력해주세요",
+            "examples": ["AI 자동화", "저렴한 가격", "간편한 사용"],
             "required": false
           }
         ]
@@ -45,6 +49,13 @@ module Ai
       - 아이디어에서 이미 언급된 내용은 질문하지 않음
       - 한국어로 친근하게 질문
       - 각 질문의 id는 고유해야 함
+      - examples는 아이디어와 관련된 구체적이고 짧은 예시 2-3개 (버튼으로 표시됨)
+
+      ## examples 생성 규칙 (중요!)
+      - examples는 실제로 유의미한 구체적 답변 예시여야 함
+      - 아이디어에 맞는 맞춤형 예시 생성 (예: 음식 배달 앱이면 "직장인 점심", "야식 주문" 등)
+      - 절대 금지 예시: "직접 입력", "기타", "없음", "해당 없음", "모름", "선택 안함"
+      - 메타적인 선택지(사용자가 직접 하는 행동)가 아닌, 실제 콘텐츠 답변이어야 함
     PROMPT
 
     def initialize(idea)
@@ -110,11 +121,19 @@ module Ai
           id: q[:id] || "question_#{i + 1}",
           question: q[:question] || "추가 정보를 알려주세요",
           placeholder: q[:placeholder] || "",
+          examples: normalize_examples(q[:examples]),
           required: q[:required] != false # 기본값 true
         }
       end
 
       { questions: normalized.take(3) } # 최대 3개
+    end
+
+    # 예시 배열 정규화 (2-3개로 제한, 문자열만 허용)
+    def normalize_examples(examples)
+      return [] unless examples.is_a?(Array)
+
+      examples.map(&:to_s).reject(&:blank?).take(3)
     end
 
     def fallback_questions
@@ -123,19 +142,22 @@ module Ai
           {
             id: "target",
             question: "주요 타겟 사용자는 누구인가요?",
-            placeholder: "예: 20-30대 직장인, 대학생, 주부 등",
+            placeholder: "타겟 사용자를 입력해주세요",
+            examples: [ "20-30대 직장인", "대학생", "1인 가구" ],
             required: true
           },
           {
             id: "problem",
             question: "해결하려는 가장 큰 문제는 무엇인가요?",
-            placeholder: "현재 겪고 있는 불편함이나 해소되지 않는 니즈",
+            placeholder: "현재 겪고 있는 불편함을 입력해주세요",
+            examples: [ "시간 부족", "비용 문제", "정보 접근성" ],
             required: true
           },
           {
             id: "differentiator",
             question: "기존 서비스와 다른 점은 무엇인가요? (선택)",
-            placeholder: "차별화 포인트가 있다면 알려주세요",
+            placeholder: "차별화 포인트를 입력해주세요",
+            examples: [ "AI 자동화", "커뮤니티 기반", "저렴한 가격" ],
             required: false
           }
         ]

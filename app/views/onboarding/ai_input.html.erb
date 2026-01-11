@@ -223,6 +223,121 @@
     animation: subtle-bounce 2s ease-in-out infinite;
   }
 
+  /* =========================================================================
+     Phase 13: Example Chip Buttons for Follow-up Questions
+     ========================================================================= */
+
+  /* Example Chip - Pill-shaped clickable example button */
+  .example-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(44, 40, 37, 0.08);
+    color: #2C2825;
+    border: 1px solid rgba(44, 40, 37, 0.15);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .example-chip:hover {
+    background: rgba(44, 40, 37, 0.15);
+    border-color: rgba(44, 40, 37, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .example-chip:active {
+    transform: translateY(0);
+    background: rgba(44, 40, 37, 0.2);
+  }
+
+  /* Selected state - inverted colors */
+  .example-chip.selected {
+    background: #2C2825;
+    color: white;
+    border-color: #2C2825;
+  }
+
+  .example-chip.selected:hover {
+    background: #1a1917;
+    border-color: #1a1917;
+  }
+
+  /* =========================================================================
+     Phase 14: Tag Input UI for Follow-up Questions
+     - Tags move INTO input container when selected
+     - × button to remove tags
+     - Works alongside text input
+     ========================================================================= */
+
+  /* Tag Input Container - wraps tags + text input */
+  .tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    width: 100%;
+  }
+
+  /* Selected Tag Chip - inside input container */
+  .selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #2C2825;
+    color: white;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: tag-pop-in 0.2s ease-out;
+  }
+
+  @keyframes tag-pop-in {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Tag Remove Button (×) */
+  .tag-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .tag-remove-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Tag input text field - grows to fill remaining space */
+  .tag-input-field {
+    flex: 1;
+    min-width: 100px;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 18px;
+    font-weight: 500;
+    color: #2C2825;
+  }
+
+  .tag-input-field::placeholder {
+    color: #d6d3d1;
+  }
+
   /* Accessibility */
   @media (prefers-reduced-motion: reduce) {
     .macos-window-premium,
@@ -231,7 +346,8 @@
     .animate-window-emerge,
     .animate-fade-in-up,
     .animate-breathing,
-    .animate-subtle-bounce {
+    .animate-subtle-bounce,
+    .example-chip {
       transition: none !important;
       animation: none !important;
     }

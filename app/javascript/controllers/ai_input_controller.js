@@ -271,10 +271,28 @@ export default class extends Controller {
       avatarImg.className = "w-full h-full object-contain"
       avatar.appendChild(avatarImg)
 
-      // Question bubble (right side)
+      // Question bubble (right side) with inline required/optional indicator
       const bubble = document.createElement("div")
       bubble.className = "px-5 py-3 bg-stone-100 rounded-2xl rounded-tl-md text-base text-[#2C2825] max-w-[85%]"
-      bubble.textContent = question.question
+
+      // Question text
+      const questionText = document.createElement("span")
+      questionText.textContent = question.question
+      bubble.appendChild(questionText)
+
+      // Inline required/optional indicator
+      if (question.required) {
+        const asterisk = document.createElement("span")
+        asterisk.className = "text-red-400 ml-1"
+        asterisk.textContent = "*"
+        asterisk.setAttribute("aria-label", "필수 입력")
+        bubble.appendChild(asterisk)
+      } else {
+        const optionalBadge = document.createElement("span")
+        optionalBadge.className = "text-stone-400 text-sm ml-2"
+        optionalBadge.textContent = "(선택)"
+        bubble.appendChild(optionalBadge)
+      }
 
       aiBubble.appendChild(avatar)
       aiBubble.appendChild(bubble)
@@ -286,35 +304,140 @@ export default class extends Controller {
       card.style.opacity = "0"
       card.dataset.questionIndex = index
 
-      // Create input with Premium style
+      // Create tag input container (tags + text input in one area)
+      const tagInputContainer = document.createElement("div")
+      tagInputContainer.className = "tag-input-container"
+      tagInputContainer.dataset.questionId = question.id
+
+      // Create text input that grows to fill space
       const input = document.createElement("input")
       input.type = "text"
       input.dataset.questionId = question.id
       input.dataset.required = question.required
       input.placeholder = question.placeholder || "답변을 입력해주세요..."
-      input.className = "w-full bg-transparent border-0 text-lg font-medium text-[#2C2825] placeholder:text-stone-300 focus:outline-none"
+      input.className = "tag-input-field"
       input.dataset.action = "input->ai-input#updateAnswers"
 
-      // Add required/optional indicator (Premium style)
-      const indicator = document.createElement("div")
-      indicator.className = "flex items-center justify-between mt-3 pt-3 border-t border-stone-100"
+      tagInputContainer.appendChild(input)
+      card.appendChild(tagInputContainer)
 
-      const statusSpan = document.createElement("span")
-      statusSpan.className = "text-sm font-medium"
-      if (question.required) {
-        statusSpan.className += " text-[#2C2825]"
-        statusSpan.textContent = "필수"
-      } else {
-        statusSpan.className += " text-stone-400"
-        statusSpan.textContent = "선택"
+      // Add example buttons if examples exist
+      if (question.examples && question.examples.length > 0) {
+        const examplesContainer = document.createElement("div")
+        examplesContainer.className = "flex flex-wrap items-center gap-2 mt-3"
+        examplesContainer.dataset.examplesForQuestion = question.id
+
+        // "예시" label
+        const label = document.createElement("span")
+        label.className = "text-xs text-stone-400 mr-1"
+        label.textContent = "예시"
+        examplesContainer.appendChild(label)
+
+        // Example buttons
+        question.examples.forEach(example => {
+          const btn = document.createElement("button")
+          btn.type = "button"
+          btn.className = "example-chip"
+          btn.textContent = example
+          btn.dataset.questionId = question.id
+          btn.dataset.example = example
+          btn.addEventListener("click", (e) => this.selectExample(e.target))
+          examplesContainer.appendChild(btn)
+        })
+
+        card.appendChild(examplesContainer)
       }
-      indicator.appendChild(statusSpan)
 
-      // Assemble card
-      card.appendChild(input)
-      card.appendChild(indicator)
+      // Assemble card (indicator removed - now inline in question bubble)
       container.appendChild(card)
     })
+  }
+
+  // ========== Tag Input System (Phase 14) ==========
+
+  /**
+   * Select an example and move it as a tag into the input container
+   * @param {HTMLElement} btn - The clicked example button
+   */
+  selectExample(btn) {
+    const questionId = btn.dataset.questionId
+    const example = btn.dataset.example
+
+    // Hide the example button
+    btn.style.display = "none"
+
+    // Find the tag input container for this question
+    const tagInputContainer = this.questionsContainerTarget.querySelector(
+      `.tag-input-container[data-question-id="${questionId}"]`
+    )
+    if (!tagInputContainer) return
+
+    // Create and insert tag before the text input
+    const tag = this.createTag(example, questionId)
+    const input = tagInputContainer.querySelector("input")
+    tagInputContainer.insertBefore(tag, input)
+
+    // Update answers
+    this.updateAnswers()
+  }
+
+  /**
+   * Remove a tag and restore the example button
+   * @param {HTMLElement} tag - The tag element to remove
+   */
+  removeTag(tag) {
+    const questionId = tag.dataset.questionId
+    const example = tag.dataset.example
+
+    // Remove the tag
+    tag.remove()
+
+    // Find and show the original example button
+    const examplesContainer = this.questionsContainerTarget.querySelector(
+      `[data-examples-for-question="${questionId}"]`
+    )
+    if (examplesContainer) {
+      const btn = examplesContainer.querySelector(
+        `.example-chip[data-example="${CSS.escape(example)}"]`
+      )
+      if (btn) {
+        btn.style.display = ""
+      }
+    }
+
+    // Update answers
+    this.updateAnswers()
+  }
+
+  /**
+   * Create a tag element with remove button
+   * @param {string} text - The tag text
+   * @param {string} questionId - The question ID this tag belongs to
+   * @returns {HTMLElement} The tag element
+   */
+  createTag(text, questionId) {
+    const tag = document.createElement("span")
+    tag.className = "selected-tag"
+    tag.dataset.questionId = questionId
+    tag.dataset.example = text
+
+    // Text node (using textContent for XSS safety)
+    const textNode = document.createTextNode(text)
+    tag.appendChild(textNode)
+
+    // Remove button (×)
+    const removeBtn = document.createElement("button")
+    removeBtn.type = "button"
+    removeBtn.className = "tag-remove-btn"
+    removeBtn.textContent = "×"
+    removeBtn.setAttribute("aria-label", `${text} 제거`)
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation()
+      this.removeTag(tag)
+    })
+
+    tag.appendChild(removeBtn)
+    return tag
   }
 
   updateAnswers() {
@@ -323,12 +446,27 @@ export default class extends Controller {
 
     inputs.forEach(input => {
       const id = input.dataset.questionId
-      const value = input.value.trim()
       const required = input.dataset.required === "true"
 
-      this.answers[id] = value
+      // Collect selected tags for this question
+      const tagInputContainer = input.closest(".tag-input-container")
+      const selectedTags = tagInputContainer
+        ? Array.from(tagInputContainer.querySelectorAll(".selected-tag"))
+            .map(tag => tag.dataset.example)
+        : []
 
-      if (required && !value) {
+      // Combine tags with text input
+      const textValue = input.value.trim()
+      const allValues = [...selectedTags]
+      if (textValue) {
+        allValues.push(textValue)
+      }
+
+      // Join all values with comma
+      const combinedValue = allValues.join(", ")
+      this.answers[id] = combinedValue
+
+      if (required && !combinedValue) {
         allRequiredFilled = false
       }
     })
