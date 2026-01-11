@@ -25,10 +25,24 @@ class TestController < ApplicationController
     password = params[:password] || "password123"
     name = params[:name] || "테스트 유저"
 
-    # 기존 사용자와 관련 데이터 삭제 후 재생성
-    User.find_by(email: email)&.destroy
-    EmailVerification.where(email: email).destroy_all
+    # 멱등성(idempotent): 사용자가 이미 존재하면 기존 사용자 반환
+    existing_user = User.find_by(email: email)
+    if existing_user
+      # 이메일 인증이 없으면 추가
+      ensure_email_verified(email)
 
+      return render json: {
+        success: true,
+        message: "User already exists",
+        user: {
+          id: existing_user.id,
+          email: existing_user.email,
+          name: existing_user.name
+        }
+      }, status: :ok
+    end
+
+    # 새 사용자 생성
     user = User.create!(
       email: email,
       password: password,
@@ -36,13 +50,7 @@ class TestController < ApplicationController
     )
 
     # 이메일 인증 완료 상태로 EmailVerification 생성
-    # 테스트 사용자가 로그인할 수 있도록 verified: true로 설정
-    EmailVerification.create!(
-      email: email,
-      code: EmailVerification.generate_code,
-      expires_at: 1.year.from_now,
-      verified: true
-    )
+    ensure_email_verified(email)
 
     render json: {
       success: true,
@@ -116,5 +124,21 @@ class TestController < ApplicationController
     return if Rails.env.test? || Rails.env.development?
 
     render json: { error: "Not allowed in #{Rails.env} environment" }, status: :not_found
+  end
+
+  # 이메일 인증이 없으면 verified 상태로 생성
+  def ensure_email_verified(email)
+    return if EmailVerification.exists?(email: email, verified: true)
+
+    # 기존 미인증 레코드 삭제
+    EmailVerification.where(email: email).destroy_all
+
+    # verified 상태로 생성
+    EmailVerification.create!(
+      email: email,
+      code: EmailVerification.generate_code,
+      expires_at: 1.year.from_now,
+      verified: true
+    )
   end
 end

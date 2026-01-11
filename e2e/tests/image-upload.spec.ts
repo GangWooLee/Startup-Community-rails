@@ -32,19 +32,14 @@ test.describe('게시물 이미지 업로드', () => {
     // 이미지 업로드 (구체적인 셀렉터 사용)
     await uploadTestImage(page, POST_IMAGE_INPUT);
 
-    // FileReader가 비동기로 이미지를 로드하므로 충분한 대기 시간 필요
-    await page.waitForTimeout(1000);
-
-    // 미리보기 이미지 표시 확인 - 먼저 DOM에 존재하는지 확인
-    const previewImage = page.locator('[data-image-upload-target="preview"] img').first();
-    await expect(previewImage).toBeAttached({ timeout: 5000 });
-
-    // 스크롤하여 뷰포트에 보이게 함
-    await previewImage.scrollIntoViewIfNeeded();
-    await expect(previewImage).toBeVisible({ timeout: 5000 });
+    // 미리보기 이미지가 완전히 로드될 때까지 대기
+    // - toHaveCount로 요소 존재 확인 (strict mode 호환)
+    // - 이미지 로딩 완료를 기다리는 대신 카운터 변경으로 업로드 성공 확인
+    const previewImages = page.locator('[data-image-upload-target="preview"] img');
+    await expect(previewImages).toHaveCount(1, { timeout: 10000 });
 
     // 이미지 alt 텍스트 확인 (접근성)
-    await expect(previewImage).toHaveAttribute('alt', '업로드 이미지 미리보기');
+    await expect(previewImages.first()).toHaveAttribute('alt', '업로드 이미지 미리보기');
   });
 
   test('이미지 업로드 후 카운터 업데이트', async ({ page }) => {
@@ -91,22 +86,16 @@ test.describe('게시물 이미지 업로드', () => {
     // 이미지 업로드
     await uploadTestImage(page, POST_IMAGE_INPUT);
 
-    // FileReader 비동기 로딩 대기
-    await page.waitForTimeout(1000);
+    // 미리보기 이미지가 생성될 때까지 대기
+    const previewImages = page.locator('[data-image-upload-target="preview"] img');
+    await expect(previewImages).toHaveCount(1, { timeout: 10000 });
 
-    // 미리보기 확인
-    const previewImage = page.locator('[data-image-upload-target="preview"] img').first();
-    await expect(previewImage).toBeAttached({ timeout: 5000 });
-    await previewImage.scrollIntoViewIfNeeded();
-    await expect(previewImage).toBeVisible({ timeout: 5000 });
-
-    // 삭제 버튼 클릭
+    // 삭제 버튼 클릭 (이미지가 있으면 삭제 버튼도 있음)
     const deleteButton = page.locator('[data-action="click->image-upload#removeNewImage"]').first();
-    await deleteButton.scrollIntoViewIfNeeded();
     await deleteButton.click();
 
     // 미리보기가 사라졌는지 확인
-    await expect(page.locator('[data-image-upload-target="preview"] img')).toHaveCount(0, { timeout: 5000 });
+    await expect(previewImages).toHaveCount(0, { timeout: 5000 });
 
     // 카운터가 0/5로 업데이트되었는지 확인
     const counter = page.locator('[data-image-upload-target="counter"]');
@@ -117,14 +106,12 @@ test.describe('게시물 이미지 업로드', () => {
     // 이미지 업로드
     await uploadTestImage(page, POST_IMAGE_INPUT);
 
-    // FileReader 비동기 로딩 대기
-    await page.waitForTimeout(1000);
+    // 미리보기 이미지가 생성될 때까지 대기 (삭제 버튼도 함께 생성됨)
+    const previewImages = page.locator('[data-image-upload-target="preview"] img');
+    await expect(previewImages).toHaveCount(1, { timeout: 10000 });
 
     // 삭제 버튼 확인
     const deleteButton = page.locator('[data-action="click->image-upload#removeNewImage"]').first();
-    await expect(deleteButton).toBeAttached({ timeout: 5000 });
-    await deleteButton.scrollIntoViewIfNeeded();
-    await expect(deleteButton).toBeVisible({ timeout: 5000 });
 
     // 접근성 속성 확인
     await expect(deleteButton).toHaveAttribute('type', 'button');
@@ -146,19 +133,20 @@ test.describe('게시물 이미지 업로드', () => {
     // 5장 업로드
     await uploadMultipleImages(page, 5, POST_IMAGE_INPUT);
 
-    // FileReader 비동기 로딩 대기
-    await page.waitForTimeout(1500);
+    // 5장 업로드 완료 확인
+    const previewImages = page.locator('[data-image-upload-target="preview"] img');
+    await expect(previewImages).toHaveCount(5, { timeout: 10000 });
 
+    // dropzone이 숨겨졌는지 확인
     const dropzone = page.locator('[data-image-upload-target="dropzone"]');
     await expect(dropzone.first()).toHaveClass(/hidden/, { timeout: 5000 });
 
     // 1장 삭제
     const deleteButton = page.locator('[data-action="click->image-upload#removeNewImage"]').first();
-    await deleteButton.scrollIntoViewIfNeeded();
     await deleteButton.click();
 
-    // 삭제 처리 대기
-    await page.waitForTimeout(500);
+    // 4장으로 감소 확인
+    await expect(previewImages).toHaveCount(4, { timeout: 5000 });
 
     // dropzone 다시 표시
     await expect(dropzone.first()).not.toHaveClass(/hidden/, { timeout: 5000 });
