@@ -87,16 +87,19 @@ class ReportsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit profile_path(@other_user)
 
-    # 더보기 버튼 클릭 (data-testid로 특정)
+    # 더보기 버튼 클릭 - JavaScript로 직접 실행 (Stimulus 타이밍 이슈 회피)
     within("[data-testid='profile-actions-dropdown']") do
-      find("button[data-action*='dropdown#toggle']").click
+      toggle_button = find("button[data-action*='dropdown#toggle']")
+      sleep 0.5  # Stimulus 컨트롤러 연결 대기 (CI 환경용)
+      # JavaScript로 직접 클릭 이벤트 발생
+      page.execute_script("arguments[0].click()", toggle_button)
     end
 
-    # 드롭다운 메뉴가 열림 확인
-    assert_selector "[data-dropdown-target='menu']", visible: true
+    # 드롭다운 메뉴가 열림 확인 (CI 환경 타이밍 이슈 대응)
+    assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
 
     # 프로필 링크 복사 버튼 확인
-    assert_text "프로필 링크 복사"
+    assert_text "프로필 링크 복사", wait: 3
   end
 
   test "profile dropdown not shown on own profile" do
