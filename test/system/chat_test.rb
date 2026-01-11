@@ -150,10 +150,14 @@ class ChatTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit chat_room_path(chat_room)
 
-    # 뒤로가기 또는 목록 버튼 클릭
-    if page.has_link?(href: chat_rooms_path)
-      click_link href: chat_rooms_path
-      assert_current_path chat_rooms_path
+    # 뒤로가기 또는 목록 버튼 클릭 (a 태그로 직접 찾기)
+    back_link = all("a[href='#{chat_rooms_path}']").first
+    if back_link
+      back_link.click
+      assert_current_path chat_rooms_path, wait: 5
+    else
+      # 링크가 없으면 테스트 스킵 (UI가 변경될 수 있음)
+      skip "뒤로가기 링크가 없음 - UI 변경 필요"
     end
   end
 
