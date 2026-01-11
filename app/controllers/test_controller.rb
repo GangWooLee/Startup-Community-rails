@@ -25,14 +25,23 @@ class TestController < ApplicationController
     password = params[:password] || "password123"
     name = params[:name] || "테스트 유저"
 
-    # 기존 사용자가 있으면 삭제 후 재생성
+    # 기존 사용자와 관련 데이터 삭제 후 재생성
     User.find_by(email: email)&.destroy
+    EmailVerification.where(email: email).destroy_all
 
     user = User.create!(
       email: email,
       password: password,
-      name: name,
-      email_verified_at: Time.current # 이메일 인증 완료 상태로 생성
+      name: name
+    )
+
+    # 이메일 인증 완료 상태로 EmailVerification 생성
+    # 테스트 사용자가 로그인할 수 있도록 verified: true로 설정
+    EmailVerification.create!(
+      email: email,
+      code: EmailVerification.generate_code,
+      expires_at: 1.year.from_now,
+      verified: true
     )
 
     render json: {
