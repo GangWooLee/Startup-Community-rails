@@ -18,7 +18,12 @@ import { waitForPageLoad } from '../utils/test-helpers';
 // 테스트용 아이디어
 const TEST_IDEA = '대학생들이 스터디 그룹을 만들고 관리할 수 있는 앱';
 
-test.describe('AI 아이디어 분석 - 태그 입력 UI', () => {
+/**
+ * @ai - LLM API 호출이 필요한 테스트
+ * CI에서는 이 태그가 붙은 테스트를 제외합니다.
+ * 실행: npx playwright test --grep-invert @ai
+ */
+test.describe('@ai AI 아이디어 분석 - 태그 입력 UI', () => {
   // LLM API 호출 대기 시간 (최대 30초)
   const LLM_TIMEOUT = 30000;
 
@@ -242,7 +247,7 @@ test.describe('AI 아이디어 분석 - 태그 입력 UI', () => {
   });
 });
 
-test.describe('AI 분석 플로우 통합 테스트', () => {
+test.describe('@ai AI 분석 플로우 통합 테스트', () => {
   test.skip('전체 플로우: 아이디어 입력 -> 질문 응답 -> 분석 결과', async ({ page }) => {
     // 이 테스트는 실제 LLM API 호출이 필요하므로 skip 처리
     // 필요시 수동으로 실행: npx playwright test ai-tag-input.spec.ts --grep "전체 플로우" --project=chromium
