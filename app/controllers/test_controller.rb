@@ -60,7 +60,8 @@ class TestController < ApplicationController
         name: user.name
       }
     }, status: :created
-  rescue ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
+    # 모든 예외를 JSON으로 반환 (406 방지)
     render json: {
       success: false,
       error: e.message
@@ -127,18 +128,23 @@ class TestController < ApplicationController
   end
 
   # 이메일 인증이 없으면 verified 상태로 생성
+  # 트랜잭션 락으로 경쟁 상태 방지
   def ensure_email_verified(email)
-    return if EmailVerification.exists?(email: email, verified: true)
+    EmailVerification.transaction do
+      return if EmailVerification.exists?(email: email, verified: true)
 
-    # 기존 미인증 레코드 삭제
-    EmailVerification.where(email: email).destroy_all
+      # 기존 미인증 레코드 삭제
+      EmailVerification.where(email: email).delete_all
 
-    # verified 상태로 생성
-    EmailVerification.create!(
-      email: email,
-      code: EmailVerification.generate_code,
-      expires_at: 1.year.from_now,
-      verified: true
-    )
+      # verified 상태로 생성
+      EmailVerification.create!(
+        email: email,
+        code: EmailVerification.generate_code,
+        expires_at: 1.year.from_now,
+        verified: true
+      )
+    end
+  rescue ActiveRecord::RecordNotUnique
+    # 동시 요청 시 무시 (이미 생성됨)
   end
 end

@@ -90,9 +90,13 @@ test.describe('게시물 이미지 업로드', () => {
     const previewImages = page.locator('[data-image-upload-target="preview"] img');
     await expect(previewImages).toHaveCount(1, { timeout: 10000 });
 
-    // 삭제 버튼 클릭 (이미지가 있으면 삭제 버튼도 있음)
+    // Stimulus 컨트롤러 초기화 완료 대기 (약간의 지연)
+    await page.waitForTimeout(500);
+
+    // 삭제 버튼 클릭 (waitFor로 버튼 준비 상태 확인 + force:true로 강제 클릭)
     const deleteButton = page.locator('[data-action="click->image-upload#removeNewImage"]').first();
-    await deleteButton.click();
+    await deleteButton.waitFor({ state: 'visible', timeout: 5000 });
+    await deleteButton.click({ force: true });
 
     // 미리보기가 사라졌는지 확인
     await expect(previewImages).toHaveCount(0, { timeout: 5000 });
@@ -141,9 +145,13 @@ test.describe('게시물 이미지 업로드', () => {
     const dropzone = page.locator('[data-image-upload-target="dropzone"]');
     await expect(dropzone.first()).toHaveClass(/hidden/, { timeout: 5000 });
 
-    // 1장 삭제
+    // Stimulus 컨트롤러 초기화 완료 대기 (약간의 지연)
+    await page.waitForTimeout(500);
+
+    // 1장 삭제 (waitFor + force:true)
     const deleteButton = page.locator('[data-action="click->image-upload#removeNewImage"]').first();
-    await deleteButton.click();
+    await deleteButton.waitFor({ state: 'visible', timeout: 5000 });
+    await deleteButton.click({ force: true });
 
     // 4장으로 감소 확인
     await expect(previewImages).toHaveCount(4, { timeout: 5000 });

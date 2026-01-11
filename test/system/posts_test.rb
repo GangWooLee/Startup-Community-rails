@@ -87,17 +87,16 @@ class PostsTest < ApplicationSystemTestCase
     # 폼이 있는지 확인
     assert_selector "form#post-form, form[action*='posts']", wait: 5
 
-    # 명확한 셀렉터로 입력
-    find("input[name='post[title]']", wait: 5).set("수정된 제목")
+    # 제목 입력 (fill_in 사용 - 더 안정적)
+    fill_in "post[title]", with: "수정된 제목"
 
-    # 저장 버튼 클릭 (JavaScript로 안정적으로)
-    save_button = find("button", text: "저장", wait: 5)
-    page.execute_script("arguments[0].click()", save_button)
+    # 폼 제출 (click_button 직접 사용)
+    click_button "저장"
 
-    # 폼 제출 완료 및 페이지 이동 대기
-    assert_no_current_path edit_post_path(@post), wait: 10
+    # Turbo 리다이렉트 완료 대기 (게시글 상세 페이지로)
+    assert_current_path post_path(@post), wait: 10
 
-    # 수정 완료 확인 (게시글 상세 페이지에서)
+    # 수정 완료 확인
     assert_text "수정된 제목", wait: 5
   end
 
