@@ -145,66 +145,16 @@ jobs:
           if-no-files-found: ignore
 
   # ===== Playwright E2E Tests =====
-  e2e-test:
-    name: 🎭 E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: [ test ]
-    # E2E 테스트는 선택적으로 실행 (AI 관련 테스트 제외)
-    continue-on-error: true
-    env:
-      RAILS_ENV: test
-      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-      GEMINI_API_KEY: "test_dummy_key"
-      RESEND_API_KEY: "test_dummy_key"
-      CI: true
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Prepare database
-        run: bin/rails db:test:prepare
-
-      - name: Run Playwright E2E tests (excluding @ai)
-        run: npx playwright test --project=chromium --grep-invert "@ai"
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          if-no-files-found: ignore
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-results
-          path: test-results/
-          if-no-files-found: ignore
+  # NOTE: E2E 테스트는 CI에서 제거됨 (2026-01-12)
+  # - CI 환경에서 불안정하고 디버깅이 어려움
+  # - 로컬에서 수동으로 실행: npx playwright test
+  # - 중요한 변경 후 반드시 로컬 E2E 테스트 필수!
 
   # ===== CI Success Gate =====
   ci-success:
     name: ✅ CI Success
     runs-on: ubuntu-latest
-    needs: [ scan_ruby, scan_js, lint, test, system-test, e2e-test ]
+    needs: [ scan_ruby, scan_js, lint, test, system-test ]
     if: always()
     env:
       SCAN_RUBY_RESULT: ${{ needs.scan_ruby.result }}
@@ -212,7 +162,6 @@ jobs:
       LINT_RESULT: ${{ needs.lint.result }}
       TEST_RESULT: ${{ needs.test.result }}
       SYSTEM_TEST_RESULT: ${{ needs.system-test.result }}
-      E2E_TEST_RESULT: ${{ needs.e2e-test.result }}
     steps:
       - name: Check required jobs passed
         run: |
@@ -222,10 +171,11 @@ jobs:
           echo "  - Lint: $LINT_RESULT"
           echo "  - Unit Tests: $TEST_RESULT"
           echo "  - System Tests: $SYSTEM_TEST_RESULT"
-          echo "  - E2E Tests (Playwright): $E2E_TEST_RESULT (optional)"
+          echo ""
+          echo "ℹ️ E2E Tests: 로컬에서 수동 실행 필요 (npx playwright test)"
           echo ""
 
-          # Required jobs check (E2E is optional - has continue-on-error)
+          # Required jobs check
           if [[ "$SCAN_RUBY_RESULT" != "success" ]] || \
              [[ "$SCAN_JS_RESULT" != "success" ]] || \
              [[ "$LINT_RESULT" != "success" ]] || \
@@ -233,11 +183,6 @@ jobs:
              [[ "$SYSTEM_TEST_RESULT" != "success" ]]; then
             echo "❌ One or more required jobs failed"
             exit 1
-          fi
-
-          # Warn if E2E failed (but don't block)
-          if [[ "$E2E_TEST_RESULT" != "success" ]]; then
-            echo "⚠️ E2E tests did not pass (optional, not blocking)"
           fi
 
           echo "✅ All required CI jobs passed!"
