@@ -130,19 +130,21 @@ class AuthenticationTest < ApplicationSystemTestCase
     visit settings_path
 
     # 설정 페이지 로드 확인
-    assert_selector "button", text: "로그아웃", wait: 5
+    logout_button = find("button", text: "로그아웃", wait: 5)
 
     # CI 환경 안정화: confirm 다이얼로그를 자동 수락하도록 스텁
     page.execute_script("window.confirm = () => true")
 
-    # 로그아웃 버튼 클릭
-    click_button "로그아웃"
+    # JavaScript로 클릭 (Turbo 호환, CI 안정화)
+    page.execute_script("arguments[0].click()", logout_button)
 
-    # 로그아웃 확인 (flash 메시지 또는 루트 페이지)
-    # 로그인 페이지 또는 루트 페이지로 리다이렉트
-    assert page.has_text?("로그아웃되었습니다", wait: 5) ||
-           page.has_current_path?(root_path, wait: 5) ||
-           page.has_current_path?(login_path, wait: 5)
+    # 페이지 이동 대기 (settings_path가 아닌 곳으로)
+    assert_no_current_path settings_path, wait: 10
+
+    # 로그아웃 확인: 로그인 링크 표시 또는 루트/로그인 페이지
+    assert page.has_link?("로그인", wait: 5) ||
+           page.has_current_path?(root_path) ||
+           page.has_current_path?(login_path)
   end
 
   # =========================================
