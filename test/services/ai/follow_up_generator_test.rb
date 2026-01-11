@@ -3,8 +3,39 @@
 require "test_helper"
 
 class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
+  # Mock LLM class for testing (no API key required)
+  class MockLLM
+    def chat(messages:)
+      OpenStruct.new(chat_completion: "{}", prompt_tokens: 0, completion_tokens: 0, total_tokens: 0)
+    end
+
+    def is_a?(klass)
+      klass == Langchain::LLM::GoogleGemini
+    end
+  end
+
+  # Override default_llm to return mock in test environment
+  module TestLangchainConfig
+    def self.default_llm
+      MockLLM.new
+    end
+  end
+
   setup do
     @idea = "대학생들이 스터디 그룹을 만들고 관리할 수 있는 앱"
+
+    # Temporarily replace LangchainConfig.default_llm
+    @original_method = LangchainConfig.method(:default_llm)
+    LangchainConfig.define_singleton_method(:default_llm) { MockLLM.new }
+
+    @generator = Ai::FollowUpGenerator.new(@idea)
+  end
+
+  teardown do
+    # Restore original method
+    if @original_method
+      LangchainConfig.define_singleton_method(:default_llm, @original_method)
+    end
   end
 
   # ─────────────────────────────────────────────────
@@ -13,30 +44,24 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   # ─────────────────────────────────────────────────
 
   test "normalize_examples filters blank values" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     examples = [ "유효한 예시", "", nil, "또 다른 예시" ]
-    result = generator.send(:normalize_examples, examples)
+    result = @generator.send(:normalize_examples, examples)
 
     assert_equal [ "유효한 예시", "또 다른 예시" ], result
     assert_not_includes result, ""
   end
 
   test "normalize_examples limits to 3 items" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     examples = [ "하나", "둘", "셋", "넷", "다섯" ]
-    result = generator.send(:normalize_examples, examples)
+    result = @generator.send(:normalize_examples, examples)
 
     assert_equal 3, result.length
     assert_equal [ "하나", "둘", "셋" ], result
   end
 
   test "normalize_examples converts to strings" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     examples = [ 123, :symbol, "문자열" ]
-    result = generator.send(:normalize_examples, examples)
+    result = @generator.send(:normalize_examples, examples)
 
     assert result.all? { |e| e.is_a?(String) }
     assert_includes result, "123"
@@ -44,11 +69,9 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "normalize_examples returns empty array for non-array input" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
-    assert_equal [], generator.send(:normalize_examples, nil)
-    assert_equal [], generator.send(:normalize_examples, "string")
-    assert_equal [], generator.send(:normalize_examples, 123)
+    assert_equal [], @generator.send(:normalize_examples, nil)
+    assert_equal [], @generator.send(:normalize_examples, "string")
+    assert_equal [], @generator.send(:normalize_examples, 123)
   end
 
   # ─────────────────────────────────────────────────
@@ -56,8 +79,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   # ─────────────────────────────────────────────────
 
   test "fallback_questions returns valid structure" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    result = generator.send(:fallback_questions)
+    result = @generator.send(:fallback_questions)
 
     assert result[:questions].is_a?(Array)
     assert_equal 3, result[:questions].length
@@ -71,8 +93,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "fallback_questions has required and optional questions" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    result = generator.send(:fallback_questions)
+    result = @generator.send(:fallback_questions)
 
     required_count = result[:questions].count { |q| q[:required] == true }
     optional_count = result[:questions].count { |q| q[:required] == false }
@@ -82,8 +103,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "fallback_questions does not include inappropriate examples" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    result = generator.send(:fallback_questions)
+    result = @generator.send(:fallback_questions)
 
     bad_examples = [ "직접 입력", "기타", "없음", "해당 없음", "모름", "선택 안함" ]
 
@@ -96,8 +116,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "fallback_questions examples are specific and meaningful" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    result = generator.send(:fallback_questions)
+    result = @generator.send(:fallback_questions)
 
     # 각 질문의 예시가 구체적인지 확인
     result[:questions].each do |question|
@@ -113,29 +132,23 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   # ─────────────────────────────────────────────────
 
   test "validate_and_normalize handles raw_response error" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     # raw_response가 있으면 fallback 반환
-    result = generator.send(:validate_and_normalize, { raw_response: "invalid json" })
+    result = @generator.send(:validate_and_normalize, { raw_response: "invalid json" })
 
     assert result[:questions].is_a?(Array)
     assert result[:questions].length >= 2
   end
 
   test "validate_and_normalize handles error key" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     # error가 있으면 fallback 반환
-    result = generator.send(:validate_and_normalize, { error: true })
+    result = @generator.send(:validate_and_normalize, { error: true })
 
     assert result[:questions].is_a?(Array)
     assert result[:questions].length >= 2
   end
 
   test "validate_and_normalize handles empty questions array" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
-    result = generator.send(:validate_and_normalize, { questions: [] })
+    result = @generator.send(:validate_and_normalize, { questions: [] })
 
     # 빈 배열이면 fallback 반환
     assert result[:questions].is_a?(Array)
@@ -143,9 +156,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "validate_and_normalize handles missing questions key" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
-    result = generator.send(:validate_and_normalize, {})
+    result = @generator.send(:validate_and_normalize, {})
 
     # questions 키가 없으면 fallback 반환
     assert result[:questions].is_a?(Array)
@@ -153,23 +164,19 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "validate_and_normalize generates id if missing" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     input = {
       questions: [
         { question: "질문 1", examples: [ "예시" ], required: true }
       ]
     }
 
-    result = generator.send(:validate_and_normalize, input)
+    result = @generator.send(:validate_and_normalize, input)
 
     # id가 없으면 자동 생성됨
     assert_equal "question_1", result[:questions].first[:id]
   end
 
   test "validate_and_normalize limits to 3 questions" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     input = {
       questions: [
         { id: "q1", question: "질문 1", examples: [], required: true },
@@ -180,14 +187,12 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
       ]
     }
 
-    result = generator.send(:validate_and_normalize, input)
+    result = @generator.send(:validate_and_normalize, input)
 
     assert_equal 3, result[:questions].length
   end
 
   test "validate_and_normalize defaults required to true" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     input = {
       questions: [
         { id: "q1", question: "질문", examples: [] }
@@ -195,21 +200,19 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
       ]
     }
 
-    result = generator.send(:validate_and_normalize, input)
+    result = @generator.send(:validate_and_normalize, input)
 
     assert result[:questions].first[:required] == true
   end
 
   test "validate_and_normalize normalizes examples" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     input = {
       questions: [
         { id: "q1", question: "질문", examples: [ "하나", "", "둘", nil, "셋", "넷" ], required: true }
       ]
     }
 
-    result = generator.send(:validate_and_normalize, input)
+    result = @generator.send(:validate_and_normalize, input)
 
     # 빈 값 제거, 3개로 제한
     examples = result[:questions].first[:examples]
@@ -217,8 +220,6 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   end
 
   test "validate_and_normalize provides default placeholder" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-
     input = {
       questions: [
         { id: "q1", question: "질문", examples: [], required: true }
@@ -226,7 +227,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
       ]
     }
 
-    result = generator.send(:validate_and_normalize, input)
+    result = @generator.send(:validate_and_normalize, input)
 
     assert_equal "", result[:questions].first[:placeholder]
   end
@@ -265,8 +266,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   # ─────────────────────────────────────────────────
 
   test "initializes with idea" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    assert_equal @idea, generator.instance_variable_get(:@idea)
+    assert_equal @idea, @generator.instance_variable_get(:@idea)
   end
 
   # ─────────────────────────────────────────────────
@@ -274,8 +274,7 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
   # ─────────────────────────────────────────────────
 
   test "build_chat_messages includes idea in user message" do
-    generator = Ai::FollowUpGenerator.new(@idea)
-    messages = generator.send(:build_chat_messages)
+    messages = @generator.send(:build_chat_messages)
 
     assert_equal 1, messages.length
     assert_equal "user", messages.first[:role]
