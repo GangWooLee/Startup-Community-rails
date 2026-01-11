@@ -84,10 +84,15 @@ export default defineConfig({
   ],
 
   // 테스트 전 Rails 서버 시작
+  // CI에서는 RAILS_ENV=test로 명시적 지정
   webServer: {
-    command: 'bin/rails server -p 3000',
+    command: process.env.CI
+      ? 'RAILS_ENV=test bin/rails server -p 3000'
+      : 'bin/rails server -p 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

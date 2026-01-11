@@ -21,18 +21,31 @@ async function ensureTestUserExists(
   email: string,
   password: string,
   name: string = '테스트 유저'
-): Promise<void> {
+): Promise<boolean> {
   try {
+    console.log(`[ensureTestUserExists] Creating user: ${email}`);
+
     const response = await page.request.post('/test/create_user', {
-      data: { email, password, name }
+      data: { email, password, name },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
 
-    if (!response.ok()) {
-      console.warn(`Failed to create test user: ${response.status()}`);
+    console.log(`[ensureTestUserExists] Response status: ${response.status()}`);
+
+    if (response.ok()) {
+      console.log(`[ensureTestUserExists] User created successfully: ${email}`);
+      return true;
+    } else {
+      const errorText = await response.text();
+      console.warn(`[ensureTestUserExists] Failed: ${response.status()} - ${errorText}`);
+      return false;
     }
   } catch (error) {
-    // 라우트가 없는 경우 (개발 환경 등) 무시
-    console.log('Test user creation skipped (route not available)');
+    console.error(`[ensureTestUserExists] Exception: ${error}`);
+    return false;
   }
 }
 
@@ -50,25 +63,36 @@ export async function createTestPost(
   } = {}
 ): Promise<{ id: number; title: string; post_type: string } | null> {
   try {
+    const requestData = {
+      title: options.title || '테스트 게시글',
+      content: options.content || 'E2E 테스트를 위한 게시글입니다.',
+      user_email: options.userEmail || TEST_USER.email,
+      post_type: options.postType || 'community'
+    };
+
+    console.log(`[createTestPost] Attempting to create post: ${JSON.stringify(requestData)}`);
+
     const response = await page.request.post('/test/create_post', {
-      data: {
-        title: options.title || '테스트 게시글',
-        content: options.content || 'E2E 테스트를 위한 게시글입니다.',
-        user_email: options.userEmail || TEST_USER.email,
-        post_type: options.postType || 'community'
+      data: requestData,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
+    console.log(`[createTestPost] Response status: ${response.status()}`);
+
     if (response.ok()) {
       const data = await response.json();
-      console.log(`Test post created: ID=${data.post.id}, Title=${data.post.title}`);
+      console.log(`[createTestPost] Success: ID=${data.post.id}, Title=${data.post.title}`);
       return data.post;
     } else {
-      console.warn(`Failed to create test post: ${response.status()}`);
+      const errorText = await response.text();
+      console.error(`[createTestPost] Failed with status ${response.status()}: ${errorText}`);
       return null;
     }
   } catch (error) {
-    console.log('Test post creation skipped (route not available)');
+    console.error(`[createTestPost] Exception: ${error}`);
     return null;
   }
 }
@@ -76,6 +100,9 @@ export async function createTestPost(
 /**
  * 테스트 게시글 생성 후 해당 페이지로 이동
  * toggle-buttons 등 게시글 상세 페이지가 필요한 테스트용
+ *
+ * 주의: 게시글 생성 전에 사용자가 먼저 존재해야 함
+ * CI 환경에서는 ensureTestUserExists로 사용자를 먼저 생성
  */
 export async function createAndNavigateToTestPost(
   page: Page,
@@ -86,6 +113,10 @@ export async function createAndNavigateToTestPost(
     postType?: 'community' | 'outsourcing';
   } = {}
 ): Promise<{ id: number; title: string } | null> {
+  // 게시글 작성자 사용자가 먼저 존재해야 함
+  const userEmail = options.userEmail || TEST_USER.email;
+  await ensureTestUserExists(page, userEmail, TEST_USER.password, TEST_USER.name);
+
   const post = await createTestPost(page, options);
   if (post) {
     await page.goto(`/posts/${post.id}`);
