@@ -187,6 +187,7 @@ export default class extends Controller {
 
   /**
    * 질문 UI 렌더링 (DOM API 사용 - XSS 방지)
+   * Phase 14: 태그 입력 시스템 추가 (ai_input_controller.js와 동일)
    */
   renderQuestions() {
     const container = this.questionsContainerTarget
@@ -224,7 +225,7 @@ export default class extends Controller {
       svg.appendChild(path)
       iconContainer.appendChild(svg)
 
-      // Create question text container
+      // Create question text container with required/optional indicator
       const textContainer = document.createElement("div")
       textContainer.className = "flex-1"
 
@@ -232,23 +233,152 @@ export default class extends Controller {
       questionText.className = "text-[#2C4A6B] font-medium text-sm leading-relaxed"
       questionText.textContent = q.question // Safe: textContent escapes HTML
 
+      // Add required/optional indicator inline
+      if (q.required) {
+        const asterisk = document.createElement("span")
+        asterisk.className = "text-red-400 ml-1"
+        asterisk.textContent = "*"
+        asterisk.setAttribute("aria-label", "필수 입력")
+        questionText.appendChild(asterisk)
+      } else {
+        const optionalBadge = document.createElement("span")
+        optionalBadge.className = "text-[#2C4A6B]/50 text-xs ml-2"
+        optionalBadge.textContent = "(선택)"
+        questionText.appendChild(optionalBadge)
+      }
+
       textContainer.appendChild(questionText)
       headerRow.appendChild(iconContainer)
       headerRow.appendChild(textContainer)
 
-      // Create textarea
-      const textarea = document.createElement("textarea")
-      textarea.dataset.questionId = q.id
-      textarea.placeholder = q.placeholder || "답변을 입력해주세요"
-      textarea.className = "w-full min-h-[80px] bg-[#F8F9FA] border border-[#2C4A6B]/20 text-[#2C4A6B] text-sm placeholder:text-[#2C4A6B]/40 focus:border-[#2C4A6B] focus:ring-2 focus:ring-[#2C4A6B]/20 focus:outline-none resize-none rounded-xl p-3"
-      if (q.required) {
-        textarea.required = true
-      }
+      // Create tag input container (tags + text input in one area)
+      const tagInputContainer = document.createElement("div")
+      tagInputContainer.className = "tag-input-container"
+      tagInputContainer.dataset.questionId = q.id
+
+      // Create text input that grows to fill space
+      const input = document.createElement("input")
+      input.type = "text"
+      input.dataset.questionId = q.id
+      input.dataset.required = q.required
+      input.placeholder = q.placeholder || "답변을 입력해주세요..."
+      input.className = "tag-input-field"
+
+      tagInputContainer.appendChild(input)
 
       questionDiv.appendChild(headerRow)
-      questionDiv.appendChild(textarea)
+      questionDiv.appendChild(tagInputContainer)
+
+      // Add example buttons if examples exist
+      if (q.examples && q.examples.length > 0) {
+        const examplesContainer = document.createElement("div")
+        examplesContainer.className = "flex flex-wrap items-center gap-2 mt-3"
+        examplesContainer.dataset.examplesForQuestion = q.id
+
+        // "예시" label
+        const label = document.createElement("span")
+        label.className = "text-xs text-[#2C4A6B]/60 mr-1"
+        label.textContent = "예시"
+        examplesContainer.appendChild(label)
+
+        // Example buttons
+        q.examples.forEach(example => {
+          const btn = document.createElement("button")
+          btn.type = "button"
+          btn.className = "example-chip"
+          btn.textContent = example
+          btn.dataset.questionId = q.id
+          btn.dataset.example = example
+          btn.addEventListener("click", (e) => this.selectExample(e.target))
+          examplesContainer.appendChild(btn)
+        })
+
+        questionDiv.appendChild(examplesContainer)
+      }
+
       container.appendChild(questionDiv)
     })
+  }
+
+  // ========== Tag Input System (Phase 14) ==========
+
+  /**
+   * Select an example and move it as a tag into the input container
+   * @param {HTMLElement} btn - The clicked example button
+   */
+  selectExample(btn) {
+    const questionId = btn.dataset.questionId
+    const example = btn.dataset.example
+
+    // Hide the example button
+    btn.style.display = "none"
+
+    // Find the tag input container for this question
+    const tagInputContainer = this.questionsContainerTarget.querySelector(
+      `.tag-input-container[data-question-id="${questionId}"]`
+    )
+    if (!tagInputContainer) return
+
+    // Create and insert tag before the text input
+    const tag = this.createTag(example, questionId)
+    const input = tagInputContainer.querySelector("input")
+    tagInputContainer.insertBefore(tag, input)
+  }
+
+  /**
+   * Remove a tag and restore the example button
+   * @param {HTMLElement} tag - The tag element to remove
+   */
+  removeTag(tag) {
+    const questionId = tag.dataset.questionId
+    const example = tag.dataset.example
+
+    // Remove the tag
+    tag.remove()
+
+    // Find and show the original example button
+    const examplesContainer = this.questionsContainerTarget.querySelector(
+      `[data-examples-for-question="${questionId}"]`
+    )
+    if (examplesContainer) {
+      const btn = examplesContainer.querySelector(
+        `.example-chip[data-example="${CSS.escape(example)}"]`
+      )
+      if (btn) {
+        btn.style.display = ""
+      }
+    }
+  }
+
+  /**
+   * Create a tag element with remove button
+   * @param {string} text - The tag text
+   * @param {string} questionId - The question ID this tag belongs to
+   * @returns {HTMLElement} The tag element
+   */
+  createTag(text, questionId) {
+    const tag = document.createElement("span")
+    tag.className = "selected-tag"
+    tag.dataset.questionId = questionId
+    tag.dataset.example = text
+
+    // Text node (using textContent for XSS safety)
+    const textNode = document.createTextNode(text)
+    tag.appendChild(textNode)
+
+    // Remove button (×)
+    const removeBtn = document.createElement("button")
+    removeBtn.type = "button"
+    removeBtn.className = "tag-remove-btn"
+    removeBtn.textContent = "×"
+    removeBtn.setAttribute("aria-label", `${text} 제거`)
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation()
+      this.removeTag(tag)
+    })
+
+    tag.appendChild(removeBtn)
+    return tag
   }
 
   /**
@@ -300,13 +430,28 @@ export default class extends Controller {
     if (this.isSubmitting) return
     this.isSubmitting = true
 
-    // Collect answers
+    // Collect answers (tags + text input)
     const answers = {}
-    const textareas = this.questionsContainerTarget.querySelectorAll("textarea[data-question-id]")
+    const inputs = this.questionsContainerTarget.querySelectorAll("input[data-question-id]")
 
-    textareas.forEach(textarea => {
-      const questionId = textarea.dataset.questionId
-      answers[questionId] = textarea.value.trim()
+    inputs.forEach(input => {
+      const questionId = input.dataset.questionId
+
+      // 선택된 태그 수집
+      const tagInputContainer = input.closest(".tag-input-container")
+      const selectedTags = tagInputContainer
+        ? Array.from(tagInputContainer.querySelectorAll(".selected-tag"))
+            .map(tag => tag.dataset.example)
+        : []
+
+      // 텍스트 입력 수집
+      const textValue = input.value.trim()
+
+      // 태그 + 텍스트 결합
+      const allValues = [...selectedTags]
+      if (textValue) allValues.push(textValue)
+
+      answers[questionId] = allValues.join(", ")
     })
 
     // Store in sessionStorage

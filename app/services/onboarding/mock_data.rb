@@ -17,19 +17,22 @@ module Onboarding
           {
             id: "target",
             question: "주요 타겟 사용자는 누구인가요?",
-            placeholder: "예: 20-30대 직장인, 대학생, 주부 등",
+            placeholder: "타겟 사용자를 입력해주세요",
+            examples: [ "20-30대 직장인", "대학생", "1인 가구" ],
             required: true
           },
           {
             id: "problem",
             question: "해결하려는 가장 큰 문제는 무엇인가요?",
-            placeholder: "현재 겪고 있는 불편함이나 해소되지 않는 니즈",
+            placeholder: "현재 겪고 있는 불편함을 입력해주세요",
+            examples: [ "시간 부족", "비용 문제", "정보 접근성" ],
             required: true
           },
           {
             id: "differentiator",
             question: "기존 서비스와 다른 점은 무엇인가요? (선택)",
-            placeholder: "차별화 포인트가 있다면 알려주세요",
+            placeholder: "차별화 포인트를 입력해주세요",
+            examples: [ "AI 자동화", "커뮤니티 기반", "저렴한 가격" ],
             required: false
           }
         ]

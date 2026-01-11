@@ -336,3 +336,113 @@
     </div>
   </div>
 </div>
+
+<%# ========== Tag Input System CSS (from ai_input.html.erb) ========== %>
+<style>
+  /* 태그 + 텍스트 입력 감싸는 컨테이너 */
+  .tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 10px 14px;
+    background: #F8F9FA;
+    border: 1px solid rgba(44, 74, 107, 0.2);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .tag-input-container:focus-within {
+    border-color: #2C4A6B;
+    box-shadow: 0 0 0 3px rgba(44, 74, 107, 0.1);
+  }
+
+  /* 선택된 태그 */
+  .selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #2C4A6B;
+    color: white;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: tag-pop-in 0.2s ease-out;
+  }
+
+  @keyframes tag-pop-in {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* 태그 제거 버튼 */
+  .tag-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .tag-remove-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* 텍스트 입력 필드 */
+  .tag-input-field {
+    flex: 1;
+    min-width: 100px;
+    border: none;
+    background: transparent;
+    color: #2C4A6B;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .tag-input-field::placeholder {
+    color: rgba(44, 74, 107, 0.4);
+  }
+
+  /* 예시 버튼 */
+  .example-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(44, 74, 107, 0.08);
+    border: 1px solid rgba(44, 74, 107, 0.15);
+    border-radius: 9999px;
+    color: #2C4A6B;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .example-chip:hover {
+    background: rgba(44, 74, 107, 0.15);
+    border-color: rgba(44, 74, 107, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .example-chip:active {
+    transform: translateY(0);
+  }
+
+  /* 접근성: 감축 모션 */
+  @media (prefers-reduced-motion: reduce) {
+    .selected-tag,
+    .example-chip {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
