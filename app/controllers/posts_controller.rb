@@ -143,15 +143,13 @@ class PostsController < ApplicationController
       permitted_params[:price_negotiable] = false
     end
 
-    # 새 이미지가 업로드된 경우에만 추가 (기존 이미지 유지)
-    if permitted_params[:images].present?
-      @post.images.attach(permitted_params[:images])
-      permitted_params.delete(:images)
-    else
-      permitted_params.delete(:images)
-    end
+    # 이미지를 별도로 추출 (update 성공 후에만 첨부)
+    # validation 실패 시 unsaved attachment로 인한 signed_id 에러 방지
+    new_images = permitted_params.delete(:images)
 
     if @post.update(permitted_params)
+      # update 성공 시에만 새 이미지 첨부
+      @post.images.attach(new_images) if new_images.present?
       redirect_to post_path(@post), notice: "게시글이 수정되었습니다."
     else
       @initial_type = @post.outsourcing? ? "outsourcing" : "community"
