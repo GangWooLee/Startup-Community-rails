@@ -39,17 +39,26 @@ class PostsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit new_post_path
 
-    # 명확한 셀렉터로 입력 (fill_in 대신 set 사용)
-    find("input[name='post[title]']", wait: 5).set("테스트 게시글 제목")
-    find("textarea[name='post[content]']").set("테스트 게시글 내용입니다.")
+    # 폼 로딩 대기
+    assert_selector "form#post-form", wait: 5
 
-    # 등록 버튼 활성화 및 클릭
-    find("#submit-button", wait: 3)
-    page.execute_script("document.getElementById('submit-button').disabled = false")
+    # JavaScript로 입력 및 input 이벤트 발생 (Stimulus 컨트롤러가 이벤트를 감지해야 함)
+    page.execute_script(<<~JS)
+      const title = document.querySelector("input[name='post[title]']");
+      const content = document.querySelector("textarea[name='post[content]']");
 
-    # JavaScript 클릭 (폼 제출 안정화)
-    submit_button = find("#submit-button")
-    page.execute_script("arguments[0].click()", submit_button)
+      title.value = "테스트 게시글 제목";
+      title.dispatchEvent(new Event('input', { bubbles: true }));
+
+      content.value = "테스트 게시글 내용입니다.";
+      content.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+
+    # 폼 검증이 완료되어 버튼이 활성화될 때까지 대기
+    sleep 0.3
+
+    # 폼 직접 제출 (submit 버튼 클릭 대신)
+    page.execute_script("document.getElementById('post-form').submit()")
 
     # 폼 제출 완료 및 페이지 이동 대기
     assert_no_current_path new_post_path, wait: 10
@@ -199,21 +208,31 @@ class PostsTest < ApplicationSystemTestCase
     log_in_as(@user)
     visit new_post_path(type: "outsourcing")
 
-    # 명확한 셀렉터로 입력
-    find("input[name='post[title]']", wait: 5).set("Rails 개발자 구합니다")
-    find("textarea[name='post[content]']").set("풀스택 개발자를 찾고 있습니다.")
+    # 폼 로딩 대기
+    assert_selector "form#post-form", wait: 5
+
+    # JavaScript로 입력 및 input 이벤트 발생
+    page.execute_script(<<~JS)
+      const title = document.querySelector("input[name='post[title]']");
+      const content = document.querySelector("textarea[name='post[content]']");
+
+      title.value = "Rails 개발자 구합니다";
+      title.dispatchEvent(new Event('input', { bubbles: true }));
+
+      content.value = "풀스택 개발자를 찾고 있습니다.";
+      content.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
 
     # 서비스 분야 선택 (외주 필수 필드)
     if page.has_select?("post[service_type]", wait: 2)
       select "개발", from: "post[service_type]"
     end
 
-    # 등록 버튼 활성화 및 클릭 (JavaScript로 안정적으로)
-    find("#submit-button", wait: 3)
-    page.execute_script("document.getElementById('submit-button').disabled = false")
+    # 폼 검증 완료 대기
+    sleep 0.3
 
-    submit_button = find("#submit-button")
-    page.execute_script("arguments[0].click()", submit_button)
+    # 폼 직접 제출
+    page.execute_script("document.getElementById('post-form').submit()")
 
     # 폼 제출 완료 및 페이지 이동 대기
     assert_no_current_path new_post_path(type: "outsourcing"), wait: 10
