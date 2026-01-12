@@ -20,7 +20,7 @@ class ProfileAnonymityTest < ActionDispatch::IntegrationTest
     @real_name_user.update!(
       profile_completed: true,
       is_anonymous: false,
-      nickname: "실명닉네임"
+      nickname: nil  # 닉네임 없으면 실명(name) 표시
     )
 
     @other_user = users(:three)
@@ -161,8 +161,9 @@ class ProfileAnonymityTest < ActionDispatch::IntegrationTest
     get post_path(post_record)
     assert_match /익명개발자/, response.body
 
-    # 사용자가 실명으로 전환
-    @anonymous_user.update!(is_anonymous: false)
+    # 사용자가 실명으로 전환하고 닉네임도 제거
+    # (새 로직: 닉네임이 있으면 is_anonymous와 관계없이 닉네임 표시)
+    @anonymous_user.update!(is_anonymous: false, nickname: nil)
 
     # 같은 게시글에서 이제 실명 표시
     get post_path(post_record)

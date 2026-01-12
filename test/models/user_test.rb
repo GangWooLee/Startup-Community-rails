@@ -429,10 +429,24 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "활기찬 개발자", @user.display_name
   end
 
-  test "display_name returns name when not anonymous" do
+  test "display_name returns nickname only when anonymous mode is enabled" do
     @user.profile_completed = true
+    @user.nickname = "설정된닉네임"
+
+    # 익명 모드 ON: 닉네임 표시
+    @user.is_anonymous = true
+    assert_equal "설정된닉네임", @user.display_name
+
+    # 익명 모드 OFF: 실명 표시 (닉네임이 있어도)
     @user.is_anonymous = false
-    @user.nickname = "무시될닉네임"
+    assert_equal @user.name, @user.display_name
+  end
+
+  test "display_name returns name when nickname is blank" do
+    @user.profile_completed = true
+    @user.is_anonymous = true  # 익명 모드에서도
+    @user.nickname = nil
+    # nickname이 없으면 실명 표시
     assert_equal @user.name, @user.display_name
   end
 
@@ -489,11 +503,11 @@ class UserTest < ActiveSupport::TestCase
   # Anonymous Feature - Nickname Validation
   # =========================================
 
-  test "nickname is required when profile completed" do
+  test "nickname is optional when profile completed" do
     @user.profile_completed = true
     @user.nickname = nil
-    assert_not @user.valid?
-    assert_validation_error @user, :nickname
+    # 새 로직: 닉네임은 선택사항 (실명 표시 원하면 비워둠)
+    assert @user.valid?
   end
 
   test "nickname is not required when profile not completed" do
@@ -569,23 +583,34 @@ class UserTest < ActiveSupport::TestCase
     assert_not @user.using_anonymous_avatar?
   end
 
-  test "state transition from real name to anonymous reflects immediately" do
+  test "display_name changes when nickname is set" do
     @user.profile_completed = true
-    @user.is_anonymous = false
+    @user.is_anonymous = true  # 익명 모드에서만 닉네임 표시
+    @user.nickname = nil
+    # 닉네임 없으면 실명 표시
     assert_equal @user.name, @user.display_name
 
-    @user.is_anonymous = true
+    # 닉네임 설정하면 닉네임 표시
     @user.nickname = "새닉네임"
     assert_equal "새닉네임", @user.display_name
   end
 
-  test "state transition from anonymous to real name reflects immediately" do
+  test "display_name changes when nickname is cleared" do
     @user.profile_completed = true
-    @user.is_anonymous = true
-    @user.nickname = "익명닉네임"
-    assert_equal "익명닉네임", @user.display_name
+    @user.is_anonymous = true  # 익명 모드에서만 닉네임 표시
+    @user.nickname = "기존닉네임"
+    assert_equal "기존닉네임", @user.display_name
 
+    # 닉네임 제거하면 실명 표시
+    @user.nickname = nil
+    assert_equal @user.name, @user.display_name
+  end
+
+  test "display_name shows real name when is_anonymous is false" do
+    @user.profile_completed = true
     @user.is_anonymous = false
+    @user.nickname = "닉네임있지만"
+    # 익명 모드 OFF면 닉네임이 있어도 실명 표시
     assert_equal @user.name, @user.display_name
   end
 

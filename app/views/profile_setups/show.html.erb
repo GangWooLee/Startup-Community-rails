@@ -23,9 +23,10 @@
       </div>
 
       <%# 아바타 선택 %>
-      <div class="mb-8">
+      <div class="mb-8 transition-all duration-200"
+           data-profile-setup-target="avatarSection">
         <label class="block text-sm font-medium text-stone-600 mb-3 text-center">
-          프로필 이미지
+          익명 프로필 이미지
         </label>
         <div class="flex justify-center gap-4">
           <% @avatar_options.each do |index| %>
@@ -53,14 +54,18 @@
       </div>
 
       <%# 닉네임 입력 %>
-      <div class="mb-6">
+      <div class="mb-6 transition-all duration-200"
+           data-profile-setup-target="nicknameSection">
         <label class="block text-sm font-medium text-stone-600 mb-2 text-center">
-          닉네임
+          익명 닉네임
         </label>
         <div class="relative">
           <%= f.text_field :nickname,
                            value: @suggested_nickname,
-                           data: { profile_setup_target: "nickname" },
+                           data: {
+                             profile_setup_target: "nickname",
+                             action: "input->profile-setup#updateCounter"
+                           },
                            class: "w-full h-14 px-4 pr-14 text-center text-lg font-bold
                                   text-stone-800 bg-stone-50 border-none rounded-xl
                                   focus:ring-2 focus:ring-orange-500 focus:outline-none
@@ -78,8 +83,9 @@
             <span class="text-stone-400 hover:text-orange-500">&#x1F3B2;</span>
           </button>
         </div>
-        <p class="text-center text-stone-400 text-xs mt-2">
-          2~20자 이내로 입력해주세요
+        <p class="text-center text-xs mt-2"
+           data-profile-setup-target="counter">
+          <span class="text-stone-400">0</span><span class="text-stone-400">/20</span>
         </p>
         <% if current_user.errors[:nickname].any? %>
           <p class="text-center text-red-500 text-sm mt-1">
@@ -93,6 +99,10 @@
         <label class="flex items-center justify-center gap-3 cursor-pointer">
           <%= f.check_box :is_anonymous,
                           checked: true,
+                          data: {
+                            profile_setup_target: "anonymousCheckbox",
+                            action: "change->profile-setup#toggleAnonymous"
+                          },
                           class: "w-5 h-5 rounded text-orange-500
                                  focus:ring-orange-500 border-stone-300
                                  cursor-pointer" %>
@@ -102,6 +112,11 @@
         </label>
         <p class="text-center text-stone-400 text-xs mt-2">
           체크 해제 시 실명(<%= current_user.name %>)이 표시됩니다
+        </p>
+        <%# 익명 모드 해제 시 안내 문구 %>
+        <p class="text-center text-amber-600 text-xs mt-2 hidden"
+           data-profile-setup-target="disabledHint">
+          💡 위 닉네임과 아바타는 나중에 익명 모드 활성화 시 사용됩니다
         </p>
       </div>
 

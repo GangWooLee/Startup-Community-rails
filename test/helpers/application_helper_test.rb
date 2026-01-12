@@ -403,7 +403,9 @@ class ApplicationHelperTest < ActionView::TestCase
   test "render_user_avatar renders fallback with initial for user without avatar" do
     result = render_user_avatar(@user)
 
-    assert_includes result, @user.name.first.upcase
+    # display_name의 첫 글자가 표시됨 (nickname이 있으면 nickname, 없으면 name)
+    expected_initial = @user.display_name.first.upcase
+    assert_includes result, expected_initial
     assert_includes result, "rounded-full"
   end
 

@@ -35,10 +35,12 @@ module Profileable
   # 익명 프로필 시스템
   # ==========================================================================
 
-  # 커뮤니티에서 표시될 이름 (익명 모드 시 닉네임 사용)
+  # 커뮤니티에서 표시될 이름
+  # 익명 모드 ON: 닉네임 사용 (없으면 실명)
+  # 익명 모드 OFF: 실명 사용
   def display_name
     return name unless profile_completed?
-    is_anonymous? ? nickname : name
+    is_anonymous? ? (nickname.presence || name) : name
   end
 
   # 커뮤니티에서 표시될 아바타 경로
