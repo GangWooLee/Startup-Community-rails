@@ -118,11 +118,11 @@ class User < ApplicationRecord
 
   # 프로필 필드 검증
   validates :bio, length: { maximum: 500 }, allow_blank: true
+  # 닉네임 검증: 선택사항이지만 입력 시 유일성/길이 체크
   validates :nickname,
-    presence: { message: "을(를) 입력해주세요" },
-    uniqueness: { message: "이(가) 이미 사용 중입니다" },
+    uniqueness: { message: "이(가) 이미 사용 중입니다", allow_blank: true },
     length: { minimum: 2, maximum: 20, message: "은(는) 2자 이상 20자 이하여야 합니다" },
-    if: :profile_completed?
+    if: -> { profile_completed? && nickname.present? }
   validates :role_title, length: { maximum: 50 }, allow_blank: true
   validates :affiliation, length: { maximum: 50 }, allow_blank: true
   validates :skills, length: { maximum: 200 }, allow_blank: true

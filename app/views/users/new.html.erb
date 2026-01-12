@@ -51,7 +51,7 @@
         </div>
       </div>
 
-      <%= form_with model: @user, url: signup_path, method: :post, local: true, class: "space-y-4", data: { controller: "email-verification" } do |f| %>
+      <%= form_with model: @user, url: signup_path, method: :post, local: true, class: "space-y-4", data: { controller: "email-verification", action: "submit->email-verification#submitForm" } do |f| %>
         <!-- Error Messages -->
         <% if @user.errors.any? %>
           <div class="rounded-md bg-destructive/10 border border-destructive/20 p-4">

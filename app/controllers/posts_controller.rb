@@ -225,11 +225,13 @@ class PostsController < ApplicationController
   # - 로그인 사용자: 커뮤니티 접근 허용
   # - 비로그인 + browse=true 파라미터: 둘러보기 모드 허용
   # - 비로그인 + 쿠키 있음: 이미 온보딩 경험함, 허용
+  # - 비로그인 + Turbo Stream 요청: 더 보기 버튼 허용
   # - 비로그인 + 첫 방문: 온보딩으로 리디렉션
   def redirect_to_onboarding
     return if logged_in?
     return if params[:browse] == "true"
     return if cookies[:onboarding_completed].present?
+    return if request.format.turbo_stream?
 
     redirect_to root_path
   end

@@ -25,6 +25,7 @@ export default class extends Controller {
   connect() {
     this.remainingSeconds = 0
     this.timerInterval = null
+    this.isSubmitting = false
     console.log("[EmailVerification] Controller connected")
   }
 
@@ -276,5 +277,22 @@ export default class extends Controller {
     this.codeSectionTarget.parentNode.insertBefore(successDiv, this.codeSectionTarget.nextSibling)
 
     setTimeout(() => successDiv.remove(), 3000)
+  }
+
+  // 폼 제출 핸들러 - 중복 제출 방지
+  submitForm(event) {
+    // 이미 제출 중이면 중복 제출 방지
+    if (this.isSubmitting) {
+      event.preventDefault()
+      return
+    }
+
+    this.isSubmitting = true
+
+    // 버튼 비활성화 및 로딩 표시
+    if (this.hasSubmitButtonTarget) {
+      this.submitButtonTarget.disabled = true
+      this.submitButtonTarget.textContent = "처리 중..."
+    }
   }
 }
