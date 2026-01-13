@@ -3,7 +3,7 @@
 # 관리자 API 키 관리 컨트롤러
 # 용도: n8n 연동용 API 키 발급/폐기
 class Admin::ApiKeysController < Admin::BaseController
-  before_action :set_user, only: [:destroy]
+  before_action :set_user, only: [ :destroy ]
 
   def index
     @users_with_tokens = User.where.not(api_token: nil)
