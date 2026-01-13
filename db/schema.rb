@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_11_050426) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_13_063045) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -426,6 +426,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_11_050426) do
     t.string "affiliation"
     t.integer "ai_analysis_limit"
     t.integer "ai_bonus_credits", default: 0, null: false
+    t.string "api_token"
     t.json "availability_statuses", default: []
     t.integer "avatar_type", default: 0
     t.string "avatar_url"
@@ -471,6 +472,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_11_050426) do
     t.string "uid"
     t.datetime "updated_at", null: false
     t.text "work_style"
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["is_admin"], name: "index_users_on_is_admin"

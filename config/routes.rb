@@ -18,6 +18,17 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # ==========================================================================
+  # API v1 (n8n 연동용, 커뮤니티 초기 활성화)
+  # 비활성화: 이 블록 주석 처리
+  # 제거: 이 블록 삭제 + app/controllers/api/ 삭제
+  # ==========================================================================
+  namespace :api do
+    namespace :v1 do
+      resources :posts, only: [ :create ]
+    end
+  end
+
   # Root path - Onboarding Landing (메인 진입점)
   # 첫 접속 시 온보딩 화면으로 시작
   root "onboarding#landing"
@@ -217,5 +228,8 @@ Rails.application.routes.draw do
     delete "ai_usages/:id/analyses/:analysis_id",
            to: "ai_usages#destroy_analysis",
            as: :destroy_ai_analysis
+
+    # API 키 관리 (n8n 연동용)
+    resources :api_keys, only: [ :index, :create, :destroy ]
   end
 end

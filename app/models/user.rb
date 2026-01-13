@@ -10,6 +10,7 @@ class User < ApplicationRecord
   include AvailabilityStatusable # 활동 상태 (외주 가능, 팀원 모집)
   include AiAnalyzable          # AI 분석 사용량 관리
   include Termable              # 약관 동의
+  include ApiTokenable          # API 토큰 (n8n 연동용, 제거 가능)
 
   # ==========================================================================
   # Security & Configuration
