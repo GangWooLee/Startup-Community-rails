@@ -199,16 +199,16 @@
             <% end %>
           </td>
 
-          <!-- 활동 -->
+          <!-- 활동 (N+1 방지: 서브쿼리 결과 사용) -->
           <td class="px-5 py-4">
             <div class="flex items-center gap-4 text-sm">
               <span class="text-muted-foreground">
                 <%= icon "chat-bubble-left-right", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
-                <%= user.chat_rooms.count %>
+                <%= user.chat_rooms_count_value %>
               </span>
               <span class="text-muted-foreground">
                 <%= icon "document-text", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
-                <%= user.posts.count rescue 0 %>
+                <%= user.posts_count_value %>
               </span>
             </div>
           </td>

@@ -5,6 +5,7 @@ class Admin::UsersController < Admin::BaseController
 
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능
+  # N+1 쿼리 방지: 서브쿼리로 posts_count, chat_rooms_count 조회
   def index
     @users = User.order(created_at: :desc)
 
@@ -30,12 +31,18 @@ class Admin::UsersController < Admin::BaseController
       @users = @users.where("email LIKE ? OR name LIKE ?", keyword, keyword)
     end
 
-    # 페이지네이션 (20명씩)
+    # 페이지네이션 (20명씩) - count는 서브쿼리 추가 전에 계산
     @page = (params[:page] || 1).to_i
     @per_page = 20
     @total_count = @users.count
     @total_pages = (@total_count.to_f / @per_page).ceil
-    @users = @users.offset((@page - 1) * @per_page).limit(@per_page)
+
+    # N+1 방지: 서브쿼리로 posts_count, chat_rooms_count 조회
+    @users = @users.select(
+      "users.*",
+      "(SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) AS posts_count_value",
+      "(SELECT COUNT(*) FROM chat_room_participants WHERE chat_room_participants.user_id = users.id) AS chat_rooms_count_value"
+    ).offset((@page - 1) * @per_page).limit(@per_page)
 
     # 오른쪽 패널 통계 데이터
     calculate_panel_stats
