@@ -12,6 +12,7 @@ module Api
       # @param [Integer] page 페이지 번호 (기본값: 1)
       # @param [Integer] per_page 페이지당 개수 (기본값: 20, 최대: 100)
       # @param [String] category 카테고리 필터: free, question, promotion (선택)
+      # @param [Integer] author_id 작성자 ID 필터 (선택)
       def index
         @posts = Post.published
                      .includes(:user)
@@ -19,6 +20,9 @@ module Api
 
         # 카테고리 필터 (선택)
         @posts = @posts.where(category: params[:category]) if params[:category].present?
+
+        # 작성자 필터 (선택)
+        @posts = @posts.where(user_id: params[:author_id]) if params[:author_id].present?
 
         # 페이지네이션
         page = [ params.fetch(:page, 1).to_i, 1 ].max

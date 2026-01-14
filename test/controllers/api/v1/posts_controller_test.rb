@@ -347,6 +347,22 @@ module Api
         end
       end
 
+      test "index should filter by author_id" do
+        other_user = users(:two)
+        Post.create!(user: @user, title: "내 글", content: "내용", status: :published)
+        Post.create!(user: other_user, title: "다른 사람 글", content: "내용", status: :published)
+
+        get api_v1_posts_url,
+            params: { author_id: @user.id },
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        assert json["posts"].present?
+        assert json["posts"].all? { |p| p["author"]["id"] == @user.id }
+      end
+
       private
 
       def valid_post_params
