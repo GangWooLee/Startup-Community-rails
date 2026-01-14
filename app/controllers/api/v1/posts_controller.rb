@@ -1,12 +1,33 @@
 # frozen_string_literal: true
 
 # API v1 게시글 컨트롤러
-# 용도: n8n 자동 게시글 생성 (커뮤니티 초기 활성화용)
-# 기능: 게시글 생성 + 이미지 URL 첨부
+# 용도: n8n 자동화 연동 (게시글 조회/생성)
+# 기능: 게시글 목록 조회, 게시글 생성 + 이미지 URL 첨부
 module Api
   module V1
     class PostsController < BaseController
       include Rails.application.routes.url_helpers
+
+      # GET /api/v1/posts
+      # @param [Integer] page 페이지 번호 (기본값: 1)
+      # @param [Integer] per_page 페이지당 개수 (기본값: 20, 최대: 100)
+      # @param [String] category 카테고리 필터: free, question, promotion (선택)
+      def index
+        @posts = Post.published
+                     .includes(:user)
+                     .order(created_at: :desc)
+
+        # 카테고리 필터 (선택)
+        @posts = @posts.where(category: params[:category]) if params[:category].present?
+
+        # 페이지네이션
+        page = [ params.fetch(:page, 1).to_i, 1 ].max
+        per_page = [ [ params.fetch(:per_page, 20).to_i, 1 ].max, 100 ].min
+
+        @posts = @posts.offset((page - 1) * per_page).limit(per_page)
+
+        render json: index_response(page, per_page)
+      end
 
       # POST /api/v1/posts
       # @param [Hash] post 게시글 파라미터
@@ -50,6 +71,36 @@ module Api
 
       def image_urls
         @image_urls ||= Array(params.dig(:post, :image_urls)).first(5)
+      end
+
+      def index_response(page, per_page)
+        {
+          success: true,
+          posts: @posts.map { |post| post_summary(post) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total_count: Post.published.count
+          }
+        }
+      end
+
+      def post_summary(post)
+        {
+          id: post.id,
+          title: post.title,
+          content: post.content.truncate(200),
+          category: post.category,
+          author: {
+            id: post.user.id,
+            name: post.user.display_name
+          },
+          comments_count: post.comments_count,
+          likes_count: post.likes_count,
+          views_count: post.views_count,
+          url: post_url(post, host: default_url_host),
+          created_at: post.created_at.iso8601
+        }
       end
 
       def success_response

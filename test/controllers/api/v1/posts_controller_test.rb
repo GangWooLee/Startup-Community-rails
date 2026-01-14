@@ -248,6 +248,105 @@ module Api
         assert json["errors"].is_a?(Array)
       end
 
+      # ===== Index (GET) Tests =====
+
+      test "index should return 401 without authorization" do
+        get api_v1_posts_url,
+            headers: { "Content-Type" => "application/json" }
+
+        assert_response :unauthorized
+      end
+
+      test "index should return posts list" do
+        # 테스트용 게시글 생성
+        3.times do |i|
+          Post.create!(
+            user: @user,
+            title: "테스트 게시글 #{i}",
+            content: "내용 #{i}",
+            category: :free,
+            status: :published
+          )
+        end
+
+        get api_v1_posts_url,
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        assert json["success"]
+        assert json["posts"].is_a?(Array)
+        assert json["pagination"].present?
+      end
+
+      test "index should filter by category" do
+        Post.create!(user: @user, title: "자유", content: "내용", category: :free, status: :published)
+        Post.create!(user: @user, title: "질문", content: "내용", category: :question, status: :published)
+
+        get api_v1_posts_url,
+            params: { category: "question" },
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        assert json["posts"].all? { |p| p["category"] == "question" }
+      end
+
+      test "index should paginate results" do
+        get api_v1_posts_url,
+            params: { page: 1, per_page: 5 },
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        assert_equal 1, json["pagination"]["page"]
+        assert_equal 5, json["pagination"]["per_page"]
+        assert json["posts"].length <= 5
+      end
+
+      test "index should not return draft posts" do
+        Post.create!(user: @user, title: "공개", content: "내용", status: :published)
+        Post.create!(user: @user, title: "임시저장", content: "내용", status: :draft)
+
+        get api_v1_posts_url,
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        titles = json["posts"].map { |p| p["title"] }
+        assert_includes titles, "공개"
+        assert_not_includes titles, "임시저장"
+      end
+
+      test "index response should have correct format" do
+        Post.create!(user: @user, title: "테스트", content: "내용", status: :published)
+
+        get api_v1_posts_url,
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        assert json.key?("success")
+        assert json.key?("posts")
+        assert json.key?("pagination")
+
+        if json["posts"].any?
+          post_data = json["posts"].first
+          assert post_data.key?("id")
+          assert post_data.key?("title")
+          assert post_data.key?("content")
+          assert post_data.key?("category")
+          assert post_data.key?("author")
+          assert post_data.key?("url")
+          assert post_data.key?("created_at")
+        end
+      end
+
       private
 
       def valid_post_params
