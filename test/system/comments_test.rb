@@ -39,9 +39,30 @@ class CommentsTest < ApplicationSystemTestCase
   end
 
   test "submit button is disabled when input is empty" do
-    # CI 환경에서 Stimulus 컨트롤러의 disabled 상태 전환이 불안정함
-    # 로컬에서는 정상 작동하나 GitHub Actions에서 간헐적 실패
-    skip "Stimulus 버튼 상태 테스트 - CI 환경에서 불안정"
+    log_in_as(@user)
+    visit post_path(@post)
+
+    # Stimulus 컨트롤러가 연결될 때까지 대기
+    assert_selector "[data-controller='comment-form']", wait: 5
+
+    # 버튼이 초기 disabled 상태인지 확인
+    submit_btn = find("[data-comment-form-target='submit']", match: :first, wait: 5)
+    assert submit_btn.disabled?, "버튼이 초기에 disabled여야 함"
+
+    # 텍스트 입력 후 enabled 확인
+    input = find("[data-comment-form-target='input']", match: :first)
+    input.set("테스트 댓글")
+    page.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }))", input)
+    sleep 0.2
+
+    assert_not submit_btn.disabled?, "텍스트 입력 후 버튼이 enabled여야 함"
+
+    # 텍스트 삭제 후 다시 disabled 확인
+    input.set("")
+    page.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }))", input)
+    sleep 0.2
+
+    assert submit_btn.disabled?, "텍스트 삭제 후 버튼이 disabled여야 함"
   end
 
   test "shows character counter" do
@@ -66,14 +87,58 @@ class CommentsTest < ApplicationSystemTestCase
   # =========================================
 
   test "Enter key does not create duplicate comments" do
-    # CI 환경에서 JavaScript keydown 이벤트 처리가 불안정함
-    # 로컬에서는 정상 작동하나 GitHub Actions에서 간헐적 실패
-    skip "Enter 키 중복 방지 테스트 - CI 환경에서 불안정"
+    log_in_as(@user)
+    visit post_path(@post)
+
+    unique_comment = "중복방지테스트_#{SecureRandom.hex(4)}"
+
+    input = find("[data-comment-form-target='input']", match: :first, wait: 5)
+    input.set(unique_comment)
+    page.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }))", input)
+    sleep 0.2
+
+    # Enter 키 여러 번 빠르게 전송 (중복 제출 시도)
+    3.times do
+      page.execute_script(
+        "arguments[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))",
+        input
+      )
+    end
+
+    # 응답 대기
+    assert_text unique_comment, wait: 5
+
+    # DB에서 해당 댓글이 정확히 1개만 생성되었는지 확인
+    assert_equal 1, Comment.where(content: unique_comment).count, "댓글이 정확히 1개만 생성되어야 함"
   end
 
-  test "submit button shows loading state during submission" do
-    # CI 환경에서 폼 제출 및 Turbo Stream 응답 처리가 불안정함
-    # 로컬에서는 정상 작동하나 GitHub Actions에서 간헐적 실패
-    skip "로딩 상태 테스트 - CI 환경에서 불안정"
+  test "submit button text changes and resets after submission" do
+    log_in_as(@user)
+    visit post_path(@post)
+
+    unique_comment = "버튼상태테스트_#{SecureRandom.hex(4)}"
+    input = find("[data-comment-form-target='input']", match: :first, wait: 5)
+    submit_btn = find("[data-comment-form-target='submit']", match: :first)
+
+    # 초기 버튼 텍스트 확인
+    assert_equal "작성", submit_btn.text
+
+    input.set(unique_comment)
+    page.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }))", input)
+    sleep 0.2
+
+    # Enter 키로 제출
+    page.execute_script(
+      "arguments[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))",
+      input
+    )
+
+    # 댓글이 생성되었는지 확인 (핵심 기능 검증)
+    assert_text unique_comment, wait: 5
+
+    # 버튼이 원래 텍스트로 복원되었는지 확인
+    sleep 0.5
+    submit_btn = find("[data-comment-form-target='submit']", match: :first)
+    assert_equal "작성", submit_btn.text
   end
 end

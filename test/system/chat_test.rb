@@ -143,10 +143,12 @@ class ChatTest < ApplicationSystemTestCase
   end
 
   test "can go back to chat list" do
-    # 뒤로가기 버튼은 모바일에서만 표시됨 (md:hidden)
-    # 데스크톱에서는 좌측 채팅 목록이 항상 표시되므로 뒤로가기 버튼 불필요
-    # CI 환경에서 뷰포트 리사이즈가 CSS 미디어 쿼리에 안정적으로 반영되지 않음
-    skip "모바일 전용 UI 테스트 - 데스크톱 CI 환경에서 스킵"
+    skip <<~SKIP
+      [모바일 전용 UI 테스트]
+      - 뒤로가기 버튼은 md:hidden (768px 미만에서만 표시)
+      - 테스트 환경 viewport: 1400x1400 (데스크톱)
+      - CSS 미디어 쿼리 테스트는 별도 모바일 E2E 환경에서 수행 필요
+    SKIP
   end
 
   # =========================================
