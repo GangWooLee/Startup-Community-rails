@@ -3,23 +3,31 @@ class SessionsController < ApplicationController
 
   # GET /login
   def new
-    # URL 파라미터로 return_to가 전달된 경우 세션과 쿠키에 저장
+    # URL 파라미터로 return_to가 전달된 경우 검증 후 세션과 쿠키에 저장
+    # Open Redirect 방지: 같은 호스트의 상대 경로만 허용
     if params[:return_to].present?
-      # 세션에 저장 (OAuth 플로우에서 더 안정적)
-      session[:return_to] = params[:return_to]
+      validated_url = validate_redirect_url(params[:return_to])
 
-      # 쿠키에도 저장 (백업)
-      cookies[:return_to] = {
-        value: params[:return_to],
-        expires: 10.minutes.from_now,
-        path: "/"
-      }
+      if validated_url
+        # 세션에 저장 (OAuth 플로우에서 더 안정적)
+        session[:return_to] = validated_url
 
-      Rails.logger.info "[AUTH] Stored return_to from params: #{params[:return_to]}"
+        # 쿠키에도 저장 (백업)
+        cookies[:return_to] = {
+          value: validated_url,
+          expires: 10.minutes.from_now,
+          path: "/"
+        }
+
+        Rails.logger.info "[AUTH] Stored return_to from params: #{validated_url}"
+      else
+        Rails.logger.warn "[AUTH] Blocked invalid return_to URL: #{params[:return_to]}"
+      end
     end
 
-    # OAuth 폼에 전달할 return_to 값 (세션 > 쿠키 > 파라미터 순으로 확인)
-    @return_to = session[:return_to] || cookies[:return_to] || params[:return_to]
+    # OAuth 폼에 전달할 return_to 값 (세션 > 쿠키 순으로 확인)
+    # 원본 params[:return_to]는 검증 실패 시 사용하지 않음
+    @return_to = session[:return_to] || cookies[:return_to]
   end
 
   # POST /login

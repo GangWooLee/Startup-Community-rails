@@ -3,6 +3,10 @@ import { Controller } from "@hotwired/stimulus"
 // 토스페이먼츠 결제 위젯 컨트롤러
 // TossPayments Payment Widget v2 SDK 연동
 export default class extends Controller {
+  // 환경 체크 (프로덕션에서는 디버그 로그 비활성화)
+  get isDevelopment() {
+    return document.documentElement.dataset.environment === "development"
+  }
   static values = {
     clientKey: String,
     customerKey: String,
@@ -85,12 +89,14 @@ export default class extends Controller {
         throw new Error(`Invalid amount: ${this.amountValue}`)
       }
 
-      console.log("[PaymentWidget] Initializing with:", {
-        clientKey: this.clientKeyValue?.substring(0, 20) + "...",
-        customerKey: this.customerKeyValue?.substring(0, 10) + "...",
-        amount: this.amountValue,
-        orderId: this.orderIdValue
-      })
+      if (this.isDevelopment) {
+        console.log("[PaymentWidget] Initializing with:", {
+          clientKey: this.clientKeyValue?.substring(0, 20) + "...",
+          customerKey: this.customerKeyValue?.substring(0, 10) + "...",
+          amount: this.amountValue,
+          orderId: this.orderIdValue
+        })
+      }
 
       // TossPayments 인스턴스 생성
       if (typeof TossPayments === "undefined") {
@@ -120,7 +126,7 @@ export default class extends Controller {
       this.hideLoading()
       this.enablePayButton()
 
-      console.log("[PaymentWidget] Widget initialized successfully")
+      if (this.isDevelopment) console.log("[PaymentWidget] Widget initialized successfully")
     } catch (error) {
       console.error("[PaymentWidget] Widget initialization error:", error)
       console.error("[PaymentWidget] Error details:", {

@@ -15,6 +15,11 @@ import { Turbo } from "@hotwired/turbo-rails"
  * - 모바일 반응형 (세로 스택)
  */
 export default class extends Controller {
+  // 환경 체크 (프로덕션에서는 디버그 로그 비활성화)
+  get isDevelopment() {
+    return document.documentElement.dataset.environment === "development"
+  }
+
   static targets = [
     "backdrop",
     "panel",
@@ -275,10 +280,12 @@ export default class extends Controller {
       // FormData 수집 - form 속성으로 연결된 외부 요소도 명시적으로 수집
       const formData = this.collectFormData()
 
-      // 디버깅: FormData 내용 확인
-      console.log("📤 Submitting FormData:")
-      for (const [key, value] of formData.entries()) {
-        console.log(`  ${key}:`, value)
+      // 디버깅: FormData 내용 확인 (개발 환경에서만)
+      if (this.isDevelopment) {
+        console.log("📤 Submitting FormData:")
+        for (const [key, value] of formData.entries()) {
+          console.log(`  ${key}:`, value)
+        }
       }
 
       const response = await fetch("/posts", {

@@ -22,11 +22,16 @@ export default class extends Controller {
     verifying: { type: Boolean, default: false }
   }
 
+  // 환경 체크 (프로덕션에서는 디버그 로그 비활성화)
+  get isDevelopment() {
+    return document.documentElement.dataset.environment === "development"
+  }
+
   connect() {
     this.remainingSeconds = 0
     this.timerInterval = null
     this.isSubmitting = false
-    console.log("[EmailVerification] Controller connected")
+    if (this.isDevelopment) console.log("[EmailVerification] Controller connected")
   }
 
   disconnect() {
@@ -48,10 +53,10 @@ export default class extends Controller {
   // 인증 코드 발송
   async sendCode(event) {
     event.preventDefault()
-    console.log("[EmailVerification] sendCode called")
+    if (this.isDevelopment) console.log("[EmailVerification] sendCode called")
 
     const email = this.emailInputTarget.value.trim()
-    console.log("[EmailVerification] Email:", email)
+    if (this.isDevelopment) console.log("[EmailVerification] Email:", email)
 
     if (!email) {
       this.showError("이메일을 입력해주세요.")
@@ -59,7 +64,7 @@ export default class extends Controller {
     }
 
     if (this.sendingValue) {
-      console.log("[EmailVerification] Already sending, ignoring")
+      if (this.isDevelopment) console.log("[EmailVerification] Already sending, ignoring")
       return
     }
 
@@ -74,7 +79,7 @@ export default class extends Controller {
     this.sendButtonTarget.textContent = "발송 중..."
 
     try {
-      console.log("[EmailVerification] Sending request to /email_verifications")
+      if (this.isDevelopment) console.log("[EmailVerification] Sending request to /email_verifications")
       const response = await fetch("/email_verifications", {
         method: "POST",
         headers: {
@@ -84,9 +89,9 @@ export default class extends Controller {
         body: JSON.stringify({ email })
       })
 
-      console.log("[EmailVerification] Response status:", response.status)
+      if (this.isDevelopment) console.log("[EmailVerification] Response status:", response.status)
       const data = await response.json()
-      console.log("[EmailVerification] Response data:", data)
+      if (this.isDevelopment) console.log("[EmailVerification] Response data:", data)
 
       if (data.success) {
         this.showCodeSection()
@@ -108,7 +113,7 @@ export default class extends Controller {
   // 인증 코드 확인
   async verifyCode(event) {
     event?.preventDefault()
-    console.log("[EmailVerification] verifyCode called")
+    if (this.isDevelopment) console.log("[EmailVerification] verifyCode called")
 
     const email = this.emailInputTarget.value.trim()
     const code = this.codeInputTarget.value.trim().toUpperCase()
@@ -190,7 +195,7 @@ export default class extends Controller {
     this.timerTarget.classList.remove("hidden")
     this.timerTarget.classList.remove("text-destructive")
 
-    console.log("[EmailVerification] Code section shown, input cleared")
+    if (this.isDevelopment) console.log("[EmailVerification] Code section shown, input cleared")
   }
 
   startTimer(seconds) {

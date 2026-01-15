@@ -347,7 +347,7 @@
       <script>
         document.addEventListener('DOMContentLoaded', function() {
           if (typeof gtag === 'function') {
-            gtag('event', '<%= flash[:ga4_event][:name] %>', <%= (flash[:ga4_event][:params] || {}).to_json.html_safe %>);
+            gtag('event', '<%= j flash[:ga4_event][:name] %>', <%= (flash[:ga4_event][:params] || {}).to_json %>);
           }
         });
       </script>
@@ -357,7 +357,7 @@
         document.addEventListener('DOMContentLoaded', function() {
           if (typeof gtag === 'function') {
             <% flash[:ga4_events].each do |event| %>
-              gtag('event', '<%= event[:name] %>', <%= (event[:params] || {}).to_json.html_safe %>);
+              gtag('event', '<%= j event[:name] %>', <%= (event[:params] || {}).to_json %>);
             <% end %>
           }
         });
