@@ -2,6 +2,8 @@
 # 1. 구매자가 외주 글(Post)에 대해 결제할 때 생성됨
 # 2. 채팅에서 거래 제안(offer_card)을 통해 생성됨
 class Order < ApplicationRecord
+  include OrderStateable  # 상태 변경/확인/표시 로직
+
   # 플랫폼 수수료율 (10%)
   PLATFORM_FEE_RATE = 0.10
 
@@ -43,8 +45,6 @@ class Order < ApplicationRecord
   # 콜백
   before_validation :generate_order_number, on: :create
   before_validation :set_seller, on: :create
-  after_update :update_offer_message_status, if: :saved_change_to_status?
-  after_update :send_chat_system_message, if: :saved_change_to_status?
 
   # 스코프
   scope :recent, -> { order(created_at: :desc) }
@@ -74,71 +74,6 @@ class Order < ApplicationRecord
     ActiveSupport::NumberHelper.number_to_currency(platform_fee, unit: "원", format: "%n%u", precision: 0)
   end
 
-  # === 상태 변경 ===
-
-  # 결제 완료 처리
-  def mark_as_paid!(payment = nil)
-    update!(
-      status: :paid,
-      paid_at: Time.current
-    )
-  end
-
-  # 작업 진행 중으로 변경 (UI 구분용)
-  def mark_as_in_progress!
-    return unless paid?
-
-    update!(status: :in_progress)
-  end
-
-  # 거래 확정 처리 (구매자가 확정)
-  def confirm!
-    return false unless can_confirm?
-
-    transaction do
-      update!(
-        status: :completed,
-        completed_at: Time.current
-      )
-      # TODO: 실제 정산 처리 (Phase 5)
-      # SettlementService.new(self).process!
-    end
-    true
-  end
-
-  # 취소 처리
-  def mark_as_cancelled!
-    update!(
-      status: :cancelled,
-      cancelled_at: Time.current
-    )
-  end
-
-  # 환불 처리
-  def mark_as_refunded!
-    update!(
-      status: :refunded,
-      refunded_at: Time.current
-    )
-  end
-
-  # === 상태 확인 ===
-
-  # 결제 가능 여부
-  def can_pay?
-    pending?
-  end
-
-  # 거래 확정 가능 여부 (결제 완료 또는 작업 진행 중일 때만)
-  def can_confirm?
-    paid? || in_progress?
-  end
-
-  # 취소 가능 여부
-  def can_cancel?
-    (paid? || in_progress?) && created_at > 7.days.ago  # 7일 이내만 취소 가능
-  end
-
   # 채팅 기반 주문인지 확인
   def chat_based?
     chat_room_id.present?
@@ -147,27 +82,6 @@ class Order < ApplicationRecord
   # Post 기반 주문인지 확인
   def post_based?
     post_id.present?
-  end
-
-  # 에스크로 보관 중인지 확인
-  def escrow_held?
-    paid? || in_progress?
-  end
-
-  # === 상태 표시 ===
-
-  # 상태 표시 (한글)
-  def status_label
-    case status
-    when "pending" then "결제 대기"
-    when "paid" then "결제 완료"
-    when "in_progress" then "작업 진행 중"
-    when "completed" then "거래 완료"
-    when "cancelled" then "취소됨"
-    when "refunded" then "환불됨"
-    when "disputed" then "분쟁 중"
-    else status
-    end
   end
 
   # 금액 포맷팅 (원화는 소수점 없음)
@@ -226,42 +140,5 @@ class Order < ApplicationRecord
     if other_user.nil? || user_id == seller_id
       errors.add(:base, "본인에게는 결제할 수 없습니다")
     end
-  end
-
-  # 상태 변경 시 거래 제안 메시지 상태 업데이트
-  def update_offer_message_status
-    return unless offer_message.present?
-
-    new_status = case status
-    when "paid", "in_progress" then "paid"
-    when "completed" then "completed"
-    when "cancelled", "refunded" then "cancelled"
-    end
-
-    offer_message.update_offer_status!(new_status) if new_status
-  end
-
-  # 상태 변경 시 채팅방에 시스템 메시지 전송
-  def send_chat_system_message
-    return unless chat_room.present?
-
-    message_content = case status
-    when "paid"
-                        "💸 결제가 완료되었습니다! 플랫폼이 #{formatted_amount}을 안전하게 보관 중입니다."
-    when "completed"
-                        "✅ 거래가 확정되었습니다! #{seller.name}님에게 #{formatted_settlement_amount}이 정산됩니다."
-    when "cancelled"
-                        "❌ 주문이 취소되었습니다."
-    when "refunded"
-                        "💰 환불이 완료되었습니다."
-    end
-
-    return unless message_content
-
-    chat_room.messages.create!(
-      sender: user,  # 시스템 메시지지만 발신자 필요
-      message_type: :system,
-      content: message_content
-    )
   end
 end

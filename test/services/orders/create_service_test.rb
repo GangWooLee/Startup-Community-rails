@@ -206,11 +206,24 @@ module Orders
     end
 
     test "call rolls back transaction on payment creation failure" do
-      skip "Requires dependency injection for proper mocking - Rails transaction rollback is tested implicitly"
-      # This test would verify:
-      # - When Payment.create! fails, Order should also be rolled back
-      # - Transaction should roll back all changes
-      # Proper implementation requires dependency injection pattern
+      initial_order_count = Order.count
+      initial_payment_count = Payment.count
+
+      service = Orders::CreateService.new(user: @user_two, post: @hiring_post)
+
+      # Payment.create!가 실패하도록 모킹
+      Payment.stub(:create!, ->(*) { raise ActiveRecord::RecordInvalid.new(Payment.new) }) do
+        result = service.call
+
+        # 실패해야 함
+        assert result.failure?
+        # ActiveRecord::RecordInvalid 예외 메시지는 "Validation failed: ..."로 시작
+        assert result.errors.any? { |e| e.include?("Validation failed") }
+      end
+
+      # 트랜잭션 롤백으로 Order도 생성되지 않아야 함
+      assert_equal initial_order_count, Order.count, "Order should be rolled back"
+      assert_equal initial_payment_count, Payment.count, "Payment should not be created"
     end
 
     test "call handles unexpected errors gracefully" do

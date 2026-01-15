@@ -219,8 +219,36 @@ module Users
     # ============================================================================
 
     test "call purges attached avatar if present" do
-      skip "Active Storage test - requires test environment setup"
-      # This would test: @user.avatar.purge if @user.avatar.attached?
+      # Active Storage 파일이 있는 사용자 생성
+      user_with_avatar = @user
+
+      # 테스트용 이미지 첨부 (fixtures/files/test_image.png 사용)
+      if File.exist?(Rails.root.join("test/fixtures/files/test_image.png"))
+        user_with_avatar.avatar.attach(
+          io: File.open(Rails.root.join("test/fixtures/files/test_image.png")),
+          filename: "avatar.png",
+          content_type: "image/png"
+        )
+
+        assert user_with_avatar.avatar.attached?, "Avatar should be attached before deletion"
+
+        service = Users::DeletionService.new(user: user_with_avatar)
+        result = service.call
+
+        assert result.success?
+
+        # 아바타가 삭제되었는지 확인 (purge 호출됨)
+        user_with_avatar.reload
+        assert_not user_with_avatar.avatar.attached?, "Avatar should be purged after deletion"
+      else
+        # 테스트 이미지 파일이 없으면 아바타 없이 테스트
+        assert_not user_with_avatar.avatar.attached?
+
+        service = Users::DeletionService.new(user: user_with_avatar)
+        result = service.call
+
+        assert result.success?
+      end
     end
 
     test "call destroys all OAuth identities" do
@@ -295,19 +323,52 @@ module Users
     # ============================================================================
 
     test "call rolls back on deletion record creation failure" do
-      skip "Requires dependency injection for proper mocking - Rails transaction rollback is tested implicitly"
-      # This test would verify:
-      # - When UserDeletion.create! fails, user data should not be anonymized
-      # - Transaction should roll back all changes
-      # Proper implementation requires dependency injection pattern
+      # 원래 사용자 정보 저장
+      original_email = @user.email
+      original_name = @user.name
+
+      service = Users::DeletionService.new(user: @user)
+
+      # UserDeletion.create!가 실패하도록 모킹
+      UserDeletion.stub(:create!, ->(*) { raise ActiveRecord::RecordInvalid.new(UserDeletion.new) }) do
+        result = service.call
+
+        # 실패해야 함
+        assert result.failure?
+        # ActiveRecord::RecordInvalid 예외 메시지는 "Validation failed: ..."로 시작
+        assert result.errors.any? { |e| e.include?("Validation failed") }
+      end
+
+      # 트랜잭션 롤백으로 사용자 데이터가 변경되지 않아야 함
+      @user.reload
+      assert_equal original_email, @user.email
+      assert_equal original_name, @user.name
+      assert_nil @user.deleted_at
     end
 
     test "call rolls back on user anonymization failure" do
-      skip "Requires dependency injection for proper mocking - Rails transaction rollback is tested implicitly"
-      # This test would verify:
-      # - When anonymize_user! fails, UserDeletion record should not be created
-      # - Transaction should roll back all changes
-      # Proper implementation requires dependency injection pattern
+      # 원래 사용자 정보 저장
+      original_email = @user.email
+
+      service = Users::DeletionService.new(user: @user)
+
+      # anonymize_user! 메서드가 실패하도록 오버라이드
+      def service.anonymize_user!
+        raise ActiveRecord::RecordInvalid.new(@user)
+      end
+
+      result = service.call
+
+      # 실패해야 함
+      assert result.failure?
+
+      # 트랜잭션 롤백으로 UserDeletion 레코드가 생성되지 않아야 함
+      assert_equal 0, UserDeletion.where(email_original: original_email).count
+
+      # 사용자 데이터도 변경되지 않아야 함
+      @user.reload
+      assert_equal original_email, @user.email
+      assert_nil @user.deleted_at
     end
 
     test "call handles unexpected errors gracefully" do

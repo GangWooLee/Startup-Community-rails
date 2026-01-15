@@ -281,26 +281,75 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   # ============================================================================
 
   test "cancel paid order requires API call" do
-    skip "Requires WebMock for TossPayments API mocking"
-    # This test would verify:
-    # - TossPayments::CancelService is called for paid orders
-    # - Proper transaction handling
-    # Proper implementation requires WebMock gem to mock TossPayments API
+    log_in_as(@user_three)
+    payment = payments(:card_payment)
+    order = @paid_order
+
+    # Mock TossPayments API 취소 성공 응답
+    stub_request(:post, %r{api\.tosspayments\.com/v1/payments/.*/cancel})
+      .to_return(
+        status: 200,
+        headers: { "Content-Type" => "application/json" },
+        body: mock_toss_cancel_success(payment.payment_key, payment.amount).to_json
+      )
+
+    assert_changes -> { order.reload.status }, from: "paid", to: "cancelled" do
+      post cancel_order_path(order)
+    end
+
+    assert_redirected_to orders_path
+    assert_equal "주문이 취소되었습니다.", flash[:notice]
+
+    # Payment도 취소 상태로 변경되었는지 확인
+    payment.reload
+    assert_equal "cancelled", payment.status
   end
 
   test "cancel with payment API failure rolls back transaction" do
-    skip "Requires WebMock for TossPayments API mocking"
-    # This test would verify:
-    # - Transaction rollback when API call fails
-    # - Proper error message display
-    # Proper implementation requires WebMock gem to mock TossPayments API
+    log_in_as(@user_three)
+    payment = payments(:card_payment)
+    order = @paid_order
+
+    # Mock TossPayments API 취소 실패 응답
+    stub_request(:post, %r{api\.tosspayments\.com/v1/payments/.*/cancel})
+      .to_return(
+        status: 400,
+        headers: { "Content-Type" => "application/json" },
+        body: mock_toss_approve_failure("ALREADY_CANCELED", "이미 취소된 결제입니다.").to_json
+      )
+
+    assert_no_changes -> { order.reload.status } do
+      post cancel_order_path(order)
+    end
+
+    assert_redirected_to order_path(order)
+    assert_equal "결제 취소에 실패했습니다. 다시 시도해주세요.", flash[:alert]
+
+    # Payment 상태도 변경되지 않았는지 확인
+    payment.reload
+    assert_equal "done", payment.status
   end
 
   test "cancel with custom reason passes reason to API" do
-    skip "Requires WebMock for TossPayments API mocking"
-    # This test would verify:
-    # - Custom reason is passed to TossPayments API
-    # Proper implementation requires WebMock gem to mock TossPayments API
+    log_in_as(@user_three)
+    payment = payments(:card_payment)
+    order = @paid_order
+    custom_reason = "고객 요청으로 환불"
+
+    # Mock TossPayments API 취소 성공 응답 - 요청 본문에서 cancelReason 확인
+    stub_request(:post, %r{api\.tosspayments\.com/v1/payments/.*/cancel})
+      .with(body: hash_including("cancelReason" => custom_reason))
+      .to_return(
+        status: 200,
+        headers: { "Content-Type" => "application/json" },
+        body: mock_toss_cancel_success(payment.payment_key, payment.amount).to_json
+      )
+
+    post cancel_order_path(order), params: { reason: custom_reason }
+
+    assert_redirected_to orders_path
+    order.reload
+    assert order.cancelled?
   end
 
   # ============================================================================

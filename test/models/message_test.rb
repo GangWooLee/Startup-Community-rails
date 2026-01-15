@@ -36,9 +36,17 @@ class MessageTest < ActiveSupport::TestCase
   test "should validate image size" do
     # 5MB 초과 이미지는 유효하지 않음
     message = Message.new(chat_room: @chat_room, sender: @user1, content: "")
-    # 가짜 대용량 파일 (실제로 생성하지 않고 테스트)
-    # 이 테스트는 실제 대용량 파일이 있을 때만 동작
-    skip "Large image file not available for testing"
+
+    # StringIO를 사용하여 가상의 대용량 파일 생성 (6MB)
+    large_file_content = "x" * (6 * 1024 * 1024)
+    large_file = StringIO.new(large_file_content)
+    large_file.define_singleton_method(:original_filename) { "large_image.png" }
+    large_file.define_singleton_method(:content_type) { "image/png" }
+
+    message.image.attach(io: large_file, filename: "large_image.png", content_type: "image/png")
+
+    assert_not message.valid?
+    assert message.errors[:image].any? { |e| e.include?("5MB") || e.include?("too large") || e.include?("크") }
   end
 
   test "should require chat room" do

@@ -11,6 +11,10 @@ class User < ApplicationRecord
   include AiAnalyzable          # AI 분석 사용량 관리
   include Termable              # 약관 동의
   include ApiTokenable          # API 토큰 (n8n 연동용, 제거 가능)
+  include Messageable           # 읽지 않은 메시지 카운트
+  include Followable            # 팔로우 관계
+  include ActivityFeedable      # 활동 피드
+  include Notifiable            # 알림 관련
 
   # ==========================================================================
   # Security & Configuration
@@ -158,86 +162,6 @@ class User < ApplicationRecord
   end
 
   # ==========================================================================
-  # 활동 피드 (Activity Feed) - "Ruby Merge Pattern"
-  # ==========================================================================
-
-  # 최근 활동 가져오기 (게시글 + 댓글을 시간순 정렬)
-  def recent_activities(limit: 20)
-    # 1. 각 모델에서 데이터 가져오기 (N+1 방지)
-    last_posts = posts.published
-                      .includes(:user, images_attachments: :blob)
-                      .order(created_at: :desc)
-                      .limit(limit)
-
-    last_comments = comments.includes(:post, :user)
-                            .order(created_at: :desc)
-                            .limit(limit)
-
-    # 2. 하나의 배열로 합치기
-    activities = last_posts.to_a + last_comments.to_a
-
-    # 3. 시간순 정렬 (최신순) 후 자르기
-    activities.sort_by(&:created_at).reverse.first(limit)
-  end
-
-  # ==========================================================================
-  # 알림 관련 메서드
-  # ==========================================================================
-
-  # 읽지 않은 알림 수
-  def unread_notifications_count
-    notifications.unread.count
-  end
-
-  # 읽지 않은 알림이 있는지 확인
-  def has_unread_notifications?
-    notifications.unread.exists?
-  end
-
-  # ==========================================================================
-  # 메시지 관련 메서드 (N+1 방지: 단일 SQL 쿼리)
-  # ==========================================================================
-
-  # 읽지 않은 메시지 총 수
-  def total_unread_messages
-    sql = <<~SQL
-      SELECT COUNT(*)
-      FROM messages m
-      INNER JOIN chat_room_participants crp
-        ON crp.chat_room_id = m.chat_room_id
-      WHERE crp.user_id = ?
-        AND crp.deleted_at IS NULL
-        AND m.sender_id != ?
-        AND m.created_at > COALESCE(crp.last_read_at, '1970-01-01')
-    SQL
-
-    ActiveRecord::Base.connection.select_value(
-      ActiveRecord::Base.sanitize_sql([ sql, id, id ])
-    ).to_i
-  end
-
-  # 읽지 않은 메시지가 있는지 확인 (EXISTS로 최적화 - COUNT보다 빠름)
-  def has_unread_messages?
-    sql = <<~SQL
-      SELECT EXISTS(
-        SELECT 1
-        FROM messages m
-        INNER JOIN chat_room_participants crp
-          ON crp.chat_room_id = m.chat_room_id
-        WHERE crp.user_id = ?
-          AND crp.deleted_at IS NULL
-          AND m.sender_id != ?
-          AND m.created_at > COALESCE(crp.last_read_at, '1970-01-01')
-        LIMIT 1
-      )
-    SQL
-
-    ActiveRecord::Base.connection.select_value(
-      ActiveRecord::Base.sanitize_sql([ sql, id, id ])
-    ) == 1
-  end
-
-  # ==========================================================================
   # 결제 관련 메서드
   # ==========================================================================
 
@@ -254,37 +178,6 @@ class User < ApplicationRecord
   # 해당 Post에 대한 주문 가져오기
   def order_for(post)
     orders.find_by(post: post)
-  end
-
-  # ==========================================================================
-  # 팔로우 관련 메서드
-  # ==========================================================================
-
-  # 특정 사용자를 팔로우 중인지 확인
-  def following?(other_user)
-    following.include?(other_user)
-  end
-
-  # 팔로우하기
-  def follow(other_user)
-    return false if self == other_user
-    active_follows.find_or_create_by(followed: other_user)
-  end
-
-  # 언팔로우
-  def unfollow(other_user)
-    active_follows.find_by(followed: other_user)&.destroy
-  end
-
-  # 팔로우 토글 (팔로우 중이면 언팔, 아니면 팔로우)
-  def toggle_follow!(other_user)
-    if following?(other_user)
-      unfollow(other_user)
-      false
-    else
-      follow(other_user)
-      true
-    end
   end
 
   private

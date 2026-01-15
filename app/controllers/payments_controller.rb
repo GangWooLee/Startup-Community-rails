@@ -260,7 +260,7 @@ class PaymentsController < ApplicationController
 
   def handle_failed_approval(result, order_id)
     Rails.logger.error "[PaymentsController#success] Payment approval failed: #{result.error&.message}"
-    redirect_to payments_fail_path(
+    redirect_to fail_payments_path(
       code: result.error&.code,
       message: result.error&.message,
       orderId: order_id

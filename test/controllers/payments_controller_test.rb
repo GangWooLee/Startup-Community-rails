@@ -171,12 +171,28 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "success requires valid payment parameters" do
-    skip "Requires WebMock or VCR for external API mocking"
-    # This test would verify:
-    # - Invalid payment_key handling
-    # - Non-existent order handling
-    # - API failure scenarios
-    # Proper implementation requires WebMock gem to mock TossPayments API
+    log_in_as(@user_two)
+    order = orders(:pending_order)
+    payment = payments(:pending_payment)
+
+    # 1. 유효하지 않은 payment_key로 API 실패 응답
+    stub_request(:post, %r{api\.tosspayments\.com/v1/payments/confirm})
+      .to_return(
+        status: 400,
+        headers: { "Content-Type" => "application/json" },
+        body: mock_toss_approve_failure("INVALID_PAYMENT_KEY", "유효하지 않은 결제 키입니다.").to_json
+      )
+
+    get success_payments_path(
+      paymentKey: "invalid_key",
+      orderId: payment.toss_order_id,
+      amount: payment.amount
+    )
+
+    # 실패 페이지로 리다이렉트 또는 에러 표시
+    assert_response :redirect
+    follow_redirect!
+    # 에러 메시지가 표시되는지 확인 (fail 페이지 또는 flash)
   end
 
   # ============================================================================

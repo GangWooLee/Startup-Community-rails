@@ -74,34 +74,17 @@ class ChatRoomsController < ApplicationController
 
     # 새 메시지 패널에서 사용자 선택 후 메시지 전송하는 경우
     if params[:initial_message].present?
-      @chat_room = ChatRoom.find_or_create_between(current_user, other_user, initiator: current_user)
-      @chat_room.messages.create!(
-        sender: current_user,
+      service = ChatRooms::CreateWithMessageService.call(
+        current_user: current_user,
+        other_user: other_user,
         content: params[:initial_message]
       )
-      @chat_room.touch(:last_message_at)
+      @chat_room = service.chat_room
 
-      # GA4 채팅 시작 이벤트
       track_ga4_event("chat_start", { chat_room_id: @chat_room.id, from_post: false })
 
       respond_to do |format|
-        format.turbo_stream {
-          prepare_chat_list_data
-          render turbo_stream: [
-            turbo_stream.replace("chat_list_panel", partial: "chat_rooms/chat_list_panel",
-              locals: {
-                filter: @filter,
-                search: @search,
-                total_unread: @total_unread,
-                received_unread: @received_unread,
-                sent_unread: @sent_unread,
-                chat_rooms: @chat_rooms,
-                current_chat_room: @chat_room
-              }),
-            turbo_stream.replace("chat_room_content", partial: "chat_rooms/chat_room_content",
-              locals: { chat_room: @chat_room, messages: @chat_room.messages.includes(:sender).order(:created_at), other_user: @chat_room.other_participant(current_user) })
-          ]
-        }
+        format.turbo_stream { render_chat_room_with_list(service) }
         format.html { redirect_to @chat_room }
       end
       return
@@ -258,49 +241,37 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  def render_chat_room_with_list(service)
+    prepare_chat_list_data
+    render turbo_stream: [
+      turbo_stream.replace("chat_list_panel", partial: "chat_rooms/chat_list_panel",
+        locals: {
+          filter: @filter, search: @search, total_unread: @total_unread,
+          received_unread: @received_unread, sent_unread: @sent_unread,
+          chat_rooms: @chat_rooms, current_chat_room: @chat_room
+        }),
+      turbo_stream.replace("chat_room_content", partial: "chat_rooms/chat_room_content",
+        locals: {
+          chat_room: @chat_room,
+          messages: service.messages,
+          other_user: service.other_participant
+        })
+    ]
+  end
+
   def prepare_chat_list_data
     @filter = params[:filter] || "all"
     @search = params[:search]
 
-    # 삭제되지 않은 채팅방만 조회
-    base_query = current_user.active_chat_rooms
-                             .includes(:users, :source_post, :participants, messages: :sender)
+    query = ChatRooms::ListQuery.call(
+      user: current_user,
+      filter: @filter,
+      search: @search
+    )
 
-    @chat_rooms = case @filter
-    when "received"
-      base_query.received_inquiries(current_user)
-    when "sent"
-      base_query.sent_inquiries(current_user)
-    else
-      base_query
-    end
-
-    if @search.present?
-      @chat_rooms = @chat_rooms.search_by_keyword(@search, current_user)
-    end
-
-    @chat_rooms = @chat_rooms.order(last_message_at: :desc)
-
-    # 읽지 않은 메시지 수도 삭제되지 않은 채팅방만 계산
-    # ✅ 최적화: SQL 집계 사용 (N+1 쿼리 방지)
-    # BEFORE: Ruby 배열 반복 (1 + N 쿼리)
-    # AFTER: SQL SUM 사용 (3 쿼리로 고정)
-    # NOTE: deleted_at으로 통일 (hidden 컬럼 deprecated)
-    @total_unread = current_user.chat_room_participants
-                                .active  # where(deleted_at: nil)
-                                .sum(:unread_count)
-
-    @received_unread = current_user.chat_room_participants
-                                   .active
-                                   .joins(chat_room: :source_post)
-                                   .where("posts.user_id = ? AND chat_rooms.initiator_id != ?",
-                                          current_user.id, current_user.id)
-                                   .sum(:unread_count)
-
-    @sent_unread = current_user.chat_room_participants
-                               .active
-                               .joins(:chat_room)
-                               .where("chat_rooms.initiator_id = ?", current_user.id)
-                               .sum(:unread_count)
+    @chat_rooms = query.chat_rooms
+    @total_unread = query.total_unread
+    @received_unread = query.received_unread
+    @sent_unread = query.sent_unread
   end
 end
