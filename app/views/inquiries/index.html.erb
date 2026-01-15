@@ -174,27 +174,47 @@
                         d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
-              <h3 class="font-bold text-stone-900 mb-2">
-                <% if @filter == 'pending' %>
-                  대기중인 문의가 없습니다
-                <% elsif @filter == 'answered' %>
-                  답변 완료된 문의가 없습니다
-                <% else %>
-                  문의 내역이 없습니다
+              <% if logged_in? %>
+                <h3 class="font-bold text-stone-900 mb-2">
+                  <% if @filter == 'pending' %>
+                    대기중인 문의가 없습니다
+                  <% elsif @filter == 'answered' %>
+                    답변 완료된 문의가 없습니다
+                  <% else %>
+                    문의 내역이 없습니다
+                  <% end %>
+                </h3>
+                <p class="text-sm text-stone-500 mb-6">
+                  궁금한 점이나 개선 요청이 있으시면<br>
+                  새 문의를 등록해주세요.
+                </p>
+                <%= link_to new_inquiry_path,
+                    class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                           bg-orange-500 text-white text-sm font-semibold
+                           hover:bg-orange-600 hover:scale-105 transition-all shadow-md" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  새 문의 작성
                 <% end %>
-              </h3>
-              <p class="text-sm text-stone-500 mb-6">
-                궁금한 점이나 개선 요청이 있으시면<br>
-                새 문의를 등록해주세요.
-              </p>
-              <%= link_to new_inquiry_path,
-                  class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-                         bg-orange-500 text-white text-sm font-semibold
-                         hover:bg-orange-600 hover:scale-105 transition-all shadow-md" do %>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                새 문의 작성
+              <% else %>
+                <h3 class="font-bold text-stone-900 mb-2">
+                  로그인이 필요합니다
+                </h3>
+                <p class="text-sm text-stone-500 mb-6">
+                  문의 내역을 확인하거나 새 문의를 작성하려면<br>
+                  로그인이 필요합니다.
+                </p>
+                <%= link_to login_path,
+                    class: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                           bg-orange-500 text-white text-sm font-semibold
+                           hover:bg-orange-600 hover:scale-105 transition-all shadow-md" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                  </svg>
+                  로그인
+                <% end %>
               <% end %>
             </div>
           <% end %>
@@ -260,7 +280,7 @@
           </h3>
 
           <div class="space-y-2">
-            <%= link_to new_inquiry_path,
+            <%= link_to (logged_in? ? new_inquiry_path : login_path),
                 class: "flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group" do %>
               <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
                 <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +352,7 @@
   </main>
 
   <%# ===== FAB Button (Mobile) ===== %>
-  <%= link_to new_inquiry_path,
+  <%= link_to (logged_in? ? new_inquiry_path : login_path),
       class: "lg:hidden fixed bottom-24 right-4 z-50
              flex items-center gap-2 px-5 py-3.5 rounded-full
              bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/30

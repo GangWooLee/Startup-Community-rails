@@ -86,6 +86,10 @@
         <%# 5. Q&A (Help Desk) %>
         <% is_qa_active = controller_name == 'inquiries' %>
         <%= collapsible_sidebar_nav_item "Q&A", inquiries_path, :question, is_active: is_qa_active %>
+
+        <%# 6. About Us %>
+        <% is_about_active = current_page?(about_path) %>
+        <%= collapsible_sidebar_nav_item "About Us", about_path, :info, is_active: is_about_active %>
       </div>
 
       <%# Boards Section - 펼친 상태에서만 표시 %>

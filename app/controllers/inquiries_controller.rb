@@ -1,32 +1,38 @@
 # frozen_string_literal: true
 
 class InquiriesController < ApplicationController
-  before_action :require_login
+  before_action :require_login, except: [ :index ]
   before_action :set_inquiry, only: [ :show ]
 
   def index
     @filter = params[:filter] || "all"
     @search = params[:q]
-    @inquiries = current_user.inquiries.order(created_at: :desc)
 
-    # 검색 필터 적용
-    if @search.present?
-      search_term = "%#{@search}%"
-      @inquiries = @inquiries.where(
-        "title LIKE ? OR content LIKE ?",
-        search_term, search_term
-      )
+    # 비로그인 사용자는 빈 목록 (페이지는 볼 수 있음)
+    if logged_in?
+      @inquiries = current_user.inquiries.order(created_at: :desc)
+
+      # 검색 필터 적용
+      if @search.present?
+        search_term = "%#{@search}%"
+        @inquiries = @inquiries.where(
+          "title LIKE ? OR content LIKE ?",
+          search_term, search_term
+        )
+      end
+
+      # 상태 필터 적용
+      case @filter
+      when "pending"
+        @inquiries = @inquiries.where(status: [ :pending, :in_progress ])
+      when "answered"
+        @inquiries = @inquiries.where(status: [ :resolved, :closed ])
+      end
+
+      @inquiries = @inquiries.page(params[:page]).per(10)
+    else
+      @inquiries = Inquiry.none.page(params[:page]).per(10)
     end
-
-    # 상태 필터 적용
-    case @filter
-    when "pending"
-      @inquiries = @inquiries.where(status: [ :pending, :in_progress ])
-    when "answered"
-      @inquiries = @inquiries.where(status: [ :resolved, :closed ])
-    end
-
-    @inquiries = @inquiries.page(params[:page]).per(10)
   end
 
   def new

@@ -14,9 +14,9 @@ class InquiriesControllerTest < ActionDispatch::IntegrationTest
   # 인증 테스트
   # =========================================
 
-  test "requires login for index" do
+  test "allows access to index without login" do
     get inquiries_path
-    assert_redirected_to login_path
+    assert_response :success
   end
 
   test "requires login for new" do

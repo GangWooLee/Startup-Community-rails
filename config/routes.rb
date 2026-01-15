@@ -148,6 +148,7 @@ Rails.application.routes.draw do
   get "privacy", to: "pages#privacy", as: :privacy
   get "refund", to: "pages#refund", as: :refund
   get "guidelines", to: "pages#guidelines", as: :guidelines
+  get "about", to: "pages#about", as: :about
 
   # OAuth 약관 동의 (신규 소셜 로그인 사용자용)
   get  "oauth/terms", to: "oauth_terms#show", as: :oauth_terms
