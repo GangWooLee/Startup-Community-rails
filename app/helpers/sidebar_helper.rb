@@ -111,27 +111,30 @@ module SidebarHelper
   end
 
   # 펼친 상태 사이드바 아이템
+  # 아이콘을 고정 너비 컨테이너(w-10)에 배치하여 접힘 애니메이션 시 위치 고정
   def render_expanded_sidebar_item(label, path, icon, is_active, badge)
     active_class = is_active ?
       "text-stone-900 bg-stone-100 font-bold" :
       "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
 
-    link_to path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all #{active_class}",
+    link_to path, class: "flex items-center py-2.5 rounded-lg transition-all #{active_class}",
                   data: { sidebar_collapse_target: "expandedContent" } do
-      concat(sidebar_icon(icon, active: is_active))
+      concat(content_tag(:div, sidebar_icon(icon, active: is_active),
+             class: "w-10 flex-shrink-0 flex justify-center"))
       concat(content_tag(:span, label, class: "truncate"))
       concat(render_sidebar_badge(badge)) if badge.present? && badge.to_i > 0
     end
   end
 
   # 접힌 상태 사이드바 아이템
+  # 아이콘을 고정 너비 컨테이너(w-10)에 배치하여 펼침과 동일한 위치 유지
   def render_collapsed_sidebar_item(label, path, icon, is_active, badge)
     collapsed_active_class = is_active ? "bg-stone-100" : "hover:bg-stone-50"
 
-    link_to path, class: "hidden flex justify-center p-2.5 rounded-lg transition-all #{collapsed_active_class}",
+    link_to path, class: "hidden flex items-center py-2.5 rounded-lg transition-all #{collapsed_active_class}",
                   title: label,
                   data: { sidebar_collapse_target: "collapsedContent" } do
-      concat(content_tag(:div, class: "relative") do
+      concat(content_tag(:div, class: "w-10 flex-shrink-0 flex justify-center relative") do
         concat(sidebar_icon(icon, active: is_active))
         if badge.present? && badge.to_i > 0
           concat(content_tag(:span, "",
