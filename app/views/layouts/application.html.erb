@@ -489,8 +489,9 @@
         │ Widget     │                               │
         └────────────┴───────────────────────────────┘
       %>
-      <div class="flex h-screen w-full bg-[#FDFBF7] overflow-hidden">
-        <%# Left: Global Sidebar (hidden on mobile) %>
+      <div class="flex h-screen w-full bg-[#FDFBF7] overflow-hidden"
+           data-controller="sidebar-collapse">
+        <%# Left: Global Sidebar (hidden on mobile, shown via JS on mobile menu toggle) %>
         <%= render "shared/global_sidebar" %>
 
         <%# Right: Main Content Area %>

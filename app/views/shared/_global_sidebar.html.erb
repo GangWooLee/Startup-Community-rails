@@ -15,14 +15,16 @@
   Drawbridge Task #109: My Community 섹션 삭제 (개발 미완료)
 %>
 
-<div data-controller="sidebar-collapse" class="contents">
-  <aside class="hidden md:flex md:flex-col w-[clamp(200px,18vw,256px)] bg-white border-r border-stone-200/60
-                h-screen sticky top-0 flex-shrink-0 transition-all duration-300"
-         data-sidebar-collapse-target="sidebar">
+<%# 사이드바: 모바일에서는 JS가 hidden 클래스 제어, 데스크톱에서는 md:flex로 항상 표시 %>
+<%# 컨트롤러는 상위 레이아웃(application.html.erb)에 정의됨 %>
+<aside class="hidden md:flex md:flex-col w-64 md:w-[clamp(200px,18vw,256px)] bg-white border-r border-stone-200/60
+              h-screen sticky md:top-0 flex-shrink-0 transition-all duration-300 ease-in-out
+              shadow-xl md:shadow-none"
+       data-sidebar-collapse-target="sidebar">
 
     <%# Logo & Brand - h-16 (64px) to align with Compact Header %>
     <div class="flex items-center h-16 border-b border-stone-100 px-3">
-      <%# 펼친 상태: 로고 + 브랜드명 + 접기 버튼 %>
+      <%# 펼친 상태: 로고 + 브랜드명 + 접기/닫기 버튼 %>
       <div class="flex items-center justify-between w-full" data-sidebar-collapse-target="expandedContent">
         <%= link_to community_path, class: "flex items-center gap-3 group" do %>
           <%= image_tag "/undrew_icon_only.png", alt: "Undrew",
@@ -31,15 +33,21 @@
           <span class="font-bold text-lg text-stone-900 tracking-tight">Undrew</span>
         <% end %>
 
-        <%# 접기 버튼 %>
+        <%# 데스크톱: 접기 버튼, 모바일: 닫기 버튼 %>
         <button type="button"
                 class="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
                 data-action="click->sidebar-collapse#toggle"
                 title="사이드바 접기">
+          <%# 데스크톱용 접기 아이콘 %>
           <svg data-sidebar-collapse-target="toggleIcon"
-               class="w-4 h-4 transition-transform duration-300"
+               class="w-4 h-4 transition-transform duration-300 hidden md:block"
                fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+          </svg>
+          <%# 모바일용 닫기 아이콘 %>
+          <svg class="w-5 h-5 md:hidden"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
@@ -118,4 +126,3 @@
     <%# User Profile Widget (Bottom Fixed) %>
     <%= render "shared/sidebar_user_widget" %>
   </aside>
-</div>

@@ -70,11 +70,11 @@
     border: 1px solid #1AAB29;
   }
 
-  /* Premium Textarea */
+  /* Premium Textarea - 반응형 폰트 크기 */
   .premium-textarea {
     width: 100%;
     background: transparent;
-    font-size: 1.5rem;
+    font-size: 1.125rem;  /* 18px - 모바일 기본 */
     line-height: 1.4;
     color: #1a1a1a;
     border: none;
@@ -86,9 +86,19 @@
   .premium-textarea::placeholder {
     color: #d6d3d1;
   }
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {  /* sm */
     .premium-textarea {
-      font-size: 1.875rem;
+      font-size: 1.25rem;  /* 20px */
+    }
+  }
+  @media (min-width: 768px) {  /* md */
+    .premium-textarea {
+      font-size: 1.5rem;  /* 24px */
+    }
+  }
+  @media (min-width: 1024px) {  /* lg */
+    .premium-textarea {
+      font-size: 1.875rem;  /* 30px */
     }
   }
 
@@ -412,7 +422,7 @@
 
   <%# ========== Main: Premium macOS Window (화면 중앙, 75vh) ========== %>
   <main class="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 sm:px-6 pb-8">
-    <div class="macos-window-premium w-full max-w-4xl h-[75vh] min-h-[600px] flex flex-col animate-window-emerge">
+    <div class="macos-window-premium w-full max-w-4xl h-[75vh] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex flex-col animate-window-emerge">
 
       <%# ========== Premium Title Bar ========== %>
       <div class="macos-titlebar-premium flex items-center relative shrink-0">
@@ -444,10 +454,10 @@
 
           <%# AI Greeting (대형 타이포그래피) %>
           <div class="mb-8 animate-fade-in-up">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-[#2C2825] leading-tight tracking-tight mb-2">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#2C2825] leading-tight tracking-tight mb-2">
               반가워요, <%= @user&.name || "메이커" %>님!
             </h1>
-            <p class="text-2xl md:text-3xl font-medium text-stone-400 leading-tight">
+            <p class="text-xl sm:text-2xl md:text-3xl font-medium text-stone-400 leading-tight">
               세상을 바꿀 아이디어를 기록해볼까요?
             </p>
           </div>
@@ -564,12 +574,13 @@
             <%# Undrew 캐릭터 with 호흡 애니메이션 %>
             <div class="relative">
               <%# 배경 글로우 (orange) %>
-              <div class="absolute inset-0 w-32 h-32 rounded-full bg-orange-200/40 blur-2xl animate-pulse"></div>
+              <div class="absolute inset-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full bg-orange-200/40 blur-2xl animate-pulse"></div>
 
               <%# 캐릭터 이미지 with 호흡 효과 %>
-              <img src="/undrew_hello_icon.png"
+              <img src="/undrew_hello_icon.webp"
                    alt="Undrew"
-                   class="relative w-28 h-28 object-contain animate-breathing">
+                   class="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain animate-breathing"
+                   loading="lazy">
             </div>
 
             <%# 생각 말풍선 with 타이핑 인디케이터 %>
