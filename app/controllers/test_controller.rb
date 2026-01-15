@@ -85,11 +85,16 @@ class TestController < ApplicationController
       return
     end
 
+    # post_type에 따라 기본 카테고리 결정
+    post_type = params[:post_type] || "community"
+    default_category = post_type == "outsourcing" ? "hiring" : "free"
+
     post = Post.create!(
       title: params[:title] || "테스트 게시글",
       content: params[:content] || "E2E 테스트를 위한 게시글입니다.",
       user: user,
-      post_type: params[:post_type] || "community"
+      post_type: post_type,
+      category: params[:category] || default_category
     )
 
     render json: {
