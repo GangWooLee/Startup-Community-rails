@@ -246,10 +246,19 @@
         </div>
       <% else %>
         <div class="pb-4 border-b border-border">
-          <div class="text-center py-4 bg-secondary/30 rounded-lg">
-            <p class="text-sm text-muted-foreground mb-2">댓글을 작성하려면 로그인이 필요합니다</p>
-            <%= link_to "로그인", login_path, class: "text-sm font-medium text-primary hover:underline" %>
-          </div>
+          <%= link_to login_path, class: "block" do %>
+            <div class="flex gap-3 cursor-pointer group">
+              <%# 기본 익명 아바타 %>
+              <div class="h-8 w-8 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <%= image_tag "/anonymous1-.png", alt: "익명", class: "h-full w-full object-cover" %>
+              </div>
+              <div class="flex-1">
+                <div class="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 bg-background text-muted-foreground group-hover:border-primary/50 transition-colors">
+                  댓글을 작성하려면 로그인이 필요합니다
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
       <% end %>
 
