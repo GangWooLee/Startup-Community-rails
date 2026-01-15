@@ -16,25 +16,14 @@
 
   <!-- Content -->
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-6 md:space-y-8">
-    <!-- Contact Section: Map + Info Card -->
-    <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-      <!-- Left: Google Maps -->
-      <div class="rounded-sm overflow-hidden border shadow-sm h-[350px] md:h-[500px] lg:h-[600px]">
-        <iframe
-          src="https://maps.google.com/maps?q=%EC%97%B0%EC%84%B8%EB%8C%80%ED%95%99%EA%B5%90&output=embed"
-          width="100%"
-          height="100%"
-          style="border:0;"
-          allowfullscreen=""
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
+    <!-- Contact Section: Floating Card Over Map -->
+    <!-- Mobile: Vertical Stack -->
+    <div class="md:hidden space-y-4">
+      <div class="h-[300px] w-3/4 mx-auto rounded-sm overflow-hidden border shadow-sm">
+        <img src="/images/map.png" alt="Yonsei University Location" class="w-full h-full object-cover">
       </div>
 
-      <!-- Right: Contact Info Card -->
-      <div class="rounded-sm border bg-card p-4 md:p-6 lg:p-8 space-y-4 md:space-y-5 lg:space-y-6 h-fit">
-        <h2 class="text-xl md:text-2xl font-bold">Contact Us</h2>
-
+      <div class="w-3/4 mx-auto rounded-sm border bg-card p-6 space-y-5">
         <!-- Mail -->
         <div>
           <p class="text-sm text-muted-foreground font-medium mb-1">Mail</p>
@@ -74,32 +63,53 @@
       </div>
     </div>
 
-    <!-- Service Policies Section -->
-    <section class="rounded-sm border bg-card p-4 md:p-6">
-      <h2 class="text-lg md:text-xl font-semibold mb-4">
-        서비스 정책
-      </h2>
-      <div class="space-y-1">
-        <%= link_to terms_path, class: "flex items-center justify-between p-3 rounded-sm hover:bg-muted transition-colors group" do %>
-          <span class="font-medium">서비스 이용약관</span>
-          <svg class="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        <% end %>
-        <%= link_to privacy_path, class: "flex items-center justify-between p-3 rounded-sm hover:bg-muted transition-colors group" do %>
-          <span class="font-medium">개인정보 처리방침</span>
-          <svg class="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        <% end %>
-        <%= link_to refund_path, class: "flex items-center justify-between p-3 rounded-sm hover:bg-muted transition-colors group" do %>
-          <span class="font-medium">환불 정책</span>
-          <svg class="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        <% end %>
+    <!-- Tablet+: Floating Card Over Map -->
+    <div class="hidden md:block relative w-3/4 mx-auto">
+      <!-- Background Map -->
+      <div class="h-[450px] lg:h-[525px] rounded-sm overflow-hidden border shadow-sm">
+        <img src="/images/map.png" alt="Yonsei University Location" class="w-full h-full object-cover">
       </div>
-    </section>
+
+      <!-- Floating Contact Card -->
+      <div class="absolute top-8 right-8 w-[300px] md:w-[320px] lg:w-[338px] max-h-[calc(100%-4rem)] rounded-sm border bg-card shadow-xl p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 overflow-y-auto">
+        <!-- Mail -->
+        <div>
+          <p class="text-sm text-muted-foreground font-medium mb-1">Mail</p>
+          <a href="mailto:ziwonlee9@yonsei.ac.kr"
+             class="text-base text-foreground hover:text-primary hover:underline transition-colors break-all block">
+            ziwonlee9@yonsei.ac.kr
+          </a>
+        </div>
+
+        <!-- LinkedIn -->
+        <div>
+          <p class="text-sm text-muted-foreground font-medium mb-1">LinkedIn</p>
+          <a href="https://linkedin.com/company/grounded-ai-community"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="text-base text-foreground hover:text-primary hover:underline transition-colors break-all inline-flex items-center gap-1">
+            linkedin.com/company/grounded-ai-community
+            <svg class="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Instagram -->
+        <div>
+          <p class="text-sm text-muted-foreground font-medium mb-1">Instagram</p>
+          <a href="https://instagram.com/undrew.community"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="text-base text-foreground hover:text-primary hover:underline transition-colors break-all inline-flex items-center gap-1">
+            @undrew.community
+            <svg class="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
   </main>
 
   <%= render "shared/bottom_nav" %>
