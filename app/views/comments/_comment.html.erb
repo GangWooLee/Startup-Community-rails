@@ -7,7 +7,7 @@
 
 <%# 3단 Flexbox 구조: [연결선(대댓글)] - [아바타] - [콘텐츠] - [좋아요 버튼] %>
 <div id="comment-<%= comment.id %>"
-     class="<%= is_reply ? 'mt-2' : 'py-3' %>"
+     class="comment-item <%= is_reply ? 'mt-2' : 'py-3' %>"
      data-controller="reply-toggle">
   <div class="flex items-start gap-2">
     <% if is_reply %>
@@ -32,7 +32,7 @@
       </p>
 
       <%# [B] 메타데이터 Row: 시간 - 좋아요 수 - 답글 달기 - 삭제 %>
-      <div class="flex items-center gap-3 mt-1">
+      <div class="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
         <span class="text-xs text-muted-foreground"><%= time_ago_in_words(comment.created_at) %></span>
 
         <% if comment.likes_count > 0 %>

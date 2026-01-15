@@ -6,7 +6,7 @@
      data-controller="comment-form"
      data-comment-form-url-value="<%= post_comments_path(post) %>"
      data-parent-id="<%= parent_id %>">
-  <div class="flex gap-3">
+  <div class="flex gap-2 sm:gap-3" data-testid="comment-form">
     <% if defined?(current_user) && current_user %>
       <%= render partial: "shared/avatar", locals: { user: current_user, size: "sm" } %>
     <% end %>
