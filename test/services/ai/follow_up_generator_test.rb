@@ -82,7 +82,8 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
     result = @generator.send(:fallback_questions)
 
     assert result[:questions].is_a?(Array)
-    assert_equal 3, result[:questions].length
+    # 3개 필수 + 2개 선택 = 5개 질문
+    assert_equal 5, result[:questions].length
 
     # 첫 번째 질문 확인
     first = result[:questions].first
@@ -98,8 +99,9 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
     required_count = result[:questions].count { |q| q[:required] == true }
     optional_count = result[:questions].count { |q| q[:required] == false }
 
-    assert_equal 2, required_count, "필수 질문 2개"
-    assert_equal 1, optional_count, "선택 질문 1개"
+    # 3개 필수 + 2개 선택
+    assert_equal 3, required_count, "필수 질문 3개"
+    assert_equal 2, optional_count, "선택 질문 2개"
   end
 
   test "fallback_questions does not include inappropriate examples" do
@@ -176,20 +178,23 @@ class Ai::FollowUpGeneratorTest < ActiveSupport::TestCase
     assert_equal "question_1", result[:questions].first[:id]
   end
 
-  test "validate_and_normalize limits to 3 questions" do
+  test "validate_and_normalize limits to 5 questions" do
     input = {
       questions: [
         { id: "q1", question: "질문 1", examples: [], required: true },
         { id: "q2", question: "질문 2", examples: [], required: true },
-        { id: "q3", question: "질문 3", examples: [], required: false },
+        { id: "q3", question: "질문 3", examples: [], required: true },
         { id: "q4", question: "질문 4", examples: [], required: false },
-        { id: "q5", question: "질문 5", examples: [], required: false }
+        { id: "q5", question: "질문 5", examples: [], required: false },
+        { id: "q6", question: "질문 6 (초과)", examples: [], required: false },
+        { id: "q7", question: "질문 7 (초과)", examples: [], required: false }
       ]
     }
 
     result = @generator.send(:validate_and_normalize, input)
 
-    assert_equal 3, result[:questions].length
+    # 최대 5개 질문으로 제한 (3개 필수 + 2개 선택)
+    assert_equal 5, result[:questions].length
   end
 
   test "validate_and_normalize defaults required to true" do
