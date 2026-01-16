@@ -19,6 +19,11 @@ production:
     class: DestroyExpiredDeletionsJob
     schedule: at 3am every day
 
+  # 미저장 AI 분석 결과 자동 삭제 (30분 경과 후)
+  cleanup_unsaved_analyses:
+    class: CleanupUnsavedAnalysesJob
+    schedule: every 30 minutes
+
   # 데이터베이스 자동 백업 (비활성화)
   # ⚠️ Production에서 PostgreSQL 사용 시 불필요 (DigitalOcean Managed DB 자동 백업 사용)
   # SQLite 환경에서만 활성화하세요.

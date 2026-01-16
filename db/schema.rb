@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_13_063045) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_16_110714) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -152,11 +152,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_063045) do
     t.json "follow_up_answers"
     t.text "idea", null: false
     t.boolean "is_real_analysis", default: true
+    t.boolean "is_saved", default: false, null: false
     t.boolean "partial_success", default: false
     t.integer "score"
     t.string "status", default: "completed", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["is_saved", "updated_at"], name: "idx_idea_analyses_unsaved_cleanup"
     t.index ["status"], name: "index_idea_analyses_on_status"
     t.index ["user_id", "created_at"], name: "index_idea_analyses_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_idea_analyses_on_user_id"

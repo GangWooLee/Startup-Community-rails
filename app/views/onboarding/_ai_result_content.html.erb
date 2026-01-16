@@ -74,6 +74,18 @@
 
   <div class="space-y-8">
 
+    <%# 휘발성 경고 배너 - 미저장 상태일 때만 표시 %>
+    <% unless idea_analysis.is_saved %>
+      <div class="flex justify-center">
+        <div class="inline-flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl animate-fade-in">
+          <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span class="text-sm text-amber-700">이 분석 결과는 페이지를 나가면 사라집니다. 보관하려면 아래에서 저장해주세요.</span>
+        </div>
+      </div>
+    <% end %>
+
     <!-- =============================================== -->
     <!-- SECTION 1: THE NAVIGATOR (BrowserCard Style) -->
     <!-- =============================================== -->
@@ -578,6 +590,25 @@
       <%= link_to community_path, class: "w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-300 bg-white text-slate-700 font-semibold btn-hover" do %>
         커뮤니티 보러가기
       <% end %>
+
+      <%# 저장 체크박스 - 버튼 하단 중앙 %>
+      <%# 페이지 이탈 시 체크 상태면 저장 (turbo:before-visit, beforeunload) %>
+      <div class="flex justify-center pt-2"
+           data-controller="save-analysis"
+           data-save-analysis-url-value="<%= save_analysis_path(idea_analysis) %>"
+           data-save-analysis-already-saved-value="<%= idea_analysis.is_saved %>">
+        <label class="inline-flex items-center gap-2 cursor-pointer group">
+          <input type="checkbox"
+                 <%= 'checked' if idea_analysis.is_saved %>
+                 class="h-5 w-5 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                 data-save-analysis-target="checkbox"
+                 data-action="change->save-analysis#toggle">
+          <span class="text-sm transition-colors <%= idea_analysis.is_saved ? 'text-emerald-600' : 'text-slate-600 group-hover:text-slate-800' %>"
+                data-save-analysis-target="label">
+            <%= idea_analysis.is_saved ? '저장됨' : '아이디어 저장' %>
+          </span>
+        </label>
+      </div>
     </div>
 
   </div>

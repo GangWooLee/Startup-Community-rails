@@ -31,6 +31,11 @@ class IdeaAnalysis < ApplicationRecord
   # 최신순 정렬
   scope :recent, -> { order(created_at: :desc) }
 
+  # 저장 상태 scopes
+  scope :saved, -> { where(is_saved: true) }
+  scope :unsaved, -> { where(is_saved: false) }
+  scope :expired_unsaved, -> { unsaved.where("updated_at < ?", 30.minutes.ago) }
+
   # 분석 완료 시 Turbo Stream 브로드캐스트
   after_update_commit :broadcast_completion, if: :should_broadcast_completion?
 
@@ -96,6 +101,11 @@ class IdeaAnalysis < ApplicationRecord
   end
 
   public
+
+  # 사용자가 명시적으로 저장할 때 호출
+  def save_to_collection!
+    update!(is_saved: true)
+  end
 
   # JSON 필드 접근 헬퍼 (symbolize_keys 적용)
   def parsed_result

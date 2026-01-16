@@ -40,6 +40,7 @@ Rails.application.routes.draw do
   post "ai/questions", to: "onboarding#ai_questions", as: :onboarding_ai_questions
   post "ai/analyze", to: "onboarding#ai_analyze", as: :onboarding_ai_analyze
   get "ai/result/:id", to: "onboarding#ai_result", as: :ai_result
+  post "ai/result/:id/save", to: "onboarding#save_analysis", as: :save_analysis
   get "ai/expert/:id", to: "onboarding#expert_profile", as: :expert_profile
 
   # Community (커뮤니티)
