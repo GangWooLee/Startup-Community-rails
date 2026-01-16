@@ -395,7 +395,7 @@
   <body class="font-sans antialiased" data-controller="search-modal">
     <!-- Flash Messages -->
     <% if flash.any? %>
-      <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 pointer-events-none">
+      <div class="fixed top-0 left-0 right-0 z-[9999] flex justify-center p-4 pointer-events-none">
         <div class="w-full max-w-md space-y-2 pointer-events-auto">
           <% flash.each do |type, message| %>
             <%# GA4 이벤트는 스크립트에서만 사용하므로 팝업으로 표시하지 않음 %>

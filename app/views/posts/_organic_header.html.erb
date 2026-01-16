@@ -72,8 +72,8 @@
               <% end %>
             </button>
 
-            <%# Notification Dropdown %>
-            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white border border-stone-200 rounded-2xl shadow-xl"
+            <%# Notification Dropdown - z-[100]으로 모든 sticky 헤더보다 위에 표시 %>
+            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white border border-stone-200 rounded-2xl shadow-xl z-[100]"
                  data-notification-dropdown-target="dropdown">
               <%= render "notifications/dropdown" %>
             </div>

@@ -38,8 +38,8 @@
               <% end %>
             </button>
 
-            <%# 알림 드롭다운 %>
-            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-background border border-border rounded-lg shadow-lg"
+            <%# 알림 드롭다운 - z-[100]으로 모든 sticky 헤더보다 위에 표시 %>
+            <div class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-background border border-border rounded-lg shadow-lg z-[100]"
                  data-notification-dropdown-target="dropdown">
               <%= render "notifications/dropdown" %>
             </div>
