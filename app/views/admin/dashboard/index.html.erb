@@ -51,32 +51,37 @@
     </div>
   <% end %>
 
-  <!-- 정산 요청 -->
-  <div class="bg-card rounded-xl border border-border p-5 card-hover">
+  <!-- 현재 활성 사용자 -->
+  <%= link_to active_admin_user_sessions_path, class: "bg-card rounded-xl border border-border p-5 card-hover block" do %>
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-muted-foreground">정산 요청</p>
+        <p class="text-sm font-medium text-muted-foreground">현재 접속자</p>
         <p class="text-2xl font-bold text-foreground mt-1">
-          <% pending_settlements = 0 %>
-          <% if pending_settlements > 0 %>
-            <span class="text-orange-600"><%= pending_settlements %></span>
+          <% if @online_users_count > 0 %>
+            <span class="text-green-600"><%= @online_users_count %></span>
           <% else %>
             <span class="text-muted-foreground">0</span>
           <% end %>
         </p>
         <p class="text-xs mt-1">
-          <% if pending_settlements > 0 %>
-            <span class="text-orange-600 font-medium">정산 대기 중</span>
+          <% if @online_users_count > 0 %>
+            <span class="inline-flex items-center gap-1">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span class="text-green-600 font-medium"><%= @active_sessions_count %>개 세션 활성</span>
+            </span>
           <% else %>
-            <span class="text-green-600 font-medium">정산 완료</span>
+            <span class="text-muted-foreground">접속자 없음</span>
           <% end %>
         </p>
       </div>
-      <div class="w-12 h-12 rounded-xl <%= pending_settlements > 0 ? 'bg-orange-50' : 'bg-muted' %> flex items-center justify-center">
-        <%= icon "banknotes", variant: :solid, css_class: "w-6 h-6 #{pending_settlements > 0 ? 'text-orange-600' : 'text-muted-foreground'}" %>
+      <div class="w-12 h-12 rounded-xl <%= @online_users_count > 0 ? 'bg-green-500/10' : 'bg-muted' %> flex items-center justify-center">
+        <%= icon "signal", variant: :solid, css_class: "w-6 h-6 #{@online_users_count > 0 ? 'text-green-600' : 'text-muted-foreground'}" %>
       </div>
     </div>
-  </div>
+  <% end %>
 
   <!-- 오늘 메시지 -->
   <div class="bg-card rounded-xl border border-border p-5 card-hover">
@@ -249,6 +254,17 @@
           </div>
           <span class="font-semibold text-foreground"><%= number_with_delimiter(@total_posts) %></span>
         </div>
+
+        <!-- 오늘 접속자 -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <%= icon "user-circle", variant: :solid, css_class: "w-4 h-4 text-blue-600" %>
+            </div>
+            <span class="text-sm text-muted-foreground">오늘 접속자</span>
+          </div>
+          <span class="font-semibold text-foreground"><%= number_with_delimiter(@unique_users_today) %></span>
+        </div>
       </div>
     </div>
 
@@ -357,6 +373,22 @@
           <span class="text-sm text-foreground">문의 관리</span>
           <% if @pending_inquiries > 0 %>
             <span class="text-xs font-medium text-yellow-600 ml-auto"><%= @pending_inquiries %> 대기</span>
+          <% else %>
+            <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
+          <% end %>
+        <% end %>
+
+        <%= link_to admin_user_sessions_path, class: "flex items-center gap-3 px-3 py-2 rounded-lg card-hover" do %>
+          <%= icon "clock", variant: :outline, css_class: "w-5 h-5 text-muted-foreground" %>
+          <span class="text-sm text-foreground">접속 기록</span>
+          <% if @online_users_count > 0 %>
+            <span class="inline-flex items-center gap-1 ml-auto">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span class="text-xs font-medium text-green-600"><%= @online_users_count %> 온라인</span>
+            </span>
           <% else %>
             <%= icon "chevron-right", variant: :mini, css_class: "w-4 h-4 text-muted-foreground/50 ml-auto" %>
           <% end %>

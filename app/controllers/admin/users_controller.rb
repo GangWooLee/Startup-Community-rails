@@ -1,7 +1,7 @@
 # 관리자 회원 관리 컨트롤러
 # 회원 검색, 상세 정보, 채팅방 목록 확인
 class Admin::UsersController < Admin::BaseController
-  before_action :set_user, only: [ :show, :chat_rooms, :destroy_post, :destroy_comment ]
+  before_action :set_user, only: [ :show, :chat_rooms, :destroy_post, :destroy_comment, :force_logout_all ]
 
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능
@@ -31,6 +31,14 @@ class Admin::UsersController < Admin::BaseController
       @users = @users.where("email LIKE ? OR name LIKE ?", keyword, keyword)
     end
 
+    # 날짜 범위 필터링
+    if params[:from_date].present?
+      @users = @users.where("created_at >= ?", Date.parse(params[:from_date]).beginning_of_day)
+    end
+    if params[:to_date].present?
+      @users = @users.where("created_at <= ?", Date.parse(params[:to_date]).end_of_day)
+    end
+
     # 페이지네이션 (20명씩) - count는 서브쿼리 추가 전에 계산
     @page = (params[:page] || 1).to_i
     @per_page = 20
@@ -46,6 +54,63 @@ class Admin::UsersController < Admin::BaseController
 
     # 오른쪽 패널 통계 데이터
     calculate_panel_stats
+  end
+
+  # GET /admin/users/export.csv
+  # 현재 필터가 적용된 회원 목록을 CSV로 내보내기
+  def export
+    @users = User.order(created_at: :desc)
+
+    # 상태 필터링 (index와 동일한 로직)
+    case params[:status]
+    when "active"
+      @users = @users.active
+    when "withdrawn"
+      @users = @users.deleted
+    end
+
+    # 타입 필터링
+    case params[:type]
+    when "admin"
+      @users = @users.where(is_admin: true)
+    when "oauth"
+      @users = @users.joins(:oauth_identities).distinct
+    end
+
+    # 검색
+    if params[:q].present?
+      keyword = "%#{params[:q]}%"
+      @users = @users.where("email LIKE ? OR name LIKE ?", keyword, keyword)
+    end
+
+    # 날짜 필터링
+    if params[:from_date].present?
+      @users = @users.where("created_at >= ?", Date.parse(params[:from_date]).beginning_of_day)
+    end
+    if params[:to_date].present?
+      @users = @users.where("created_at <= ?", Date.parse(params[:to_date]).end_of_day)
+    end
+
+    # N+1 방지: 서브쿼리로 카운트 조회
+    @users = @users.select(
+      "users.*",
+      "(SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) AS posts_count_value",
+      "(SELECT COUNT(*) FROM chat_room_participants WHERE chat_room_participants.user_id = users.id) AS chat_rooms_count_value"
+    )
+
+    columns = {
+      id: "ID",
+      name: "이름",
+      email: "이메일",
+      created_at: "가입일",
+      type: ->(user) { user_type_label(user) },
+      status: ->(user) { user.deleted? ? "탈퇴" : "활동 중" },
+      posts_count_value: "게시글 수",
+      chat_rooms_count_value: "채팅방 수"
+    }
+
+    service = Admin::CsvExportService.new(@users, columns: columns, filename_prefix: "users")
+    send_data service.generate, filename: service.filename, type: "text/csv; charset=utf-8"
   end
 
   # GET /admin/users/:id
@@ -66,6 +131,11 @@ class Admin::UsersController < Admin::BaseController
     @posts_count = @user.posts.count
     @comments_count = @user.comments.count
     @messages_count = @user.sent_messages.count
+
+    # 접속 기록 (최근 20개)
+    @sessions = @user.session_history(limit: 20)
+    @sessions_count = @user.user_sessions.count
+    @active_sessions_count = @user.active_sessions.count
 
     # 탈퇴 회원인 경우 탈퇴 기록 로드
     @user_deletion = @user.last_deletion if @user.deleted?
@@ -111,10 +181,47 @@ class Admin::UsersController < Admin::BaseController
     redirect_to admin_user_path(@user, anchor: "comments")
   end
 
+  # POST /admin/users/:id/force_logout_all
+  # 모든 활성 세션 강제 종료
+  def force_logout_all
+    count = @user.active_sessions.count
+
+    if count > 0
+      @user.end_all_sessions!(reason: "admin_action")
+
+      # 관리자 행위 로깅
+      AdminViewLog.create!(
+        admin: current_user,
+        target: @user,
+        action: "force_logout_all_sessions",
+        ip_address: request.remote_ip,
+        user_agent: request.user_agent,
+        reason: "#{count}개 세션 강제 종료"
+      )
+
+      flash[:notice] = "#{@user.name}님의 #{count}개 세션이 모두 종료되었습니다."
+    else
+      flash[:alert] = "활성 세션이 없습니다."
+    end
+
+    redirect_to admin_user_path(@user)
+  end
+
   private
 
   def set_user
     @user = User.find(params[:id])
+  end
+
+  # 사용자 타입 레이블
+  def user_type_label(user)
+    if user.admin?
+      "관리자"
+    elsif user.oauth_user?
+      "OAuth"
+    else
+      "일반"
+    end
   end
 
   # 오른쪽 패널 통계 계산

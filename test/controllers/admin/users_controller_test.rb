@@ -89,6 +89,42 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     # 이 부분은 뷰에서 닉네임을 표시하는지에 따라 다름
   end
 
+  # =========================================
+  # CSV Export
+  # =========================================
+
+  test "admin can export users to CSV" do
+    log_in_as(@admin)
+
+    get export_admin_users_path(format: :csv)
+    assert_response :success
+    assert_equal "text/csv; charset=utf-8", response.content_type
+
+    # UTF-8 BOM 확인
+    assert response.body.start_with?("\xEF\xBB\xBF"), "CSV should start with UTF-8 BOM"
+
+    # 헤더 확인
+    assert_includes response.body, "ID"
+    assert_includes response.body, "이름"
+    assert_includes response.body, "이메일"
+  end
+
+  test "admin can export filtered users" do
+    log_in_as(@admin)
+
+    # 상태 필터 적용하여 내보내기
+    get export_admin_users_path(format: :csv, status: "active")
+    assert_response :success
+
+    # 탈퇴 회원은 포함되지 않아야 함
+    # (테스트 데이터에 따라 다름)
+  end
+
+  test "export requires admin login" do
+    get export_admin_users_path(format: :csv)
+    assert_redirected_to root_path
+  end
+
   private
 
   def log_in_as(user)

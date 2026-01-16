@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_16_110714) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_16_143046) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -423,6 +423,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_16_110714) do
     t.index ["user_id"], name: "index_user_deletions_on_user_id"
   end
 
+  create_table "user_sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "device_type"
+    t.string "ip_address"
+    t.datetime "last_activity_at"
+    t.datetime "logged_in_at", null: false
+    t.datetime "logged_out_at"
+    t.string "login_method", null: false
+    t.string "logout_reason"
+    t.boolean "remember_me", default: false
+    t.string "session_token", null: false
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.integer "user_id", null: false
+    t.index ["logged_in_at"], name: "index_user_sessions_on_logged_in_at"
+    t.index ["logged_out_at"], name: "index_user_sessions_on_logged_out_at"
+    t.index ["session_token"], name: "index_user_sessions_on_session_token", unique: true
+    t.index ["user_id", "logged_in_at"], name: "index_user_sessions_on_user_id_and_logged_in_at"
+    t.index ["user_id"], name: "index_user_sessions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.text "achievements"
     t.string "affiliation"
@@ -522,4 +543,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_16_110714) do
   add_foreign_key "reports", "users", column: "resolved_by_id"
   add_foreign_key "talent_listings", "users"
   add_foreign_key "user_deletions", "users"
+  add_foreign_key "user_sessions", "users"
 end

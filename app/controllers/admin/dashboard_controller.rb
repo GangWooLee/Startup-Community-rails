@@ -20,6 +20,12 @@ class Admin::DashboardController < Admin::BaseController
     @pending_reports = Report.pending.count
     @pending_inquiries = Inquiry.pending.count
 
+    # 세션 통계 (실시간 활성 사용자)
+    @active_sessions_count = UserSession.active.count
+    @online_users_count = UserSession.active.distinct.count(:user_id)
+    @today_login_count = UserSession.where("logged_in_at >= ?", Time.current.beginning_of_day).count
+    @unique_users_today = UserSession.where("logged_in_at >= ?", Time.current.beginning_of_day).distinct.count(:user_id)
+
     # 최근 가입 사용자 (10명 - 테이블용)
     @recent_users = User.includes(:chat_rooms).order(created_at: :desc).limit(10)
 

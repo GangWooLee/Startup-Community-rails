@@ -24,6 +24,11 @@ production:
     class: CleanupUnsavedAnalysesJob
     schedule: every 30 minutes
 
+  # 오래된 세션 기록 자동 삭제 (90일 경과 후)
+  cleanup_old_sessions:
+    class: CleanupOldSessionsJob
+    schedule: at 3:30am every day
+
   # 데이터베이스 자동 백업 (비활성화)
   # ⚠️ Production에서 PostgreSQL 사용 시 불필요 (DigitalOcean Managed DB 자동 백업 사용)
   # SQLite 환경에서만 활성화하세요.

@@ -52,7 +52,7 @@ class UsersController < ApplicationController
       if existing_user.update(update_attrs)
         # 사용된 인증 코드 삭제
         EmailVerification.where(email: email).destroy_all
-        log_in(existing_user)
+        log_in(existing_user, method: "email")
 
         # 1순위: 대기 중인 입력 → AI 분석 실행 (Lazy Registration)
         if (analysis = restore_pending_input_and_analyze)
@@ -85,7 +85,7 @@ class UsersController < ApplicationController
     if @user.save
       # 사용된 인증 코드 삭제
       EmailVerification.where(email: email).destroy_all
-      log_in(@user)
+      log_in(@user, method: "email")
 
       # GA4 회원가입 이벤트
       track_ga4_event("sign_up", { method: "email" })

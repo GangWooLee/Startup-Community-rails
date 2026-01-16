@@ -205,6 +205,18 @@
             <%= icon "chat-bubble-bottom-center-text", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
             댓글 (<%= @comments_count %>)
           </button>
+          <button type="button"
+                  class="px-6 py-3 text-sm font-medium text-muted-foreground btn-hover [&.is-active]:text-primary [&.is-active]:border-b-2 [&.is-active]:border-primary [&.is-active]:bg-primary/5"
+                  data-tabs-target="trigger"
+                  data-tab-id="sessions"
+                  data-action="click->tabs#select"
+                  role="tab">
+            <%= icon "clock", variant: :outline, css_class: "w-4 h-4 inline mr-1.5" %>
+            접속 기록
+            <% if @active_sessions_count > 0 %>
+              <span class="ml-1 px-1.5 py-0.5 text-xs font-medium bg-green-500 text-white rounded-full"><%= @active_sessions_count %></span>
+            <% end %>
+          </button>
         </nav>
       </div>
 
@@ -445,6 +457,146 @@
             <%= icon "chat-bubble-bottom-center-text", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
             <h3 class="mt-2 text-sm font-medium text-foreground">댓글 없음</h3>
             <p class="mt-1 text-sm text-muted-foreground">이 사용자는 작성한 댓글이 없습니다.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 접속 기록 -->
+      <div class="p-4 hidden" data-tabs-target="panel" data-tab-id="sessions" role="tabpanel">
+        <!-- 상단 액션 -->
+        <% if @active_sessions_count > 0 %>
+          <div class="flex items-center justify-between mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              <span class="text-sm text-amber-800">
+                현재 <strong><%= @active_sessions_count %></strong>개의 활성 세션이 있습니다.
+              </span>
+            </div>
+            <%= button_to force_logout_all_admin_user_path(@user),
+                method: :post,
+                class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-100 rounded-lg btn-hover",
+                data: { turbo_confirm: "정말 #{@user.name}님의 모든 세션을 강제 종료하시겠습니까?\n\n#{@active_sessions_count}개의 활성 세션이 모두 종료됩니다." } do %>
+              <%= icon "arrow-right-on-rectangle", variant: :outline, css_class: "w-4 h-4" %>
+              모든 기기에서 로그아웃
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @sessions.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-border">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">로그인 방식</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">디바이스</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">IP 주소</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">로그인 시간</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">상태</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <% @sessions.each do |session| %>
+                  <tr class="<%= session.active? ? 'bg-green-50/50' : '' %> card-hover">
+                    <td class="px-4 py-3">
+                      <% case session.login_method %>
+                      <% when "email" %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          <%= icon "envelope", variant: :solid, css_class: "w-3.5 h-3.5 mr-1" %>
+                          이메일
+                        </span>
+                      <% when "google" %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                          Google
+                        </span>
+                      <% when "github" %>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-800 text-white">
+                          GitHub
+                        </span>
+                      <% end %>
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2 text-sm">
+                        <% case session.device_type %>
+                        <% when "mobile" %>
+                          <%= icon "device-phone-mobile", variant: :outline, css_class: "w-4 h-4 text-muted-foreground" %>
+                          <span class="text-muted-foreground">모바일</span>
+                        <% when "tablet" %>
+                          <%= icon "device-tablet", variant: :outline, css_class: "w-4 h-4 text-muted-foreground" %>
+                          <span class="text-muted-foreground">태블릿</span>
+                        <% else %>
+                          <%= icon "computer-desktop", variant: :outline, css_class: "w-4 h-4 text-muted-foreground" %>
+                          <span class="text-muted-foreground">데스크톱</span>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="text-sm text-muted-foreground" title="<%= session.ip_address %>">
+                        <%= session.masked_ip_address %>
+                      </span>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="text-sm text-foreground"><%= session.logged_in_at.strftime("%Y-%m-%d %H:%M") %></p>
+                      <p class="text-xs text-muted-foreground"><%= time_ago_in_words(session.logged_in_at) %> 전</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <% if session.active? %>
+                        <span class="inline-flex items-center gap-1.5 text-sm">
+                          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          <span class="text-green-600 font-medium">활성</span>
+                        </span>
+                        <% if session.remember_me %>
+                          <span class="block text-xs text-muted-foreground mt-0.5">Remember Me</span>
+                        <% end %>
+                      <% else %>
+                        <span class="inline-flex items-center gap-1.5 text-sm">
+                          <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                          <span class="text-muted-foreground">종료됨</span>
+                        </span>
+                        <p class="text-xs text-muted-foreground mt-0.5">
+                          <%= case session.logout_reason
+                              when "user_initiated" then "사용자 로그아웃"
+                              when "session_expired" then "세션 만료"
+                              when "forced" then "강제 종료"
+                              when "admin_action" then "관리자 조치"
+                              else session.logout_reason || "-"
+                              end %>
+                        </p>
+                      <% end %>
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <% if session.active? %>
+                        <%= button_to force_logout_admin_user_session_path(session),
+                            method: :post,
+                            class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg btn-hover",
+                            data: { turbo_confirm: "이 세션을 강제 종료하시겠습니까?" } do %>
+                          <%= icon "arrow-right-on-rectangle", variant: :outline, css_class: "w-4 h-4" %>
+                          종료
+                        <% end %>
+                      <% else %>
+                        <span class="text-sm text-muted-foreground"><%= session.duration_formatted %></span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 전체 보기 링크 -->
+          <% if @sessions_count > 20 %>
+            <div class="mt-4 text-center">
+              <%= link_to admin_user_sessions_path(user_id: @user.id),
+                          class: "text-sm text-primary link-hover relative" do %>
+                전체 <%= @sessions_count %>개 기록 보기 →
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="py-12 text-center">
+            <%= icon "clock", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+            <h3 class="mt-2 text-sm font-medium text-foreground">접속 기록 없음</h3>
+            <p class="mt-1 text-sm text-muted-foreground">이 사용자의 접속 기록이 없습니다.</p>
           </div>
         <% end %>
       </div>

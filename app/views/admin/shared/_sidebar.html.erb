@@ -24,6 +24,22 @@
       <span>회원 관리</span>
     <% end %>
 
+    <%= link_to admin_user_sessions_path,
+                class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'user_sessions' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
+      <%= icon "clock", variant: :outline, css_class: "w-5 h-5" %>
+      <span>접속 기록</span>
+      <% active_sessions = UserSession.active.count rescue 0 %>
+      <% if active_sessions > 0 %>
+        <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-green-600 text-white rounded-full"><%= active_sessions %></span>
+      <% end %>
+    <% end %>
+
+    <%= link_to admin_posts_path,
+                class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'posts' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
+      <%= icon "document-text", variant: :outline, css_class: "w-5 h-5" %>
+      <span>게시글 관리</span>
+    <% end %>
+
     <%= link_to admin_ai_usages_path,
                 class: "flex items-center gap-3 px-3 py-2 rounded-lg #{controller_name == 'ai_usages' ? 'bg-gray-700 text-white' : 'text-gray-300 btn-hover'}" do %>
       <%= icon "sparkles", variant: :outline, css_class: "w-5 h-5" %>

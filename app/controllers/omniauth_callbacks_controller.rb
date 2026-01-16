@@ -37,10 +37,11 @@ class OmniauthCallbacksController < ApplicationController
       end
 
       # 로그인 처리 (세션 ID 재생성 + pending_analysis_key/pending_input_key 보존)
-      log_in(@user)
+      login_method = auth.provider == "google_oauth2" ? "google" : "github"
+      log_in(@user, method: login_method)
 
       # GA4 이벤트: 신규 사용자 = sign_up, 기존 사용자 = login
-      ga4_method = auth.provider == "google_oauth2" ? "google" : "github"
+      ga4_method = login_method
       if result[:new_user]
         track_ga4_event("sign_up", { method: ga4_method })
       else

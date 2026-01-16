@@ -58,11 +58,25 @@ class OauthTermsController < ApplicationController
     session.delete(:pending_oauth_user_id)
     return_to = session.delete(:oauth_return_to)
 
-    # 로그인 처리
-    log_in(@user)
+    # 로그인 방식 결정 (OAuth provider 확인)
+    login_method = determine_oauth_method(@user)
+    log_in(@user, method: login_method)
 
     # 리디렉션 (원래 가려던 곳 또는 커뮤니티)
     flash[:notice] = "환영합니다! 회원가입이 완료되었습니다."
     redirect_to return_to.presence || community_path
+  end
+
+  # OAuth provider에서 로그인 방식 결정
+  def determine_oauth_method(user)
+    # 가장 최근에 생성된 OAuth identity의 provider 사용
+    identity = user.oauth_identities.order(created_at: :desc).first
+    return "email" unless identity
+
+    case identity.provider
+    when "google_oauth2" then "google"
+    when "github" then "github"
+    else "email"
+    end
   end
 end

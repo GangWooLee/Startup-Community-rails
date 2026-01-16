@@ -15,6 +15,7 @@ class User < ApplicationRecord
   include Followable            # 팔로우 관계
   include ActivityFeedable      # 활동 피드
   include Notifiable            # 알림 관련
+  include SessionTrackable      # 로그인/로그아웃 세션 추적
 
   # ==========================================================================
   # Security & Configuration

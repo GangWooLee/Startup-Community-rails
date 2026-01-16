@@ -44,13 +44,14 @@ class SessionsController < ApplicationController
     end
 
     if user.authenticate(params[:password])
-      log_in(user)
+      remember_me_checked = params[:remember_me] == "1"
+      log_in(user, method: "email", remember_me: remember_me_checked)
 
       # GA4 로그인 이벤트
       track_ga4_event("login", { method: "email" })
 
       # Remember Me: 체크박스 선택 시 영구 쿠키 저장
-      if params[:remember_me] == "1"
+      if remember_me_checked
         remember(user)
       else
         forget(user)

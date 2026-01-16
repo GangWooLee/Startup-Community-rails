@@ -200,18 +200,40 @@ Rails.application.routes.draw do
     root to: "dashboard#index"
 
     resources :users, only: [ :index, :show ] do
+      collection do
+        get :export, defaults: { format: :csv }  # CSV 내보내기
+      end
       member do
-        get :chat_rooms         # 해당 사용자의 채팅방 목록
-        delete :destroy_post    # 관리자 권한으로 게시글 삭제
-        delete :destroy_comment # 관리자 권한으로 댓글 삭제
+        get :chat_rooms          # 해당 사용자의 채팅방 목록
+        delete :destroy_post     # 관리자 권한으로 게시글 삭제
+        delete :destroy_comment  # 관리자 권한으로 댓글 삭제
+        post :force_logout_all   # 모든 기기에서 로그아웃
       end
     end
 
     resources :chat_rooms, only: [ :show ]  # 채팅방 대화 내용 열람
 
+    # 게시글 관리
+    resources :posts, only: [ :index, :destroy ] do
+      collection do
+        get :export, defaults: { format: :csv }  # CSV 내보내기
+      end
+    end
+
     resources :user_deletions, only: [ :index, :show ] do
       member do
         post :reveal  # 암호화된 개인정보 열람 (로깅 필수)
+      end
+    end
+
+    # 사용자 세션 관리 (접속 기록)
+    resources :user_sessions, only: [ :index ] do
+      collection do
+        get :active                         # 현재 활성 세션
+        get :export, defaults: { format: :csv }  # CSV 내보내기
+      end
+      member do
+        post :force_logout  # 강제 로그아웃
       end
     end
 
@@ -220,6 +242,9 @@ Rails.application.routes.draw do
 
     # AI 분석 사용량 관리
     resources :ai_usages, only: [ :index, :show ] do
+      collection do
+        get :export, defaults: { format: :csv }  # CSV 내보내기
+      end
       member do
         patch :update_limit           # limit 수정
         patch :update_bonus           # 보너스 크레딧 수정
