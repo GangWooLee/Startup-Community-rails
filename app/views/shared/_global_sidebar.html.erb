@@ -11,7 +11,8 @@
 %>
 
 <%# 사이드바: 모바일 hidden, 데스크톱 w-64 기본 펼침 %>
-<aside class="hidden md:flex md:flex-col w-64 bg-white border-r border-stone-200/60 h-screen flex-shrink-0"
+<%# 모바일에서 펼쳐질 때 compact_header(z-50)보다 위에 표시되도록 z-[60] 적용 %>
+<aside class="hidden md:flex md:flex-col w-64 bg-white border-r border-stone-200/60 h-screen flex-shrink-0 z-[60]"
        data-sidebar-collapse-target="sidebar">
 
     <%# Logo & Brand Header %>

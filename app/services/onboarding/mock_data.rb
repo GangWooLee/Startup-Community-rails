@@ -10,7 +10,7 @@ module Onboarding
   module MockData
     module_function
 
-    # LLM 미설정 시 사용할 기본 추가 질문
+    # LLM 미설정 시 사용할 기본 추가 질문 (3-5개)
     def default_follow_up_questions
       {
         questions: [
@@ -30,9 +30,23 @@ module Onboarding
           },
           {
             id: "differentiator",
-            question: "기존 서비스와 다른 점은 무엇인가요? (선택)",
+            question: "기존 서비스와 다른 점은 무엇인가요?",
             placeholder: "차별화 포인트를 입력해주세요",
             examples: [ "AI 자동화", "커뮤니티 기반", "저렴한 가격" ],
+            required: true
+          },
+          {
+            id: "revenue_model",
+            question: "어떤 방식으로 수익을 낼 계획인가요? (선택)",
+            placeholder: "수익 모델을 입력해주세요",
+            examples: [ "구독료", "광고", "수수료" ],
+            required: false
+          },
+          {
+            id: "timeline",
+            question: "언제쯤 출시를 목표로 하고 계신가요? (선택)",
+            placeholder: "예상 출시 시기를 입력해주세요",
+            examples: [ "1개월 내", "3개월 내", "6개월 내" ],
             required: false
           }
         ]
