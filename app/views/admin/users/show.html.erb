@@ -156,10 +156,12 @@
 
         <!-- 액션 버튼 -->
         <div class="pt-4 border-t border-border space-y-2">
-          <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium btn-hover">
+          <%= link_to start_chat_path(@user),
+              class: "w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium btn-hover",
+              data: { turbo_method: :post } do %>
             <%= icon "envelope", variant: :outline, css_class: "w-4 h-4" %>
             메시지 보내기
-          </button>
+          <% end %>
           <button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium btn-hover"
                   onclick="confirm('정말 이 사용자를 정지하시겠습니까?') && alert('정지 기능은 준비 중입니다.')">
             <%= icon "no-symbol", variant: :outline, css_class: "w-4 h-4" %>
