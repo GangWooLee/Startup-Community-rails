@@ -351,17 +351,17 @@
     </div>
   </main>
 
-  <%# ===== FAB Button (Mobile) ===== %>
+  <%# ===== FAB Button (Mobile) - 심플한 '+' 아이콘만 ===== %>
   <%= link_to (logged_in? ? new_inquiry_path : login_path),
       class: "lg:hidden fixed bottom-24 right-4 z-50
-             flex items-center gap-2 px-5 py-3.5 rounded-full
-             bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/30
+             h-14 w-14 rounded-full
+             bg-orange-500 text-white shadow-lg shadow-orange-500/30
+             flex items-center justify-center
              hover:bg-orange-600 hover:scale-105 hover:shadow-xl
              active:scale-95 transition-all duration-200" do %>
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
     </svg>
-    <span>새 문의</span>
   <% end %>
 
 </div>

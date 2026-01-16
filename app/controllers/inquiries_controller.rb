@@ -3,6 +3,7 @@
 class InquiriesController < ApplicationController
   before_action :require_login, except: [ :index ]
   before_action :set_inquiry, only: [ :show ]
+  before_action :hide_floating_button, only: [ :index, :new, :show ]
 
   def index
     @filter = params[:filter] || "all"
