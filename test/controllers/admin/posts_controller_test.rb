@@ -68,6 +68,31 @@ class Admin::PostsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "invalid date format does not cause 500 error" do
+    log_in_as(@admin)
+
+    # 잘못된 날짜 형식 입력 - 500 에러 대신 정상 응답해야 함
+    get admin_posts_path(from_date: "invalid-date")
+    assert_response :success
+    assert_select "div.bg-red-50, div.text-red-800, div.bg-yellow-50", minimum: 0
+
+    # 다양한 잘못된 형식 테스트
+    get admin_posts_path(to_date: "2024-99-99")
+    assert_response :success
+
+    get admin_posts_path(from_date: "abc", to_date: "xyz")
+    assert_response :success
+  end
+
+  test "invalid date format in export does not cause 500 error" do
+    log_in_as(@admin)
+
+    # CSV 내보내기에서도 잘못된 날짜 처리
+    get export_admin_posts_path(format: :csv, from_date: "invalid")
+    assert_response :success
+    assert_equal "text/csv; charset=utf-8", response.content_type
+  end
+
   # =========================================
   # Destroy
   # =========================================
