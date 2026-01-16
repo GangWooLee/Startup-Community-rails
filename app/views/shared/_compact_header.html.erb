@@ -16,9 +16,10 @@
   <%# Mobile: flex 레이아웃으로 검색바가 좌측부터 확장, sm+: 중앙 정렬 유지 %>
   <div class="flex items-center h-[clamp(3.5rem,8vh,4rem)] px-4 sm:px-6 gap-2 sm:gap-4 sm:justify-center sm:relative">
 
-    <%# Mobile: 햄버거 메뉴 버튼 (md 이하에서만 표시) %>
+    <%# 햄버거 메뉴 버튼 (모바일 전용 - 데스크톱은 아이콘 바가 있음) %>
     <button type="button"
-            class="md:hidden flex-shrink-0 p-2 -ml-1 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+            class="md:hidden flex-shrink-0 p-2 -ml-1 text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors
+                   sm:absolute sm:left-4 sm:ml-0"
             data-action="click->sidebar-collapse#toggle"
             aria-label="메뉴 열기">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

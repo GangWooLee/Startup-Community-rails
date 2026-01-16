@@ -1,181 +1,235 @@
 import { Controller } from "@hotwired/stimulus"
 
 /**
- * Sidebar Collapse Controller
+ * Sidebar Controller - 데스크톱/모바일 분리 방식
  *
- * 글로벌 사이드바의 접기/펼치기를 제어합니다.
- *
- * Desktop (≥768px):
- * - 펼친 상태: w-64 (256px) - 전체 정보 표시
- * - 접힌 상태: w-16 (64px) - 아이콘만 표시
- *
- * Mobile (<768px):
- * - 펼친 상태: 오버레이와 함께 전체 사이드바 표시
- * - 접힌 상태: 완전히 숨김 (hidden)
+ * 데스크톱: w-64 ↔ w-16 레이아웃 내 너비 변경 (콘텐츠 밀림)
+ * 모바일: 완전히 숨김 ↔ 오버레이로 열림 (콘텐츠 밀림 없음)
  */
 export default class extends Controller {
-  static targets = ["sidebar", "toggleIcon", "expandedContent", "collapsedContent"]
+  static targets = ["sidebar", "expandedContent", "collapsedContent", "toggleIcon"]
   static values = {
-    collapsed: { type: Boolean, default: false },
-    mobileOpen: { type: Boolean, default: false }
+    collapsed: { type: Boolean, default: false },   // 데스크톱: 접힘 상태
+    mobileOpen: { type: Boolean, default: false }   // 모바일: 열림 상태
   }
 
   connect() {
-    // 로컬 스토리지에서 상태 복원 (데스크톱 전용)
-    const saved = localStorage.getItem("globalSidebarCollapsed")
-    if (saved === "true") {
-      this.collapsedValue = true
-    }
-
-    // 모바일 감지 및 반응형 처리
-    this.boundHandleResize = this.handleResize.bind(this)
-    window.addEventListener("resize", this.boundHandleResize)
-
-    // 초기 UI 업데이트
-    this.handleResize()
-
-    // 사이드바 내 링크 클릭 시 모바일에서 자동 닫기
+    // 사이드바 내 링크 클릭 시 자동 닫기 (모바일 전용)
     this.boundHandleNavClick = this.handleNavClick.bind(this)
     if (this.hasSidebarTarget) {
       this.sidebarTarget.addEventListener("click", this.boundHandleNavClick)
     }
-  }
 
-  disconnect() {
-    window.removeEventListener("resize", this.boundHandleResize)
-    if (this.hasSidebarTarget) {
-      this.sidebarTarget.removeEventListener("click", this.boundHandleNavClick)
+    // 화면 크기 변경 감지
+    this.boundHandleResize = this.handleResize.bind(this)
+    window.addEventListener("resize", this.boundHandleResize)
+
+    // localStorage에서 데스크톱 상태 복원
+    const savedCollapsed = localStorage.getItem("globalSidebarCollapsed")
+    if (savedCollapsed !== null) {
+      this.collapsedValue = savedCollapsed === "true"
     }
-    this.removeOverlay()
-  }
 
-  // 현재 모바일인지 확인 (매번 계산)
-  get isMobile() {
-    return window.innerWidth < 768
-  }
-
-  handleResize() {
+    // 초기 UI 설정
     this.updateUI()
   }
 
+  disconnect() {
+    if (this.hasSidebarTarget) {
+      this.sidebarTarget.removeEventListener("click", this.boundHandleNavClick)
+    }
+    window.removeEventListener("resize", this.boundHandleResize)
+    this.removeOverlay()
+  }
+
   handleNavClick(event) {
-    // 모바일에서 네비게이션 링크 클릭 시 사이드바 닫기
+    // 모바일에서만 링크 클릭 시 사이드바 닫기
     if (this.isMobile && event.target.closest("a")) {
       this.mobileOpenValue = false
       this.updateUI()
     }
   }
 
+  handleResize() {
+    // 화면 크기 변경 시 UI 업데이트
+    this.updateUI()
+  }
+
+  get isMobile() {
+    return window.innerWidth < 768
+  }
+
+  /**
+   * 토글 - 화면 크기에 따라 다른 동작
+   */
   toggle() {
     if (this.isMobile) {
-      // 모바일: 열림/닫힘 토글
       this.mobileOpenValue = !this.mobileOpenValue
     } else {
-      // 데스크톱: 접힘/펼침 토글
       this.collapsedValue = !this.collapsedValue
       localStorage.setItem("globalSidebarCollapsed", this.collapsedValue)
     }
     this.updateUI()
   }
 
-  // 오버레이 클릭 시 닫기 (모바일)
-  closeFromOverlay() {
-    this.mobileOpenValue = false
+  /**
+   * 닫기 - 화면 크기에 따라 다른 동작
+   */
+  close() {
+    if (this.isMobile) {
+      this.mobileOpenValue = false
+    } else {
+      this.collapsedValue = true
+      localStorage.setItem("globalSidebarCollapsed", this.collapsedValue)
+    }
+    this.updateUI()
+  }
+
+  /**
+   * 열기 - 화면 크기에 따라 다른 동작
+   */
+  open() {
+    if (this.isMobile) {
+      this.mobileOpenValue = true
+    } else {
+      this.collapsedValue = false
+      localStorage.setItem("globalSidebarCollapsed", this.collapsedValue)
+    }
     this.updateUI()
   }
 
   updateUI() {
     if (!this.hasSidebarTarget) return
 
-    const sidebar = this.sidebarTarget
-
     if (this.isMobile) {
-      this.updateMobileUI(sidebar)
+      this.updateMobileUI()
     } else {
-      this.updateDesktopUI(sidebar)
+      this.updateDesktopUI()
     }
   }
 
-  updateMobileUI(sidebar) {
-    // 모바일에서는 항상 펼친 스타일 사용 (w-64)
-    sidebar.classList.remove("w-16", "md:flex", "md:flex-col", "hidden")
-    sidebar.classList.add("w-64")
+  /**
+   * 모바일: 완전히 숨김 ↔ 오버레이로 열림 (콘텐츠 밀림 없음)
+   */
+  updateMobileUI() {
+    const sidebar = this.sidebarTarget
 
-    // 항상 펼친 콘텐츠 표시
-    this.expandedContentTargets.forEach(el => el.classList.remove("hidden"))
-    this.collapsedContentTargets.forEach(el => el.classList.add("hidden"))
-
-    // 슬라이드 애니메이션을 위한 기본 클래스 설정
+    // 모바일에서는 fixed 포지션 (레이아웃 밖)
+    sidebar.classList.remove(
+      "relative", "w-16", "md:w-16"
+    )
     sidebar.classList.add(
       "fixed", "inset-y-0", "left-0", "z-50",
-      "flex", "flex-col", "bg-white",
-      "transition-transform", "duration-300", "ease-in-out"
+      "w-64", "flex", "flex-col", "bg-white",
+      "transition-transform", "duration-300", "ease-in-out",
+      "shadow-xl", "border-r", "border-stone-200/60"
     )
 
     if (this.mobileOpenValue) {
-      // 열린 상태: 화면에 슬라이드 인
-      sidebar.classList.remove("-translate-x-full")
+      // 열린 상태: 슬라이드 인
+      sidebar.classList.remove("hidden", "-translate-x-full")
       sidebar.classList.add("translate-x-0")
+      this.showExpandedContent()
+      this.updateToggleIcon(false)  // '<<' 아이콘 (닫기 방향)
       this.createOverlay()
       document.body.classList.add("overflow-hidden")
     } else {
-      // 닫힌 상태: 왼쪽으로 슬라이드 아웃
+      // 닫힌 상태: 슬라이드 아웃 & 숨김
       sidebar.classList.remove("translate-x-0")
-      sidebar.classList.add("-translate-x-full")
+      sidebar.classList.add("hidden", "-translate-x-full")
       this.removeOverlay()
       document.body.classList.remove("overflow-hidden")
     }
   }
 
-  updateDesktopUI(sidebar) {
-    // 데스크톱에서는 항상 표시 - 모바일 관련 클래스 제거
+  /**
+   * 데스크톱: w-64 ↔ w-16 레이아웃 내 너비 변경 (콘텐츠 밀림)
+   */
+  updateDesktopUI() {
+    const sidebar = this.sidebarTarget
+
+    // 데스크톱에서는 relative 포지션 (레이아웃 내)
     sidebar.classList.remove(
-      "hidden", "fixed", "inset-y-0", "left-0", "z-50",
-      "-translate-x-full", "translate-x-0",
-      "transition-transform", "duration-300", "ease-in-out"
+      "hidden", "-translate-x-full", "translate-x-0",
+      "fixed", "inset-y-0", "left-0", "shadow-xl", "z-50"
     )
-    sidebar.classList.add("md:flex", "md:flex-col", "flex")
+    sidebar.classList.add(
+      "relative", "flex", "flex-col", "bg-white",
+      "border-r", "border-stone-200/60", "h-screen",
+      "transition-all", "duration-300", "ease-in-out"
+    )
+
+    // 오버레이 제거 (데스크톱은 오버레이 없음)
     this.removeOverlay()
-    document.body.classList.remove("overflow-hidden")
 
     if (this.collapsedValue) {
-      // 접힌 상태: w-16 (64px) - 아이콘만 표시
+      // 접힌 상태: w-16
       sidebar.classList.remove("w-64")
       sidebar.classList.add("w-16")
-
-      // 텍스트 콘텐츠 숨기기
-      this.expandedContentTargets.forEach(el => el.classList.add("hidden"))
-      this.collapsedContentTargets.forEach(el => el.classList.remove("hidden"))
-
-      // 토글 아이콘 회전 (화살표 방향 반전)
-      if (this.hasToggleIconTarget) {
-        this.toggleIconTarget.classList.add("rotate-180")
-      }
+      this.showCollapsedContent()
+      this.updateToggleIcon(true)
     } else {
-      // 펼친 상태: w-64 (256px)
-      sidebar.classList.remove("w-16")
+      // 펼친 상태: w-64
+      sidebar.classList.remove("w-16", "md:w-16")
       sidebar.classList.add("w-64")
-
-      // 텍스트 콘텐츠 표시
-      this.expandedContentTargets.forEach(el => el.classList.remove("hidden"))
-      this.collapsedContentTargets.forEach(el => el.classList.add("hidden"))
-
-      // 토글 아이콘 원위치
-      if (this.hasToggleIconTarget) {
-        this.toggleIconTarget.classList.remove("rotate-180")
-      }
+      this.showExpandedContent()
+      this.updateToggleIcon(false)
     }
   }
 
+  /**
+   * 펼친 콘텐츠 표시 (아이콘 + 텍스트)
+   */
+  showExpandedContent() {
+    this.expandedContentTargets.forEach(el => {
+      el.classList.remove("hidden")
+      el.classList.add("flex")
+    })
+    this.collapsedContentTargets.forEach(el => {
+      el.classList.add("hidden")
+      el.classList.remove("flex")
+    })
+  }
+
+  /**
+   * 접힌 콘텐츠 표시 (아이콘만)
+   */
+  showCollapsedContent() {
+    this.expandedContentTargets.forEach(el => {
+      el.classList.add("hidden")
+      el.classList.remove("flex")
+    })
+    this.collapsedContentTargets.forEach(el => {
+      el.classList.remove("hidden")
+      el.classList.add("flex")
+    })
+  }
+
+  /**
+   * 토글 아이콘 회전 (데스크톱용)
+   */
+  updateToggleIcon(collapsed) {
+    if (!this.hasToggleIconTarget) return
+
+    if (collapsed) {
+      this.toggleIconTarget.classList.add("rotate-180")
+    } else {
+      this.toggleIconTarget.classList.remove("rotate-180")
+    }
+  }
+
+  /**
+   * 오버레이 생성 (모바일 전용)
+   */
   createOverlay() {
     if (this.overlayElement) return
 
     this.overlayElement = document.createElement("div")
     this.overlayElement.className = "fixed inset-0 bg-black/0 z-40 transition-colors duration-300"
-    this.overlayElement.addEventListener("click", () => this.closeFromOverlay())
+    this.overlayElement.addEventListener("click", () => this.close())
     document.body.appendChild(this.overlayElement)
 
-    // 다음 프레임에서 배경색 적용 (페이드 인 트리거)
+    // 다음 프레임에서 배경색 적용 (페이드 인)
     requestAnimationFrame(() => {
       if (this.overlayElement) {
         this.overlayElement.classList.remove("bg-black/0")
@@ -184,9 +238,12 @@ export default class extends Controller {
     })
   }
 
+  /**
+   * 오버레이 제거
+   */
   removeOverlay() {
     if (this.overlayElement) {
-      // 먼저 페이드 아웃
+      // 페이드 아웃
       this.overlayElement.classList.remove("bg-black/50")
       this.overlayElement.classList.add("bg-black/0")
 
@@ -197,5 +254,6 @@ export default class extends Controller {
         overlay.remove()
       }, 300)
     }
+    document.body.classList.remove("overflow-hidden")
   }
 }

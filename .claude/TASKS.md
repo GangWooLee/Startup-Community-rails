@@ -208,6 +208,34 @@
   - [ ] 📋 에러 처리 로직 추가
 - **예상 효과**: 안정성 향상, 디버깅 용이
 
+#### 1.3 API 토큰 해싱 처리 (보안 강화)
+- **현재 문제**: `api_token`이 평문으로 DB에 저장됨
+- **위험**: DB 유출 시 토큰 즉시 악용 가능
+- **관련 파일**:
+  - `app/models/concerns/api_tokenable.rb`
+  - `app/controllers/api/v1/base_controller.rb`
+  - `test/models/concerns/api_tokenable_test.rb`
+- **작업 내용**:
+  - [ ] 📋 `api_token_digest` 컬럼 추가 (마이그레이션)
+  - [ ] 📋 BCrypt 해시 처리 구현
+  - [ ] 📋 토큰 검증 메서드 추가 (`verify_api_token?`)
+  - [ ] 📋 기존 테스트 업데이트
+- **구현 예시**:
+  ```ruby
+  def generate_api_token!
+    token = SecureRandom.hex(32)
+    self.api_token_digest = BCrypt::Password.create(token)
+    save!
+    token  # 1회만 반환
+  end
+
+  def verify_api_token?(provided_token)
+    BCrypt::Password.new(api_token_digest) == provided_token
+  end
+  ```
+- **예상 효과**: DB 유출 시에도 토큰 보호
+- **추가일**: 2026-01-16 (코드 검수 시 발견)
+
 ### Phase 2: 프론트엔드 개선 (우선순위: 중간)
 
 #### 2.1 ai_input_controller.js 분리

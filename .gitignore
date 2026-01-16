@@ -70,6 +70,7 @@ playwright-report/
 test-results/
 playwright/.cache/
 e2e/screenshots/
+.playwright-mcp/
 
 # Design reference files
 design-sample/
