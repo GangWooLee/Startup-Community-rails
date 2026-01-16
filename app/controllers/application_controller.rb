@@ -35,6 +35,9 @@ class ApplicationController < ActionController::Base
   # 익명 프로필 설정: 로그인 사용자 중 프로필 미완료 시 /welcome으로 리다이렉트
   before_action :require_profile_setup, if: :logged_in?
 
+  # 세션 활동 시간 업데이트 (5분 간격으로 DB 부하 최소화)
+  before_action :touch_session_activity, if: :logged_in?
+
   # ==========================================================================
   # Helper Methods
   # ==========================================================================
@@ -44,5 +47,27 @@ class ApplicationController < ActionController::Base
   # 플로팅 글쓰기 버튼 숨김 (글 작성/수정 등 특정 페이지에서 사용)
   def hide_floating_button
     @hide_floating_button = true
+  end
+
+  # 세션 활동 시간 업데이트 (5분 간격으로 DB 부하 최소화)
+  # @note 매 요청마다 DB 업데이트를 피하고, 5분 이상 지났을 때만 업데이트
+  SESSION_ACTIVITY_INTERVAL = 5.minutes
+
+  def touch_session_activity
+    return unless session[:user_session_token].present?
+
+    # 마지막 업데이트 시간 확인 (세션에 캐싱)
+    last_touch = session[:last_activity_touch]
+    return if last_touch.present? && Time.parse(last_touch) > SESSION_ACTIVITY_INTERVAL.ago
+
+    # DB 업데이트 (5분 이상 지났거나 최초 요청)
+    user_session = UserSession.find_by(session_token: session[:user_session_token])
+    if user_session&.active?
+      user_session.touch_activity!
+      session[:last_activity_touch] = Time.current.iso8601
+    end
+  rescue ArgumentError
+    # Time.parse 실패 시 무시
+    session[:last_activity_touch] = nil
   end
 end

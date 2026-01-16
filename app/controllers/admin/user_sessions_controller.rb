@@ -83,7 +83,7 @@ class Admin::UserSessionsController < Admin::BaseController
       logged_in_at: "로그인 시간",
       logged_out_at: "로그아웃 시간",
       logout_reason: ->(s) { logout_reason_label(s.logout_reason) },
-      ip_address: "IP 주소",
+      ip_address: ->(s) { s.masked_ip_address },  # 프라이버시 보호: IP 마스킹
       device_type: "디바이스",
       remember_me: "Remember Me",
       duration: ->(s) { s.duration_formatted }
@@ -125,12 +125,22 @@ class Admin::UserSessionsController < Admin::BaseController
       )
     end
 
-    # 날짜 필터
+    # 날짜 필터 (에러 처리 포함)
     if params[:from_date].present?
-      @sessions = @sessions.where("logged_in_at >= ?", Date.parse(params[:from_date]).beginning_of_day)
+      begin
+        from_date = Date.parse(params[:from_date])
+        @sessions = @sessions.where("logged_in_at >= ?", from_date.beginning_of_day)
+      rescue ArgumentError
+        flash.now[:alert] = "시작 날짜 형식이 올바르지 않습니다."
+      end
     end
     if params[:to_date].present?
-      @sessions = @sessions.where("logged_in_at <= ?", Date.parse(params[:to_date]).end_of_day)
+      begin
+        to_date = Date.parse(params[:to_date])
+        @sessions = @sessions.where("logged_in_at <= ?", to_date.end_of_day)
+      rescue ArgumentError
+        flash.now[:alert] = "종료 날짜 형식이 올바르지 않습니다."
+      end
     end
   end
 
