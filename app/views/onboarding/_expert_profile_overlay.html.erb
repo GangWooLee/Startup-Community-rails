@@ -24,7 +24,7 @@
 %>
 
 <div id="expert-profile-overlay"
-     class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6"
+     class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 md:p-6"
      data-controller="profile-overlay"
      data-action="keydown.esc->profile-overlay#close click->profile-overlay#backdropClick">
 
@@ -66,16 +66,9 @@
 
       <%# 그라디언트 헤더 섹션 %>
       <div class="bg-gradient-to-br from-slate-800 to-slate-900 px-8 py-10 text-center text-white">
-        <%# 아바타 (24x24 = 96px) %>
-        <div class="w-24 h-24 rounded-full overflow-hidden bg-white/20 flex items-center justify-center mx-auto mb-5 ring-4 ring-white/30 shadow-xl">
-          <% if user.avatar.attached? %>
-            <%= image_tag user.avatar, alt: user.display_name, class: "h-full w-full object-cover" %>
-          <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-            <%= image_tag user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
-            <span class="text-4xl hidden items-center justify-center"><%= role_emoji %></span>
-          <% else %>
-            <span class="text-4xl"><%= role_emoji %></span>
-          <% end %>
+        <%# 아바타 (24x24 = 96px) - render_user_avatar 헬퍼로 익명 처리 지원 %>
+        <div class="flex justify-center mb-5">
+          <%= render_user_avatar(user, size: "2xl", ring: "ring-4 ring-white/30", class: "shadow-xl") %>
         </div>
 
         <%# 이름 %>

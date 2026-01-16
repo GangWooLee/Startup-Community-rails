@@ -45,21 +45,8 @@
 
     <%# 헤더: 아바타 + 점수 배지 %>
     <div class="flex justify-between items-start mb-4">
-      <%# 아바타 (16x16 = 64px) %>
-      <div class="w-16 h-16 rounded-full bg-white shadow-md overflow-hidden border-2 border-white flex-shrink-0">
-        <% if user.avatar.attached? %>
-          <%= image_tag user.avatar, alt: user.display_name, class: "w-full h-full object-cover" %>
-        <% elsif user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-          <%= image_tag user.avatar_url, alt: user.display_name, class: "w-full h-full object-cover", onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
-          <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 hidden items-center justify-center">
-            <span class="text-2xl"><%= role_emoji %></span>
-          </div>
-        <% else %>
-          <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-            <span class="text-2xl"><%= role_emoji %></span>
-          </div>
-        <% end %>
-      </div>
+      <%# 아바타 (16x16 = 64px) - render_user_avatar 헬퍼로 익명 처리 지원 %>
+      <%= render_user_avatar(user, size: "xl", ring: "border-2 border-white", class: "shadow-md") %>
 
       <%# 점수 상승 배지 %>
       <div class="bg-gradient-to-br <%= c[:badge_bg] %> rounded-lg px-3 py-2 shadow-md">
