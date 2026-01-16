@@ -6,7 +6,7 @@
 # 비로그인 사용자는 입력만 저장 (Lazy Registration)
 # 로그인 사용자는 백그라운드 잡으로 분석 실행
 class OnboardingController < ApplicationController
-  before_action :require_login, only: [ :ai_result ]
+  before_action :require_login, only: [ :ai_result, :save_analysis ]
   before_action :hide_floating_button, only: [ :landing, :ai_input, :ai_result ]
   before_action :check_usage_limit, only: [ :ai_analyze ]
 
@@ -94,6 +94,27 @@ class OnboardingController < ApplicationController
     cookies[:onboarding_completed] = { value: "true", expires: 1.year.from_now }
   rescue ActiveRecord::RecordNotFound
     redirect_to onboarding_ai_input_path, alert: "분석 결과를 찾을 수 없습니다"
+  end
+
+  # POST /ai/result/:id/save (분석 결과 저장)
+  def save_analysis
+    @idea_analysis = current_user.idea_analyses.find(params[:id])
+    @idea_analysis.save_to_collection!
+
+    track_ga4_event("ai_analysis_saved", {
+      analysis_id: @idea_analysis.id,
+      score: @idea_analysis.score
+    })
+
+    respond_to do |format|
+      format.html { redirect_to ai_result_path(@idea_analysis), notice: "분석 결과가 저장되었습니다." }
+      format.json { render json: { saved: true, message: "저장되었습니다" } }
+    end
+  rescue ActiveRecord::RecordNotFound
+    respond_to do |format|
+      format.html { redirect_to onboarding_ai_input_path, alert: "분석 결과를 찾을 수 없습니다" }
+      format.json { render json: { error: "Not found" }, status: :not_found }
+    end
   end
 
   # GET /ai/expert/:id (전문가 프로필 오버레이)
