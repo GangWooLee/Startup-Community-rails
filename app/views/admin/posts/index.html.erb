@@ -1,0 +1,282 @@
+<% content_for :page_title, "게시글 관리" %>
+
+<!-- 브레드크럼 -->
+<nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+  <%= icon "home", variant: :solid, css_class: "w-4 h-4" %>
+  <span>/</span>
+  <span class="text-foreground font-medium">게시글 관리</span>
+</nav>
+
+<!-- 상단 통계 -->
+<div class="grid grid-cols-6 gap-4 mb-6">
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <%= icon "document-text", variant: :solid, css_class: "w-5 h-5 text-primary" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@total_posts) %></p>
+        <p class="text-xs text-muted-foreground">전체 게시글</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card rounded-xl border border-border p-4 card-hover">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+        <%= icon "plus-circle", variant: :solid, css_class: "w-5 h-5 text-green-600" %>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-foreground"><%= @today_posts %></p>
+        <p class="text-xs text-muted-foreground">오늘 작성</p>
+      </div>
+    </div>
+  </div>
+
+  <% category_colors = { "free" => "blue", "question" => "purple", "promotion" => "amber", "hiring" => "green", "seeking" => "pink" } %>
+  <% category_labels = { "free" => "자유", "question" => "질문", "promotion" => "홍보", "hiring" => "구인", "seeking" => "구직" } %>
+  <% %w[free question hiring seeking].each do |cat| %>
+    <div class="bg-card rounded-xl border border-border p-4 card-hover">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-<%= category_colors[cat] %>-500/10 flex items-center justify-center">
+          <span class="text-sm font-bold text-<%= category_colors[cat] %>-600"><%= category_labels[cat] %></span>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-foreground"><%= @category_counts[cat] || 0 %></p>
+          <p class="text-xs text-muted-foreground"><%= category_labels[cat] %> 게시글</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- 검색 및 필터 -->
+<div class="bg-card rounded-xl border border-border p-4 mb-6">
+  <div class="flex items-center gap-4">
+    <!-- 검색 -->
+    <%= form_with url: admin_posts_path, method: :get, local: true, class: "flex-1", data: { turbo: false } do %>
+      <!-- 기존 필터 유지 -->
+      <input type="hidden" name="category" value="<%= params[:category] %>">
+      <input type="hidden" name="from_date" value="<%= params[:from_date] %>">
+      <input type="hidden" name="to_date" value="<%= params[:to_date] %>">
+
+      <div class="relative">
+        <%= icon "magnifying-glass", variant: :outline, css_class: "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" %>
+        <input type="text"
+               name="q"
+               value="<%= params[:q] %>"
+               placeholder="제목 또는 작성자 이름으로 검색..."
+               class="w-full pl-10 pr-4 py-2.5 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary focus:bg-background transition">
+      </div>
+    <% end %>
+
+    <!-- 카테고리 필터 탭 -->
+    <div class="flex items-center gap-2 border-l border-border pl-4">
+      <%= link_to admin_posts_path(q: params[:q], from_date: params[:from_date], to_date: params[:to_date]),
+                  class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:category].blank? ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'}" do %>
+        전체
+      <% end %>
+      <% %w[free question promotion hiring seeking].each do |cat| %>
+        <%= link_to admin_posts_path(category: cat, q: params[:q], from_date: params[:from_date], to_date: params[:to_date]),
+                    class: "px-3 py-2 rounded-lg text-sm font-medium btn-hover #{params[:category] == cat ? 'bg-' + category_colors[cat] + '-600 text-white' : 'bg-muted text-muted-foreground'}" do %>
+          <%= category_labels[cat] %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- CSV 내보내기 버튼 -->
+    <div class="border-l border-border pl-4">
+      <%= link_to export_admin_posts_path(category: params[:category], q: params[:q], from_date: params[:from_date], to_date: params[:to_date], format: :csv),
+                  class: "inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium btn-hover" do %>
+        <%= icon "arrow-down-tray", variant: :outline, css_class: "w-4 h-4" %>
+        CSV 다운로드
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 날짜 범위 필터 -->
+  <div class="mt-4 pt-4 border-t border-border">
+    <%= form_with url: admin_posts_path, method: :get, local: true, data: { turbo: false }, class: "flex items-center gap-3" do %>
+      <!-- 기존 필터 유지 -->
+      <input type="hidden" name="category" value="<%= params[:category] %>">
+      <input type="hidden" name="q" value="<%= params[:q] %>">
+
+      <span class="text-sm text-muted-foreground">작성일:</span>
+      <input type="date"
+             name="from_date"
+             value="<%= params[:from_date] %>"
+             class="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      <span class="text-muted-foreground">~</span>
+      <input type="date"
+             name="to_date"
+             value="<%= params[:to_date] %>"
+             class="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium btn-hover">
+        적용
+      </button>
+      <% if params[:from_date].present? || params[:to_date].present? %>
+        <%= link_to admin_posts_path(category: params[:category], q: params[:q]),
+                    class: "px-3 py-2 text-sm text-muted-foreground link-hover" do %>
+          날짜 초기화
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if params[:q].present? %>
+    <div class="mt-3 flex items-center gap-2">
+      <span class="text-sm text-muted-foreground">
+        "<span class="font-medium text-foreground"><%= params[:q] %></span>" 검색 결과:
+        <span class="font-bold text-primary"><%= @total_count %></span>개
+      </span>
+      <%= link_to admin_posts_path(category: params[:category], from_date: params[:from_date], to_date: params[:to_date]), class: "text-sm text-muted-foreground link-hover relative underline" do %>
+        초기화
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<!-- 게시글 목록 테이블 -->
+<div class="bg-card rounded-xl border border-border overflow-hidden">
+  <table class="w-full">
+    <thead>
+      <tr class="bg-muted border-b border-border">
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">게시글</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">카테고리</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">작성자</th>
+        <th class="px-5 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">통계</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">작성일</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">액션</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-border">
+      <% @posts.each do |post| %>
+        <tr class="card-hover">
+          <!-- 게시글 정보 -->
+          <td class="px-5 py-4">
+            <div class="max-w-md">
+              <%= link_to post_path(post), target: "_blank", class: "font-medium text-foreground hover:text-primary line-clamp-1" do %>
+                <%= post.title %>
+              <% end %>
+              <% if post.content.present? %>
+                <p class="text-sm text-muted-foreground line-clamp-1 mt-1"><%= truncate(strip_tags(post.content), length: 60) %></p>
+              <% end %>
+            </div>
+          </td>
+
+          <!-- 카테고리 -->
+          <td class="px-5 py-4">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-<%= category_colors[post.category] %>-100 text-<%= category_colors[post.category] %>-700">
+              <%= category_labels[post.category] %>
+            </span>
+          </td>
+
+          <!-- 작성자 -->
+          <td class="px-5 py-4">
+            <% if post.user %>
+              <%= link_to admin_user_path(post.user), class: "flex items-center gap-2" do %>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                  <%= post.user.name&.first&.upcase || "?" %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-foreground truncate"><%= post.user.name %></p>
+                </div>
+              <% end %>
+            <% else %>
+              <span class="text-sm text-muted-foreground">(삭제된 사용자)</span>
+            <% end %>
+          </td>
+
+          <!-- 통계 -->
+          <td class="px-5 py-4 text-center">
+            <div class="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+              <span title="조회수">
+                <%= icon "eye", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
+                <%= post.views_count %>
+              </span>
+              <span title="좋아요">
+                <%= icon "heart", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
+                <%= post.likes_count %>
+              </span>
+              <span title="댓글">
+                <%= icon "chat-bubble-left", variant: :outline, css_class: "w-4 h-4 inline mr-1" %>
+                <%= post.comments_count %>
+              </span>
+            </div>
+          </td>
+
+          <!-- 작성일 -->
+          <td class="px-5 py-4">
+            <p class="text-sm text-foreground"><%= post.created_at.strftime("%Y-%m-%d") %></p>
+            <p class="text-xs text-muted-foreground"><%= time_ago_in_words(post.created_at) %> 전</p>
+          </td>
+
+          <!-- 액션 -->
+          <td class="px-5 py-4 text-right">
+            <div class="flex items-center justify-end gap-1">
+              <%= link_to post_path(post),
+                          target: "_blank",
+                          class: "p-2 text-muted-foreground rounded-lg btn-hover",
+                          title: "새 탭에서 보기" do %>
+                <%= icon "arrow-top-right-on-square", variant: :outline, css_class: "w-5 h-5" %>
+              <% end %>
+              <%= button_to admin_post_path(post, category: params[:category], q: params[:q], from_date: params[:from_date], to_date: params[:to_date]),
+                            method: :delete,
+                            data: { confirm: "정말 '#{post.title}'을(를) 삭제하시겠습니까?\n\n연관된 댓글과 알림도 함께 삭제됩니다." },
+                            class: "p-2 text-destructive rounded-lg btn-hover",
+                            title: "삭제" do %>
+                <%= icon "trash", variant: :outline, css_class: "w-5 h-5" %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @posts.empty? %>
+    <div class="py-12 text-center">
+      <%= icon "document-text", variant: :outline, css_class: "mx-auto h-12 w-12 text-muted-foreground/50" %>
+      <h3 class="mt-2 text-sm font-medium text-foreground">게시글 없음</h3>
+      <p class="mt-1 text-sm text-muted-foreground">검색 결과가 없습니다.</p>
+    </div>
+  <% end %>
+</div>
+
+<!-- 페이지네이션 -->
+<% if @total_pages > 1 %>
+  <% filter_params = { category: params[:category], q: params[:q], from_date: params[:from_date], to_date: params[:to_date] }.compact %>
+
+  <div class="mt-6 flex items-center justify-between">
+    <p class="text-sm text-muted-foreground">
+      총 <span class="font-medium text-foreground"><%= @total_count %></span>개 중
+      <span class="font-medium text-foreground"><%= (@page - 1) * @per_page + 1 %>-<%= [(@page * @per_page), @total_count].min %></span>개 표시
+    </p>
+
+    <nav class="flex items-center gap-1">
+      <% if @page > 1 %>
+        <%= link_to admin_posts_path(filter_params.merge(page: @page - 1)),
+                    class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
+          <%= icon "chevron-left", variant: :mini, css_class: "w-5 h-5" %>
+        <% end %>
+      <% end %>
+
+      <% visible_pages = ([@page - 2, 1].max..[@page + 2, @total_pages].min) %>
+      <% visible_pages.each do |page_num| %>
+        <% if page_num == @page %>
+          <span class="px-4 py-2 rounded-lg bg-foreground text-background text-sm font-medium"><%= page_num %></span>
+        <% else %>
+          <%= link_to page_num, admin_posts_path(filter_params.merge(page: page_num)),
+                      class: "px-4 py-2 rounded-lg border border-border text-muted-foreground text-sm btn-hover" %>
+        <% end %>
+      <% end %>
+
+      <% if @page < @total_pages %>
+        <%= link_to admin_posts_path(filter_params.merge(page: @page + 1)),
+                    class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
+          <%= icon "chevron-right", variant: :mini, css_class: "w-5 h-5" %>
+        <% end %>
+      <% end %>
+    </nav>
+  </div>
+<% end %>
