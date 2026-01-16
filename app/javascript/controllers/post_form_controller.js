@@ -10,17 +10,19 @@ export default class extends Controller {
   }
 
   prefillFromOnboarding() {
-    // sessionStorage에 저장된 아이디어가 있으면 자동으로 채움
-    // (로그인 후 리디렉션된 경우에도 작동)
-    const savedIdea = sessionStorage.getItem('onboarding_idea')
+    // AI 분석 요약을 제목에 채움 (로그인 후 리디렉션된 경우에도 작동)
+    const savedSummary = sessionStorage.getItem('onboarding_idea_summary')
 
-    if (savedIdea && this.hasContentTarget) {
-      this.contentTarget.value = savedIdea
+    if (savedSummary && this.hasTitleTarget) {
+      this.titleTarget.value = savedSummary
       // 사용 후 삭제
-      sessionStorage.removeItem('onboarding_idea')
-      // 유효성 검사 트리거
-      this.validateForm()
+      sessionStorage.removeItem('onboarding_idea_summary')
     }
+
+    // 본문은 비워둠 - 사용자가 직접 작성
+    // (기존 onboarding_idea 저장 로직 제거됨)
+
+    this.validateForm()
   }
 
   toggleOutsourcingFields() {

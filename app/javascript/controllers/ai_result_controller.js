@@ -5,10 +5,11 @@ export default class extends Controller {
   static values = { idea: String }
 
   goToPost(event) {
-    // 아이디어를 sessionStorage에 저장 (로그인 후에도 유지됨)
-    // ai_input에서 이미 저장했지만, 혹시 없을 경우를 대비해 다시 저장
-    if (this.ideaValue) {
-      sessionStorage.setItem('onboarding_idea', this.ideaValue)
+    // 요약을 sessionStorage에 저장 (제목용)
+    const summary = event.currentTarget.dataset.summary
+    if (summary) {
+      sessionStorage.setItem('onboarding_idea_summary', summary)
     }
+    // 원본 아이디어는 저장하지 않음 - 본문은 사용자가 직접 작성
   }
 }
