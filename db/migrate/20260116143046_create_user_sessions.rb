@@ -29,7 +29,7 @@ class CreateUserSessions < ActiveRecord::Migration[8.1]
     end
 
     add_index :user_sessions, :session_token, unique: true
-    add_index :user_sessions, [:user_id, :logged_in_at]
+    add_index :user_sessions, [ :user_id, :logged_in_at ]
     add_index :user_sessions, :logged_in_at
     add_index :user_sessions, :logged_out_at  # 활성 세션 조회 최적화
   end
