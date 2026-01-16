@@ -3,7 +3,7 @@
 # 관리자 사용자 세션 관리 컨트롤러
 # 로그인/로그아웃 기록 조회, 강제 로그아웃 기능
 class Admin::UserSessionsController < Admin::BaseController
-  before_action :set_session, only: [:force_logout]
+  before_action :set_session, only: [ :force_logout ]
 
   # GET /admin/user_sessions
   # 전체 세션 목록 (필터링, 검색, 페이지네이션)

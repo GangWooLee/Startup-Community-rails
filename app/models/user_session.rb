@@ -136,10 +136,10 @@ class UserSession < ApplicationRecord
     ua = user_agent.downcase
     self.device_type = if ua.include?("mobile") || ua.include?("android") || ua.include?("iphone")
                          "mobile"
-                       elsif ua.include?("tablet") || ua.include?("ipad")
+    elsif ua.include?("tablet") || ua.include?("ipad")
                          "tablet"
-                       else
+    else
                          "desktop"
-                       end
+    end
   end
 end
