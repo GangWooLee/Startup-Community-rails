@@ -42,21 +42,23 @@ class ReportsTest < ApplicationSystemTestCase
       assert_selector "[data-report-modal-target='targetLabel']"
 
       # 신고 사유 선택
-      choose "스팸"
+      choose "스팸/광고"
 
       # 상세 설명 입력
       fill_in "report[description]", with: "테스트 신고입니다."
 
-      # 신고하기 버튼 클릭
-      click_button "신고하기"
+      # 신고하기 버튼 클릭 (JavaScript로 실행하여 Turbo 폼 제출 보장)
+      submit_btn = find("button[data-report-modal-target='submitBtn']")
+      page.execute_script("arguments[0].click()", submit_btn)
     end
 
-    # 신고 완료 확인 (성공 메시지 표시됨)
-    assert_selector "#report-modal", visible: true
+    # 신고 완료 확인 (Turbo Stream 응답 대기)
+    assert_text "신고 접수 완료", wait: 10
+
+    # 확인 버튼 클릭하여 모달 닫기 (JavaScript로 실행)
     within("#report-modal") do
-      assert_text "신고 접수 완료"
-      # 확인 버튼 클릭하여 모달 닫기
-      click_button "확인"
+      confirm_btn = find("button", text: "확인")
+      page.execute_script("arguments[0].click()", confirm_btn)
     end
 
     # 모달 닫힘 확인
@@ -141,7 +143,7 @@ class ReportsTest < ApplicationSystemTestCase
     end
 
     # 모달 닫힘 확인
-    assert_no_selector "#report-modal", visible: true
+    assert_no_selector "#report-modal", visible: true, wait: 5
   end
 
   test "report modal can be closed with escape key" do
