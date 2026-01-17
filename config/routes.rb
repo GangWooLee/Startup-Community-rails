@@ -200,7 +200,7 @@ Rails.application.routes.draw do
     root to: "dashboard#index"
 
     # Sudo Mode (재인증)
-    resource :sudo, only: [:show, :create, :destroy], controller: "sudo"
+    resource :sudo, only: [ :show, :create, :destroy ], controller: "sudo"
 
     resources :users, only: [ :index, :show ] do
       collection do

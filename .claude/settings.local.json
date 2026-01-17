@@ -73,7 +73,10 @@
       "mcp__puppeteer__puppeteer_fill",
       "mcp__puppeteer__puppeteer_select",
       "mcp__puppeteer__puppeteer_hover",
-      "mcp__puppeteer__puppeteer_evaluate"
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests"
     ],
     "deny": [],
     "ask": []

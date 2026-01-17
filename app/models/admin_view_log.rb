@@ -144,7 +144,7 @@ class AdminViewLog < ApplicationRecord
   private_class_method def self.build_reason(reason, metadata)
     return reason if metadata.blank?
 
-    parts = [reason]
+    parts = [ reason ]
     metadata.each do |key, value|
       parts << "#{key}: #{value}"
     end

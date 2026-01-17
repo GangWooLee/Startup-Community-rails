@@ -76,15 +76,15 @@ module Admin
     # Generate default reason based on target
     def generate_default_reason(target)
       target_desc = case target
-                    when User
+      when User
                       "User##{target.id} (#{target.name})"
-                    when Post
+      when Post
                       "Post##{target.id} (#{target.title.truncate(20)})"
-                    when Comment
+      when Comment
                       "Comment##{target.id}"
-                    when Report
+      when Report
                       "Report##{target.id}"
-                    else
+      else
                       "#{target.class.name}##{target.id}"
       end
 

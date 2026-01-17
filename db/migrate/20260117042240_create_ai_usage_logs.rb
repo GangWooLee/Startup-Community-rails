@@ -17,7 +17,7 @@ class CreateAiUsageLogs < ActiveRecord::Migration[8.1]
     end
 
     # 인덱스: 사용량 통계 쿼리 최적화
-    add_index :ai_usage_logs, [:user_id, :created_at]
+    add_index :ai_usage_logs, [ :user_id, :created_at ]
     add_index :ai_usage_logs, :created_at
     add_index :ai_usage_logs, :status
     add_index :ai_usage_logs, :idea_analysis_id
