@@ -50,23 +50,34 @@ module PendingAnalysis
   # 비로그인 상태에서 입력만 저장 → 로그인 후 백그라운드에서 AI 분석 실행
   def restore_pending_input_and_analyze
     return nil unless logged_in?
-    return nil unless session[:pending_input_key].present?
 
-    cache_key = session[:pending_input_key]
+    # 세션 또는 쿠키에서 캐시 키 복원 (OAuth 외부 리다이렉션 시 세션 손실 대비)
+    cache_key = session[:pending_input_key].presence || cookies.signed[:pending_input_key].presence
+
+    unless cache_key.present?
+      Rails.logger.info "[Lazy Registration] No pending input key found (session or cookie)"
+      return nil
+    end
+
+    Rails.logger.info "[Lazy Registration] Found cache key: #{cache_key}"
+
     cached_input = Rails.cache.read(cache_key)
 
-    return nil unless cached_input
+    unless cached_input
+      Rails.logger.warn "[Lazy Registration] Cache miss for key: #{cache_key}"
+      cleanup_pending_input_keys(cache_key)
+      return nil
+    end
 
     # 횟수 제한 확인 (로그인한 사용자의 기존 분석 횟수 체크)
-    max_analyses = OnboardingController::MAX_FREE_ANALYSES
+    max_analyses = Onboarding::UsageLimitChecker::MAX_FREE_ANALYSES
     usage_count = current_user.idea_analyses.count
 
     if usage_count >= max_analyses
       Rails.logger.warn "[AI] User##{current_user.id} exceeded free analysis limit (#{usage_count}/#{max_analyses})"
 
-      # 캐시 및 세션 정리
-      Rails.cache.delete(cache_key)
-      session.delete(:pending_input_key)
+      # 캐시 및 세션/쿠키 정리
+      cleanup_pending_input_keys(cache_key)
 
       # 횟수 초과 알림
       flash[:alert] = "AI 분석 무료 이용 횟수(#{max_analyses}회)를 모두 사용했습니다."
@@ -87,9 +98,8 @@ module PendingAnalysis
       partial_success: false
     )
 
-    # 2. 캐시 정리
-    Rails.cache.delete(cache_key)
-    session.delete(:pending_input_key)
+    # 2. 캐시 및 세션/쿠키 정리
+    cleanup_pending_input_keys(cache_key)
 
     # 3. 백그라운드 잡 실행
     AiAnalysisJob.perform_later(idea_analysis.id)
@@ -99,8 +109,15 @@ module PendingAnalysis
   rescue => e
     Rails.logger.error "[AI] Failed to create async analysis: #{e.message}"
     Rails.logger.error e.backtrace.first(5).join("\n")
-    session.delete(:pending_input_key)
+    cleanup_pending_input_keys(cache_key)
     nil
+  end
+
+  # 세션, 쿠키, 캐시에서 pending_input_key 정리
+  def cleanup_pending_input_keys(cache_key)
+    Rails.cache.delete(cache_key) if cache_key.present?
+    session.delete(:pending_input_key)
+    cookies.delete(:pending_input_key)
   end
 
   # Mock 분석 결과 (LLM 미설정 시) - 간략 버전

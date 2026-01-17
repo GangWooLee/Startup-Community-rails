@@ -66,6 +66,15 @@ class OnboardingController < ApplicationController
     if result.pending?
       # 비로그인: 쿠키 횟수 증가 후 로그인 유도
       usage_checker.increment_guest_count!
+
+      # 쿠키 백업 저장 (OAuth 외부 리다이렉션 시 세션 손실 대비)
+      cookies.signed[:pending_input_key] = {
+        value: result.cache_key,
+        expires: 1.hour.from_now,
+        httponly: true,
+        same_site: :lax
+      }
+
       redirect_to login_path, notice: "분석 준비가 완료되었습니다! 로그인하면 바로 결과를 확인할 수 있어요."
     else
       # 로그인: GA4 이벤트 후 결과 페이지로 리다이렉트
