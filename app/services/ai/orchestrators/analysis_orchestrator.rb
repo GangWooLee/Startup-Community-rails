@@ -133,8 +133,8 @@ module Ai
           recommendations: @results.dig(:strategy, :recommendations),
           actions: @results.dig(:strategy, :actions),
 
-          # 점수 및 전문성
-          score: @results.dig(:scoring, :score),
+          # 점수 및 전문성 (radar_chart_data, dimension_scores 포함)
+          score: build_score_result,
           required_expertise: @results.dig(:scoring, :required_expertise),
 
           # 메타데이터
@@ -156,6 +156,20 @@ module Ai
           elapsed_seconds: elapsed_total,
           agent_sequence: AGENT_SEQUENCE
         }
+      end
+
+      # 점수 결과 통합 (radar_chart_data, dimension_scores 포함)
+      def build_score_result
+        scoring = @results[:scoring] || {}
+        score_data = scoring[:score] || {}
+
+        # score 객체에 radar_chart_data, dimension_scores 등 추가
+        score_data.merge(
+          radar_chart_data: scoring[:radar_chart_data] || [ 5, 5, 5, 5, 5 ],
+          dimension_scores: scoring[:dimension_scores],
+          total_score: scoring[:total_score],
+          grade: scoring[:grade]
+        )
       end
     end
   end
