@@ -24,6 +24,9 @@ class OnboardingController < ApplicationController
     @back_path = logged_in? ? community_path : root_path
     @user = current_user
     set_usage_stats
+
+    # 사용량 초과 여부를 뷰로 전달 (모달 표시용)
+    @limit_exceeded = usage_checker.exceeded?
   end
 
   # POST /ai/questions (추가 질문 생성)
@@ -162,12 +165,13 @@ class OnboardingController < ApplicationController
 
     respond_to do |format|
       format.html do
-        redirect_to community_path, alert: "무료 분석 #{limit}회가 끝났습니다."
+        # ai_input으로 리다이렉트하여 모달 표시
+        redirect_to onboarding_ai_input_path
       end
       format.json do
         render json: {
           error: "limit_exceeded",
-          message: "무료 분석 #{limit}회가 끝났습니다.",
+          message: "무료 분석 #{limit}회가 모두 사용되었습니다.",
           remaining: 0
         }, status: :forbidden
       end
