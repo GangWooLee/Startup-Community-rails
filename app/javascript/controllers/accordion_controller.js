@@ -14,7 +14,7 @@ import { Controller } from "@hotwired/stimulus"
 //   data-item-id="unique-id" - 아이템별 고유 ID (선택사항)
 //
 export default class extends Controller {
-  static targets = ["item", "trigger", "content", "icon"]
+  static targets = ["item", "trigger", "content", "icon", "label"]
   static values = {
     multiple: { type: Boolean, default: false }
   }
@@ -79,6 +79,13 @@ export default class extends Controller {
       icon.classList.add("rotate-180")
     }
 
+    // 라벨 텍스트 변경: 열기 → 닫기
+    const item = content.closest("[data-accordion-target='item']")
+    const label = item?.querySelector("[data-accordion-target='label']")
+    if (label) {
+      label.textContent = "닫기"
+    }
+
     if (trigger) {
       trigger.setAttribute("aria-expanded", "true")
     }
@@ -106,6 +113,13 @@ export default class extends Controller {
 
     if (icon) {
       icon.classList.remove("rotate-180")
+    }
+
+    // 라벨 텍스트 변경: 닫기 → 열기
+    const item = content.closest("[data-accordion-target='item']")
+    const label = item?.querySelector("[data-accordion-target='label']")
+    if (label) {
+      label.textContent = "열기"
     }
 
     if (trigger) {

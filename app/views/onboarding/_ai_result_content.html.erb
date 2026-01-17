@@ -417,8 +417,8 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-purple-600 font-semibold hidden md:block" data-accordion-target="label">펼치기</span>
-            <svg class="w-6 h-6 text-purple-600 transition-transform group-hover:translate-y-1"
+            <span class="text-purple-600 font-semibold hidden md:block" data-accordion-target="label">닫기</span>
+            <svg class="w-6 h-6 text-purple-600 transition-transform group-hover:translate-y-1 rotate-180"
                  data-accordion-target="icon"
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -426,8 +426,8 @@
           </div>
         </button>
 
-        <%# 확장 콘텐츠 %>
-        <div class="hidden px-4 sm:px-6 md:px-8 pb-6 sm:pb-8 space-y-6 sm:space-y-8" data-accordion-target="content">
+        <%# 확장 콘텐츠 - 기본값 펼쳐짐 %>
+        <div class="px-4 sm:px-6 md:px-8 pb-6 sm:pb-8 space-y-6 sm:space-y-8" data-accordion-target="content">
 
           <%# 📊 시장 분석 데이터 %>
           <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
