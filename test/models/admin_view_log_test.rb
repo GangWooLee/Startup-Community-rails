@@ -171,25 +171,155 @@ class AdminViewLogTest < ActiveSupport::TestCase
   # Constants Tests
   # ============================================================================
 
-  test "ACTIONS contains expected values" do
-    expected = {
-      reveal_personal_info: "reveal_personal_info",
-      view_snapshot: "view_snapshot",
-      export_data: "export_data"
-    }
-    assert_equal expected, AdminViewLog::ACTIONS, "ACTIONS hash should match expected structure"
-    assert_equal 3, AdminViewLog::ACTIONS.size, "Should have exactly 3 actions"
-    assert AdminViewLog::ACTIONS.key?(:reveal_personal_info), "Should include reveal_personal_info"
-    assert AdminViewLog::ACTIONS.key?(:view_snapshot), "Should include view_snapshot"
-    assert AdminViewLog::ACTIONS.key?(:export_data), "Should include export_data"
+  test "ACTIONS includes all action categories" do
+    # Check that all categories are included
+    assert AdminViewLog::PERSONAL_DATA_ACTIONS.all? { |a| AdminViewLog::ACTIONS.include?(a) }
+    assert AdminViewLog::USER_MANAGEMENT_ACTIONS.all? { |a| AdminViewLog::ACTIONS.include?(a) }
+    assert AdminViewLog::CONTENT_MANAGEMENT_ACTIONS.all? { |a| AdminViewLog::ACTIONS.include?(a) }
+    assert AdminViewLog::SYSTEM_ACTIONS.all? { |a| AdminViewLog::ACTIONS.include?(a) }
+  end
+
+  test "SENSITIVE_ACTIONS are a subset of all actions" do
+    AdminViewLog::SENSITIVE_ACTIONS.each do |action|
+      assert AdminViewLog::ACTIONS.include?(action), "#{action} should be in ACTIONS"
+    end
   end
 
   test "ACTIONS values are strings" do
-    AdminViewLog::ACTIONS.values.each do |value|
+    AdminViewLog::ACTIONS.each do |value|
       assert_kind_of String, value, "Action value should be a String"
       assert value.present?, "Action value should not be blank"
       assert_match /^[a-z_]+$/, value, "Action value should be snake_case"
     end
+  end
+
+  # ============================================================================
+  # Enhanced Security Tests
+  # ============================================================================
+
+  test "log_action creates a new log entry" do
+    assert_difference -> { AdminViewLog.count }, 1 do
+      AdminViewLog.log_action(
+        admin: @admin,
+        action: :force_logout_session,
+        target: @deletion,
+        reason: "Testing audit log functionality"
+      )
+    end
+  end
+
+  test "log_action with metadata appends to reason" do
+    log = AdminViewLog.log_action(
+      admin: @admin,
+      action: :delete_user_post,
+      target: @deletion,
+      reason: "Policy violation",
+      metadata: { post_id: 123, title: "Test Post" }
+    )
+
+    assert_includes log.reason, "Policy violation"
+    assert_includes log.reason, "post_id: 123"
+    assert_includes log.reason, "title: Test Post"
+  end
+
+  test "log_action with request extracts IP and user agent" do
+    require "ostruct"
+    request_mock = ::OpenStruct.new(
+      remote_ip: "192.168.1.100",
+      user_agent: "Mozilla/5.0 Test"
+    )
+
+    log = AdminViewLog.log_action(
+      admin: @admin,
+      action: :reveal_personal_info,
+      target: @deletion,
+      reason: "Customer support request",
+      request: request_mock
+    )
+
+    assert_equal "192.168.1.100", log.ip_address
+    assert_equal "Mozilla/5.0 Test", log.user_agent
+  end
+
+  test "sensitive_action? returns true for sensitive actions" do
+    AdminViewLog::SENSITIVE_ACTIONS.each do |action|
+      assert AdminViewLog.sensitive_action?(action), "#{action} should be sensitive"
+    end
+  end
+
+  test "sensitive_action? returns false for non-sensitive actions" do
+    refute AdminViewLog.sensitive_action?("sudo_mode_enabled")
+    refute AdminViewLog.sensitive_action?("nonexistent_action")
+  end
+
+  test "action_label returns Korean label" do
+    log = AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "force_logout_session",
+      reason: "Test reason text"
+    )
+
+    assert_equal "세션 강제 종료", log.action_label
+  end
+
+  test "sensitive? returns true for sensitive action" do
+    log = AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "delete_user_post",
+      reason: "Test reason text"
+    )
+
+    assert log.sensitive?
+  end
+
+  test "sensitive? returns false for non-sensitive action" do
+    log = AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "sudo_mode_enabled",
+      reason: "Test reason text"
+    )
+
+    refute log.sensitive?
+  end
+
+  test "by_action scope filters correctly" do
+    AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "delete_user_post",
+      reason: "Test delete post"
+    )
+    AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "force_logout_session",
+      reason: "Test logout"
+    )
+
+    delete_logs = AdminViewLog.by_action("delete_user_post")
+    assert delete_logs.all? { |log| log.action == "delete_user_post" }
+    assert_equal 1, delete_logs.count
+  end
+
+  test "sensitive_actions scope returns only sensitive actions" do
+    AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "delete_user_post", # sensitive
+      reason: "Test sensitive action"
+    )
+    AdminViewLog.create!(
+      admin: @admin,
+      target: @deletion,
+      action: "sudo_mode_enabled", # not sensitive
+      reason: "Test non-sensitive"
+    )
+
+    sensitive_logs = AdminViewLog.sensitive_actions
+    assert sensitive_logs.all?(&:sensitive?)
   end
 
   # ============================================================================

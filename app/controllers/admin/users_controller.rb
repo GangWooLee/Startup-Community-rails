@@ -1,7 +1,10 @@
 # 관리자 회원 관리 컨트롤러
 # 회원 검색, 상세 정보, 채팅방 목록 확인
 class Admin::UsersController < Admin::BaseController
+  include Admin::SudoMode
+
   before_action :set_user, only: [ :show, :chat_rooms, :destroy_post, :destroy_comment, :force_logout_all ]
+  before_action :require_sudo, only: [ :destroy_post, :destroy_comment, :force_logout_all ]
 
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능
@@ -154,6 +157,12 @@ class Admin::UsersController < Admin::BaseController
     @post = @user.posts.find(params[:post_id])
 
     ActiveRecord::Base.transaction do
+      # 감사 로그 기록 (삭제 전)
+      audit_log(:delete_user_post, @post, "관리자 게시글 삭제", metadata: {
+        post_title: @post.title.truncate(50),
+        author: @user.name
+      })
+
       # 채팅방의 source_post_id 참조 해제 (외래 키 제약 우회)
       ChatRoom.where(source_post_id: @post.id).update_all(source_post_id: nil)
 
@@ -175,6 +184,13 @@ class Admin::UsersController < Admin::BaseController
   # 관리자 권한으로 댓글 삭제
   def destroy_comment
     @comment = @user.comments.find(params[:comment_id])
+
+    # 감사 로그 기록 (삭제 전)
+    audit_log(:delete_user_comment, @comment, "관리자 댓글 삭제", metadata: {
+      comment_content: @comment.content.truncate(50),
+      author: @user.name
+    })
+
     @comment.destroy
 
     flash[:notice] = "댓글이 삭제되었습니다."
@@ -189,15 +205,11 @@ class Admin::UsersController < Admin::BaseController
     if count > 0
       @user.end_all_sessions!(reason: "admin_action")
 
-      # 관리자 행위 로깅
-      AdminViewLog.create!(
-        admin: current_user,
-        target: @user,
-        action: "force_logout_all_sessions",
-        ip_address: request.remote_ip,
-        user_agent: request.user_agent,
-        reason: "#{count}개 세션 강제 종료"
-      )
+      # 감사 로그 기록
+      audit_log(:force_logout_all_sessions, @user, "#{count}개 세션 강제 종료", metadata: {
+        session_count: count,
+        target_user: @user.email
+      })
 
       flash[:notice] = "#{@user.name}님의 #{count}개 세션이 모두 종료되었습니다."
     else

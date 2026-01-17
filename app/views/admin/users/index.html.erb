@@ -79,7 +79,7 @@
 <div class="bg-card rounded-xl border border-border p-4 mb-6">
   <div class="flex items-center gap-4">
     <!-- 검색 -->
-    <%= form_with url: admin_users_path, method: :get, local: true, class: "flex-1" do %>
+    <%= form_with url: admin_users_path, method: :get, local: true, class: "flex-1", data: { turbo: false } do %>
       <div class="relative">
         <%= icon "magnifying-glass", variant: :outline, css_class: "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" %>
         <input type="text"
@@ -123,6 +123,45 @@
         OAuth
       <% end %>
     </div>
+
+    <!-- CSV 내보내기 버튼 -->
+    <div class="border-l border-border pl-4">
+      <%= link_to export_admin_users_path(status: params[:status], type: params[:type], q: params[:q], from_date: params[:from_date], to_date: params[:to_date], format: :csv),
+                  class: "inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium btn-hover" do %>
+        <%= icon "arrow-down-tray", variant: :outline, css_class: "w-4 h-4" %>
+        CSV 다운로드
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 날짜 범위 필터 -->
+  <div class="mt-4 pt-4 border-t border-border">
+    <%= form_with url: admin_users_path, method: :get, local: true, data: { turbo: false }, class: "flex items-center gap-3" do %>
+      <!-- 기존 필터 유지 -->
+      <input type="hidden" name="status" value="<%= params[:status] %>">
+      <input type="hidden" name="type" value="<%= params[:type] %>">
+      <input type="hidden" name="q" value="<%= params[:q] %>">
+
+      <span class="text-sm text-muted-foreground">가입일:</span>
+      <input type="date"
+             name="from_date"
+             value="<%= params[:from_date] %>"
+             class="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      <span class="text-muted-foreground">~</span>
+      <input type="date"
+             name="to_date"
+             value="<%= params[:to_date] %>"
+             class="px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium btn-hover">
+        적용
+      </button>
+      <% if params[:from_date].present? || params[:to_date].present? %>
+        <%= link_to admin_users_path(status: params[:status], type: params[:type], q: params[:q]),
+                    class: "px-3 py-2 text-sm text-muted-foreground link-hover" do %>
+          날짜 초기화
+        <% end %>
+      <% end %>
+    <% end %>
   </div>
 
   <% if params[:q].present? %>
@@ -248,6 +287,9 @@
 
 <!-- 페이지네이션 -->
 <% if @total_pages > 1 %>
+  <%# 필터 파라미터 유지를 위한 공통 params %>
+  <% filter_params = { q: params[:q], type: params[:type], status: params[:status], from_date: params[:from_date], to_date: params[:to_date] }.compact %>
+
   <div class="mt-6 flex items-center justify-between">
     <p class="text-sm text-muted-foreground">
       총 <span class="font-medium text-foreground"><%= @total_count %></span>명 중
@@ -256,7 +298,7 @@
 
     <nav class="flex items-center gap-1">
       <% if @page > 1 %>
-        <%= link_to admin_users_path(page: @page - 1, q: params[:q], type: params[:type]),
+        <%= link_to admin_users_path(filter_params.merge(page: @page - 1)),
                     class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
           <%= icon "chevron-left", variant: :mini, css_class: "w-5 h-5" %>
         <% end %>
@@ -267,13 +309,13 @@
         <% if page_num == @page %>
           <span class="px-4 py-2 rounded-lg bg-foreground text-background text-sm font-medium"><%= page_num %></span>
         <% else %>
-          <%= link_to page_num, admin_users_path(page: page_num, q: params[:q], type: params[:type]),
+          <%= link_to page_num, admin_users_path(filter_params.merge(page: page_num)),
                       class: "px-4 py-2 rounded-lg border border-border text-muted-foreground text-sm btn-hover" %>
         <% end %>
       <% end %>
 
       <% if @page < @total_pages %>
-        <%= link_to admin_users_path(page: @page + 1, q: params[:q], type: params[:type]),
+        <%= link_to admin_users_path(filter_params.merge(page: @page + 1)),
                     class: "p-2 rounded-lg border border-border text-muted-foreground btn-hover" do %>
           <%= icon "chevron-right", variant: :mini, css_class: "w-5 h-5" %>
         <% end %>

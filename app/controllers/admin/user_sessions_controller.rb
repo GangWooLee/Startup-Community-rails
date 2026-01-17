@@ -49,15 +49,12 @@ class Admin::UserSessionsController < Admin::BaseController
     if @session.active?
       @session.end_session!(reason: "admin_action")
 
-      # 관리자 행위 로깅
-      AdminViewLog.create!(
-        admin: current_user,
-        target: @session.user,
-        action: "force_logout_session",
-        ip_address: request.remote_ip,
-        user_agent: request.user_agent,
-        reason: "Session ID: #{@session.id}"
-      )
+      # 감사 로그 기록
+      audit_log(:force_logout_session, @session.user, "세션 강제 종료", metadata: {
+        session_id: @session.id,
+        target_user: @session.user&.email,
+        device: @session.device_type
+      })
 
       flash[:notice] = "#{@session.user.name}님의 세션이 강제 종료되었습니다."
     else
