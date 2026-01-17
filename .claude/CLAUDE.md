@@ -64,6 +64,31 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 | `mx-auto` (고정 너비 없이) | 중앙 정렬 안 됨 | `flex justify-center` 또는 고정 너비 추가 |
 | 중복 HTML ID (Turbo Stream 타겟) | 잘못된 컨테이너에 렌더링 | 전역 컨테이너 하나만 사용 |
 
+### 🔐 비로그인 사용자 세션 관리 (2026-01-17)
+
+**문제 배경**:
+- 비로그인 사용자가 `browse=true`로 커뮤니티 진입 후
+- 사이드바 링크(홍보, 자유게시판 등) 클릭 시 온보딩으로 리다이렉트되는 버그 발생
+- 원인: URL 파라미터는 페이지 이동 시 유지되지 않음
+
+**해결 패턴**:
+```ruby
+# PostsController#index
+session[:browsing_community] = true if params[:browse] == "true"
+
+# PostsController#redirect_to_onboarding
+return if session[:browsing_community]  # ← 세션 체크 필수!
+```
+
+**핵심 원칙**:
+| 상황 | 해결책 |
+|------|--------|
+| 일회성 파라미터로 상태 전달 | URL 파라미터 사용 |
+| **페이지 이동 시에도 상태 유지 필요** | **세션** 사용 |
+| 브라우저 종료 후에도 유지 필요 | **쿠키** 사용 |
+
+**테스트**: `test/controllers/posts_controller_test.rb` - `redirect_to_onboarding 세션 기반 테스트` 섹션
+
 ### ⚠️ 애니메이션 CSS 아키텍처 (중요!)
 ```
 현재 구조:
@@ -554,6 +579,62 @@ main          # 프로덕션 브랜치
 ## 📚 배운 교훈 (Lessons Learned)
 
 > **목적**: 반복되는 실수를 방지하고 프로젝트 지식을 축적
+
+### OAuth 세션 손실 패턴 (Critical!)
+
+**문제**: OAuth 외부 리다이렉션 시 Rails 세션 데이터 손실
+
+```ruby
+# ❌ 세션만 사용 - OAuth 리다이렉션 후 손실 가능
+session[:pending_idea] = idea
+
+# ✅ 세션 + 쿠키 백업 - OAuth 대비
+session[:pending_idea] = idea
+cookies.encrypted[:pending_idea_backup] = {
+  value: idea,
+  expires: 1.hour.from_now
+}
+
+# ✅ 복원 시 세션 우선, 쿠키 폴백
+idea = session[:pending_idea] || cookies.encrypted[:pending_idea_backup]
+```
+
+**상태 저장 선택 가이드**:
+| 시나리오 | 권장 방법 |
+|---------|----------|
+| 내부 리다이렉션만 (일반 폼 제출) | 세션 |
+| **OAuth 등 외부 리다이렉션** | **세션 + 쿠키 백업** |
+| 브라우저 종료 후에도 유지 | 쿠키 |
+| 민감 데이터 | `cookies.encrypted` 필수 |
+
+**관련 파일**: `app/controllers/concerns/pending_analysis.rb`
+
+### 데이터 병합 필드 누락 방지
+
+**문제**: 복잡한 객체 병합 시 중첩 필드 누락
+
+```ruby
+# ❌ 수동 병합 - 필드 누락 위험
+result[:score] = {
+  total_score: score.total_score,
+  grade: score.grade
+  # radar_chart_data 누락!
+}
+
+# ✅ 전용 빌더 메서드 사용
+result[:score] = build_score_result(score)
+
+def build_score_result(score)
+  {
+    total_score: score.total_score,
+    grade: score.grade,
+    dimension_scores: score.dimension_scores,
+    radar_chart_data: score.radar_chart_data  # 모든 필드 명시
+  }
+end
+```
+
+**원칙**: 복잡한 데이터 구조 병합은 **전용 빌더 메서드**로 추출하여 필드 누락 방지
 
 ### CI 실패 패턴 (System Test)
 

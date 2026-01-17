@@ -6,6 +6,9 @@ class PostsController < ApplicationController
   before_action :hide_floating_button, only: [ :new, :edit, :show ]
 
   def index
+    # browse=true로 접근 시 세션에 브라우징 상태 저장 (사이드바 네비게이션 허용)
+    session[:browsing_community] = true if params[:browse] == "true"
+
     # 커뮤니티 섹션: 커뮤니티 글만 표시 (free, question, promotion)
     # 구인/구직은 외주 섹션(/job_posts)에서 표시
     @page = [ params[:page].to_i, 1 ].max
@@ -230,6 +233,7 @@ class PostsController < ApplicationController
   def redirect_to_onboarding
     return if logged_in?
     return if params[:browse] == "true"
+    return if session[:browsing_community]
     return if cookies[:onboarding_completed].present?
     return if request.format.turbo_stream?
 

@@ -307,6 +307,51 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "권한이 없습니다.", flash[:alert]
   end
 
+  # ===== redirect_to_onboarding 세션 기반 테스트 =====
+
+  test "index with browse param should set browsing_community session" do
+    get community_path(browse: true)
+    assert_response :success
+    assert session[:browsing_community], "세션에 browsing_community 플래그가 설정되어야 함"
+  end
+
+  test "index with category filter should work after browsing session is set" do
+    # 먼저 browse=true로 접근하여 세션 설정
+    get community_path(browse: true)
+    assert_response :success
+
+    # 이후 카테고리 필터로 접근 - 세션이 유지되어 접근 가능해야 함
+    get community_path(category: "promotion")
+    assert_response :success  # 온보딩 리다이렉트 없이 성공
+  end
+
+  test "sidebar navigation works for all community categories after browse" do
+    get community_path(browse: true)
+
+    %w[free question promotion].each do |category|
+      get community_path(category: category)
+      assert_response :success, "#{category} 카테고리 접근이 실패함"
+    end
+  end
+
+  test "sort change should work after browsing session is set" do
+    get community_path(browse: true)
+
+    get community_path(sort: "popular")
+    assert_response :success
+  end
+
+  test "index should allow access with onboarding_completed cookie" do
+    cookies[:onboarding_completed] = "true"
+    get community_path
+    assert_response :success
+  end
+
+  test "turbo stream request should be allowed without browse param" do
+    get community_path, as: :turbo_stream
+    assert_response :success
+  end
+
   # ===== 헬퍼 =====
 
   private
