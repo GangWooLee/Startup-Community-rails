@@ -119,6 +119,50 @@ module Ai
 
           assert_equal "에듀테크", gatherer.industry
         end
+
+        # ==========================================================================
+        # Parallel Execution Tests (병렬 실행 테스트)
+        # ==========================================================================
+
+        test "gather executes searches in parallel" do
+          # 각 검색에 약간의 지연을 주어 병렬 실행 확인
+          mock_tool = SlowMockGroundingTool.new(
+            delay: 0.1,
+            market_data: "시장 데이터",
+            competitors: "경쟁사 데이터",
+            trends: "트렌드 데이터"
+          )
+
+          gatherer = GroundingDataGatherer.new(industry: @industry, grounding_tool: mock_tool)
+
+          start_time = Time.now
+          result = gatherer.gather
+          elapsed = Time.now - start_time
+
+          # 순차 실행이면 0.3초 이상, 병렬이면 ~0.1초
+          assert elapsed < 0.25, "Expected parallel execution (< 0.25s) but took #{elapsed}s"
+          assert_equal "시장 데이터", result[:market_size]
+          assert_equal "경쟁사 데이터", result[:competitors]
+          assert_equal "트렌드 데이터", result[:trends]
+        end
+
+        test "gather handles partial slow responses" do
+          # 하나의 검색만 느리게 응답
+          mock_tool = PartialSlowMockGroundingTool.new(
+            slow_search: :market_size,
+            delay: 0.2,
+            fast_data: "빠른 응답",
+            slow_data: "느린 응답"
+          )
+
+          gatherer = GroundingDataGatherer.new(industry: @industry, grounding_tool: mock_tool)
+          result = gatherer.gather
+
+          # 모든 결과가 반환되어야 함
+          assert_equal "느린 응답", result[:market_size]
+          assert_equal "빠른 응답", result[:competitors]
+          assert_equal "빠른 응답", result[:trends]
+        end
       end
 
       # Mock grounding tool for testing
@@ -151,6 +195,59 @@ module Ai
           def initialize(content)
             @content = content
           end
+        end
+      end
+
+      # Slow mock tool for testing parallel execution
+      class SlowMockGroundingTool
+        def initialize(delay:, market_data: nil, competitors: nil, trends: nil)
+          @delay = delay
+          @market_data = market_data
+          @competitors = competitors
+          @trends = trends
+        end
+
+        def search_market_data(query:)
+          sleep(@delay)
+          MockGroundingTool::MockResult.new(@market_data)
+        end
+
+        def search_competitors(query:)
+          sleep(@delay)
+          MockGroundingTool::MockResult.new(@competitors)
+        end
+
+        def search_trends(query:)
+          sleep(@delay)
+          MockGroundingTool::MockResult.new(@trends)
+        end
+      end
+
+      # Mock tool with one slow search for testing partial delays
+      class PartialSlowMockGroundingTool
+        def initialize(slow_search:, delay:, fast_data:, slow_data:)
+          @slow_search = slow_search
+          @delay = delay
+          @fast_data = fast_data
+          @slow_data = slow_data
+        end
+
+        def search_market_data(query:)
+          sleep(@delay) if @slow_search == :market_size
+          content = @slow_search == :market_size ? @slow_data : @fast_data
+          MockGroundingTool::MockResult.new(content)
+        end
+
+        def search_competitors(query:)
+          sleep(@delay) if @slow_search == :competitors
+          content = @slow_search == :competitors ? @slow_data : @fast_data
+          MockGroundingTool::MockResult.new(content)
+        end
+
+        def search_trends(query:)
+          sleep(@delay) if @slow_search == :trends
+          content = @slow_search == :trends ? @slow_data : @fast_data
+          MockGroundingTool::MockResult.new(content)
         end
       end
     end

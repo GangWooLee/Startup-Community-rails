@@ -21,12 +21,28 @@ module Ai
         end
 
         def gather
-          Rails.logger.info("[GroundingDataGatherer] Gathering data for: #{industry}")
+          Rails.logger.info("[GroundingDataGatherer] Gathering data for: #{industry} (parallel)")
 
+          # 3개 검색을 병렬 실행 (각 검색은 독립적)
+          futures = {
+            market_size: Concurrent::Future.execute { search_market_size },
+            competitors: Concurrent::Future.execute { search_competitors },
+            trends: Concurrent::Future.execute { search_trends }
+          }
+
+          # 결과 수집 (개별 타임아웃 30초)
           results = {}
-          results[:market_size] = search_market_size
-          results[:competitors] = search_competitors
-          results[:trends] = search_trends
+          futures.each do |key, future|
+            begin
+              results[key] = future.value(30) # 30초 타임아웃
+            rescue Concurrent::TimeoutError
+              Rails.logger.warn("[GroundingDataGatherer] #{key} timed out")
+              results[key] = nil
+            end
+          end
+
+          gathered_keys = results.keys.select { |k| results[k].present? }
+          Rails.logger.info("[GroundingDataGatherer] Gathered: #{gathered_keys.join(', ')} (#{gathered_keys.size}/3)")
           results
         end
 
