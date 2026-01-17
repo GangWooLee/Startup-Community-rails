@@ -104,7 +104,13 @@ class AuthenticationTest < ApplicationSystemTestCase
   end
 
   test "login fails with non-existent email" do
+    # 로그아웃 상태 보장 (이전 테스트 세션 오염 방지)
+    Capybara.reset_sessions!
+
     visit login_path
+
+    # 로그인 폼 로드 대기
+    assert_selector "input[name='email']", wait: 5
 
     # name 속성으로 입력 필드 찾기
     find("input[name='email']").fill_in with: "nonexistent@example.com"
