@@ -80,4 +80,83 @@ class LoginSecurityTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_match /잠겼습니다/, flash[:alert]
   end
+
+  # ===== 잠금 해제 테스트 추가 (2026-01-17) =====
+
+  test "lockout expires after 15 minutes" do
+    # Lock the account
+    Rails.cache.write("login_lockout:127.0.0.1", true, expires_in: 15.minutes)
+    Rails.cache.write("login_attempts:127.0.0.1", 5, expires_in: 10.minutes)
+
+    # Verify locked
+    assert Rails.cache.read("login_lockout:127.0.0.1"), "Account should be locked initially"
+
+    # Travel forward 16 minutes (beyond 15 minute lockout)
+    travel 16.minutes do
+      # Cache should have expired
+      assert_nil Rails.cache.read("login_lockout:127.0.0.1"), "Lockout should expire after 15 minutes"
+
+      # Should be able to login again
+      post login_path, params: { email: @user.email, password: "test1234" }
+      assert_redirected_to community_path, "Should be able to login after lockout expires"
+    end
+  end
+
+  test "failed attempts counter expires after window" do
+    # Make 3 failed attempts
+    3.times do
+      post login_path, params: { email: @user.email, password: "wrongpassword" }
+      assert_response :unprocessable_entity
+    end
+
+    # Verify attempts were tracked
+    attempts = Rails.cache.read("login_attempts:127.0.0.1")
+    assert_equal 3, attempts.to_i
+
+    # Travel forward 11 minutes (beyond 10 minute window)
+    travel 11.minutes do
+      # Attempt counter should have expired
+      assert_nil Rails.cache.read("login_attempts:127.0.0.1"), "Attempt counter should expire after window"
+
+      # Make 2 more failed attempts (should not lock since counter reset)
+      2.times do
+        post login_path, params: { email: @user.email, password: "wrongpassword" }
+        assert_response :unprocessable_entity
+      end
+
+      # Should NOT be locked (only 2 new attempts after reset)
+      locked = Rails.cache.read("login_lockout:127.0.0.1")
+      assert_nil locked, "Account should not be locked with only 2 attempts after reset"
+    end
+  end
+
+  test "lockout message shows remaining time" do
+    # Lock the account
+    Rails.cache.write("login_lockout:127.0.0.1", true, expires_in: 15.minutes)
+
+    # Try to login
+    post login_path, params: { email: @user.email, password: "test1234" }
+    assert_redirected_to login_path
+
+    follow_redirect!
+    # Should mention minutes remaining
+    assert_match /분 후/, flash[:alert], "Flash should mention minutes remaining"
+  end
+
+  test "successful login after lockout expiry clears all cache" do
+    # Lock the account and set attempts
+    Rails.cache.write("login_lockout:127.0.0.1", true, expires_in: 15.minutes)
+    Rails.cache.write("login_attempts:127.0.0.1", 5, expires_in: 10.minutes)
+
+    # Travel past lockout period
+    travel 16.minutes do
+      # Login successfully
+      post login_path, params: { email: @user.email, password: "test1234" }
+      assert_redirected_to community_path
+
+      # All cache entries should be cleared
+      assert_nil Rails.cache.read("login_lockout:127.0.0.1")
+      assert_nil Rails.cache.read("login_attempts:127.0.0.1")
+    end
+  end
 end
