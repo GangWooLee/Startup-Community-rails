@@ -17,7 +17,7 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.9.0 |
-| **마지막 업데이트** | 2026-01-08 |
+| **마지막 업데이트** | 2026-01-16 |
 | **진행 중 작업** | 문서 최신화, 안정성 개선 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
@@ -61,6 +61,8 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 | `onclick` 검색 결과 | blur 시 재검색 | `onmousedown` 사용 |
 | `faraday_ssl.rb` 파일 삭제 | Mac에서 SSL 에러 | **절대 삭제 금지!** (Mac 필수) |
 | 레이아웃에서 애니메이션 CSS 삭제 | 랜딩 페이지 깨짐 | **삭제 금지!** (CDN은 커스텀 CSS 미포함) |
+| `mx-auto` (고정 너비 없이) | 중앙 정렬 안 됨 | `flex justify-center` 또는 고정 너비 추가 |
+| 중복 HTML ID (Turbo Stream 타겟) | 잘못된 컨테이너에 렌더링 | 전역 컨테이너 하나만 사용 |
 
 ### ⚠️ 애니메이션 CSS 아키텍처 (중요!)
 ```
@@ -78,6 +80,83 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - app/views/layouts/application.html.erb (애니메이션 정의)
 - app/javascript/controllers/scroll_animation_controller.js
 - app/views/onboarding/landing.html.erb (사용처)
+```
+
+### 🎨 CSS 패턴 가이드
+
+#### z-index 계층 구조
+| 레이어 | z-index | 용도 |
+|--------|---------|------|
+| 기본 콘텐츠 | 없음 | 일반 요소 |
+| Sticky 헤더 | z-40~50 | compact_header |
+| 모달/오버레이 | z-[60] | profile-overlay |
+| 알림 드롭다운 | z-[100] | notification-dropdown |
+| Flash 메시지 | z-[9999] | 최상위 알림 |
+
+#### 중앙 정렬 패턴
+```erb
+<%# 고정 너비 요소 - mx-auto 작동 %>
+<div class="mx-auto w-64">콘텐츠</div>
+
+<%# 가변 너비 요소 - flex 사용 %>
+<div class="flex justify-center">
+  <div>콘텐츠</div>
+</div>
+```
+
+#### CSS Grid 카드 높이 균일화
+```erb
+<%# 카드 wrapper에 h-full 필수 %>
+<div class="grid md:grid-cols-3 gap-6">
+  <div class="h-full">  <%# ← wrapper에 h-full %>
+    <div class="h-full flex flex-col">  <%# ← 카드 본체에도 h-full + flex %>
+      <div class="flex-1">콘텐츠</div>  <%# ← flex-1로 공간 채움 %>
+      <div>하단 고정</div>
+    </div>
+  </div>
+</div>
+```
+
+### 👤 익명 프로필 시스템
+
+**핵심 추상화:**
+```ruby
+render_user_avatar(user, size: "md")  # 익명 아바타 자동 처리
+user.display_name                      # 익명 닉네임 자동 처리
+```
+
+**동작 원리:**
+1. `user.is_anonymous` 플래그 확인
+2. 익명 시 → `using_anonymous_avatar?` → `/anonymous[N]-.png` 표시
+3. 익명 시 → `display_name` → 익명 닉네임 반환
+
+**관련 파일:**
+- 아바타 헬퍼: `app/helpers/avatar_helper.rb`
+- 프로필 Concern: `app/models/concerns/profileable.rb`
+
+**사용처:**
+- 전문가 카드/모달 (`_expert_card_v2.html.erb`, `_expert_profile_overlay.html.erb`)
+- 프로필 위젯, 댓글, 채팅 등
+
+### ⚡ Turbo Stream 주의사항
+
+**중복 ID 문제:**
+- Turbo Stream은 **DOM 순서상 첫 번째** 일치하는 ID를 타겟
+- 로컬 컨테이너가 전역 컨테이너보다 먼저 있으면 로컬에 렌더링됨
+- **해결**: 전역 컨테이너 하나만 사용 (application.html.erb)
+
+**CSS 스택 컨텍스트:**
+- `<main>` 내부 요소는 `<main>` 형제 요소를 z-index로 가릴 수 없음
+- 모달/오버레이는 반드시 `<main>` **외부**에 렌더링되어야 함
+
+**sessionStorage 페이지간 데이터 전달:**
+```javascript
+// 저장 (ai_result_controller.js)
+sessionStorage.setItem('onboarding_idea_summary', summary)
+
+// 사용 후 삭제 (post_form_controller.js)
+const saved = sessionStorage.getItem('onboarding_idea_summary')
+sessionStorage.removeItem('onboarding_idea_summary')
 ```
 
 ## 📋 Plan Mode 규칙 (필수!)
@@ -181,6 +260,16 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - AI: `ai_loading`, `ai_result`, `ai_input`
 - 기타: `email_verification`, `chat_room`, `message_form`, `load_more`, `confirm` 등
 
+### AI 분석 → 커뮤니티 게시 흐름
+- **ai_result_controller**: `app/javascript/controllers/ai_result_controller.js`
+  - 분석 결과 → "커뮤니티에 게시" 버튼 클릭 시 요약을 sessionStorage 저장
+- **post_form_controller**: `app/javascript/controllers/post_form_controller.js`
+  - 게시 폼 로드 시 sessionStorage에서 제목 자동 채움
+
+### 익명 프로필 시스템
+- **아바타 헬퍼**: `app/helpers/avatar_helper.rb` - `render_user_avatar()`
+- **프로필 Concern**: `app/models/concerns/profileable.rb` - `display_name`, `using_anonymous_avatar?`
+
 ### 회원 탈퇴 시스템
 - **탈퇴 처리**: `app/services/users/deletion_service.rb`
 - **탈퇴 모델**: `app/models/user_deletion.rb`
@@ -190,6 +279,8 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-16]** AI 분석 결과 UI 개선 (전문가 모달 z-index, 익명 프로필, 액션 카드 높이 균일화)
+- **[2026-01-16]** AI → 커뮤니티 게시 흐름 개선 (제목에 요약, 본문 빈 상태로 사용자 직접 작성)
 - **[2026-01-08]** Claude Code rules 대폭 확장 (9개 파일, 1,152줄)
 - **[2026-01-08]** .claude/ 문서 최신성 업데이트
 - **[2026-01-07]** Resend HTTP API 이메일 서비스 연동 (프로덕션)
