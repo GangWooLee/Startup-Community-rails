@@ -38,6 +38,7 @@
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.clarity.ms">
 
     <%# Google Fonts - 비동기 로딩으로 렌더 블로킹 방지 %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -409,6 +410,11 @@
 
     <%# GA4 Turbo Stream 이벤트 컨테이너 %>
     <div id="ga4-events" style="display: none;"></div>
+
+    <%# Microsoft Clarity (사용자 행동 분석 - 히트맵, 세션 녹화) %>
+    <% if Rails.env.production? %>
+      <%= render 'layouts/clarity' %>
+    <% end %>
 
     <%# 카카오 JavaScript SDK (공유 기능용) %>
     <%
