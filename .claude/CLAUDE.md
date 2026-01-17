@@ -17,7 +17,7 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.9.0 |
-| **마지막 업데이트** | 2026-01-16 |
+| **마지막 업데이트** | 2026-01-17 |
 | **진행 중 작업** | 문서 최신화, 안정성 개선 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
@@ -342,6 +342,8 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-17]** CI 트러블슈팅 가이드 추가 (`rules/testing/ci-troubleshooting.md`)
+- **[2026-01-17]** CLAUDE.md에 배운 교훈 및 지속적 개선 섹션 추가
 - **[2026-01-16]** AI 분석 결과 UI 개선 (전문가 모달 z-index, 익명 프로필, 액션 카드 높이 균일화)
 - **[2026-01-16]** AI → 커뮤니티 게시 흐름 개선 (제목에 요약, 본문 빈 상태로 사용자 직접 작성)
 - **[2026-01-08]** Claude Code rules 대폭 확장 (9개 파일, 1,152줄)
@@ -549,6 +551,78 @@ main          # 프로덕션 브랜치
 
 ---
 
+## 📚 배운 교훈 (Lessons Learned)
+
+> **목적**: 반복되는 실수를 방지하고 프로젝트 지식을 축적
+
+### CI 실패 패턴 (System Test)
+
+**상세 가이드**: [rules/testing/ci-troubleshooting.md](rules/testing/ci-troubleshooting.md)
+
+| 패턴 | 빈도 | 핵심 해결책 |
+|------|------|-------------|
+| **Stale Element** | 20% | JavaScript `querySelector` 사용 (반복문 내부) |
+| **ESC 키 모달** | 10% | `document.dispatchEvent` 사용 |
+| **Stimulus 타이밍** | 25% | `assert_selector "[data-controller='xxx']", wait: 5` |
+| **Dropdown 경쟁** | 15% | 옵션 표시 대기 후 클릭 |
+| **상태 오염** | 5% | `SecureRandom.hex(4)` 유니크 데이터 |
+
+### 알려진 함정 (Known Pitfalls)
+
+| 상황 | 잘못된 접근 | 올바른 접근 |
+|------|------------|-------------|
+| Turbo Stream 후 요소 조작 | Ruby 변수 재사용 | `find()` 재호출 또는 JS querySelector |
+| 모달 ESC 키 닫기 | `send_keys(:escape)` | `document.dispatchEvent(KeyboardEvent)` |
+| 숨겨진 요소 클릭 | Capybara `.click` | `page.execute_script("arguments[0].click()")` |
+| 폼 제출 중복 방지 테스트 | 요소 캐싱 | 매 반복마다 새로 찾기 |
+
+---
+
+## 🔄 지속적 개선 (Continuous Improvement)
+
+> **원칙**: 같은 실수를 두 번 하지 않는다
+
+### 문서화 트리거
+
+다음 상황 발생 시 **반드시** 관련 문서 업데이트:
+
+| 상황 | 문서화 대상 | 위치 |
+|------|------------|------|
+| CI 실패 수정 | 실패 패턴 + 해결책 | `rules/testing/ci-troubleshooting.md` |
+| 프로젝트 특화 버그 | 금지 패턴 + 대안 | `CLAUDE.md` → 프로젝트 특화 규칙 |
+| 아키텍처 결정 | 결정 배경 + 이유 | `ARCHITECTURE_DETAIL.md` |
+| 보안 이슈 | 취약점 + 방어책 | `rules/backend/security.md` |
+
+### 문서화 절차
+
+```
+1. 문제 발생 → 원인 분석
+2. 해결책 적용 → 테스트 통과 확인
+3. 패턴 일반화 → 재발 방지 규칙 도출
+4. 문서 업데이트 → 커밋에 포함
+```
+
+### 작업 완료 체크리스트
+
+모든 작업 완료 시 확인:
+- [ ] 테스트 통과 (`bin/rails test`)
+- [ ] Rubocop 통과 (`rubocop`)
+- [ ] CI 통과 확인
+- [ ] **새로운 패턴 발견 시 문서화** ← 필수!
+
+### 세션 종료 시 점검
+
+```
+☐ 이번 세션에서 새로 발견한 패턴이 있는가?
+  → 있다면 적절한 문서에 기록
+☐ CI 실패를 수정했는가?
+  → 있다면 ci-troubleshooting.md에 추가
+☐ 프로젝트 특화 규칙을 위반했다가 수정했는가?
+  → 있다면 CLAUDE.md 금지 패턴에 추가
+```
+
+---
+
 ## 참조 문서
 
 ### 핵심 문서 (새 세션 시 필수)
@@ -621,7 +695,9 @@ main          # 프로덕션 브랜치
 │   │   ├── tailwind-dos-donts.md
 │   │   ├── stimulus-patterns.md
 │   │   └── accessibility.md
-│   ├── testing/conventions.md   # 테스트 규칙
+│   ├── testing/
+│   │   ├── conventions.md       # 테스트 규칙
+│   │   └── ci-troubleshooting.md # CI 실패 패턴 및 해결책
 │   ├── infrastructure/critical-files.md  # 인프라 규칙
 │   └── common/code-quality.md   # 공통 코드 품질
 │
