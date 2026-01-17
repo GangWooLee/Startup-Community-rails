@@ -19,10 +19,10 @@ production:
     class: DestroyExpiredDeletionsJob
     schedule: at 3am every day
 
-  # 미저장 AI 분석 결과 자동 삭제 (30분 경과 후)
+  # 미저장 AI 분석 결과 자동 삭제 (7일 경과 후)
   cleanup_unsaved_analyses:
     class: CleanupUnsavedAnalysesJob
-    schedule: every 30 minutes
+    schedule: at 4am every day
 
   # 오래된 세션 기록 자동 삭제 (90일 경과 후)
   cleanup_old_sessions:

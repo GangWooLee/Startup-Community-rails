@@ -19,29 +19,20 @@
 
   <!-- Main Content -->
   <main class="max-w-screen-xl mx-auto px-4 py-6">
-    <% if @idea_analyses.any? %>
+    <% if @usage_logs.any? %>
       <div class="space-y-3">
-        <% @idea_analyses.each do |analysis| %>
-          <%= link_to ai_result_path(analysis) do %>
-            <div class="bg-card rounded-xl border border-border p-4 card-hover mb-3">
-              <!-- 점수 뱃지 & 날짜 -->
-              <div class="flex items-center justify-between mb-2">
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium <%= analysis.score.to_i >= 70 ? 'bg-green-500/10 text-green-600' : analysis.score.to_i >= 50 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-red-500/10 text-red-600' %>">
-                  <span class="font-bold"><%= analysis.score || 0 %>점</span>
-                </span>
-                <span class="text-xs text-muted-foreground">
-                  <%= analysis.created_at.strftime("%Y.%m.%d %H:%M") %>
-                </span>
-              </div>
+        <% @usage_logs.each do |log| %>
+          <% analysis = log.idea_analysis %>
+          <% has_analysis = analysis.present? %>
 
-              <!-- 아이디어 내용 -->
-              <p class="text-sm font-medium line-clamp-2 mb-2"><%= analysis.idea %></p>
-
-              <!-- 요약 (있으면) -->
-              <% if analysis.summary.present? %>
-                <p class="text-xs text-muted-foreground line-clamp-1"><%= analysis.summary %></p>
-              <% end %>
-            </div>
+          <% if has_analysis %>
+            <%# 분석 결과가 있는 경우 - 클릭 가능 %>
+            <%= link_to ai_result_path(analysis) do %>
+              <%= render partial: "my_page/usage_log_card", locals: { log: log, analysis: analysis, expired: false } %>
+            <% end %>
+          <% else %>
+            <%# 분석 결과가 삭제된 경우 - 클릭 불가 %>
+            <%= render partial: "my_page/usage_log_card", locals: { log: log, analysis: nil, expired: true } %>
           <% end %>
         <% end %>
       </div>

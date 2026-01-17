@@ -100,6 +100,60 @@ class IdeaAnalysisTest < ActiveSupport::TestCase
     assert_equal old, results.last
   end
 
+  test "expired_unsaved scope returns unsaved analyses older than 7 days" do
+    # 8일 전 미저장 분석 - 만료됨
+    expired_analysis = IdeaAnalysis.create!(
+      user: @user,
+      idea: "Expired unsaved",
+      analysis_result: { summary: "test" },
+      is_saved: false
+    )
+    expired_analysis.update_column(:updated_at, 8.days.ago)
+
+    # 6일 전 미저장 분석 - 아직 유효
+    recent_analysis = IdeaAnalysis.create!(
+      user: @user,
+      idea: "Recent unsaved",
+      analysis_result: { summary: "test" },
+      is_saved: false
+    )
+    recent_analysis.update_column(:updated_at, 6.days.ago)
+
+    # 8일 전 저장된 분석 - 만료 대상 아님
+    saved_analysis = IdeaAnalysis.create!(
+      user: @user,
+      idea: "Saved analysis",
+      analysis_result: { summary: "test" },
+      is_saved: true
+    )
+    saved_analysis.update_column(:updated_at, 8.days.ago)
+
+    expired_ids = IdeaAnalysis.expired_unsaved.pluck(:id)
+
+    # 8일 전 미저장 분석만 만료 대상
+    assert_includes expired_ids, expired_analysis.id
+    assert_not_includes expired_ids, recent_analysis.id
+    assert_not_includes expired_ids, saved_analysis.id
+  end
+
+  test "saved scope returns only saved analyses" do
+    saved = IdeaAnalysis.create!(user: @user, idea: "Saved", analysis_result: { summary: "test" }, is_saved: true)
+    unsaved = IdeaAnalysis.create!(user: @user, idea: "Unsaved", analysis_result: { summary: "test" }, is_saved: false)
+
+    saved_ids = IdeaAnalysis.saved.where(id: [ saved.id, unsaved.id ]).pluck(:id)
+    assert_includes saved_ids, saved.id
+    assert_not_includes saved_ids, unsaved.id
+  end
+
+  test "unsaved scope returns only unsaved analyses" do
+    saved = IdeaAnalysis.create!(user: @user, idea: "Saved", analysis_result: { summary: "test" }, is_saved: true)
+    unsaved = IdeaAnalysis.create!(user: @user, idea: "Unsaved", analysis_result: { summary: "test" }, is_saved: false)
+
+    unsaved_ids = IdeaAnalysis.unsaved.where(id: [ saved.id, unsaved.id ]).pluck(:id)
+    assert_not_includes unsaved_ids, saved.id
+    assert_includes unsaved_ids, unsaved.id
+  end
+
   # ─────────────────────────────────────────────────
   # Parsed Result Helpers Tests
   # ─────────────────────────────────────────────────

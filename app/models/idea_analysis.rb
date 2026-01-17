@@ -35,7 +35,7 @@ class IdeaAnalysis < ApplicationRecord
   # 저장 상태 scopes
   scope :saved, -> { where(is_saved: true) }
   scope :unsaved, -> { where(is_saved: false) }
-  scope :expired_unsaved, -> { unsaved.where("updated_at < ?", 30.minutes.ago) }
+  scope :expired_unsaved, -> { unsaved.where("updated_at < ?", 7.days.ago) }
 
   # 사용 기록 자동 생성/업데이트 (삭제되어도 기록은 보존됨)
   after_create :create_usage_log

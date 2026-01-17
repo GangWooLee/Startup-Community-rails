@@ -26,7 +26,10 @@ class MyPageController < ApplicationController
 
   def idea_analyses
     @user = current_user
-    @idea_analyses = @user.idea_analyses.order(created_at: :desc)
+    # AiUsageLog 기반으로 변경 - 삭제된 분석도 기록 표시
+    @usage_logs = @user.ai_usage_logs
+                       .includes(:idea_analysis)
+                       .order(created_at: :desc)
   end
 
   def update
