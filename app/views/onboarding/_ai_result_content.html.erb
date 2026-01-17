@@ -122,60 +122,192 @@
 
         <%# Idea Summary Badge %>
         <div class="flex justify-center mb-8">
-          <div class="bg-yellow-50 border-2 border-yellow-300 rounded-full px-6 py-3 inline-flex items-center gap-3 shadow-md">
-            <span class="text-2xl">💡</span>
+          <div class="bg-yellow-50 border-2 border-yellow-300 rounded-full px-6 py-3 inline-flex items-center shadow-md">
             <span class="text-yellow-800 font-semibold"><%= analysis[:summary] %></span>
           </div>
         </div>
 
-        <%# Score Circle (w-48 h-48 = 192px, r=85) %>
-        <div class="flex justify-center mb-10">
-          <div class="relative flex items-center justify-center">
-            <%# 외곽 글로우 효과 %>
-            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-violet-500/20 blur-2xl scale-110"></div>
+        <%# Pentagon Radar Chart - VC Dashboard Style (2열 Bento Grid) %>
+        <%
+          # 레이더 차트 데이터 (10점 만점)
+          radar_data = analysis.dig(:score, :radar_chart_data) || [5, 5, 5, 5, 5]
+          dimension_names = %w[시장성 문제 차별성 실현가능성 수익모델]
+          dimension_keys = %w[market problem moat feasibility business]
 
-            <svg class="transform -rotate-90 w-48 h-48 relative z-10" viewBox="0 0 192 192">
-              <%# 그라데이션 정의 %>
-              <defs>
-                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#3b82f6"/>
-                  <stop offset="50%" stop-color="#6366f1"/>
-                  <stop offset="100%" stop-color="#8b5cf6"/>
-                </linearGradient>
-              </defs>
+          # SVG 좌표 계산 상수
+          center_x = 150
+          center_y = 150
+          max_radius = 100
+          label_radius = 125
 
-              <%# 배경 원 %>
-              <circle cx="96" cy="96" r="85" stroke="#e2e8f0" stroke-width="14" fill="none"/>
+          # 오각형 꼭짓점 각도 (12시 방향부터 시계방향, 라디안)
+          angles = [-90, -18, 54, 126, 198].map { |deg| deg * Math::PI / 180 }
 
-              <%# 진행도 원 - stroke-dasharray 계산: 85 * 2 * PI * (score/100) %>
-              <circle cx="96" cy="96" r="85"
-                      stroke="url(#scoreGradient)"
-                      stroke-width="14"
-                      fill="none"
-                      stroke-dasharray="<%= (85 * 2 * 3.14159 * score / 100).round %> <%= (85 * 2 * 3.14159).round %>"
-                      stroke-linecap="round"
-                      class="drop-shadow-lg animate-score-circle"/>
-            </svg>
+          # 점수를 좌표로 변환하는 람다
+          pentagon_point = ->(pt_score, angle, cx, cy, max_r) {
+            normalized = [pt_score.to_f / 10.0, 1.0].min
+            radius = normalized * max_r
+            x = cx + radius * Math.cos(angle)
+            y = cy + radius * Math.sin(angle)
+            "#{x.round(1)},#{y.round(1)}"
+          }
 
-            <%# 중앙 점수 텍스트 %>
-            <div class="absolute inset-0 flex flex-col items-center justify-center z-20">
-              <span class="font-bold text-slate-800 animate-count-up" style="font-size: 3.5rem;"><%= score %></span>
-              <span class="text-slate-500 font-medium mt-1">점</span>
+          # 배경 오각형 (그리드) 좌표 생성 람다
+          pentagon_grid_points = ->(level, angs, cx, cy, max_r) {
+            angs.map { |angle|
+              x = cx + (level / 5.0) * max_r * Math.cos(angle)
+              y = cy + (level / 5.0) * max_r * Math.sin(angle)
+              "#{x.round(1)},#{y.round(1)}"
+            }.join(' ')
+          }
+
+          # 데이터 다각형 좌표
+          data_points = angles.each_with_index.map { |angle, i|
+            pentagon_point.call(radar_data[i] || 5, angle, center_x, center_y, max_radius)
+          }.join(' ')
+
+          # 레이블 위치 계산
+          label_positions = angles.each_with_index.map { |angle, i|
+            x = center_x + label_radius * Math.cos(angle)
+            y = center_y + label_radius * Math.sin(angle)
+            # 텍스트 앵커 조정
+            anchor = case i
+                     when 0 then 'middle'
+                     when 1, 2 then 'start'
+                     when 3, 4 then 'end'
+                     end
+            { x: x.round(1), y: y.round(1), anchor: anchor, name: dimension_names[i], score: radar_data[i] || 5 }
+          }
+
+          # 등급 시스템
+          grade_info = case score
+            when 90..100 then { label: "Platinum", emoji: "💎", message: "투자가치 매우 높음", bg: "bg-violet-50", border: "border-violet-200", text: "text-violet-700", badge_bg: "bg-violet-100" }
+            when 80..89 then { label: "Gold", emoji: "🥇", message: "투자가치가 높은 아이디어", bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge_bg: "bg-amber-100" }
+            when 70..79 then { label: "Silver", emoji: "🥈", message: "발전 가능성이 있는 아이디어", bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-600", badge_bg: "bg-slate-100" }
+            when 60..69 then { label: "Bronze", emoji: "🥉", message: "기본기를 갖춘 아이디어", bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-700", badge_bg: "bg-orange-100" }
+            else { label: "Developing", emoji: "🌱", message: "보완이 필요한 아이디어", bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge_bg: "bg-emerald-100" }
+          end
+        %>
+
+        <%# 2열 Bento Grid 레이아웃 %>
+        <div class="flex flex-col md:flex-row gap-8 items-center justify-center mb-10 max-w-4xl mx-auto">
+
+          <%# 좌측: 총점 카드 (2/5) %>
+          <div class="w-full md:w-2/5 space-y-4 flex flex-col items-center text-center">
+            <%# Analysis Result 뱃지 %>
+            <span class="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+              Analysis Result
+            </span>
+
+            <%# 점수 표시 %>
+            <div>
+              <h3 class="text-stone-500 text-sm font-medium">종합 사업성 점수</h3>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-6xl font-black text-stone-900"><%= score %></span>
+                <span class="text-xl text-stone-400 font-medium">/ 100</span>
+              </div>
+            </div>
+
+            <%# 등급 뱃지 %>
+            <div class="flex items-center gap-2">
+              <span class="text-2xl"><%= grade_info[:emoji] %></span>
+              <span class="<%= grade_info[:badge_bg] %> <%= grade_info[:text] %> px-3 py-1 rounded-lg text-sm font-bold">
+                <%= grade_info[:label] %>
+              </span>
+            </div>
+
+            <%# 진단 요약 %>
+            <div class="border-t border-stone-100 pt-4">
+              <p class="text-stone-800 font-bold text-lg">"<%= grade_info[:message] %>"</p>
+              <p class="text-stone-500 text-sm mt-1">
+                <% if strong_areas.any? %>
+                  <span class="text-emerald-600 font-medium"><%= strong_areas.first %></span> 강점
+                  <% if weak_areas.any? %>
+                    · <span class="text-orange-600 font-medium"><%= weak_areas.first %></span> 보완 필요
+                  <% end %>
+                <% elsif weak_areas.any? %>
+                  <span class="text-orange-600 font-medium"><%= weak_areas.join(', ') %></span> 영역 보완 필요
+                <% else %>
+                  균형 잡힌 아이디어입니다
+                <% end %>
+              </p>
             </div>
           </div>
-        </div>
 
-        <%# Score Status %>
-        <% score_status = case score
-             when 0..40 then { label: "보완 필요", bg: "from-red-50 to-red-100/50", border: "border-red-300", text: "text-red-700" }
-             when 41..60 then { label: "기본기 갖춤", bg: "from-yellow-50 to-yellow-100/50", border: "border-yellow-300", text: "text-yellow-700" }
-             when 61..80 then { label: "좋은 출발", bg: "from-blue-50 to-blue-100/50", border: "border-blue-300", text: "text-blue-700" }
-             else { label: "훌륭한 아이디어", bg: "from-emerald-50 to-emerald-100/50", border: "border-emerald-300", text: "text-emerald-700" }
-           end %>
-        <div class="flex justify-center mb-10">
-          <div class="bg-gradient-to-r <%= score_status[:bg] %> rounded-full px-6 py-2.5 border-2 <%= score_status[:border] %> shadow-md">
-            <span class="font-bold <%= score_status[:text] %>"><%= score_status[:label] %></span>
+          <%# 우측: 레이더 차트 (3/5) %>
+          <div class="w-full md:w-3/5 relative flex justify-center">
+            <svg viewBox="-30 0 360 300" class="w-80 h-80 md:w-96 md:h-96" data-pentagon-chart aria-label="5차원 아이디어 점수 레이더 차트">
+              <%# 1. 배경 오각형 그리드 (5단계) - 점선 스타일 %>
+              <g class="fill-none" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4">
+                <% (1..5).each do |level| %>
+                  <polygon points="<%= pentagon_grid_points.call(level, angles, center_x, center_y, max_radius) %>" />
+                <% end %>
+              </g>
+
+              <%# 2. 축선 (중심 → 꼭짓점) - 점선 %>
+              <g stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4">
+                <% angles.each do |angle| %>
+                  <%
+                    end_x = center_x + max_radius * Math.cos(angle)
+                    end_y = center_y + max_radius * Math.sin(angle)
+                  %>
+                  <line x1="<%= center_x %>" y1="<%= center_y %>" x2="<%= end_x.round(1) %>" y2="<%= end_y.round(1) %>" />
+                <% end %>
+              </g>
+
+              <%# 3. 데이터 다각형 (점수 영역) - 오렌지 단색 + 투명도 %>
+              <polygon
+                points="<%= data_points %>"
+                fill="#fb923c"
+                fill-opacity="0.35"
+                stroke="#ea580c"
+                stroke-width="2"
+                data-area
+                class="animate-pentagon-scale"
+              />
+
+              <%# 4. 데이터 포인트 (꼭짓점 점) - 작은 오렌지 점 %>
+              <g>
+                <% angles.each_with_index do |angle, i| %>
+                  <%
+                    point_score = radar_data[i] || 5
+                    normalized = [point_score.to_f / 10.0, 1.0].min
+                    px = center_x + normalized * max_radius * Math.cos(angle)
+                    py = center_y + normalized * max_radius * Math.sin(angle)
+                  %>
+                  <circle cx="<%= px.round(1) %>" cy="<%= py.round(1) %>" r="4" fill="#ea580c" data-dimension="<%= dimension_keys[i] %>" />
+                <% end %>
+              </g>
+
+              <%# 5. 꼭짓점 레이블 (차원 이름 + 점수) %>
+              <g class="text-xs font-medium">
+                <% label_positions.each_with_index do |pos, i| %>
+                  <%
+                    # 상단 레이블은 위로, 하단은 아래로 오프셋
+                    y_offset = i == 0 ? -8 : (i == 3 || i == 4 ? 8 : 0)
+                  %>
+                  <text
+                    x="<%= pos[:x] %>"
+                    y="<%= pos[:y] + y_offset %>"
+                    text-anchor="<%= pos[:anchor] %>"
+                    class="fill-slate-600"
+                    data-dimension="<%= dimension_keys[i] %>"
+                  >
+                    <%= pos[:name] %>
+                  </text>
+                  <text
+                    x="<%= pos[:x] %>"
+                    y="<%= pos[:y] + y_offset + 14 %>"
+                    text-anchor="<%= pos[:anchor] %>"
+                    class="fill-orange-600 font-bold"
+                  >
+                    <%= pos[:score] %>/10
+                  </text>
+                <% end %>
+              </g>
+            </svg>
           </div>
+
         </div>
 
         <%# Diagnosis Box %>
