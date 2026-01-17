@@ -98,11 +98,14 @@ class CommentsTest < ApplicationSystemTestCase
     sleep 0.2
 
     # Enter 키 여러 번 빠르게 전송 (중복 제출 시도)
+    # JavaScript로 요소를 직접 찾아 이벤트 발생 (Stale Element 방지)
     3.times do
-      page.execute_script(
-        "arguments[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))",
-        input
-      )
+      page.execute_script(<<~JS)
+        const input = document.querySelector("[data-comment-form-target='input']");
+        if (input) {
+          input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        }
+      JS
     end
 
     # 응답 대기
