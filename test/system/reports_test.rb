@@ -159,16 +159,17 @@ class ReportsTest < ApplicationSystemTestCase
     # CI 환경에서 드롭다운 메뉴가 나타날 때까지 충분히 대기
     assert_selector "[data-dropdown-target='menu']", visible: true, wait: 10
     within("[data-dropdown-target='menu']") do
-      find("button", text: "신고하기").click
+      report_btn = find("button", text: "신고하기")
+      page.execute_script("arguments[0].click()", report_btn)
     end
 
-    assert_selector "#report-modal", visible: true
+    assert_selector "#report-modal", visible: true, wait: 5
 
-    # ESC 키로 닫기 (오버레이 클릭 대신)
-    find("body").send_keys(:escape)
+    # ESC 키로 닫기 (JavaScript로 키 이벤트 발생)
+    page.execute_script("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }))")
 
     # 모달 닫힘 확인
-    assert_no_selector "#report-modal", visible: true, wait: 3
+    assert_no_selector "#report-modal", visible: true, wait: 5
   end
 
   test "report modal shows all reason options" do

@@ -209,6 +209,64 @@ sessionStorage.removeItem('onboarding_idea_summary')
 - [ ] **Manual Test**: 수동 테스트 확인
 - [ ] **No Regression**: 기존 기능 정상 작동
 
+### Phase 사이징 가이드라인
+
+| 범위 | Phase 수 | 총 소요시간 | 예시 |
+|------|----------|-------------|------|
+| **Small** | 2-3개 | 3-6시간 | 다크모드 토글, 간단한 UI 컴포넌트 |
+| **Medium** | 4-5개 | 8-15시간 | 인증 시스템, 검색 기능 |
+| **Large** | 6-7개 | 15-25시간 | AI 분석 시스템, 실시간 채팅 |
+
+### Test Coverage 기준 (Rails 프로젝트)
+
+| 레이어 | 최소 커버리지 | 테스트 유형 |
+|--------|--------------|-------------|
+| **Model (비즈니스 로직)** | ≥80% | Unit Test |
+| **Service Object** | ≥80% | Unit Test |
+| **Controller** | ≥70% | Integration Test |
+| **View/UI** | - | System Test (E2E) |
+
+**커버리지 명령어:**
+```bash
+# 테스트 실행
+bin/rails test
+
+# 시스템 테스트 (Capybara)
+bin/rails test:system
+
+# 특정 파일 테스트
+bin/rails test test/models/user_test.rb
+```
+
+### Test-First Development 워크플로우
+
+```
+1. 🔴 RED Phase
+   ├── 테스트 케이스 정의 (입력/출력/엣지케이스)
+   ├── 실패하는 테스트 작성
+   ├── 테스트 실행 → 실패 확인 ❌
+   └── (선택) 실패 테스트 커밋
+
+2. 🟢 GREEN Phase
+   ├── 테스트 통과하는 최소 코드 작성
+   ├── 2-5분마다 테스트 실행
+   ├── 모든 테스트 통과 확인 ✅
+   └── 추가 기능 작성 금지 (테스트 범위 내에서만)
+
+3. 🔵 REFACTOR Phase
+   ├── 코드 품질 개선 (중복 제거, 명명 개선)
+   ├── 리팩토링 후 테스트 실행
+   ├── 테스트 여전히 통과 확인 ✅
+   └── 커밋
+```
+
+### 위험 평가 및 롤백 전략
+
+**계획 문서에 반드시 포함:**
+1. **Risk Assessment**: 기술/의존성/일정/품질 위험 식별
+2. **Rollback Strategy**: 각 Phase 실패 시 복구 방법
+3. **Progress Tracking**: Phase별 진행률, 체크박스 상태
+
 ### ⛔ Plan Mode에서 금지 사항
 ❌ TDD 없이 구현만 진행
 ❌ Quality Gate 생략
@@ -220,6 +278,11 @@ sessionStorage.removeItem('onboarding_idea_summary')
 ```
 .claude/plans/[plan-name].md
 ```
+
+### 📚 Plan Mode 참조 문서
+상세 가이드라인은 다음 파일 참조:
+- **SKILL.md**: Phase 사이징, 테스트 명세, 커버리지 계산
+- **plan-template.md**: 완전한 계획 문서 템플릿 (TDD 구조 포함)
 
 ## 핵심 파일 Quick Reference
 
