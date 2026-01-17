@@ -6,12 +6,21 @@
 # - 관리자가 사용자의 접속 기록 추적
 # - 강제 로그아웃 기능
 # - 활성 사용자 통계
+# - 세션 만료 관리
 #
 # 사용법:
 #   UserSession.record_login(user:, method:, ip_address:, user_agent:)
 #   user_session.end_session!(reason: "user_initiated")
+#   user_session.expired? # 세션 만료 확인
 #
 class UserSession < ApplicationRecord
+  # ==========================================================================
+  # 세션 만료 설정
+  # ==========================================================================
+  # 일반 사용자: 12시간 비활동 시 만료
+  # 관리자: 30분 비활동 시 만료 (보안 강화)
+  GENERAL_SESSION_TIMEOUT = 12.hours
+  ADMIN_SESSION_TIMEOUT = 30.minutes
   # ==========================================================================
   # Associations
   # ==========================================================================
@@ -79,6 +88,35 @@ class UserSession < ApplicationRecord
   # 활성 세션 여부
   def active?
     logged_out_at.nil?
+  end
+
+  # 세션 만료 여부 확인
+  # 관리자는 30분, 일반 사용자는 12시간 비활동 시 만료
+  def expired?
+    return false unless active?
+
+    timeout = user&.admin? ? ADMIN_SESSION_TIMEOUT : GENERAL_SESSION_TIMEOUT
+    activity_time = last_activity_at || logged_in_at
+    activity_time < timeout.ago
+  end
+
+  # 세션 만료 시간 (남은 시간)
+  def expires_in
+    return nil unless active?
+
+    timeout = user&.admin? ? ADMIN_SESSION_TIMEOUT : GENERAL_SESSION_TIMEOUT
+    activity_time = last_activity_at || logged_in_at
+    remaining = timeout - (Time.current - activity_time)
+    remaining.positive? ? remaining : 0
+  end
+
+  # 만료된 세션 자동 종료
+  def expire_if_needed!
+    return false unless expired?
+
+    end_session!(reason: "session_expired")
+    Rails.logger.info "[SESSION] Auto-expired session #{id} for user #{user_id}"
+    true
   end
 
   # 세션 시간 (분)

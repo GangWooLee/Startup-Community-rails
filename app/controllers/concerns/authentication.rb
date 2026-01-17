@@ -13,9 +13,46 @@ module Authentication
 
   included do
     helper_method :current_user, :logged_in?
+    before_action :check_session_expiry
   end
 
   private
+
+  # ==========================================================================
+  # Session Expiry Check
+  # ==========================================================================
+
+  # Check if the current session has expired
+  # Admin sessions expire after 30 minutes of inactivity
+  # Regular user sessions expire after 12 hours of inactivity
+  def check_session_expiry
+    return unless session[:user_session_token].present?
+
+    user_session = UserSession.find_by(session_token: session[:user_session_token])
+    return unless user_session
+
+    if user_session.expire_if_needed!
+      # Session expired - log out the user
+      forget(@current_user) if @current_user
+      reset_session
+      @current_user = nil
+
+      flash[:alert] = "세션이 만료되었습니다. 다시 로그인해주세요."
+
+      # Store current location for redirect after login
+      store_location if request.get? && !request.xhr?
+
+      # Respond appropriately based on request type
+      respond_to do |format|
+        format.html { redirect_to login_path }
+        format.json { render json: { error: "Session expired" }, status: :unauthorized }
+        format.turbo_stream { redirect_to login_path }
+      end
+    else
+      # Update last activity time
+      user_session.touch_activity!
+    end
+  end
 
   # ==========================================================================
   # Current User

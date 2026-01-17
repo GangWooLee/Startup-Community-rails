@@ -199,6 +199,9 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
 
+    # Sudo Mode (재인증)
+    resource :sudo, only: [:show, :create, :destroy], controller: "sudo"
+
     resources :users, only: [ :index, :show ] do
       collection do
         get :export, defaults: { format: :csv }  # CSV 내보내기

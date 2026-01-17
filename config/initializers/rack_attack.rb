@@ -45,6 +45,51 @@ class Rack::Attack
     end
   end
 
+  # ==========================================================================
+  # Admin Page Protection (CRITICAL)
+  # ==========================================================================
+
+  # Throttle admin page access by IP (100 requests per 5 minutes)
+  # Admin pages typically have lower traffic, so stricter limits are appropriate
+  throttle("admin/ip", limit: 100, period: 5.minutes) do |req|
+    req.ip if req.path.start_with?("/admin")
+  end
+
+  # ==========================================================================
+  # Account Lockout (Brute Force Protection)
+  # ==========================================================================
+  #
+  # After 5 failed login attempts within 10 minutes, block the IP for 15 minutes
+  # Failed attempts are tracked in Rails.cache by SessionsController
+  #
+  # This is checked on EVERY login attempt (before authentication)
+  # If blocked, returns 403 Forbidden
+  #
+  blocklist("login_lockout/ip") do |req|
+    next false unless req.path == "/login" && req.post?
+
+    begin
+      ban_key = "login_lockout:#{req.ip}"
+      Rails.cache.read(ban_key) == true
+    rescue => e
+      Rails.logger.error "[Rack::Attack] Lockout check error: #{e.message}"
+      false
+    end
+  end
+
+  # Block admin page access for banned IPs
+  blocklist("admin_lockout/ip") do |req|
+    next false unless req.path.start_with?("/admin")
+
+    begin
+      ban_key = "login_lockout:#{req.ip}"
+      Rails.cache.read(ban_key) == true
+    rescue => e
+      Rails.logger.error "[Rack::Attack] Admin lockout check error: #{e.message}"
+      false
+    end
+  end
+
   # Throttle signup attempts by IP (5 requests per hour)
   throttle("signups/ip", limit: 5, period: 1.hour) do |req|
     if req.path == "/signup" && req.post?

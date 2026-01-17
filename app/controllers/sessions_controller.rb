@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  include LoginSecurity
+
   before_action :require_no_login, only: [ :new, :create ]
 
   # GET /login
@@ -37,6 +39,9 @@ class SessionsController < ApplicationController
     # 탈퇴한 사용자는 User.find_by로 찾으면 nil이 됨 (익명화되어 이메일 다름)
     # 만약 unscoped로 찾아서 deleted?인 경우 처리
     if user.nil?
+      # Track failed login attempt (user not found)
+      track_failed_login
+
       # 익명화된 사용자인지 확인 (이메일이 변경되었으므로 찾을 수 없음)
       flash.now[:alert] = "이메일 또는 비밀번호가 올바르지 않습니다."
       render :new, status: :unprocessable_entity
@@ -44,6 +49,9 @@ class SessionsController < ApplicationController
     end
 
     if user.authenticate(params[:password])
+      # Clear failed login attempts on successful authentication
+      clear_failed_logins
+
       remember_me_checked = params[:remember_me] == "1"
       log_in(user, method: "email", remember_me: remember_me_checked)
 
@@ -74,6 +82,9 @@ class SessionsController < ApplicationController
       flash[:notice] = "로그인되었습니다. 환영합니다, #{user.name}님!"
       redirect_back_or(community_path)
     else
+      # Track failed login attempt for brute force protection
+      track_failed_login
+
       flash.now[:alert] = "이메일 또는 비밀번호가 올바르지 않습니다."
       render :new, status: :unprocessable_entity
     end
