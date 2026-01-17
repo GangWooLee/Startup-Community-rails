@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_16_143046) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_17_042240) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -63,6 +63,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_16_143046) do
     t.index ["created_at"], name: "index_admin_view_logs_on_created_at"
     t.index ["target_type", "target_id"], name: "index_admin_view_logs_on_target"
     t.index ["target_type", "target_id"], name: "index_admin_view_logs_on_target_type_and_target_id"
+  end
+
+  create_table "ai_usage_logs", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.integer "idea_analysis_id"
+    t.text "idea_summary"
+    t.boolean "is_real_analysis", default: true
+    t.integer "score"
+    t.string "status", default: "analyzing"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.boolean "was_saved", default: false
+    t.index ["created_at"], name: "index_ai_usage_logs_on_created_at"
+    t.index ["idea_analysis_id"], name: "index_ai_usage_logs_on_idea_analysis_id"
+    t.index ["status"], name: "index_ai_usage_logs_on_status"
+    t.index ["user_id", "created_at"], name: "index_ai_usage_logs_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_ai_usage_logs_on_user_id"
   end
 
   create_table "bookmarks", force: :cascade do |t|
@@ -509,6 +527,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_16_143046) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_view_logs", "users", column: "admin_id"
+  add_foreign_key "ai_usage_logs", "users"
   add_foreign_key "bookmarks", "users"
   add_foreign_key "chat_room_participants", "chat_rooms"
   add_foreign_key "chat_room_participants", "users"

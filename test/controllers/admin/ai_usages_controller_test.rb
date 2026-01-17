@@ -71,4 +71,76 @@ class Admin::AiUsagesControllerTest < ActionDispatch::IntegrationTest
     # Cleanup
     @user.update!(ai_bonus_credits: 0)
   end
+
+  # === 날짜 필터 및 사용 이력 테스트 ===
+
+  test "should get index with top users view by default" do
+    get admin_ai_usages_path
+
+    assert_response :success
+    assert_select "h2", /Top 사용자/
+  end
+
+  test "should get index with history view" do
+    get admin_ai_usages_path(view: "history")
+
+    assert_response :success
+    assert_select "h2", /사용 이력/
+  end
+
+  test "should filter statistics by date range" do
+    # 오늘 날짜로 필터링
+    today = Date.current.to_s
+
+    get admin_ai_usages_path(from_date: today, to_date: today)
+
+    assert_response :success
+    # 날짜 필터 표시 확인
+    assert_select "span.text-primary", /필터된 분석/
+  end
+
+  test "should maintain filters when switching tabs" do
+    today = Date.current.to_s
+
+    get admin_ai_usages_path(from_date: today, to_date: today, view: "history")
+
+    assert_response :success
+    assert_select "input[name='from_date'][value='#{today}']"
+    assert_select "input[name='to_date'][value='#{today}']"
+  end
+
+  test "history view should paginate results" do
+    get admin_ai_usages_path(view: "history", page: 1)
+
+    assert_response :success
+    # 사용 이력 테이블 표시 확인
+    assert_select "h2", /사용 이력/
+  end
+
+  test "history view should search by user name or email" do
+    get admin_ai_usages_path(view: "history", q: @user.email)
+
+    assert_response :success
+  end
+
+  # === 잘못된 날짜 형식 에러 처리 테스트 ===
+
+  test "invalid date format in index does not cause 500 error" do
+    # 잘못된 날짜 형식으로 요청
+    get admin_ai_usages_path(from_date: "invalid-date", to_date: "also-invalid")
+
+    # 500 에러가 아닌 정상 응답
+    assert_response :success
+    # 에러 메시지 표시 확인
+    assert_match(/잘못된 날짜 형식/, response.body)
+  end
+
+  test "invalid date format in export does not cause 500 error" do
+    # 잘못된 날짜 형식으로 CSV 내보내기 요청
+    get export_admin_ai_usages_path(format: :csv, from_date: "not-a-date")
+
+    # 500 에러가 아닌 정상 응답 (CSV 반환)
+    assert_response :success
+    assert_equal "text/csv; charset=utf-8", response.content_type
+  end
 end

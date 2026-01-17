@@ -75,6 +75,7 @@ class User < ApplicationRecord
 
   # AI 아이디어 분석
   has_many :idea_analyses, dependent: :destroy
+  has_many :ai_usage_logs, dependent: :destroy  # 영구 보존되는 사용 기록
 
   # 신고/문의
   has_many :reports, foreign_key: :reporter_id, dependent: :destroy  # 내가 한 신고

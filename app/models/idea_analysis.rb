@@ -2,6 +2,7 @@
 
 class IdeaAnalysis < ApplicationRecord
   belongs_to :user
+  has_one :ai_usage_log, dependent: :nullify  # 삭제 시 로그는 보존 (nullify)
 
   # 상태 enum (비동기 분석용)
   enum :status, {
@@ -36,6 +37,10 @@ class IdeaAnalysis < ApplicationRecord
   scope :unsaved, -> { where(is_saved: false) }
   scope :expired_unsaved, -> { unsaved.where("updated_at < ?", 30.minutes.ago) }
 
+  # 사용 기록 자동 생성/업데이트 (삭제되어도 기록은 보존됨)
+  after_create :create_usage_log
+  after_update :sync_usage_log, if: :should_sync_usage_log?
+
   # 분석 완료 시 Turbo Stream 브로드캐스트
   after_update_commit :broadcast_completion, if: :should_broadcast_completion?
 
@@ -46,6 +51,40 @@ class IdeaAnalysis < ApplicationRecord
   end
 
   private
+
+  # 사용 기록 생성 (분석 시작 시)
+  def create_usage_log
+    AiUsageLog.create!(
+      user_id: user_id,
+      idea_summary: idea.to_s.truncate(200),
+      status: status,
+      is_real_analysis: is_real_analysis,
+      score: score,
+      idea_analysis_id: id
+    )
+  rescue StandardError => e
+    Rails.logger.error "[IdeaAnalysis##{id}] Failed to create usage log: #{e.message}"
+    # 사용 기록 생성 실패해도 분석은 계속 진행
+  end
+
+  # 사용 기록 동기화 (상태/저장 여부 변경 시)
+  def sync_usage_log
+    return unless ai_usage_log
+
+    ai_usage_log.update!(
+      status: status,
+      score: score,
+      completed_at: completed? ? Time.current : nil,
+      was_saved: is_saved
+    )
+  rescue StandardError => e
+    Rails.logger.error "[IdeaAnalysis##{id}] Failed to sync usage log: #{e.message}"
+  end
+
+  # 사용 기록 동기화가 필요한지 확인
+  def should_sync_usage_log?
+    saved_change_to_status? || saved_change_to_is_saved? || saved_change_to_score?
+  end
 
   def should_broadcast_completion?
     saved_change_to_status? && completed?

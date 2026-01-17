@@ -6,23 +6,21 @@ class Admin::AiUsagesController < Admin::BaseController
   # GET /admin/ai_usages
   # 전체 AI 분석 통계 + 사용자 검색
   def index
-    # 통계 계산
-    calculate_statistics
+    # 날짜 범위 필터 적용된 기본 스코프 생성
+    @base_scope = build_date_filtered_scope
+    @current_view = params[:view] == "history" ? "history" : "users"
 
-    # 사용자 검색
-    if params[:q].present?
-      keyword = "%#{params[:q]}%"
-      @users = User.where("email LIKE ? OR name LIKE ?", keyword, keyword)
-                   .includes(:idea_analyses)
-                   .order(created_at: :desc)
-                   .limit(50)
+    # 통계 계산 (필터 적용)
+    calculate_statistics(@base_scope)
+
+    # 날짜 범위 필터 적용된 분석 집합 (기존 코드 호환)
+    analyses_scope = @base_scope
+
+    # 뷰에 따라 다른 데이터 로드
+    if @current_view == "history"
+      load_history_data(analyses_scope)
     else
-      # Top 사용자 (분석 많이 한 순)
-      @users = User.joins(:idea_analyses)
-                   .group("users.id")
-                   .select("users.*, COUNT(idea_analyses.id) as analyses_count")
-                   .order(Arel.sql("COUNT(idea_analyses.id) DESC"))
-                   .limit(20)
+      load_users_data(analyses_scope)
     end
   end
 
@@ -31,6 +29,38 @@ class Admin::AiUsagesController < Admin::BaseController
   def show
     @analyses = @user.idea_analyses.order(created_at: :desc)
     @stats = @user.ai_usage_stats
+  end
+
+  # GET /admin/ai_usages/export.csv
+  # AI 분석 데이터를 CSV로 내보내기
+  def export
+    @analyses = IdeaAnalysis.includes(:user).order(created_at: :desc)
+
+    # 날짜 범위 필터링 (안전한 파싱)
+    from_date = parse_date_safely(params[:from_date])
+    to_date = parse_date_safely(params[:to_date])
+
+    @analyses = @analyses.where("idea_analyses.created_at >= ?", from_date.beginning_of_day) if from_date
+    @analyses = @analyses.where("idea_analyses.created_at <= ?", to_date.end_of_day) if to_date
+
+    # 검색 필터
+    if params[:q].present?
+      keyword = "%#{params[:q]}%"
+      @analyses = @analyses.joins(:user).where("users.email LIKE ? OR users.name LIKE ?", keyword, keyword)
+    end
+
+    columns = {
+      id: "ID",
+      user_name: ->(analysis) { analysis.user&.name || "(삭제됨)" },
+      user_email: ->(analysis) { analysis.user&.email || "-" },
+      idea_title: ->(analysis) { analysis.idea_title.to_s.truncate(50) },
+      status: ->(analysis) { status_label(analysis.status) },
+      is_real: ->(analysis) { analysis.is_real_analysis ? "실제" : "Mock" },
+      created_at: "분석일"
+    }
+
+    service = Admin::CsvExportService.new(@analyses, columns: columns, filename_prefix: "ai_analyses")
+    send_data service.generate, filename: service.filename, type: "text/csv; charset=utf-8"
   end
 
   # PATCH /admin/ai_usages/:id/update_limit
@@ -115,23 +145,106 @@ class Admin::AiUsagesController < Admin::BaseController
     @user = User.find(params[:id])
   end
 
-  def calculate_statistics
-    # 전체 통계
-    @total_analyses = IdeaAnalysis.count
-    @today_analyses = IdeaAnalysis.where("created_at >= ?", Time.current.beginning_of_day).count
-    @this_week_analyses = IdeaAnalysis.where("created_at >= ?", 1.week.ago).count
+  # 사용 이력 데이터 로드
+  def load_history_data(analyses_scope)
+    @analyses = analyses_scope.includes(:user).order(created_at: :desc)
 
-    # 실제 vs Mock 분석
-    @real_analyses = IdeaAnalysis.where(is_real_analysis: true).count
-    @mock_analyses = IdeaAnalysis.where(is_real_analysis: false).count
+    # 사용자 검색 필터
+    if params[:q].present?
+      keyword = "%#{params[:q]}%"
+      @analyses = @analyses.joins(:user).where(
+        "users.email LIKE :q OR users.name LIKE :q", q: keyword
+      )
+    end
 
-    # 상태별 통계
-    @completed_count = IdeaAnalysis.where(status: "completed").count
-    @analyzing_count = IdeaAnalysis.where(status: "analyzing").count
-    @failed_count = IdeaAnalysis.where(status: "failed").count
+    # 페이지네이션 (30개/페이지)
+    @page = (params[:page] || 1).to_i
+    @per_page = 30
+    @total_count = @analyses.count
+    @total_pages = (@total_count.to_f / @per_page).ceil
+    @analyses = @analyses.offset((@page - 1) * @per_page).limit(@per_page)
+  end
 
-    # 평균 사용량
-    users_with_analyses = User.joins(:idea_analyses).distinct.count
+  # 사용자 목록 데이터 로드 (기존 Top Users 로직)
+  def load_users_data(analyses_scope)
+    if params[:q].present?
+      keyword = "%#{params[:q]}%"
+      @users = User.where("email LIKE ? OR name LIKE ?", keyword, keyword)
+                   .includes(:idea_analyses)
+                   .order(created_at: :desc)
+                   .limit(50)
+    else
+      # Top 사용자 (분석 많이 한 순) - 날짜 필터 적용
+      @users = User.joins(:idea_analyses)
+                   .merge(analyses_scope)
+                   .group("users.id")
+                   .select("users.*, COUNT(idea_analyses.id) as analyses_count")
+                   .order(Arel.sql("COUNT(idea_analyses.id) DESC"))
+                   .limit(20)
+    end
+  end
+
+  # 상태 레이블
+  def status_label(status)
+    {
+      "pending" => "대기",
+      "analyzing" => "분석 중",
+      "completed" => "완료",
+      "failed" => "실패"
+    }[status] || status
+  end
+
+  # 날짜 범위 필터 적용된 스코프 생성
+  def build_date_filtered_scope
+    scope = IdeaAnalysis.all
+    from_date = parse_date_safely(params[:from_date])
+    to_date = parse_date_safely(params[:to_date])
+
+    scope = scope.where("idea_analyses.created_at >= ?", from_date.beginning_of_day) if from_date
+    scope = scope.where("idea_analyses.created_at <= ?", to_date.end_of_day) if to_date
+    scope
+  end
+
+  # 안전한 날짜 파싱 (잘못된 형식 시 nil 반환)
+  def parse_date_safely(date_string)
+    return nil if date_string.blank?
+    Date.parse(date_string)
+  rescue ArgumentError
+    flash.now[:alert] = "잘못된 날짜 형식입니다: #{date_string}"
+    nil
+  end
+
+  def calculate_statistics(scope = IdeaAnalysis.all)
+    # 필터가 적용되었는지 여부
+    @has_date_filter = params[:from_date].present? || params[:to_date].present?
+
+    # 전체 통계 (필터 적용)
+    @total_analyses = scope.count
+    @today_analyses = scope.where("created_at >= ?", Time.current.beginning_of_day).count
+    @this_week_analyses = scope.where("created_at >= ?", 1.week.ago).count
+
+    # 실제 vs Mock 분석 (필터 적용)
+    @real_analyses = scope.where(is_real_analysis: true).count
+    @mock_analyses = scope.where(is_real_analysis: false).count
+
+    # 상태별 통계 (필터 적용)
+    @completed_count = scope.where(status: "completed").count
+    @analyzing_count = scope.where(status: "analyzing").count
+    @failed_count = scope.where(status: "failed").count
+
+    # 평균 사용량 (필터 적용)
+    # Note: scope already has idea_analyses table aliased, so we use subquery
+    users_with_analyses = User.where(id: scope.select(:user_id).distinct).count
     @avg_analyses = users_with_analyses > 0 ? (@total_analyses.to_f / users_with_analyses).round(1) : 0
+
+    # 영구 보존 사용 기록 통계 (AiUsageLog)
+    calculate_permanent_stats
+  end
+
+  # 영구 보존 통계 (AiUsageLog 기반, 삭제된 분석 포함)
+  def calculate_permanent_stats
+    @permanent_stats = AiUsageLog.usage_stats
+    @deleted_analyses_count = AiUsageLog.where(idea_analysis_id: nil).count
+    @saved_by_user_count = AiUsageLog.saved_by_user.count
   end
 end
