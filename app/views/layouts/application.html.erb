@@ -12,6 +12,18 @@
     <%# Open Graph 메타 태그 %>
     <%= content_for?(:og_meta) ? yield(:og_meta) : og_meta_tags %>
 
+    <%# Canonical URL %>
+    <%= content_for?(:canonical) ? yield(:canonical) : canonical_tag %>
+
+    <%# Structured Data (JSON-LD) - Site-wide %>
+    <% if Rails.env.production? %>
+      <%= organization_json_ld %>
+      <%= website_json_ld %>
+    <% end %>
+
+    <%# Page-specific structured data %>
+    <%= yield(:structured_data) if content_for?(:structured_data) %>
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -20,13 +32,24 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Google Fonts - Montserrat (영문) + Nanum Gothic Coding (한글) %>
+    <%# DNS Prefetch - 외부 도메인 사전 연결으로 성능 개선 %>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+    <%# Google Fonts - 비동기 로딩으로 렌더 블로킹 방지 %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet"></noscript>
 
-    <%# Devicon - 기술 스택 아이콘 (최신 버전) %>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <%# Devicon - 비동기 로딩으로 렌더 블로킹 방지 %>
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" rel="stylesheet"></noscript>
 
     <%# ActionText (Trix 에디터) 스타일 %>
     <%= stylesheet_link_tag "actiontext" %>

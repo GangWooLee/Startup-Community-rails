@@ -6,6 +6,15 @@
   <%= post_og_meta_tags(@post) %>
 <% end %>
 
+<% content_for :structured_data do %>
+  <%= article_json_ld(@post) %>
+  <%= breadcrumb_json_ld([
+    { name: "홈", url: root_path },
+    { name: @post.outsourcing? ? "외주" : "커뮤니티", url: @post.outsourcing? ? job_posts_path : community_path },
+    { name: @post.title.truncate(30), url: post_path(@post) }
+  ]) %>
+<% end %>
+
 <%#
   Post Detail Page
   - Outsourcing posts: "Portfolio Magazine" style (Bento Grid + Split Layout)

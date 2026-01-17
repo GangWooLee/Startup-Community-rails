@@ -99,16 +99,17 @@ module AvatarHelper
     avatar_type = user.respond_to?(:avatar_type) ? user.avatar_type.to_i : 0
     image_tag("/anonymous#{avatar_type + 1}-.png",
               alt: user.display_name,
+              loading: "lazy",
               class: "h-full w-full object-cover")
   end
 
   def render_attached_avatar(user, variant)
     img_src = variant ? user.avatar.variant(variant) : user.avatar
-    image_tag(img_src, alt: user.display_name, class: "h-full w-full object-cover")
+    image_tag(img_src, alt: user.display_name, loading: "lazy", class: "h-full w-full object-cover")
   end
 
   def render_url_avatar(user)
-    image_tag(user.avatar_url, alt: user.display_name, class: "h-full w-full object-cover")
+    image_tag(user.avatar_url, alt: user.display_name, loading: "lazy", class: "h-full w-full object-cover")
   end
 
   def render_fallback_avatar(user, sizes, fallback_text_color)

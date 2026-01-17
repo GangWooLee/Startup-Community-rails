@@ -1,1 +1,28 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# robots.txt for https://undrewai.com
+# Last updated: 2026-01-17
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow auth pages
+Disallow: /login
+Disallow: /signup
+Disallow: /password/
+
+# Disallow user-specific pages
+Disallow: /my_page
+Disallow: /settings
+Disallow: /chat_rooms
+Disallow: /notifications
+
+# Disallow Rails internal
+Disallow: /up
+Disallow: /rails/
+
+# Sitemap (TODO: implement sitemap.xml)
+Sitemap: https://undrewai.com/sitemap.xml

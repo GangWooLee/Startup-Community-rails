@@ -2,6 +2,17 @@
   <meta name="turbo-cache-control" content="no-cache">
 <% end %>
 
+<% content_for :canonical do %>
+  <%= canonical_tag(params: [:page, :category]) %>
+<% end %>
+
+<% content_for :structured_data do %>
+  <%= breadcrumb_json_ld([
+    { name: "홈", url: root_path },
+    { name: "커뮤니티", url: community_path }
+  ]) %>
+<% end %>
+
 <%#
   Community Main Page - Organic Modern Design (Global Sidebar Version)
   Reference: design-sample/community_page/community_page

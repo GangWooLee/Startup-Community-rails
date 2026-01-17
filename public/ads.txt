@@ -1,0 +1,5 @@
+# ads.txt for https://undrewai.com
+# This site does not currently participate in programmatic advertising.
+# This file exists to prevent unauthorized ad fraud.
+
+placeholder.example.com, placeholder, DIRECT

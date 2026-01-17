@@ -12,6 +12,7 @@
 # - AvatarHelper: 사용자 아바타 렌더링
 # - UrlHelper: URL 안전성 검증 및 자동 링크 변환
 # - SidebarHelper: 글로벌 사이드바 레이아웃
+# - SeoHelper: Canonical URL 및 JSON-LD 구조화 데이터
 module ApplicationHelper
   # ==========================================================================
   # 기능별 헬퍼 모듈 include
@@ -22,6 +23,7 @@ module ApplicationHelper
   include AvatarHelper
   include UrlHelper
   include SidebarHelper
+  include SeoHelper
 
   # ==========================================================================
   # 결제 시스템 설정
