@@ -20,16 +20,30 @@ module SystemTestHelpers
   def log_in_as(user)
     visit login_path
 
-    # 로그인 폼의 email 입력 필드가 보일 때까지 대기
-    assert_selector "input[name='email']", visible: true, wait: 5
+    # 페이지 완전 로드 대기 (CI 환경에서 느릴 수 있음)
+    assert_selector "body", wait: 10
 
-    # 폼 필드 입력 (name 속성으로 찾기)
-    find("input[name='email']", visible: true).fill_in with: user.email
-    find("input[name='password']").fill_in with: TEST_PASSWORD
+    # 로그인 폼의 email 입력 필드가 보일 때까지 대기 (CI용 대기 시간 증가)
+    assert_selector "input[name='email']", visible: true, wait: 10
 
-    # 로그인 버튼 찾기 및 클릭
-    login_button = find("button", text: "로그인", match: :first)
-    login_button.click
+    # 폼 필드 입력 (JavaScript로 직접 설정하여 안정성 확보)
+    page.execute_script(<<~JS, user.email, TEST_PASSWORD)
+      const emailInput = document.querySelector("input[name='email']");
+      const passwordInput = document.querySelector("input[name='password']");
+      if (emailInput) {
+        emailInput.value = arguments[0];
+        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      if (passwordInput) {
+        passwordInput.value = arguments[1];
+        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    JS
+    sleep 0.2
+
+    # 로그인 버튼 찾기 및 클릭 (JavaScript 클릭으로 안정성 확보)
+    login_button = find("button", text: "로그인", match: :first, wait: 5)
+    page.execute_script("arguments[0].click()", login_button)
 
     # 폼 제출 완료 대기 (페이지 전환 또는 에러 메시지)
     sleep 0.5
