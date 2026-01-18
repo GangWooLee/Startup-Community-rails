@@ -352,6 +352,16 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "Googlebot should access community without redirect" do
+    get community_path, headers: { "User-Agent" => "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" }
+    assert_response :success
+  end
+
+  test "Bingbot should access community without redirect" do
+    get community_path, headers: { "User-Agent" => "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)" }
+    assert_response :success
+  end
+
   # ===== 헬퍼 =====
 
   private

@@ -239,7 +239,19 @@ class PostsController < ApplicationController
     return if session[:browsing_community]
     return if cookies[:onboarding_completed].present?
     return if request.format.turbo_stream?
+    return if crawler_request?
 
     redirect_to root_path
+  end
+
+  # 검색 엔진 크롤러인지 확인 (SEO 목적)
+  # Googlebot, Bingbot 등이 /community 콘텐츠를 색인할 수 있도록 허용
+  def crawler_request?
+    user_agent = request.user_agent.to_s.downcase
+    user_agent.include?("googlebot") ||
+      user_agent.include?("bingbot") ||
+      user_agent.include?("yandex") ||
+      user_agent.include?("baiduspider") ||
+      user_agent.include?("duckduckbot")
   end
 end

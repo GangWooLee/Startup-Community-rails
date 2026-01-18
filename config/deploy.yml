@@ -29,6 +29,9 @@ servers:
 proxy:
   ssl: true
   host: undrewai.com
+  hosts:
+    - undrewai.com
+    - www.undrewai.com
 
 # Where you keep your container images.
 registry:
