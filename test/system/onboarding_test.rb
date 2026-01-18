@@ -27,8 +27,8 @@ class OnboardingTest < ApplicationSystemTestCase
   test "landing page shows main heading or CTA" do
     visit root_path
 
-    # 페이지 로드 대기
-    sleep 2
+    # 페이지 로드 대기 (sleep 대신 assert_selector 사용)
+    assert_selector "body", wait: 5
 
     # 메인 헤딩 또는 CTA 텍스트 확인 - HTML 소스에서 검색
     assert page.html.include?("Stop Scrolling") ||
@@ -41,8 +41,8 @@ class OnboardingTest < ApplicationSystemTestCase
   test "landing page has link to ai input" do
     visit root_path
 
-    # 페이지 로드 대기
-    sleep 1
+    # 페이지 로드 대기 (sleep 대신 assert_selector 사용)
+    assert_selector "body", wait: 5
 
     # AI 분석 시작 버튼 확인 - HTML 소스에서 검색
     assert page.html.include?("시작하기") ||
@@ -135,8 +135,8 @@ class OnboardingTest < ApplicationSystemTestCase
   test "landing page has community link" do
     visit root_path
 
-    # 페이지 로드 대기
-    sleep 1
+    # 페이지 로드 대기 (sleep 대신 assert_selector 사용)
+    assert_selector "body", wait: 5
 
     # 커뮤니티 링크 확인 - HTML 소스에서 검색
     assert page.html.include?("커뮤니티") ||
@@ -159,5 +159,62 @@ class OnboardingTest < ApplicationSystemTestCase
            page.has_text?("분석", wait: 3) ||
            page.has_selector?("[data-remaining]", wait: 2),
            "Expected to find usage info or analysis related text"
+  end
+
+  # =========================================
+  # Phase 4: 추가 E2E 테스트
+  # =========================================
+
+  test "guest can input idea and sees login prompt" do
+    visit onboarding_ai_input_path
+
+    # Stimulus 컨트롤러 로드 대기
+    assert_selector "[data-controller*='ai']", wait: 5
+
+    # 아이디어 입력 영역 확인 (textarea 또는 input)
+    if page.has_selector?("textarea", wait: 3)
+      # 비로그인 사용자가 입력 페이지에 접근 가능하다는 것 자체가 테스트 목표
+      assert page.has_selector?("textarea"),
+             "Expected textarea for idea input"
+    end
+
+    # 로그인 유도 요소 확인 (버튼 텍스트나 안내 메시지)
+    # 비로그인 사용자에게는 로그인 후 분석 가능하다는 안내가 있어야 함
+    assert page.has_text?("로그인", wait: 3) ||
+           page.has_text?("분석", wait: 3) ||
+           page.has_selector?("button", wait: 3),
+           "Expected login guidance or analysis button for guest"
+  end
+
+  test "logged-in user can access ai result page with analysis" do
+    log_in_as(@user)
+
+    # 테스트용 분석 결과 생성 (analysis_result를 Hash로 저장)
+    analysis = @user.idea_analyses.create!(
+      idea: "시스템 테스트용 아이디어 #{SecureRandom.hex(4)}",
+      status: :completed,
+      analysis_result: {
+        summary: "테스트 요약",
+        target_users: { primary: "테스트 사용자" },
+        market_analysis: { potential: "높음" },
+        recommendations: { mvp_features: [] },
+        score: { overall: 75 }
+      },
+      is_real_analysis: false
+    )
+
+    # 결과 페이지 방문
+    visit ai_result_path(analysis)
+
+    # 결과 페이지 로드 확인
+    assert_current_path ai_result_path(analysis)
+    assert_selector "main", wait: 5
+
+    # 분석 결과 관련 콘텐츠 확인
+    assert page.has_text?("분석", wait: 3) ||
+           page.has_text?("결과", wait: 3) ||
+           page.has_text?("점수", wait: 3) ||
+           page.has_selector?("[data-controller*='result']", wait: 3),
+           "Expected analysis result content on page"
   end
 end

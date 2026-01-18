@@ -26,7 +26,8 @@ class OnboardingController < ApplicationController
     set_usage_stats
 
     # 사용량 초과 여부를 뷰로 전달 (모달 표시용)
-    @limit_exceeded = usage_checker.exceeded?
+    # 로그인 사용자만 제한 확인 (비로그인은 ai_analyze에서 로그인 유도)
+    @limit_exceeded = logged_in? && usage_checker.exceeded?
   end
 
   # POST /ai/questions (추가 질문 생성)
@@ -159,6 +160,8 @@ class OnboardingController < ApplicationController
   end
 
   def check_usage_limit
+    # 비로그인 사용자는 스킵 - 로그인 후 restore_pending_input_and_analyze에서 DB 기반 체크
+    return unless logged_in?
     return unless usage_checker.exceeded?
 
     limit = usage_checker.effective_limit
