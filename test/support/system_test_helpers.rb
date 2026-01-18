@@ -20,11 +20,11 @@ module SystemTestHelpers
   def log_in_as(user)
     visit login_path
 
-    # 폼이 완전히 로드될 때까지 대기
-    assert_selector "form", wait: 5
+    # 로그인 폼의 email 입력 필드가 보일 때까지 대기
+    assert_selector "input[name='email']", visible: true, wait: 5
 
     # 폼 필드 입력 (name 속성으로 찾기)
-    find("input[name='email']").fill_in with: user.email
+    find("input[name='email']", visible: true).fill_in with: user.email
     find("input[name='password']").fill_in with: TEST_PASSWORD
 
     # 로그인 버튼 찾기 및 클릭
@@ -65,8 +65,8 @@ module SystemTestHelpers
   def sign_up_as(email:, password:, name:, agree_terms: true)
     visit signup_path
 
-    # 폼이 완전히 로드될 때까지 대기
-    assert_selector "form", wait: 5
+    # 회원가입 폼의 name 입력 필드가 보일 때까지 대기
+    assert_selector "input[name='user[name]']", visible: true, wait: 5
 
     fill_in "user[name]", with: name
     fill_in "user[email]", with: email
