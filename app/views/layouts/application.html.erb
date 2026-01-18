@@ -376,7 +376,8 @@
 
   <body class="font-sans antialiased" data-controller="search-modal">
     <!-- Flash Messages -->
-    <% if flash.any? %>
+    <%# 로그인 페이지에서는 전역 팝업 표시하지 않음 (인라인 메시지 사용) %>
+    <% if flash.any? && controller_name != 'sessions' %>
       <div class="fixed top-0 left-0 right-0 z-[9999] flex justify-center p-4 pointer-events-none">
         <div class="w-full max-w-md space-y-2 pointer-events-auto">
           <% flash.each do |type, message| %>
