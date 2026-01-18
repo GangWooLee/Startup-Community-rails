@@ -15,7 +15,7 @@ class PostsController < ApplicationController
     @per_page = POSTS_PER_PAGE
 
     base_query = Post.published
-                     .includes(:user, images_attachments: :blob)
+                     .includes(user: { avatar_attachment: :blob }, images_attachments: :blob)
                      .where(category: filter_categories)
 
     # 정렬 방식 적용
@@ -58,7 +58,9 @@ class PostsController < ApplicationController
     @post.record_view(current_user)  # 로그인 사용자만, 중복/본인 제외
     # 최상위 댓글만 가져오고, 대댓글은 댓글 안에서 로드
     @comments = @post.comments.root_comments
-                     .includes(:user, :likes, replies: [ :user, :likes ])
+                     .includes({ user: { avatar_attachment: :blob } },
+                              :likes,
+                              { replies: [ { user: { avatar_attachment: :blob } }, :likes ] })
                      .oldest
 
     # 외주 글일 경우 비슷한 프로젝트 쿼리 + GA4 이벤트
@@ -69,7 +71,7 @@ class PostsController < ApplicationController
         category: @post.category
       })
       @similar_posts = Post.published
-                           .includes(:user, images_attachments: :blob)
+                           .includes(user: { avatar_attachment: :blob }, images_attachments: :blob)
                            .where(category: @post.category)
                            .where.not(id: @post.id)
 
@@ -191,7 +193,8 @@ class PostsController < ApplicationController
   private
 
   def set_post
-    @post = Post.includes(:user, comments: :user).find(params[:id])
+    # comments는 show 액션에서 별도로 로드 (replies, likes 포함)
+    @post = Post.includes(:user).find(params[:id])
   end
 
   def authorize_post

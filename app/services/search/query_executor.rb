@@ -57,7 +57,7 @@ module Search
     def search_posts(limit:)
       base = posts_base_query
       Result.new(
-        items: base.includes(:user, images_attachments: :blob)
+        items: base.includes(user: { avatar_attachment: :blob }, images_attachments: :blob)
                    .order(created_at: :desc)
                    .limit(limit),
         total_count: base.count,
@@ -68,7 +68,7 @@ module Search
 
     # 게시글 검색 (페이지네이션)
     def search_posts_paginated(page:, per_page:)
-      base = posts_base_query.includes(:user, images_attachments: :blob)
+      base = posts_base_query.includes(user: { avatar_attachment: :blob }, images_attachments: :blob)
       total_count = base.count
       total_pages = (total_count.to_f / per_page).ceil
       current_page = [ [ page, 1 ].max, [ total_pages, 1 ].max ].min
@@ -89,10 +89,11 @@ module Search
     end
 
     def users_base_query
-      User.where(
-        "name LIKE :q OR role_title LIKE :q OR bio LIKE :q OR affiliation LIKE :q",
-        q: query_pattern
-      )
+      User.includes(avatar_attachment: :blob)
+          .where(
+            "name LIKE :q OR role_title LIKE :q OR bio LIKE :q OR affiliation LIKE :q",
+            q: query_pattern
+          )
     end
 
     def posts_base_query

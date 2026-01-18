@@ -1,7 +1,11 @@
 <%# 알림 드롭다운 (헤더용) - Organic Modern Style %>
 <%# 헤더에서 직접 렌더링될 때는 current_user에서 알림을 가져옴 %>
 
-<% notifications = current_user.notifications.includes(:actor, :notifiable).recent.limit(10) %>
+<% notifications = current_user.notifications
+                               .where.not(actor_id: nil)
+                               .includes({ actor: { avatar_attachment: :blob } })
+                               .recent
+                               .limit(10) %>
 <% unread_count = current_user.unread_notifications_count %>
 
 <div class="bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden

@@ -8,13 +8,13 @@ module ActivityFeedable
 
   # 최근 활동 가져오기 (게시글 + 댓글을 시간순 정렬)
   def recent_activities(limit: 20)
-    # 1. 각 모델에서 데이터 가져오기 (N+1 방지)
+    # 1. 각 모델에서 데이터 가져오기
+    # Note: activity_card에서 user는 표시하지 않으므로 includes 불필요
     last_posts = posts.published
-                      .includes(:user, images_attachments: :blob)
                       .order(created_at: :desc)
                       .limit(limit)
 
-    last_comments = comments.includes(:post, :user)
+    last_comments = comments.includes(:post)  # post는 "원문 보기" 링크에 필요
                             .order(created_at: :desc)
                             .limit(limit)
 

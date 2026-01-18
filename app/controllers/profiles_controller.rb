@@ -2,8 +2,8 @@ class ProfilesController < ApplicationController
   before_action :hide_floating_button
 
   def show
-    # N+1 쿼리 방지를 위해 includes 사용
-    @user = User.includes(:posts, :oauth_identities, avatar_attachment: :blob, cover_image_attachment: :blob)
+    # N+1 쿼리 방지를 위해 includes 사용 (아바타, 커버 이미지만 로드)
+    @user = User.includes(avatar_attachment: :blob, cover_image_attachment: :blob)
                 .find(params[:id])
 
     # 각 탭별 데이터 (최신순, 제한)

@@ -54,7 +54,7 @@ class ChatRoomsController < ApplicationController
     # 성능 최적화: 최근 50개 메시지만 로드 (페이지네이션)
     # 역순으로 가져온 후 정순 정렬하여 UI에 표시
     @messages = @chat_room.messages
-                          .includes(:sender)
+                          .includes(sender: { avatar_attachment: :blob })
                           .with_attached_image  # 이미지 첨부 N+1 방지
                           .order(created_at: :desc)
                           .limit(50)

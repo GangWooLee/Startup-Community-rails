@@ -116,5 +116,14 @@ Rails.application.configure do
     Bullet.console = true        # 브라우저 콘솔에 출력
     Bullet.add_footer = true     # 페이지 하단에 정보 표시
     Bullet.rails_logger = true   # Rails 로그에 출력
+
+    # Whitelist: 조건부 AVOID 경고 무시 (2026-01-18)
+    # avatar가 조건부로 사용됨 (anonymous/external URL/fallback 시 미사용)
+    Bullet.add_safelist(type: :unused_eager_loading, class_name: "User", association: :avatar_attachment)
+    Bullet.add_safelist(type: :unused_eager_loading, class_name: "ActiveStorage::Attachment", association: :blob)
+    # likes가 조건부로 사용됨 (좋아요 수 미표시 시 미사용)
+    Bullet.add_safelist(type: :unused_eager_loading, class_name: "Comment", association: :likes)
+    # sender가 조건부로 사용됨 (시스템 메시지 시 미사용)
+    Bullet.add_safelist(type: :unused_eager_loading, class_name: "Message", association: :sender)
   end
 end
