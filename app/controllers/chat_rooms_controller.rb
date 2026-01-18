@@ -104,7 +104,7 @@ class ChatRoomsController < ApplicationController
 
     if existing_room
       # 기존 채팅방이 있으면 바로 해당 채팅방으로 이동
-      redirect_to existing_room
+      redirect_to chat_room_path(existing_room)
     else
       # 기존 채팅방이 없으면 새 메시지 패널로 이동 (수신자 미리 선택)
       redirect_to new_chat_room_path(recipient_id: other_user.id)

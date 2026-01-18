@@ -35,6 +35,7 @@
     <%# DNS Prefetch - 외부 도메인 사전 연결으로 성능 개선 %>
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://www.clarity.ms">
@@ -54,14 +55,81 @@
     <%# ActionText (Trix 에디터) 스타일 %>
     <%= stylesheet_link_tag "actiontext" %>
 
-    <%# Tailwind CSS (빌드된 CSS 사용 - 성능 최적화: 2026-01-18) %>
-    <%= stylesheet_link_tag "tailwind", data: { turbo_track: "reload" } %>
+    <%# Tailwind CSS CDN (개발/테스트용) %>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <%# Tailwind Config - undrew-design %>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["'Montserrat'", "'Nanum Gothic Coding'", 'sans-serif'],
+              serif: ["'Montserrat'", "'Nanum Gothic Coding'", 'serif'],
+            },
+            borderRadius: {
+              lg: 'var(--radius)',
+              md: 'calc(var(--radius) - 2px)',
+              sm: 'calc(var(--radius) - 4px)',
+              xl: 'calc(var(--radius) + 4px)',
+            },
+            colors: {
+              background: 'hsl(var(--background))',
+              foreground: 'hsl(var(--foreground))',
+              card: {
+                DEFAULT: 'hsl(var(--card))',
+                foreground: 'hsl(var(--card-foreground))',
+              },
+              popover: {
+                DEFAULT: 'hsl(var(--popover))',
+                foreground: 'hsl(var(--popover-foreground))',
+              },
+              primary: {
+                DEFAULT: 'hsl(var(--primary))',
+                foreground: 'hsl(var(--primary-foreground))',
+              },
+              secondary: {
+                DEFAULT: 'hsl(var(--secondary))',
+                foreground: 'hsl(var(--secondary-foreground))',
+              },
+              muted: {
+                DEFAULT: 'hsl(var(--muted))',
+                foreground: 'hsl(var(--muted-foreground))',
+              },
+              accent: {
+                DEFAULT: 'hsl(var(--accent))',
+                foreground: 'hsl(var(--accent-foreground))',
+              },
+              destructive: {
+                DEFAULT: 'hsl(var(--destructive))',
+                foreground: 'hsl(var(--destructive-foreground))',
+              },
+              border: 'hsl(var(--border))',
+              input: 'hsl(var(--input))',
+              'input-background': 'hsl(var(--input-background))',
+              'switch-background': 'hsl(var(--switch-background))',
+              ring: 'hsl(var(--ring))',
+              sidebar: {
+                DEFAULT: 'hsl(var(--sidebar))',
+                foreground: 'hsl(var(--sidebar-foreground))',
+                primary: 'hsl(var(--sidebar-primary))',
+                'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+                accent: 'hsl(var(--sidebar-accent))',
+                'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+                border: 'hsl(var(--sidebar-border))',
+                ring: 'hsl(var(--sidebar-ring))',
+              },
+            },
+          },
+        },
+      }
+    </script>
 
     <%# CSS Variables and Base Styles - undrew-design %>
     <style>
       :root {
-        /* Typography - Montserrat (CDN과 동일) */
-        --font-sans: 'Montserrat', 'Nanum Gothic Coding', sans-serif;
+        /* Typography - IBM Plex Serif */
+        --font-sans: 'IBM Plex Serif', serif;
         --font-size: 16px;
         --font-weight-normal: 400;
         --font-weight-medium: 500;
@@ -168,26 +236,25 @@
          ⚠️ IMPORTANT: DO NOT REMOVE OR MOVE THIS SECTION!
 
          WHY IS THIS HERE?
-         - This project uses built Tailwind CSS (stylesheet_link_tag "tailwind")
-         - CSS Variables are defined here for runtime access
-         - Animations are kept inline to ensure they work regardless of build state
+         - This project uses Tailwind CDN (Line 29: cdn.tailwindcss.com)
+         - Custom animations in app/assets/tailwind/application.css are built
+           into app/assets/builds/tailwind.css
+         - BUT the layout ONLY loads the CDN, NOT the built CSS file
+         - Therefore, custom animations MUST be defined inline here
 
-         UPDATED: 2026-01-18 - CDN → Built CSS 전환
-         - 성능 개선: 407KB → 223KB (safelist 포함)
-         - 렌더 블로킹 제거 (CDN JavaScript → CSS 직접 로드)
-         - 롤백: scripts/rollback-to-cdn.sh 사용
+         ALTERNATIVES (if you want to change this setup):
+         1. Keep CDN + inline CSS (current approach - simple, works)
+         2. Replace CDN with built CSS: stylesheet_link_tag "tailwind"
+            (requires testing all pages for style compatibility)
 
          WHAT'S DEFINED HERE:
-         - CSS Variables: colors, typography, border-radius
          - Entry animations: fade-slide-up, fade-slide-right, scale-in
          - Scroll animations: animate-on-scroll, animate-on-scroll-card
          - Animation delays: animate-delay-100 through animate-delay-500
          - Accessibility: prefers-reduced-motion support
 
          RELATED FILES:
-         - app/assets/tailwind/application.css (Tailwind source)
-         - app/assets/builds/tailwind.css (빌드 결과물)
-         - config/shadcn.tailwind.js (safelist 포함)
+         - app/assets/tailwind/application.css (source definitions, backup)
          - app/javascript/controllers/scroll_animation_controller.js
          - app/views/onboarding/landing.html.erb (main usage)
          ========================================================================== */

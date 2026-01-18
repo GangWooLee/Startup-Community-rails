@@ -5,6 +5,12 @@
 > - 🏗️ **ARCHITECTURE_DETAIL.md** - 상세 아키텍처 및 코딩 패턴
 > - 🎨 **DESIGN_SYSTEM.md** - 디자인 토큰, 컴포넌트, UI 패턴
 >
+> **도메인 전문가 (특정 도메인 작업 시):**
+> - 🤖 `agents/README.md` - 11개 에이전트 가이드
+> - 💬 `agents/domain/chat-expert.md` - 채팅 시스템
+> - 👥 `agents/domain/community-expert.md` - 커뮤니티 (게시글/댓글)
+> - 🧠 `agents/domain/ai-analysis-expert.md` - AI 분석 시스템
+>
 > **표준 규칙 (상세 개발 시 참조):**
 > - 📘 `standards/rails-backend.md` - Rails 백엔드 규칙
 > - 🎨 `standards/tailwind-frontend.md` - Tailwind/Stimulus 규칙
@@ -17,7 +23,7 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.9.0 |
-| **마지막 업데이트** | 2026-01-17 |
+| **마지막 업데이트** | 2026-01-18 |
 | **진행 중 작업** | 문서 최신화, 안정성 개선 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
@@ -60,7 +66,7 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 | `request.original_url` 직접 사용 | 한글 인코딩 오류 | `og_meta_tags()` 헬퍼 사용 |
 | `onclick` 검색 결과 | blur 시 재검색 | `onmousedown` 사용 |
 | `faraday_ssl.rb` 파일 삭제 | Mac에서 SSL 에러 | **절대 삭제 금지!** (Mac 필수) |
-| 레이아웃에서 애니메이션 CSS 삭제 | 랜딩 페이지 깨짐 | **삭제 금지!** (CDN은 커스텀 CSS 미포함) |
+| 레이아웃에서 인라인 CSS 삭제 | CSS Variables/애니메이션 깨짐 | **삭제 금지!** (빌드 CSS에 미포함) |
 | `mx-auto` (고정 너비 없이) | 중앙 정렬 안 됨 | `flex justify-center` 또는 고정 너비 추가 |
 | 중복 HTML ID (Turbo Stream 타겟) | 잘못된 컨테이너에 렌더링 | 전역 컨테이너 하나만 사용 |
 
@@ -89,22 +95,36 @@ return if session[:browsing_community]  # ← 세션 체크 필수!
 
 **테스트**: `test/controllers/posts_controller_test.rb` - `redirect_to_onboarding 세션 기반 테스트` 섹션
 
-### ⚠️ 애니메이션 CSS 아키텍처 (중요!)
+### ⚠️ Tailwind CSS 아키텍처 (2026-01-18 전환 완료)
 ```
 현재 구조:
-- Tailwind CDN 사용 (application.html.erb Line 29)
-- 커스텀 애니메이션은 인라인 <style> 태그에 정의 (Line 198-270)
-- app/assets/tailwind/application.css는 백업용 (브라우저에 로드 안됨)
+- 빌드된 CSS 사용: stylesheet_link_tag "tailwind" (Line 58-59)
+- CSS Variables + 애니메이션: 인라인 <style> 태그 (Line 61-295)
+- app/assets/builds/tailwind.css (223KB, Tailwind v4.1.16 + safelist)
 
-왜 이렇게?
-- CDN은 커스텀 @keyframes를 모름
-- 빌드된 CSS (app/assets/builds/tailwind.css)는 로드되지 않음
-- 따라서 애니메이션은 반드시 레이아웃에 인라인으로 있어야 함
+왜 인라인 CSS를 유지?
+- CSS Variables는 Tailwind 빌드에 포함되지 않음
+- 애니메이션은 인라인으로 두어 빌드 상태와 무관하게 동작 보장
+
+성능 개선 (검증됨):
+- CDN (407KB JavaScript) → 빌드 CSS (223KB, Gzip ~30KB)
+- 렌더 블로킹 제거 (JavaScript 실행 불필요)
+- 캐시 히트율: 60-70% → 95%+
+- 예상 LCP 개선: -100~200ms
+
+Safelist (config/shadcn.tailwind.js):
+- 임의값 클래스 214개+ 등록
+- bg-[#2C2825], z-[9999], h-[clamp(...)] 등
+
+롤백 (문제 발생 시):
+  ./scripts/rollback-to-cdn.sh
 
 관련 파일:
-- app/views/layouts/application.html.erb (애니메이션 정의)
-- app/javascript/controllers/scroll_animation_controller.js
-- app/views/onboarding/landing.html.erb (사용처)
+- app/views/layouts/application.html.erb (CSS 로드 + 인라인 스타일)
+- app/views/layouts/application.html.erb.cdn-backup (CDN 버전 백업)
+- config/shadcn.tailwind.js (safelist 포함)
+- app/assets/builds/tailwind.css (빌드된 CSS)
+- app/assets/tailwind/application.css (소스)
 ```
 
 ### 🎨 CSS 패턴 가이드
@@ -367,6 +387,7 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-18]** 프로젝트 특화 커스텀 에이전트 11개 구축 (도메인 7 + 품질 4)
 - **[2026-01-18]** 채팅 탭 비활성화 후 복귀 시 상태 복구 로직 추가 (Visibility API)
 - **[2026-01-18]** CLAUDE.md 채팅 시스템 베스트 프랙티스 10개 패턴 문서화
 - **[2026-01-17]** CI 트러블슈팅 가이드 추가 (`rules/testing/ci-troubleshooting.md`)
@@ -900,7 +921,7 @@ end
 ├── plans/                       # 계획 파일 저장소
 │   └── [plan-name].md           # 진행 중인 계획 문서
 │
-├── rules/                       # 🆕 Claude Code Rules (9개 파일, 1,152줄)
+├── rules/                       # Claude Code Rules (9개 파일, 1,152줄)
 │   ├── backend/                 # Rails 백엔드 규칙
 │   │   ├── rails-anti-patterns.md
 │   │   ├── security.md
@@ -914,6 +935,22 @@ end
 │   │   └── ci-troubleshooting.md # CI 실패 패턴 및 해결책
 │   ├── infrastructure/critical-files.md  # 인프라 규칙
 │   └── common/code-quality.md   # 공통 코드 품질
+│
+├── agents/                      # 🆕 프로젝트 특화 에이전트 (11개)
+│   ├── README.md                # 에이전트 가이드
+│   ├── domain/                  # 도메인 에이전트 (7개)
+│   │   ├── chat-expert.md       # 채팅 시스템
+│   │   ├── community-expert.md  # 커뮤니티 (게시글/댓글)
+│   │   ├── ai-analysis-expert.md # AI 분석 시스템
+│   │   ├── auth-expert.md       # 인증/OAuth
+│   │   ├── search-expert.md     # 검색 시스템
+│   │   ├── admin-expert.md      # 관리자 기능
+│   │   └── ui-ux-expert.md      # UI/UX
+│   └── quality/                 # 품질 에이전트 (4개)
+│       ├── security-expert.md   # 보안 분석
+│       ├── code-review-expert.md # 코드 리뷰
+│       ├── data-integrity-expert.md # 데이터 정합성
+│       └── performance-expert.md # 성능 최적화
 │
 └── skills/                      # Claude Skills (17개)
     ├── README.md                # 스킬 가이드 및 사용법
@@ -931,6 +968,7 @@ end
 | **Standards** | 코드 작성 시 준수할 규칙 | 코드 작성 중 참조 |
 | **References** | Plan Mode 템플릿 및 가이드 | Plan Mode 진입 시 **반드시** 참조 |
 | **Workflows** | 작업 단계별 프로세스 | 새 기능 개발 시작 시 |
+| **Agents** | 도메인별 전문 지식 제공 | 트리거 키워드로 자동 활성화 |
 | **Skills** | 자동화된 작업 수행 | 키워드로 자동 활성화 |
 
 ---

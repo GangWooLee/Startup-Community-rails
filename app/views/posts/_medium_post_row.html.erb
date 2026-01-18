@@ -100,7 +100,7 @@
       <%# Thumbnail Section (RIGHT) - Only rendered when image exists %>
       <% if has_image %>
         <div class="shrink-0 w-[120px] self-stretch rounded-xl overflow-hidden bg-stone-100 ml-1">
-          <%= image_tag post.images.first,
+          <%= image_tag post.images.first.variant(:medium),
               alt: post.title,
               loading: "lazy",
               class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>

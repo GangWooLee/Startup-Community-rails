@@ -78,7 +78,7 @@
       <%# Cover Image Area %>
       <div class="relative h-48 md:h-56 rounded-3xl overflow-hidden">
         <% if post.images.attached? %>
-          <%= image_tag post.images.first, class: "w-full h-full object-cover" %>
+          <%= image_tag post.images.first.variant(:large), class: "w-full h-full object-cover" %>
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         <% else %>
           <%# Gradient fallback with decorative elements %>

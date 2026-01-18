@@ -55,7 +55,7 @@
       <% if post.images.attached? %>
         <div class="flex-shrink-0">
           <div class="relative w-[clamp(3rem,8vw,4rem)] h-[clamp(3rem,8vw,4rem)] rounded-lg overflow-hidden bg-secondary">
-            <%= image_tag post.images.first, class: "w-full h-full object-cover", alt: "첨부 이미지" %>
+            <%= image_tag post.images.first.variant(:thumb), class: "w-full h-full object-cover", alt: "첨부 이미지", loading: "lazy" %>
             <% if post.images.count > 1 %>
               <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span class="text-white text-xs sm:text-sm font-bold">+<%= post.images.count - 1 %></span>

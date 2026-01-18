@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_17_042240) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_18_083737) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -103,6 +103,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_17_042240) do
     t.integer "unread_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["chat_room_id", "user_id", "deleted_at"], name: "index_participants_on_room_user_deleted"
     t.index ["chat_room_id", "user_id"], name: "index_chat_room_participants_on_chat_room_id_and_user_id", unique: true
     t.index ["chat_room_id"], name: "index_chat_room_participants_on_chat_room_id"
     t.index ["deleted_at"], name: "index_chat_room_participants_on_deleted_at"
@@ -237,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_17_042240) do
     t.json "metadata"
     t.integer "sender_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["chat_room_id", "created_at", "sender_id"], name: "index_messages_on_room_created_sender"
     t.index ["chat_room_id", "created_at"], name: "index_messages_on_chat_room_id_and_created_at"
     t.index ["chat_room_id"], name: "index_messages_on_chat_room_id"
     t.index ["created_at"], name: "index_messages_on_created_at_desc", order: :desc
@@ -367,6 +369,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_17_042240) do
     t.string "work_type"
     t.index ["category"], name: "index_posts_on_category"
     t.index ["created_at"], name: "index_posts_on_created_at"
+    t.index ["likes_count", "views_count"], name: "index_posts_on_popularity"
     t.index ["status", "category", "created_at"], name: "index_posts_on_status_category_created_at"
     t.index ["status"], name: "index_posts_on_status"
     t.index ["title"], name: "index_posts_on_title_for_search"

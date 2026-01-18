@@ -85,13 +85,7 @@
                  other_user: @other_user %>
     <% end %>
 
-    <!-- 우측: 정보 패널 (xl에서부터 표시 - 유동적 너비) -->
-    <aside class="hidden xl:flex xl:flex-col xl:w-[clamp(260px,18vw,320px)] flex-shrink-0 border-l border-stone-200/60"
-           aria-label="상대방 정보">
-      <%= render "chat_rooms/info_panel",
-                 other_user: @other_user,
-                 chat_room: @chat_room %>
-    </aside>
+    <%# 우측 info_panel 제거됨 - Task 77: 프로필에서 채팅 재진입 시 불필요한 패널 %>
 
     </div><%# Island Container 닫기 %>
   </div><%# Outer wrapper 닫기 %>

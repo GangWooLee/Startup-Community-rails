@@ -17,9 +17,10 @@
   <%= link_to post_path(post), class: "block relative w-full h-[clamp(250px,40vh,320px)] rounded-2xl overflow-hidden group hover-scale shadow-lg shadow-orange-900/10 hover:shadow-xl hover:shadow-orange-900/15" do %>
     <%# Background Image %>
     <% if post.images.attached? && post.images.first.present? %>
-      <%= image_tag post.images.first,
+      <%= image_tag post.images.first.variant(:large),
           alt: post.title,
-          class: "absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" %>
+          class: "absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out",
+          loading: "lazy" %>
     <% else %>
       <%# Fallback gradient background %>
       <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-stone-700 via-stone-800 to-stone-900"></div>

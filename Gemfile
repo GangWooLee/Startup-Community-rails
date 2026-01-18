@@ -110,6 +110,9 @@ group :development do
 
   # Preview emails in browser instead of sending [https://github.com/ryanb/letter_opener]
   gem "letter_opener"
+
+  # N+1 쿼리 탐지 [https://github.com/flyerhzm/bullet]
+  gem "bullet"
 end
 
 group :test do
