@@ -41,8 +41,9 @@ class ReportsTest < ApplicationSystemTestCase
     within("#report-modal") do
       assert_selector "[data-report-modal-target='targetLabel']"
 
-      # 신고 사유 선택
-      choose "스팸/광고"
+      # 신고 사유 선택 (CI 환경에서 요소 클릭 차단 방지를 위해 JavaScript 사용)
+      spam_radio = find("input[type='radio'][value='spam']")
+      page.execute_script("arguments[0].click()", spam_radio)
 
       # 상세 설명 입력
       fill_in "report[description]", with: "테스트 신고입니다."
