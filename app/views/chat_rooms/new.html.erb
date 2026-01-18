@@ -19,8 +19,9 @@
         search = params[:search]
 
         # 삭제되지 않은 채팅방만 조회 (prepare_chat_list_data와 동일하게)
+        # 성능 최적화: messages: :sender 대신 last_message_preview 사용
         base_query = current_user.active_chat_rooms
-                                 .includes(:users, :source_post, :participants, messages: :sender)
+                                 .includes(:users, :source_post, :participants, last_message_preview: :sender)
 
         chat_rooms = case filter
         when "received"
@@ -37,11 +38,24 @@
 
         chat_rooms = chat_rooms.order(last_message_at: :desc)
 
-        # 읽지 않은 메시지 수도 삭제되지 않은 채팅방만 계산
-        all_rooms = current_user.active_chat_rooms.includes(:participants, :source_post, messages: :sender)
-        total_unread = all_rooms.sum { |room| room.unread_count_for(current_user) }
-        received_unread = all_rooms.select { |room| room.source_post&.user_id == current_user.id && room.initiator_id != current_user.id }.sum { |room| room.unread_count_for(current_user) }
-        sent_unread = all_rooms.select { |room| room.initiator_id == current_user.id }.sum { |room| room.unread_count_for(current_user) }
+        # 읽지 않은 메시지 수 계산 - SQL 집계로 N+1 쿼리 방지
+        active_participants = current_user.chat_room_participants.active
+
+        # 전체 미읽음: 모든 활성 채팅방의 unread_count 합계
+        total_unread = active_participants.sum(:unread_count)
+
+        # 받은 문의 미읽음: source_post 작성자가 본인이고, 본인이 시작하지 않은 채팅
+        received_unread = active_participants
+          .joins(chat_room: :source_post)
+          .where(posts: { user_id: current_user.id })
+          .where.not(chat_rooms: { initiator_id: current_user.id })
+          .sum(:unread_count)
+
+        # 보낸 문의 미읽음: 본인이 시작한 채팅
+        sent_unread = active_participants
+          .joins(:chat_room)
+          .where(chat_rooms: { initiator_id: current_user.id })
+          .sum(:unread_count)
       %>
       <%= render "chat_rooms/chat_list_panel",
                  filter: filter,

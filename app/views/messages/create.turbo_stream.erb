@@ -1,3 +1,14 @@
-<%# 메시지는 Message 모델의 broadcast_message에서 브로드캐스트됨 %>
-<%# 여기서 중복으로 append하면 메시지가 두 번 나타남 %>
-<%# 빈 응답 반환 - 폼 리셋은 stimulus controller에서 처리 %>
+<%# 발신자용 메시지 렌더링 %>
+<%# Broadcaster에서 발신자를 제외하므로, HTTP 응답에서 직접 메시지를 추가 %>
+<%# 폼 리셋은 message_form_controller.js의 turbo:submit-end 이벤트에서 처리 %>
+
+<%= turbo_stream.append "messages" do %>
+  <%= render partial: "messages/message",
+             locals: {
+               message: @message,
+               current_user: current_user,
+               is_read: false,
+               show_profile: true,
+               show_time: true
+             } %>
+<% end %>

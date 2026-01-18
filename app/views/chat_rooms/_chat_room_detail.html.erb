@@ -253,7 +253,7 @@
       <%= form_with model: [chat_room, Message.new],
                     data: {
                       controller: "message-form",
-                      action: "turbo:submit-end->message-form#reset",
+                      action: "turbo:submit-start->message-form#handleSubmitStart turbo:submit-end->message-form#handleSubmitEnd",
                       chat_room_target: "form"
                     },
                     class: "relative" do |f| %>

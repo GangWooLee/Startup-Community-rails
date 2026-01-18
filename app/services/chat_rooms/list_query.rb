@@ -27,8 +27,9 @@ module ChatRooms
 
     def load_chat_rooms
       # 삭제되지 않은 채팅방만 조회
+      # 성능 최적화: messages: :sender 대신 last_message_preview 사용 (전체 메시지 로드 방지)
       base_query = @user.active_chat_rooms
-                        .includes(:users, :source_post, :participants, messages: :sender)
+                        .includes(:users, :source_post, :participants, last_message_preview: :sender)
 
       @chat_rooms = case @filter
       when "received"

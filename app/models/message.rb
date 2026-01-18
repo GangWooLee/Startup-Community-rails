@@ -34,6 +34,9 @@ class Message < ApplicationRecord
   # content 또는 image 중 하나는 필수 (일반 텍스트/이미지 메시지의 경우)
   validate :content_or_image_present, if: :user_message?
 
+  # 5초 내 동일 내용 메시지 중복 방지 (IME 이슈로 인한 중복 전송 방지)
+  validate :prevent_duplicate_within_timeframe, on: :create, if: :user_message?
+
   scope :recent, -> { order(created_at: :desc) }
   scope :chronological, -> { order(created_at: :asc) }
 
@@ -113,6 +116,22 @@ class Message < ApplicationRecord
   def content_or_image_present
     if content.blank? && !image.attached?
       errors.add(:base, "메시지 내용 또는 이미지가 필요합니다")
+    end
+  end
+
+  # 5초 내 동일 내용 메시지 중복 방지
+  # IME(한글 입력기) 버그로 인한 중복 전송 방지
+  def prevent_duplicate_within_timeframe
+    return unless content.present? && sender_id.present? && chat_room_id.present?
+
+    recent_duplicate = Message.where(
+      chat_room_id: chat_room_id,
+      sender_id: sender_id,
+      content: content
+    ).where("created_at > ?", 5.seconds.ago).exists?
+
+    if recent_duplicate
+      errors.add(:content, "최근 5초 내 동일한 메시지가 전송되었습니다")
     end
   end
 

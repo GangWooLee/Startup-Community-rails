@@ -35,7 +35,13 @@ module Messages
     end
 
     # 채팅방에 새 메시지 추가
+    # 발신자 제외 조건:
+    # - text 메시지만 제외: create.turbo_stream.erb에서 HTTP 응답으로 렌더링됨
+    # - system/deal_confirm: 서버에서 생성되므로 모든 참여자에게 전송
+    # - card (profile/contact/offer): head :ok 반환하므로 모든 참여자에게 전송 필요
     def broadcast_new_message(participant, is_sender)
+      return if is_sender && @message.text?
+
       Turbo::StreamsChannel.broadcast_append_to(
         "chat_room_#{@chat_room.id}_user_#{participant.user_id}",
         target: "messages",

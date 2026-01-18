@@ -51,7 +51,15 @@ class ChatRoomsController < ApplicationController
     @participant = @chat_room.participants.find_by(user: current_user)
     @participant.mark_as_read!
 
-    @messages = @chat_room.messages.includes(:sender).order(:created_at)
+    # 성능 최적화: 최근 50개 메시지만 로드 (페이지네이션)
+    # 역순으로 가져온 후 정순 정렬하여 UI에 표시
+    @messages = @chat_room.messages
+                          .includes(:sender)
+                          .with_attached_image  # 이미지 첨부 N+1 방지
+                          .order(created_at: :desc)
+                          .limit(50)
+                          .reverse
+    @has_more_messages = @chat_room.messages.count > 50
     @other_user = @chat_room.other_participant(current_user)
   end
 
@@ -169,6 +177,12 @@ class ChatRoomsController < ApplicationController
     end
 
     @user = @chat_room.other_participant(current_user)
+
+    # nil 체크: 참여자가 없거나 탈퇴한 경우 방어
+    if @user.nil?
+      head :not_found
+      return
+    end
 
     respond_to do |format|
       format.turbo_stream {

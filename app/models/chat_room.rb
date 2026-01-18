@@ -5,6 +5,10 @@ class ChatRoom < ApplicationRecord
   has_many :orders, dependent: :nullify
   has_many :reports, as: :reportable, dependent: :destroy
 
+  # 채팅 목록에서 미리보기용 마지막 메시지 (성능 최적화)
+  # includes(:last_message_preview)로 N+1 없이 로드
+  has_one :last_message_preview, -> { order(created_at: :desc) }, class_name: "Message"
+
   # 현재 활성화된 주문 (취소/환불 제외)
   has_one :active_order, -> { where.not(status: [ :cancelled, :refunded ]).order(created_at: :desc) }, class_name: "Order"
 
@@ -123,9 +127,14 @@ class ChatRoom < ApplicationRecord
   end
 
   # 마지막 메시지
-  # includes(:messages)로 preload된 경우 추가 쿼리 없이 Ruby에서 처리
+  # 우선순위:
+  # 1. last_message_preview가 preload된 경우 사용 (채팅 목록용 - 성능 최적화)
+  # 2. messages가 preload된 경우 Ruby에서 처리
+  # 3. 그 외에는 쿼리 실행
   def last_message
-    if messages.loaded?
+    if association(:last_message_preview).loaded?
+      last_message_preview
+    elsif messages.loaded?
       messages.max_by(&:created_at)
     else
       messages.order(created_at: :desc).first

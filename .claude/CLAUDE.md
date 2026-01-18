@@ -367,6 +367,8 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-18]** 채팅 탭 비활성화 후 복귀 시 상태 복구 로직 추가 (Visibility API)
+- **[2026-01-18]** CLAUDE.md 채팅 시스템 베스트 프랙티스 10개 패턴 문서화
 - **[2026-01-17]** CI 트러블슈팅 가이드 추가 (`rules/testing/ci-troubleshooting.md`)
 - **[2026-01-17]** CLAUDE.md에 배운 교훈 및 지속적 개선 섹션 추가
 - **[2026-01-16]** AI 분석 결과 UI 개선 (전문가 모달 z-index, 익명 프로필, 액션 카드 높이 균일화)
@@ -656,6 +658,137 @@ end
 | 모달 ESC 키 닫기 | `send_keys(:escape)` | `document.dispatchEvent(KeyboardEvent)` |
 | 숨겨진 요소 클릭 | Capybara `.click` | `page.execute_script("arguments[0].click()")` |
 | 폼 제출 중복 방지 테스트 | 요소 캐싱 | 매 반복마다 새로 찾기 |
+
+### 채팅 시스템 베스트 프랙티스
+
+#### 1. 메시지 중복 방지 3계층
+```
+┌─────────────────────────────────────────────────┐
+│ 1. 클라이언트 (message_form_controller.js)     │
+│    - isSubmitting 플래그로 연타 방지            │
+│    - event.isComposing 체크 (한글 IME 방지)    │
+├─────────────────────────────────────────────────┤
+│ 2. 서버 검증 (message.rb)                      │
+│    - 5초 내 동일 content 중복 체크 validation  │
+├─────────────────────────────────────────────────┤
+│ 3. Broadcaster (broadcaster.rb)                │
+│    - 발신자에게는 text 메시지 브로드캐스트 X   │
+│    - HTTP 응답으로 이미 렌더링됨               │
+└─────────────────────────────────────────────────┘
+```
+
+**관련 파일**:
+- `app/javascript/controllers/message_form_controller.js`
+- `app/models/message.rb:122-136`
+- `app/services/messages/broadcaster.rb:42-57`
+
+#### 2. Race Condition 방지 (카운터 업데이트)
+```ruby
+# ❌ 위험: 동시 요청 시 카운트 손실
+participants.each { |p| p.update(unread_count: p.unread_count + 1) }
+
+# ✅ Row-level locking으로 원자성 보장
+participants.lock("FOR UPDATE")
+           .where.not(user_id: sender_id)
+           .update_all("unread_count = unread_count + 1")
+```
+**적용**: `unread_count`, `likes_count`, `comments_count` 등
+
+#### 3. 트랜잭션과 부수 효과 분리
+```ruby
+# ✅ 데이터 일관성이 필요한 작업만 트랜잭션 내부
+ActiveRecord::Base.transaction do
+  message.save!
+  update_unread_counts
+end
+
+# ✅ 트랜잭션 외부: 실패해도 롤백 불필요한 작업
+broadcast_to_participants
+send_push_notification
+```
+
+#### 4. has_one으로 N+1 방지 (채팅 목록 최적화)
+```ruby
+# ❌ 전체 메시지 로드
+has_many :messages
+# 채팅목록에서 messages.last 호출 시 N+1
+
+# ✅ 마지막 메시지만 로드
+has_one :last_message_preview,
+        -> { order(created_at: :desc) },
+        class_name: "Message"
+
+# 사용: includes(:last_message_preview)
+```
+
+#### 5. Preload 상태 확인 패턴
+```ruby
+# ✅ preload 여부에 따라 쿼리/Ruby 처리 분기
+def other_participant(current_user)
+  if users.loaded?
+    users.find { |u| u.id != current_user.id }  # Ruby (쿼리 없음)
+  else
+    users.where.not(id: current_user.id).first  # SQL
+  end
+end
+```
+
+#### 6. SQL 집계 활용 (N+1 방지)
+```ruby
+# ❌ Ruby 반복 - N+1 발생
+participants.sum { |p| p.unread_count }
+
+# ✅ SQL 집계 - 단일 쿼리
+participants.sum(:unread_count)
+```
+
+#### 7. update 메서드 선택 가이드
+| 메서드 | 콜백 실행 | 용도 |
+|--------|----------|------|
+| `update` | O | 일반 업데이트 |
+| `update_columns` | X | 단일 레코드, 타임스탬프 건너뛰기 |
+| `update_all` | X | 여러 레코드 일괄 업데이트 |
+
+#### 8. 탭 비활성화 후 복귀 처리 (Visibility API)
+```javascript
+// ✅ 탭 재활성화 시 상태 복구
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    // 고정된 isSubmitting 상태 리셋
+    // ActionCable 연결 상태 확인 및 재연결
+  }
+})
+```
+**문제**: 폼 제출 중 탭 전환 시 `turbo:submit-end` 누락 → `isSubmitting: true` 고정
+
+#### 9. nil 체크 3단계 방어선
+```ruby
+# Model: optional 설정
+belongs_to :other_user, optional: true
+
+# Controller: Early return
+def profile_overlay
+  return head :not_found unless @other_user
+end
+
+# View: 조건부 렌더링
+<% if other_user.present? %>
+  <%= other_user.name %>
+<% else %>
+  <span class="text-gray-400">Unknown</span>
+<% end %>
+```
+
+#### 10. 에러 처리 패턴 (Sentry 연동)
+```ruby
+def call
+  # 비즈니스 로직
+rescue StandardError => e
+  Rails.logger.error "[ChatService] #{e.class}: #{e.message}"
+  Sentry.capture_exception(e) if defined?(Sentry)
+  raise  # 삼키지 않음! 호출자가 결정하도록
+end
+```
 
 ---
 

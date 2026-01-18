@@ -8,6 +8,35 @@ export default class extends Controller {
     this.scrollToBottom()
     this.observeNewMessages()
     this.markAsReadDebounceTimer = null
+
+    // Page Visibility API: 탭 재활성화 시 연결 복구
+    this.boundHandleVisibilityChange = this.handleVisibilityChange.bind(this)
+    document.addEventListener("visibilitychange", this.boundHandleVisibilityChange)
+  }
+
+  // 탭 가시성 변경 시 호출
+  handleVisibilityChange() {
+    if (document.visibilityState === "visible") {
+      // 탭이 다시 활성화됨 - 읽음 상태 동기화
+      this.markAsReadDebounced()
+
+      // ActionCable 연결 상태 확인 및 복구
+      this.checkAndRecoverConnection()
+    }
+  }
+
+  // ActionCable 연결 상태 확인
+  checkAndRecoverConnection() {
+    // Turbo의 ActionCable consumer 접근
+    const consumer = window.Turbo?.session?.streamObserver?.sources?.get("ActionCable")?.consumer
+
+    if (consumer && consumer.connection) {
+      const state = consumer.connection.getState()
+      if (state !== "open") {
+        console.debug("[chat-room] 탭 복귀: ActionCable 재연결 시도")
+        consumer.connection.reopen()
+      }
+    }
   }
 
   // 제안 메시지 삽입
@@ -91,5 +120,6 @@ export default class extends Controller {
     if (this.markAsReadDebounceTimer) {
       clearTimeout(this.markAsReadDebounceTimer)
     }
+    document.removeEventListener("visibilitychange", this.boundHandleVisibilityChange)
   }
 }

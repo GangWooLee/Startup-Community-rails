@@ -33,6 +33,13 @@ module Messages
       broadcast_message
       notify_recipients unless @message.system_message?
       resurrect_hidden_participants
+    rescue StandardError => e
+      # 데이터는 이미 커밋된 상태이므로, 브로드캐스트/알림 실패만 로깅
+      Rails.logger.error "[PostCreationService] #{e.class}: #{e.message}"
+      Rails.logger.error e.backtrace&.first(5)&.join("\n")
+      Sentry.capture_exception(e) if defined?(Sentry)
+      # 에러를 삼키지 않고 재발생 (호출자가 처리 가능하도록)
+      raise
     end
 
     private
@@ -45,8 +52,10 @@ module Messages
     end
 
     # 수신자들의 unread_count 증가
+    # Row-level locking으로 Race Condition 방지 (동시 메시지 전송 시)
     def increment_recipient_unread_count
       @chat_room.participants
+                .lock("FOR UPDATE")
                 .where.not(user_id: @sender_id)
                 .update_all("unread_count = unread_count + 1")
     end

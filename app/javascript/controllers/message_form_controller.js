@@ -6,14 +6,63 @@ export default class extends Controller {
   connect() {
     this.autoResize()
     this.selectedFile = null
+    this.isSubmitting = false  // 중복 제출 방지 플래그
 
     // Paste 이벤트 리스너 등록
     this.boundHandlePaste = this.handlePaste.bind(this)
     this.element.addEventListener("paste", this.boundHandlePaste)
+
+    // Page Visibility API: 탭 재활성화 시 상태 복구
+    this.boundHandleVisibilityChange = this.handleVisibilityChange.bind(this)
+    document.addEventListener("visibilitychange", this.boundHandleVisibilityChange)
   }
 
   disconnect() {
     this.element.removeEventListener("paste", this.boundHandlePaste)
+    document.removeEventListener("visibilitychange", this.boundHandleVisibilityChange)
+  }
+
+  // 탭 가시성 변경 시 호출 (탭 복귀 시 상태 복구)
+  handleVisibilityChange() {
+    if (document.visibilityState === "visible") {
+      // 탭이 다시 활성화됨 - 고정된 상태 복구
+      // 5초 이상 제출 중이었다면 비정상 상태로 간주하고 리셋
+      if (this.isSubmitting && this.submitStartTime) {
+        const elapsed = Date.now() - this.submitStartTime
+        if (elapsed > 5000) {
+          console.debug("[message-form] 탭 복귀: 고정된 제출 상태 리셋")
+          this.resetSubmitState()
+        }
+      }
+    }
+  }
+
+  // 제출 상태 완전 리셋
+  resetSubmitState() {
+    this.isSubmitting = false
+    this.submitStartTime = null
+    if (this.hasButtonTarget) {
+      this.buttonTarget.disabled = false
+    }
+  }
+
+  // Turbo 제출 시작 - 중복 제출 방지
+  handleSubmitStart() {
+    this.isSubmitting = true
+    this.submitStartTime = Date.now()  // 탭 복귀 시 상태 판단용
+    if (this.hasButtonTarget) {
+      this.buttonTarget.disabled = true
+    }
+  }
+
+  // Turbo 제출 완료 - 상태 초기화 및 폼 리셋
+  handleSubmitEnd() {
+    this.isSubmitting = false
+    this.submitStartTime = null
+    if (this.hasButtonTarget) {
+      this.buttonTarget.disabled = false
+    }
+    this.reset()
   }
 
   // 클립보드에서 이미지 붙여넣기 처리
@@ -97,6 +146,8 @@ export default class extends Controller {
 
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
+      // 이미 제출 중이면 무시 (Enter 연타 방지)
+      if (this.isSubmitting) return
       // 텍스트나 이미지 중 하나라도 있으면 전송
       if (this.canSubmit()) {
         this.element.requestSubmit()
@@ -106,6 +157,7 @@ export default class extends Controller {
 
   submit(event) {
     // 직접 호출 시 전송
+    if (this.isSubmitting) return  // 중복 제출 방지
     if (this.canSubmit()) {
       event.preventDefault()
       this.element.requestSubmit()
