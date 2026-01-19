@@ -68,17 +68,20 @@ export default class extends Controller {
     }
   }
 
-  // 모달 동적 생성
+  // 모달 동적 생성 (XSS 방지: 사용자 데이터는 textContent로 삽입)
   createModal() {
     const modal = document.createElement('div')
     modal.className = 'fixed inset-0 z-50 flex items-center justify-center hidden'
     modal.dataset.leaveChatTarget = 'modal'
-    modal.innerHTML = `
+
+    // 정적 HTML 구조만 사용 (사용자 입력 데이터 미포함)
+    // Note: innerHTML is safe here as it contains only static HTML without user data
+    const staticHtml = `
       <div class="absolute inset-0 bg-black/50" data-action="click->leave-chat#closeModal"></div>
       <div class="relative bg-white rounded-2xl shadow-xl w-[90%] max-w-sm mx-auto p-6 animate-modal-in">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">채팅방을 나가시겠습니까?</h3>
         <p class="text-sm text-gray-600 mb-6">
-          채팅 목록에서 사라지지만, <strong data-leave-chat-target="userName">${this.currentRoomName}</strong>님은 계속 대화 내용을 볼 수 있습니다.
+          채팅 목록에서 사라지지만, <strong data-leave-chat-target="userName"></strong>님은 계속 대화 내용을 볼 수 있습니다.
           <br><br>
           <span class="text-gray-500">상대방이 다시 메시지를 보내면 채팅방이 다시 나타납니다.</span>
         </p>
@@ -96,6 +99,14 @@ export default class extends Controller {
         </div>
       </div>
     `
+    modal.innerHTML = staticHtml
+
+    // 사용자 이름은 textContent로 안전하게 삽입 (XSS 방지)
+    const userNameElement = modal.querySelector('[data-leave-chat-target="userName"]')
+    if (userNameElement) {
+      userNameElement.textContent = this.currentRoomName
+    }
+
     this.element.appendChild(modal)
   }
 }
