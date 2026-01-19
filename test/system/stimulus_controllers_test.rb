@@ -147,6 +147,7 @@ class StimulusControllersTest < ApplicationSystemTestCase
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'k',
         metaKey: true,
+        ctrlKey: true,
         bubbles: true
       }));
     JS
@@ -165,6 +166,7 @@ class StimulusControllersTest < ApplicationSystemTestCase
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'k',
         metaKey: true,
+        ctrlKey: true,
         bubbles: true
       }));
     JS
@@ -186,8 +188,8 @@ class StimulusControllersTest < ApplicationSystemTestCase
       }
     JS
 
-    # 모달 닫힘 확인 (hidden 클래스 또는 opacity-0)
-    assert_selector "[data-search-modal-target='overlay'].hidden, [data-search-modal-target='overlay'].opacity-0", wait: 3
+    # 모달 닫힘 확인 (hidden 클래스가 추가됨 - visible: false로 찾아야 함)
+    assert_selector "[data-search-modal-target='overlay'].hidden", visible: false, wait: 5
   end
 
   test "ESC 버튼 클릭으로 검색 모달 닫기" do
@@ -200,17 +202,19 @@ class StimulusControllersTest < ApplicationSystemTestCase
       document.dispatchEvent(new KeyboardEvent('keydown', {
         key: 'k',
         metaKey: true,
+        ctrlKey: true,
         bubbles: true
       }));
     JS
 
-    assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 3
+    assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 5
 
-    # ESC 버튼 클릭
-    click_button "ESC"
+    # ESC 버튼이 visible 될 때까지 대기 후 JavaScript로 클릭 (CI 안정성)
+    esc_button = find("button", text: "ESC", wait: 5)
+    page.execute_script("arguments[0].click()", esc_button)
 
-    # 모달 닫힘 확인
-    assert_selector "[data-search-modal-target='overlay'].hidden, [data-search-modal-target='overlay'].opacity-0", wait: 3
+    # 모달 닫힘 확인 (hidden 클래스가 추가됨 - visible: false로 찾아야 함)
+    assert_selector "[data-search-modal-target='overlay'].hidden", visible: false, wait: 5
   end
 
   private

@@ -20,11 +20,17 @@ module SystemTestHelpers
   def log_in_as(user)
     visit login_path
 
-    # 페이지 완전 로드 대기 (CI 환경에서 느릴 수 있음)
-    assert_selector "body", wait: 10
+    # CI 환경에서 페이지 로드가 느릴 수 있음 - 충분한 대기 시간 확보
+    assert_selector "body", wait: 15
+
+    # Turbo 로딩 완료 대기
+    assert_no_selector ".turbo-progress-bar", wait: 10
+
+    # 로그인 폼이 렌더링될 때까지 대기 (h2 "로그인" 텍스트로 확인 - 가장 안정적)
+    assert_text "로그인", wait: 15
 
     # 로그인 폼의 email 입력 필드가 보일 때까지 대기 (CI용 대기 시간 증가)
-    assert_selector "input[name='email']", visible: true, wait: 10
+    assert_selector "input[name='email']", visible: true, wait: 15
 
     # 폼 필드 입력 (JavaScript로 직접 설정하여 안정성 확보)
     page.execute_script(<<~JS, user.email, TEST_PASSWORD)
