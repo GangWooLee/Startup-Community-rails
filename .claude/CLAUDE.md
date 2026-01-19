@@ -69,6 +69,7 @@ onmousedown="event.preventDefault(); window.location.href = '...'"  # ✅
 | 레이아웃에서 인라인 CSS 삭제 | CSS Variables/애니메이션 깨짐 | **삭제 금지!** (빌드 CSS에 미포함) |
 | `mx-auto` (고정 너비 없이) | 중앙 정렬 안 됨 | `flex justify-center` 또는 고정 너비 추가 |
 | 중복 HTML ID (Turbo Stream 타겟) | 잘못된 컨테이너에 렌더링 | 전역 컨테이너 하나만 사용 |
+| `document.querySelector(...).property` | null 시 TypeError | optional chaining `?.` 또는 Stimulus value 사용 |
 
 ### 🔐 비로그인 사용자 세션 관리 (2026-01-17)
 
@@ -680,6 +681,40 @@ end
 | 숨겨진 요소 클릭 | Capybara `.click` | `page.execute_script("arguments[0].click()")` |
 | 폼 제출 중복 방지 테스트 | 요소 캐싱 | 매 반복마다 새로 찾기 |
 
+### JavaScript DOM 쿼리 Null 안전성 (2026-01-19)
+
+**문제**: `document.querySelector()`가 요소를 찾지 못하면 `null` 반환 → 프로퍼티 접근 시 TypeError
+
+```javascript
+// ❌ 위험 - null 시 크래시
+document.querySelector('meta[name="csrf-token"]').content
+
+// ✅ 안전 - Optional chaining + 폴백
+document.querySelector('meta[name="csrf-token"]')?.content || ''
+
+// ✅ 최적 - Stimulus value 사용 (DOM 쿼리 제거)
+// View: data-controller-csrf-token-value="<%= form_authenticity_token %>"
+// JS: this.csrfTokenValue
+```
+
+**CSRF 토큰 접근 우선순위**:
+| 방법 | 안전성 | 성능 | 사용 조건 |
+|------|--------|------|----------|
+| `this.csrfTokenValue` | ✅ 최적 | ✅ 빠름 | static values에 csrfToken 정의됨 |
+| `?.content \|\| ''` | ✅ 안전 | ⚠️ DOM 쿼리 | csrfToken value 미정의 시 |
+| `.content` (no chaining) | ❌ 위험 | - | **금지** |
+
+**발생 조건**:
+- 비로그인 사용자
+- 네트워크 지연으로 메타태그 로드 전 스크립트 실행
+- 브라우저 확장 프로그램 간섭
+- Turbo 캐시에서 불완전한 DOM 복원
+
+**관련 파일**:
+- `ai_input_controller.js:147`
+- `canvas_modal_controller.js:296`
+- `leave_chat_controller.js:52`
+
 ### 채팅 시스템 베스트 프랙티스
 
 #### 1. 메시지 중복 방지 3계층
@@ -810,6 +845,59 @@ rescue StandardError => e
   raise  # 삼키지 않음! 호출자가 결정하도록
 end
 ```
+
+### Stimulus 이벤트 리스너 bind() 패턴 (2026-01-19)
+
+**문제**: `bind(this)` 인라인 호출 시 `removeEventListener` 실패
+
+```javascript
+// ❌ 위험 - 매번 새 함수 객체 생성
+connect() {
+  element.addEventListener('event', this.handler.bind(this))
+}
+disconnect() {
+  element.removeEventListener('event', this.handler.bind(this))  // 실패!
+}
+
+// ✅ 안전 - 동일 참조 유지
+connect() {
+  this.boundHandler = this.handler.bind(this)
+  element.addEventListener('event', this.boundHandler)
+}
+disconnect() {
+  element.removeEventListener('event', this.boundHandler)
+}
+```
+
+**원인**: JavaScript의 `bind()`는 매번 **새로운 함수 객체**를 생성하므로 `func.bind(this) !== func.bind(this)`
+
+**결과**: 리스너 미제거 → 메모리 누수 → "disconnected port object" 오류 (Turbo 네비게이션 시)
+
+**관련 파일** (수정 완료):
+- `app/javascript/controllers/image_carousel_controller.js`
+- `app/javascript/controllers/confirm_controller.js`
+
+### Stimulus 키 필터 문법 (2026-01-19)
+
+**문제**: Stimulus는 `keydown.escape`를 지원하지 않음
+
+| 잘못된 사용 | 올바른 사용 |
+|------------|------------|
+| `keydown.escape` | `keydown.esc` |
+
+**Stimulus 지원 키 필터**:
+| 키 | 필터 |
+|----|------|
+| Escape | `esc` |
+| Enter | `enter` |
+| Tab | `tab` |
+| Space | `space` |
+| 화살표 | `arrow-down`, `arrow-up`, `arrow-left`, `arrow-right` |
+
+**에러 메시지**: `contains unknown key filter: escape`
+
+**관련 파일** (수정 완료):
+- `app/views/shared/_search_modal.html.erb`
 
 ---
 
