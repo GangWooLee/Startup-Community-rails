@@ -83,112 +83,114 @@
               첫 스케치부터 실행까지 함께합니다.
             </p>
 
-            <%# CTA Buttons - 원본 크기 유지 + 유동적 스케일링 %>
-            <div class="pt-2 sm:pt-4 animate-fade-slide-up animate-delay-500 flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <%# CTA Button - 단독 배치 %>
+            <div class="pt-2 sm:pt-4 animate-fade-slide-up animate-delay-500">
               <button type="button"
                       class="h-14 sm:h-16 px-10 sm:px-12 text-base sm:text-lg font-semibold rounded-lg bg-[#2C4A6B] hover:bg-[#1e3548] text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
                       data-action="click->idea-modal#open">
                 창업 시작하기
               </button>
-              <a href="<%= community_path(browse: true) %>"
-                 data-turbo="false"
-                 class="h-14 sm:h-16 px-10 sm:px-12 text-base sm:text-lg font-semibold rounded-lg bg-white border border-[#2C4A6B]/30 text-[#2C4A6B] hover:border-[#2C4A6B]/60 hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                커뮤니티 바로가기
-              </a>
             </div>
           </div>
 
           <%# Right Side - Community Preview (장식용) %>
           <%# Neo-Minimalism: 테두리 대신 부드러운 그림자, 넉넉한 간격 %>
-          <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-[clamp(1.25rem,4vw,2rem)] animate-fade-slide-right animate-delay-400 order-1 lg:order-2">
+          <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-[clamp(1.25rem,4vw,2rem)] animate-fade-slide-right animate-delay-400 order-1 lg:order-2 overflow-hidden">
+
             <%# Header %>
-            <div class="flex items-center gap-2.5 mb-5">
-              <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span class="text-[clamp(0.625rem,1.2vw,0.75rem)] font-bold text-stone-500 uppercase tracking-wider">
-                Undrew Community Forum
-              </span>
-            </div>
+              <div class="flex items-center gap-2.5 mb-5">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-[clamp(0.625rem,1.2vw,0.75rem)] font-bold text-stone-500 uppercase tracking-wider">
+                  Undrew Community Forum
+                </span>
+              </div>
 
-            <%# 게시글 리스트 - 8px Grid: 16-20px 간격 %>
-            <div class="space-y-4">
-              <%# Post 1 - 테두리 제거, 미세 그림자로 깊이감 %>
-              <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow">
-                <%# 아바타 - 크기 고정 %>
-                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                  MK
+              <%# 게시글 리스트 - 8px Grid: 16-20px 간격 %>
+              <div class="space-y-4">
+                <%# Post 1 - 테두리 제거, 미세 그림자로 깊이감 %>
+                <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-shadow">
+                  <%# 아바타 - 크기 고정 %>
+                  <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                    MK
+                  </div>
+                  <%# 콘텐츠 %>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
+                      AI 기반 교육 플랫폼 공동 창업자 찾습니다
+                    </h4>
+                    <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                      현재 기획 단계는 마무리되었고, MVP 개발을 함께할...
+                    </p>
+                  </div>
+                  <%# 메타 정보 - 인라인 수평 배치 %>
+                  <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">💬</span> 12
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">❤️</span> 5
+                    </span>
+                  </div>
                 </div>
-                <%# 콘텐츠 %>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
-                    AI 기반 교육 플랫폼 공동 창업자 찾습니다
-                  </h4>
-                  <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                    현재 기획 단계는 마무리되었고, MVP 개발을 함께할...
-                  </p>
+
+                <%# Post 2 %>
+                <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-shadow">
+                  <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                    JD
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
+                      초기 스타트업 마케팅, 인스타 vs 블로그?
+                    </h4>
+                    <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                      B2C 서비스인데 예산이 한정적이라 고민입니다...
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">💬</span> 8
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">❤️</span> 24
+                    </span>
+                  </div>
                 </div>
-                <%# 메타 정보 - 인라인 수평 배치 %>
-                <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">💬</span> 12
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">❤️</span> 5
-                  </span>
+
+                <%# Post 3 %>
+                <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-shadow">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                    SY
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
+                      MVP 출시 후 첫 유저 피드백 공유
+                    </h4>
+                    <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                      3주 전 출시한 서비스의 첫 사용자 인터뷰 결과를...
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">💬</span> 5
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="opacity-60">❤️</span> 32
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <%# Post 2 %>
-              <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow">
-                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                  JD
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
-                    초기 스타트업 마케팅, 인스타 vs 블로그?
-                  </h4>
-                  <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                    B2C 서비스인데 예산이 한정적이라 고민입니다...
-                  </p>
-                </div>
-                <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">💬</span> 8
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">❤️</span> 24
-                  </span>
-                </div>
-              </div>
-
-              <%# Post 3 %>
-              <div class="flex gap-4 items-start p-4 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow">
-                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                  SY
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium text-stone-800 mb-1 line-clamp-1">
-                    MVP 출시 후 첫 유저 피드백 공유
-                  </h4>
-                  <p class="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                    3주 전 출시한 서비스의 첫 사용자 인터뷰 결과를...
-                  </p>
-                </div>
-                <div class="flex items-center gap-3 text-xs text-stone-400 flex-shrink-0">
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">💬</span> 5
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <span class="opacity-60">❤️</span> 32
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <%# 하단 장식 텍스트 - 간격 확대 %>
+            <%# 하단 장식 텍스트 + CTA 버튼 %>
             <div class="mt-5 pt-4 border-t border-stone-100/80 text-center">
-              <p class="text-xs text-stone-400">
+              <p class="text-xs text-stone-400 mb-4">
                 지금 <span class="text-blue-500 font-semibold">127명</span>이 이야기하고 있어요
               </p>
+              <%# CTA 버튼 (h-14, px-7, text-base) %>
+              <a href="<%= community_path(browse: true) %>"
+                 data-turbo="false"
+                 class="inline-flex items-center justify-center h-14 px-7 text-base font-semibold rounded-xl bg-[#2C4A6B]/10 text-[#2C4A6B] hover:bg-[#2C4A6B]/20 transition-all">
+                커뮤니티 바로가기
+              </a>
             </div>
           </div>
         </div>
