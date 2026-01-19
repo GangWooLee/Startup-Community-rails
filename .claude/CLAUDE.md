@@ -899,6 +899,46 @@ disconnect() {
 **관련 파일** (수정 완료):
 - `app/views/shared/_search_modal.html.erb`
 
+### 파일 편집 시 인접 코드 삭제 주의 (2026-01-19)
+
+**문제**: 특정 줄을 수정할 때 인접한 코드 블록이 실수로 삭제됨
+
+**실제 사례**: PNG→WebP 이미지 경로 변경 작업 중 Flash 메시지 섹션 삭제
+```erb
+<%# 수정 대상: 이미지 경로만 변경 %>
+<img src="/undrew_hello_icon.webp" ...>
+
+<%# 실수로 삭제된 코드 (15줄) %>
+<% if flash[:alert].present? || flash[:notice].present? %>
+  <%# ... Flash 메시지 렌더링 ... %>
+<% end %>
+```
+
+**영향**:
+- 로그인 실패 시 에러 메시지 미표시
+- 보호된 페이지 리다이렉션 시 알림 미표시
+- 사용자가 폼이 고장났다고 오해
+
+**방지 체크리스트**:
+| 단계 | 확인 사항 |
+|------|----------|
+| **편집 전** | 수정할 파일 전체 구조 파악 (Read 먼저) |
+| **편집 중** | old_string에 최소한의 컨텍스트만 포함 |
+| **편집 후** | 변경된 줄 수가 예상과 일치하는지 확인 |
+| **검증** | 관련 테스트 실행 및 수동 확인 |
+
+**안전한 편집 패턴**:
+```ruby
+# ✅ 최소 컨텍스트로 정확한 위치 지정
+old_string: 'src="/image.png"'
+new_string: 'src="/image.webp"'
+
+# ❌ 위험 - 넓은 범위 지정 시 의도치 않은 삭제 가능
+old_string: '<img src="/image.png" ...전체 태그...>'
+```
+
+**관련 파일**: `app/views/sessions/new.html.erb` (Flash 메시지 복원)
+
 ---
 
 ## 🔄 지속적 개선 (Continuous Improvement)

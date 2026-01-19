@@ -266,7 +266,7 @@ export default class extends Controller {
       avatar.className = "flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-50 p-1 shadow-sm"
 
       const avatarImg = document.createElement("img")
-      avatarImg.src = "/undrew_hello_icon.png"
+      avatarImg.src = "/undrew_hello_icon.webp"
       avatarImg.alt = "Undrew"
       avatarImg.className = "w-full h-full object-contain"
       avatar.appendChild(avatarImg)

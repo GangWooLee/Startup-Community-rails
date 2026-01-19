@@ -145,6 +145,27 @@ window.myData = data
 static values = { data: Object }
 ```
 
+### CSRF 토큰 안전하게 접근하기
+```javascript
+// ✅ 방법 1: Stimulus value 사용 (권장)
+static values = { csrfToken: String }
+
+async submit() {
+  const response = await fetch(url, {
+    headers: { "X-CSRF-Token": this.csrfTokenValue }
+  })
+}
+
+// View에서 전달:
+// data-controller-csrf-token-value="<%= form_authenticity_token %>"
+
+// ✅ 방법 2: Optional chaining (csrfToken value 미정의 시)
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || ''
+
+// ❌ 금지: null 체크 없이 직접 접근
+document.querySelector('meta[name="csrf-token"]').content  // TypeError 위험!
+```
+
 ## HTML 연결
 
 ```erb
