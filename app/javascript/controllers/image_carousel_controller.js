@@ -8,14 +8,18 @@ export default class extends Controller {
     this.totalSlides = this.slideTargets.length
     this.updateUI()
 
-    // 터치/스와이프 지원
-    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true })
-    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true })
+    // 터치/스와이프 지원 - 바인드된 함수를 변수에 저장하여 disconnect에서 동일 참조로 제거
+    this.boundHandleTouchStart = this.handleTouchStart.bind(this)
+    this.boundHandleTouchEnd = this.handleTouchEnd.bind(this)
+
+    this.element.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true })
+    this.element.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true })
   }
 
   disconnect() {
-    this.element.removeEventListener('touchstart', this.handleTouchStart.bind(this))
-    this.element.removeEventListener('touchend', this.handleTouchEnd.bind(this))
+    // 저장된 동일한 함수 참조로 리스너 제거 (메모리 누수 방지)
+    this.element.removeEventListener('touchstart', this.boundHandleTouchStart)
+    this.element.removeEventListener('touchend', this.boundHandleTouchEnd)
   }
 
   next() {
