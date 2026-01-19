@@ -49,7 +49,7 @@ export default class extends Controller {
         method: 'DELETE',
         headers: {
           'Accept': 'text/vnd.turbo-stream.html',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
         }
       })
 
