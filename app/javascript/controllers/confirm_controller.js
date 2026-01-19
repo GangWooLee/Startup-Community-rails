@@ -19,14 +19,17 @@ export default class extends Controller {
 
   connect() {
     // 폼인 경우 submit 이벤트에 리스너 추가
+    // 바인드된 함수를 변수에 저장하여 disconnect에서 동일 참조로 제거
     if (this.element.tagName === "FORM") {
-      this.element.addEventListener("submit", this.handleSubmit.bind(this))
+      this.boundHandleSubmit = this.handleSubmit.bind(this)
+      this.element.addEventListener("submit", this.boundHandleSubmit)
     }
   }
 
   disconnect() {
-    if (this.element.tagName === "FORM") {
-      this.element.removeEventListener("submit", this.handleSubmit.bind(this))
+    // 저장된 동일한 함수 참조로 리스너 제거 (메모리 누수 방지)
+    if (this.element.tagName === "FORM" && this.boundHandleSubmit) {
+      this.element.removeEventListener("submit", this.boundHandleSubmit)
     }
   }
 
