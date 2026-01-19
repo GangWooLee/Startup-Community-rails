@@ -27,15 +27,21 @@ export default class extends Controller {
 
   // ActionCable 연결 상태 확인
   checkAndRecoverConnection() {
-    // Turbo의 ActionCable consumer 접근
-    const consumer = window.Turbo?.session?.streamObserver?.sources?.get("ActionCable")?.consumer
+    try {
+      // Turbo의 ActionCable consumer 접근
+      const consumer = window.Turbo?.session?.streamObserver?.sources?.get("ActionCable")?.consumer
 
-    if (consumer && consumer.connection) {
-      const state = consumer.connection.getState()
-      if (state !== "open") {
-        console.debug("[chat-room] 탭 복귀: ActionCable 재연결 시도")
-        consumer.connection.reopen()
+      if (consumer && consumer.connection) {
+        const state = consumer.connection.getState()
+        if (state !== "open") {
+          console.debug("[chat-room] 탭 복귀: ActionCable 재연결 시도")
+          consumer.connection.reopen()
+        }
       }
+    } catch (error) {
+      // "disconnected port object" 등 연결 상태 관련 오류 무시
+      // 브라우저 확장, Turbo 내부 상태 등에서 발생할 수 있음
+      console.debug("[chat-room] ActionCable 상태 확인 실패 (무시됨):", error.message)
     }
   }
 
