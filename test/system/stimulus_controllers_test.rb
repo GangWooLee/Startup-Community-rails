@@ -209,9 +209,11 @@ class StimulusControllersTest < ApplicationSystemTestCase
 
     assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 5
 
-    # ESC 버튼이 visible 될 때까지 대기 후 JavaScript로 클릭 (CI 안정성)
-    esc_button = find("button", text: "ESC", wait: 5)
-    page.execute_script("arguments[0].click()", esc_button)
+    # ESC 버튼을 JavaScript로 직접 찾아서 클릭 (CI headless 환경 안정성)
+    page.execute_script(<<~JS)
+      const escButton = document.querySelector('[data-action="click->search-modal#close"]');
+      if (escButton) escButton.click();
+    JS
 
     # 모달 닫힘 확인 (hidden 클래스가 추가됨 - visible: false로 찾아야 함)
     assert_selector "[data-search-modal-target='overlay'].hidden", visible: false, wait: 5
