@@ -45,14 +45,17 @@ module SystemTestHelpers
         passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
       }
     JS
-    sleep 0.2
+
+    # 입력값이 설정될 때까지 상태 기반 대기 (sleep 대신)
+    # JavaScript로 값을 설정한 후 값이 반영될 때까지 대기
+    wait_for_javascript_value("input[name='email']", user.email)
 
     # 로그인 버튼 찾기 및 클릭 (JavaScript 클릭으로 안정성 확보)
     login_button = find("button", text: "로그인", match: :first, wait: 5)
     page.execute_script("arguments[0].click()", login_button)
 
-    # 폼 제출 완료 대기 (페이지 전환 또는 에러 메시지)
-    sleep 0.5
+    # 폼 제출 완료 대기 (상태 기반: Turbo 로딩 바가 사라질 때까지)
+    assert_no_selector ".turbo-progress-bar", wait: 10
 
     # 로그인 성공 확인 (최대 5초 대기)
     # 로그인 실패 시 login_path에 머무름
@@ -63,7 +66,8 @@ module SystemTestHelpers
       else
         # JavaScript로 폼 직접 제출 시도
         page.execute_script("document.querySelector('form').submit()")
-        sleep 1
+        # 상태 기반 대기: Turbo 로딩 완료 후 경로 확인
+        assert_no_selector ".turbo-progress-bar", wait: 10
         assert_no_current_path login_path, wait: 5
       end
     end
@@ -160,5 +164,75 @@ module SystemTestHelpers
   # 디버그용: 현재 페이지 스크린샷 저장
   def debug_screenshot(name = "debug")
     page.save_screenshot("tmp/screenshots/#{name}_#{Time.current.to_i}.png")
+  end
+
+  # 키보드 단축키 이벤트 디스패치 헬퍼
+  # Capybara의 send_keys가 document 레벨 리스너에 작동하지 않을 때 사용
+  #
+  # @param key [String] 키 이름 (예: 'k', 'Escape', 'Enter')
+  # @param meta [Boolean] Cmd/Win 키 동시 누름
+  # @param ctrl [Boolean] Ctrl 키 동시 누름
+  # @param shift [Boolean] Shift 키 동시 누름
+  # @param alt [Boolean] Alt 키 동시 누름
+  # @param target [String, nil] 이벤트 타겟 셀렉터 (nil이면 document)
+  #
+  # @example 검색 모달 열기 (Cmd+K / Ctrl+K)
+  #   dispatch_keyboard_shortcut(key: "k", meta: true, ctrl: true)
+  #
+  # @example ESC로 모달 닫기
+  #   dispatch_keyboard_shortcut(key: "Escape")
+  #
+  # @example 특정 입력 필드에서 Enter
+  #   dispatch_keyboard_shortcut(key: "Enter", target: "[data-comment-form-target='input']")
+  #
+  def dispatch_keyboard_shortcut(key:, meta: false, ctrl: false, shift: false, alt: false, target: nil)
+    target_script = target ? "document.querySelector('#{target}')" : "document"
+
+    page.execute_script(<<~JS, key, meta, ctrl, shift, alt)
+      const target = #{target_script};
+      if (target) {
+        target.dispatchEvent(new KeyboardEvent('keydown', {
+          key: arguments[0],
+          metaKey: arguments[1],
+          ctrlKey: arguments[2],
+          shiftKey: arguments[3],
+          altKey: arguments[4],
+          bubbles: true
+        }));
+      }
+    JS
+  end
+
+  # 특정 요소에 Enter 키 디스패치 (폼 제출 등)
+  # @param selector [String] CSS 셀렉터
+  def dispatch_enter_key(selector)
+    dispatch_keyboard_shortcut(key: "Enter", target: selector)
+  end
+
+  # ESC 키로 모달/드롭다운 닫기
+  def dispatch_escape_key
+    dispatch_keyboard_shortcut(key: "Escape")
+  end
+
+  # JavaScript로 설정된 input 값이 반영될 때까지 대기
+  # @param selector [String] CSS 셀렉터
+  # @param expected_value [String] 기대하는 값
+  # @param timeout [Integer] 최대 대기 시간 (초)
+  def wait_for_javascript_value(selector, expected_value, timeout: 3)
+    start_time = Time.current
+    escaped_selector = selector.gsub("'") { "\\'" }
+    loop do
+      # evaluate_script는 표현식을 기대하므로 IIFE 사용
+      script = "(function() { var el = document.querySelector('#{escaped_selector}'); return el ? el.value : null; })()"
+      current_value = page.evaluate_script(script)
+      return if current_value == expected_value
+      return if current_value.present?  # 어떤 값이든 설정되면 OK
+
+      if Time.current - start_time > timeout
+        # 타임아웃 시에도 계속 진행 (값이 이미 설정되어 있을 가능성)
+        break
+      end
+      sleep 0.05
+    end
   end
 end

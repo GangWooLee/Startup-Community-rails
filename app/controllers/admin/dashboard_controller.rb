@@ -1,6 +1,7 @@
 # 관리자 대시보드 컨트롤러
 # 서비스 전체 현황 통계 표시
 class Admin::DashboardController < Admin::BaseController
+  include Admin::PanelStats
   def index
     # 사용자 통계
     @total_users = User.count
@@ -39,19 +40,21 @@ class Admin::DashboardController < Admin::BaseController
 
   private
 
+  # 오른쪽 패널 통계 계산
+  # Admin::PanelStats concern 활용
   def calculate_panel_stats
     return if @total_users.zero?
 
-    # 회원 타입별 비율
-    @admin_users_count = User.where(is_admin: true).count
-    @oauth_users_count = User.joins(:oauth_identities).distinct.count
-    @regular_users_count = @total_users - @oauth_users_count
+    # 회원 타입별 통계 (Concern 활용)
+    stats = calculate_user_type_stats(@total_users)
+    @admin_users_count = stats[:admin_count]
+    @oauth_users_count = stats[:oauth_count]
+    @regular_users_count = stats[:normal_count]
+    @admin_percentage = stats[:admin_percentage]
+    @oauth_percentage = stats[:oauth_percentage]
+    @regular_percentage = stats[:normal_percentage]
 
-    @admin_percentage = ((@admin_users_count.to_f / @total_users) * 100).round(1)
-    @oauth_percentage = ((@oauth_users_count.to_f / @total_users) * 100).round(1)
-    @regular_percentage = (100 - @admin_percentage - @oauth_percentage).round(1)
-
-    # 평균 통계
+    # 평균 통계 (대시보드 전용)
     @avg_chat_rooms_per_user = (@total_chat_rooms.to_f / @total_users).round(1)
     @avg_posts_per_user = (@total_posts.to_f / @total_users).round(1)
     @avg_messages_per_room = @total_chat_rooms.positive? ? (@total_messages.to_f / @total_chat_rooms).round(1) : 0
