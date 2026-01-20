@@ -48,8 +48,8 @@ class Admin::UsersController < Admin::BaseController
     @total_count = @users.count
     @total_pages = (@total_count.to_f / @per_page).ceil
 
-    # N+1 방지: 서브쿼리로 posts_count, chat_rooms_count 조회
-    @users = @users.select(
+    # N+1 방지: oauth_identities preload + 서브쿼리로 posts_count, chat_rooms_count 조회
+    @users = @users.includes(:oauth_identities).select(
       "users.*",
       "(SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) AS posts_count_value",
       "(SELECT COUNT(*) FROM chat_room_participants WHERE chat_room_participants.user_id = users.id) AS chat_rooms_count_value"

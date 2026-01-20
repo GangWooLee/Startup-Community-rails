@@ -27,7 +27,8 @@ class Admin::DashboardController < Admin::BaseController
     @unique_users_today = UserSession.where("logged_in_at >= ?", Time.current.beginning_of_day).distinct.count(:user_id)
 
     # 최근 가입 사용자 (10명 - 테이블용)
-    @recent_users = User.includes(:chat_rooms).order(created_at: :desc).limit(10)
+    # N+1 방지: oauth_identities도 preload (뷰에서 oauth_user? 호출)
+    @recent_users = User.includes(:chat_rooms, :oauth_identities).order(created_at: :desc).limit(10)
 
     # 최근 활동 채팅방 (5개)
     @recent_chat_rooms = ChatRoom.includes(:users).order(last_message_at: :desc).limit(5)
