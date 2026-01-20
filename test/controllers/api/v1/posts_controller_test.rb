@@ -208,6 +208,111 @@ module Api
         assert_equal 0, json["post"]["images_count"]
       end
 
+      # ===== SSRF Prevention Tests =====
+
+      test "should block localhost URLs (SSRF prevention)" do
+        params = valid_post_params.merge(image_urls: [ "http://127.0.0.1/secret.png" ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        # 로컬호스트 URL은 차단되어 이미지 0개
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      test "should block private IP URLs (SSRF prevention)" do
+        params = valid_post_params.merge(image_urls: [
+          "http://10.0.0.1/internal.png",
+          "http://192.168.1.1/config.png",
+          "http://172.16.0.1/secret.png"
+        ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        # 모든 내부 IP URL이 차단됨
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      test "should block AWS metadata endpoint (SSRF prevention)" do
+        params = valid_post_params.merge(image_urls: [ "http://169.254.169.254/latest/meta-data/" ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      # ===== Orphan Blob Prevention Tests =====
+
+      test "should not create orphan blobs when validation fails" do
+        initial_blob_count = ActiveStorage::Blob.count
+
+        # 유효성 검증 실패 (title 누락)
+        params = valid_post_params.except(:title).merge(image_urls: [ "https://example.com/image.jpg" ])
+
+        assert_no_difference "Post.count" do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :unprocessable_entity
+        # 고아 blob이 생성되지 않아야 함
+        assert_equal initial_blob_count, ActiveStorage::Blob.count
+      end
+
+      # ===== Pagination total_count Filter Tests =====
+
+      test "total_count should reflect category filter" do
+        # 카테고리별 게시글 생성
+        Post.create!(user: @user, title: "자유1", content: "내용", category: :free, status: :published)
+        Post.create!(user: @user, title: "자유2", content: "내용", category: :free, status: :published)
+        Post.create!(user: @user, title: "질문1", content: "내용", category: :question, status: :published)
+
+        get api_v1_posts_url,
+            params: { category: "question" },
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        # 필터가 적용된 개수만 반환해야 함
+        expected_count = Post.published.where(category: "question").count
+        assert_equal expected_count, json["pagination"]["total_count"]
+      end
+
+      test "total_count should reflect author_id filter" do
+        other_user = users(:two)
+        Post.create!(user: @user, title: "내 글", content: "내용", status: :published)
+        Post.create!(user: other_user, title: "다른 글", content: "내용", status: :published)
+
+        get api_v1_posts_url,
+            params: { author_id: @user.id },
+            headers: @valid_headers
+
+        assert_response :success
+        json = JSON.parse(response.body)
+
+        expected_count = Post.published.where(user_id: @user.id).count
+        assert_equal expected_count, json["pagination"]["total_count"]
+      end
+
       # NOTE: 이미지 URL 다운로드 테스트는 WebMock stub이 필요
       # 프로덕션에서 curl로 수동 테스트 권장
       # 테스트 환경에서는 HTTP 요청이 차단됨

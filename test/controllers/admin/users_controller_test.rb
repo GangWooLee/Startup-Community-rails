@@ -125,6 +125,47 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
+  # =========================================
+  # Date Filter Exception Handling
+  # =========================================
+
+  test "index should handle invalid from_date gracefully" do
+    log_in_as(@admin)
+
+    # 잘못된 날짜 형식
+    get admin_users_path(from_date: "invalid-date")
+    assert_response :success  # 500 에러가 아닌 정상 응답
+  end
+
+  test "index should handle impossible date gracefully" do
+    log_in_as(@admin)
+
+    # 존재하지 않는 날짜
+    get admin_users_path(from_date: "2026-02-30")
+    assert_response :success
+  end
+
+  test "index should handle invalid to_date gracefully" do
+    log_in_as(@admin)
+
+    get admin_users_path(to_date: "not-a-date")
+    assert_response :success
+  end
+
+  test "export should handle invalid dates gracefully" do
+    log_in_as(@admin)
+
+    get export_admin_users_path(format: :csv, from_date: "invalid", to_date: "also-invalid")
+    assert_response :success
+  end
+
+  test "index should work with valid date filters" do
+    log_in_as(@admin)
+
+    get admin_users_path(from_date: "2026-01-01", to_date: "2026-12-31")
+    assert_response :success
+  end
+
   private
 
   def log_in_as(user)

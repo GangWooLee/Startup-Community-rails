@@ -35,13 +35,8 @@ class Admin::UsersController < Admin::BaseController
       @users = @users.where("email LIKE ? OR name LIKE ?", keyword, keyword)
     end
 
-    # 날짜 범위 필터링
-    if params[:from_date].present?
-      @users = @users.where("created_at >= ?", Date.parse(params[:from_date]).beginning_of_day)
-    end
-    if params[:to_date].present?
-      @users = @users.where("created_at <= ?", Date.parse(params[:to_date]).end_of_day)
-    end
+    # 날짜 범위 필터링 (잘못된 날짜 형식은 무시)
+    @users = apply_date_filters(@users)
 
     # 페이지네이션 (20명씩) - count는 서브쿼리 추가 전에 계산
     @page = (params[:page] || 1).to_i
@@ -87,13 +82,8 @@ class Admin::UsersController < Admin::BaseController
       @users = @users.where("email LIKE ? OR name LIKE ?", keyword, keyword)
     end
 
-    # 날짜 필터링
-    if params[:from_date].present?
-      @users = @users.where("created_at >= ?", Date.parse(params[:from_date]).beginning_of_day)
-    end
-    if params[:to_date].present?
-      @users = @users.where("created_at <= ?", Date.parse(params[:to_date]).end_of_day)
-    end
+    # 날짜 필터링 (잘못된 날짜 형식은 무시)
+    @users = apply_date_filters(@users)
 
     # N+1 방지: oauth_identities preload + 서브쿼리로 카운트 조회
     @users = @users.includes(:oauth_identities).select(
@@ -224,6 +214,30 @@ class Admin::UsersController < Admin::BaseController
 
   def set_user
     @user = User.includes(:oauth_identities).find(params[:id])
+  end
+
+  # 안전한 날짜 파싱 (예외 발생 시 nil 반환)
+  # @param param_name [Symbol] 파라미터 이름 (:from_date 또는 :to_date)
+  # @return [Date, nil] 파싱된 날짜 또는 nil
+  def parse_date_param(param_name)
+    return nil if params[param_name].blank?
+    Date.parse(params[param_name])
+  rescue Date::Error, ArgumentError, TypeError
+    Rails.logger.warn "[Admin] Invalid date parameter: #{param_name}=#{params[param_name]}"
+    nil
+  end
+
+  # 날짜 필터 적용 (잘못된 날짜는 무시)
+  # @param scope [ActiveRecord::Relation] 필터를 적용할 쿼리
+  # @return [ActiveRecord::Relation] 날짜 필터가 적용된 쿼리
+  def apply_date_filters(scope)
+    if (from_date = parse_date_param(:from_date))
+      scope = scope.where("created_at >= ?", from_date.beginning_of_day)
+    end
+    if (to_date = parse_date_param(:to_date))
+      scope = scope.where("created_at <= ?", to_date.end_of_day)
+    end
+    scope
   end
 
   # 사용자 타입 레이블

@@ -43,10 +43,9 @@ module Api
         @post = current_api_user.posts.build(post_params)
         @post.status = :published
 
-        # 이미지 URL 처리 (있는 경우)
-        attach_images_from_urls if image_urls.present?
-
         if @post.save
+          # 저장 성공 후에만 이미지 첨부 (고아 blob 방지)
+          attach_images_from_urls if image_urls.present?
           render json: success_response, status: :created
         else
           render json: error_response, status: :unprocessable_entity
@@ -78,15 +77,28 @@ module Api
       end
 
       def index_response(page, per_page)
+        # 필터가 적용된 쿼리에서 count (offset/limit 제외)
+        filtered_count = build_filtered_query.count
+
         {
           success: true,
           posts: @posts.map { |post| post_summary(post) },
           pagination: {
             page: page,
             per_page: per_page,
-            total_count: Post.published.count
+            total_count: filtered_count
           }
         }
+      end
+
+      # 필터만 적용된 기본 쿼리 (페이지네이션 제외)
+      def build_filtered_query
+        query = Post.published
+
+        query = query.where(category: params[:category]) if params[:category].present?
+        query = query.where(user_id: params[:author_id]) if params[:author_id].present?
+
+        query
       end
 
       def post_summary(post)
@@ -141,9 +153,15 @@ module Api
       end
 
       def attach_image_from_url(url)
+        # SSRF 방지: private IP, localhost 차단
+        unless UrlSanitizer.safe?(url)
+          Rails.logger.warn "[API] Blocked unsafe URL (SSRF prevention): #{url}"
+          return
+        end
+
         uri = URI.parse(url)
 
-        # HTTP/HTTPS만 허용
+        # HTTP/HTTPS만 허용 (UrlSanitizer에서도 체크하지만 추가 안전장치)
         unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
           Rails.logger.warn "[API] Invalid image URL scheme: #{url}"
           return
