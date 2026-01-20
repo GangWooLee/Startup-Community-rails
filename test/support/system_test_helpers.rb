@@ -186,12 +186,12 @@ module SystemTestHelpers
   #   dispatch_keyboard_shortcut(key: "Enter", target: "[data-comment-form-target='input']")
   #
   def dispatch_keyboard_shortcut(key:, meta: false, ctrl: false, shift: false, alt: false, target: nil)
-    target_script = target ? "document.querySelector('#{target}')" : "document"
-
-    page.execute_script(<<~JS, key, meta, ctrl, shift, alt)
-      const target = #{target_script};
-      if (target) {
-        target.dispatchEvent(new KeyboardEvent('keydown', {
+    # target을 arguments로 전달하여 JavaScript 문자열 이스케이핑 문제 방지
+    page.execute_script(<<~JS, key, meta, ctrl, shift, alt, target)
+      const selector = arguments[5];
+      const targetElement = selector ? document.querySelector(selector) : document;
+      if (targetElement) {
+        targetElement.dispatchEvent(new KeyboardEvent('keydown', {
           key: arguments[0],
           metaKey: arguments[1],
           ctrlKey: arguments[2],

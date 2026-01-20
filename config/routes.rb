@@ -63,6 +63,7 @@ Rails.application.routes.draw do
   # OAuth Authentication
   # OAuth 요청 전 return_to 저장을 위한 중간 경로
   post "/oauth/:provider", to: "oauth#passthru", as: :oauth_passthru
+  get "/oauth/webview_warning", to: "oauth#webview_warning", as: :oauth_webview_warning
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 

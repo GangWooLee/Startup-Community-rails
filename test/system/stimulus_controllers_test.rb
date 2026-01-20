@@ -70,8 +70,8 @@ class StimulusControllersTest < ApplicationSystemTestCase
     delete_button = delete_form.find("button")
     page.execute_script("arguments[0].click()", delete_button)
 
-    # 짧은 대기 후 페이지 유지 확인
-    sleep 0.5
+    # 상태 기반 대기: 게시글 제목이 여전히 보이는지 확인
+    assert_text @post.title, wait: 3
 
     # 동일 페이지에 머물러 있는지 확인
     assert_current_path post_path(@post)
@@ -142,15 +142,8 @@ class StimulusControllersTest < ApplicationSystemTestCase
     # 페이지 로드 대기
     assert_selector "body", wait: 5
 
-    # Cmd+K 시뮬레이션
-    page.execute_script(<<~JS)
-      document.dispatchEvent(new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        ctrlKey: true,
-        bubbles: true
-      }));
-    JS
+    # Cmd+K 시뮬레이션 (헬퍼 메서드 사용)
+    dispatch_keyboard_shortcut(key: "k", meta: true, ctrl: true)
 
     # 모달 오버레이 표시 확인
     assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 3
@@ -161,32 +154,15 @@ class StimulusControllersTest < ApplicationSystemTestCase
 
     assert_selector "body", wait: 5
 
-    # 모달 열기
-    page.execute_script(<<~JS)
-      document.dispatchEvent(new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        ctrlKey: true,
-        bubbles: true
-      }));
-    JS
+    # 모달 열기 (헬퍼 메서드 사용)
+    dispatch_keyboard_shortcut(key: "k", meta: true, ctrl: true)
 
     # 모달 열림 확인
     assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 3
 
-    # ESC 키로 닫기 (input에서 keydown.esc 액션 트리거)
-    page.execute_script(<<~JS)
-      const input = document.querySelector("[data-search-modal-target='input']");
-      if (input) {
-        input.focus();
-        input.dispatchEvent(new KeyboardEvent('keydown', {
-          key: 'Escape',
-          keyCode: 27,
-          code: 'Escape',
-          bubbles: true
-        }));
-      }
-    JS
+    # ESC 키로 닫기 (input에 포커스 후 ESC 키 전달)
+    page.execute_script("document.querySelector(\"[data-search-modal-target='input']\")?.focus()")
+    dispatch_keyboard_shortcut(key: "Escape", target: "[data-search-modal-target='input']")
 
     # 모달 닫힘 확인 (hidden 클래스가 추가됨 - visible: false로 찾아야 함)
     assert_selector "[data-search-modal-target='overlay'].hidden", visible: false, wait: 5
@@ -197,15 +173,8 @@ class StimulusControllersTest < ApplicationSystemTestCase
 
     assert_selector "body", wait: 5
 
-    # 모달 열기
-    page.execute_script(<<~JS)
-      document.dispatchEvent(new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        ctrlKey: true,
-        bubbles: true
-      }));
-    JS
+    # 모달 열기 (헬퍼 메서드 사용)
+    dispatch_keyboard_shortcut(key: "k", meta: true, ctrl: true)
 
     assert_selector "[data-search-modal-target='overlay']:not(.hidden)", wait: 5
 

@@ -14,8 +14,8 @@ class NavigationTest < ApplicationSystemTestCase
   test "header shows logo or brand" do
     visit root_path
 
-    # 페이지 로드 대기
-    sleep 1
+    # 상태 기반 대기: 페이지 로드 완료
+    assert_selector "body", wait: 5
 
     # 로고 또는 브랜드 확인 - HTML 소스 검색
     assert page.html.include?("Undrew") ||
@@ -27,7 +27,9 @@ class NavigationTest < ApplicationSystemTestCase
 
   test "header shows navigation links" do
     visit root_path
-    sleep 2
+
+    # 상태 기반 대기: 네비게이션 또는 링크가 보일 때까지
+    assert_selector "a, button, nav", wait: 5
 
     # 네비게이션 링크 확인 - HTML 소스에서 검색
     assert page.html.include?("<a") ||
@@ -42,7 +44,9 @@ class NavigationTest < ApplicationSystemTestCase
 
   test "guest sees login option" do
     visit root_path
-    sleep 1
+
+    # 상태 기반 대기: 페이지 로드 완료
+    assert_selector "body", wait: 5
 
     # 비로그인 시 로그인 관련 요소 - HTML 소스 검색
     assert page.html.include?("로그인") ||
@@ -93,14 +97,17 @@ class NavigationTest < ApplicationSystemTestCase
   test "can navigate between main sections" do
     log_in_as(@user)
     visit root_path
-    sleep 1
+
+    # 상태 기반 대기: 페이지 로드 완료
+    assert_selector "body", wait: 5
 
     # 커뮤니티 링크로 이동
     community_link = find("a", text: /커뮤니티|게시판|Posts/i, wait: 3) rescue nil
 
     if community_link
       community_link.click
-      sleep 0.5
+      # 상태 기반 대기: 페이지 이동 완료
+      assert_no_selector ".turbo-progress-bar", wait: 5
       assert page.has_current_path?(posts_path) ||
              page.has_text?("게시글", wait: 3),
              "Expected to navigate to posts"
