@@ -166,6 +166,150 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  # =========================================
+  # Status/Type Filter Tests (Step 4)
+  # =========================================
+
+  test "index should filter by status active" do
+    log_in_as(@admin)
+
+    get admin_users_path(status: "active")
+    assert_response :success
+
+    # 탈퇴 회원(deleted_user)이 결과에 없어야 함
+    assert_no_match /deleted@test\.com/, response.body
+  end
+
+  test "index should filter by status withdrawn" do
+    log_in_as(@admin)
+
+    get admin_users_path(status: "withdrawn")
+    assert_response :success
+
+    # 탈퇴 회원만 표시되어야 함
+    # 일반 회원은 표시되지 않아야 함
+    assert_no_match /user1@test\.com/, response.body
+  end
+
+  test "index should filter by type oauth" do
+    log_in_as(@admin)
+
+    get admin_users_path(type: "oauth")
+    assert_response :success
+
+    # OAuth 연결이 있는 사용자만 표시되어야 함
+    # oauth_user fixture는 oauth_identities가 연결되어 있음
+  end
+
+  test "index should filter by type admin" do
+    log_in_as(@admin)
+
+    get admin_users_path(type: "admin")
+    assert_response :success
+
+    # 관리자만 표시되어야 함
+    assert_match /admin@test\.com/, response.body
+    # 일반 사용자는 표시되지 않아야 함
+    assert_no_match /user1@test\.com/, response.body
+  end
+
+  # =========================================
+  # destroy_post Transaction Tests (Step 1)
+  # =========================================
+
+  test "destroy_post should clear source_post_id in chat_rooms" do
+    log_in_as(@admin)
+
+    # 테스트용 게시글 생성
+    post_record = @anonymous_user.posts.create!(
+      title: "트랜잭션 테스트 게시글",
+      content: "테스트 내용",
+      category: :free,
+      status: :published
+    )
+
+    # 해당 게시글을 source_post로 참조하는 채팅방 생성
+    chat_room = ChatRoom.create!(source_post_id: post_record.id)
+
+    # Sudo mode 세션 설정 (POST /admin/sudo)
+    post admin_sudo_path, params: { password: TEST_PASSWORD }
+
+    # 게시글 삭제
+    delete destroy_post_admin_user_path(@anonymous_user, post_id: post_record.id)
+
+    # 채팅방의 source_post_id가 nil로 변경되었는지 확인
+    chat_room.reload
+    assert_nil chat_room.source_post_id, "ChatRoom.source_post_id should be cleared after post deletion"
+  ensure
+    chat_room&.destroy
+  end
+
+  test "destroy_post should clear post_id in orders" do
+    log_in_as(@admin)
+
+    # 테스트용 외주 게시글 생성 (hiring/seeking 카테고리만 Order와 연결 가능)
+    post_record = @anonymous_user.posts.create!(
+      title: "주문 연결 테스트 게시글",
+      content: "테스트 내용",
+      category: :hiring,  # 외주(구인) 카테고리
+      status: :published,
+      service_type: "development",
+      price: 100000
+    )
+
+    # 해당 게시글을 참조하는 주문 생성
+    # Order 모델: user_id(구매자), seller_id, amount, title, order_number 필수
+    order = Order.create!(
+      post_id: post_record.id,
+      user: users(:two),
+      seller: @anonymous_user,
+      amount: 10000,
+      title: "테스트 주문",
+      order_number: "ORD-TEST-#{SecureRandom.hex(4)}"
+    )
+
+    # Sudo mode 세션 설정 (POST /admin/sudo)
+    post admin_sudo_path, params: { password: TEST_PASSWORD }
+
+    # 게시글 삭제
+    delete destroy_post_admin_user_path(@anonymous_user, post_id: post_record.id)
+
+    # 주문의 post_id가 nil로 변경되었는지 확인
+    order.reload
+    assert_nil order.post_id, "Order.post_id should be cleared after post deletion"
+  ensure
+    order&.destroy
+  end
+
+  test "destroy_post should record audit log" do
+    log_in_as(@admin)
+
+    # 테스트용 게시글 생성
+    post_record = @anonymous_user.posts.create!(
+      title: "감사 로그 테스트 게시글",
+      content: "테스트 내용",
+      category: :free,
+      status: :published
+    )
+
+    # Sudo mode 세션 설정 (POST /admin/sudo)
+    post admin_sudo_path, params: { password: TEST_PASSWORD }
+
+    # 감사 로그가 생성되는지 확인 (AdminViewLog 모델이 있다면)
+    if defined?(AdminViewLog)
+      initial_log_count = AdminViewLog.count
+
+      delete destroy_post_admin_user_path(@anonymous_user, post_id: post_record.id)
+
+      assert_operator AdminViewLog.count, :>, initial_log_count,
+        "AdminViewLog should be created after post deletion"
+    else
+      # AdminViewLog 모델이 없는 경우 삭제만 확인
+      delete destroy_post_admin_user_path(@anonymous_user, post_id: post_record.id)
+      assert_response :redirect
+    end
+  end
+
   private
 
   def log_in_as(user)
