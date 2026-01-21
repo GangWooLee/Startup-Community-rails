@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko" data-environment="<%= Rails.env %>" data-turbo-native="true">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title><%= content_for(:title) || "Undrew - 창업자 커뮤니티" %></title>
+    <meta name="description" content="아이디어·사람·외주가 한 공간에서 연결되는 최초의 창업 커뮤니티">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Undrew">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <%# Open Graph 메타 태그 %>
+    <%= content_for?(:og_meta) ? yield(:og_meta) : og_meta_tags %>
+
+    <%# Canonical URL %>
+    <%= content_for?(:canonical) ? yield(:canonical) : canonical_tag %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+
+    <%# Favicon %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Google Fonts - 비동기 로딩 %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet"></noscript>
+
+    <%# Devicon - 비동기 로딩 %>
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" rel="stylesheet"></noscript>
+
+    <%# ActionText (Trix 에디터) 스타일 %>
+    <%= stylesheet_link_tag "actiontext" %>
+
+    <%# Tailwind CSS (빌드된 CSS 사용) %>
+    <%= stylesheet_link_tag "tailwind", data: { turbo_track: "reload" } %>
+
+    <%# CSS Variables and Base Styles - 웹과 동일 %>
+    <style>
+      :root {
+        --font-sans: 'Montserrat', 'Nanum Gothic Coding', sans-serif;
+        --font-size: 16px;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+
+        --background: 0 0% 100%;
+        --foreground: 0 0% 9%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 9%;
+        --primary: 248 76% 5%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 265 6% 95%;
+        --secondary-foreground: 248 76% 5%;
+        --muted: 240 10% 94%;
+        --muted-foreground: 240 5% 50%;
+        --accent: 220 14% 93%;
+        --accent-foreground: 248 76% 5%;
+        --destructive: 349 82% 46%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 0% / 0.1;
+        --input: 0 0% 0% / 0;
+        --input-background: 240 6% 96%;
+        --switch-background: 220 7% 81%;
+        --ring: 0 0% 71%;
+        --radius: 0.625rem;
+        --sidebar: 0 0% 98.5%;
+        --sidebar-foreground: 0 0% 9%;
+        --sidebar-primary: 248 76% 5%;
+        --sidebar-primary-foreground: 0 0% 98.5%;
+        --sidebar-accent: 0 0% 97%;
+        --sidebar-accent-foreground: 0 0% 20.5%;
+        --sidebar-border: 0 0% 92.2%;
+        --sidebar-ring: 0 0% 70.8%;
+      }
+
+      .dark {
+        --background: 0 0% 9%;
+        --foreground: 0 0% 98.5%;
+        --card: 0 0% 9%;
+        --card-foreground: 0 0% 98.5%;
+        --popover: 0 0% 9%;
+        --popover-foreground: 0 0% 98.5%;
+        --primary: 0 0% 98.5%;
+        --primary-foreground: 0 0% 20.5%;
+        --secondary: 0 0% 26.9%;
+        --secondary-foreground: 0 0% 98.5%;
+        --muted: 0 0% 26.9%;
+        --muted-foreground: 0 0% 70.8%;
+        --accent: 0 0% 26.9%;
+        --accent-foreground: 0 0% 98.5%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98.5%;
+        --border: 0 0% 26.9%;
+        --input: 0 0% 26.9%;
+        --input-background: 0 0% 12%;
+        --switch-background: 0 0% 25%;
+        --ring: 0 0% 43.9%;
+        --sidebar: 0 0% 12%;
+        --sidebar-foreground: 0 0% 98.5%;
+        --sidebar-primary: 262 83% 58%;
+        --sidebar-primary-foreground: 0 0% 98.5%;
+        --sidebar-accent: 0 0% 26.9%;
+        --sidebar-accent-foreground: 0 0% 98.5%;
+        --sidebar-border: 0 0% 26.9%;
+        --sidebar-ring: 0 0% 43.9%;
+      }
+
+      * { border-color: hsl(var(--border)); }
+
+      body {
+        font-family: var(--font-sans);
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+      }
+
+      /* Devicon 색상 오버라이드 */
+      .devicon-python-plain.colored {
+        color: #3776AB !important;
+      }
+
+      /* 애니메이션 - 웹과 동일 */
+      @keyframes fade-slide-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slide-down {
+        from { opacity: 0; transform: translateY(-1rem); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-slide-up { animation: fade-slide-up 0.6s ease-out forwards; }
+      .animate-slide-down { animation: slide-down 0.3s ease-out; }
+
+      /* Accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        .animate-fade-slide-up, .animate-slide-down {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+
+      /* Safe Area Padding for notch/home indicator */
+      .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      .safe-area-top {
+        padding-top: env(safe-area-inset-top, 0);
+      }
+    </style>
+
+    <%# 카카오 JavaScript SDK (공유 기능용) %>
+    <%
+      kakao_js_key = Rails.application.credentials.dig(:kakao, :javascript_key)
+    %>
+    <% if kakao_js_key.present? %>
+      <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.9/kakao.min.js"
+              crossorigin="anonymous"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
+            Kakao.init('<%= kakao_js_key %>');
+          }
+        });
+      </script>
+    <% end %>
+
+    <%= javascript_importmap_tags %>
+    <%= Sentry.get_trace_propagation_meta.html_safe if defined?(Sentry) && Sentry.initialized? %>
+  </head>
+
+  <body class="font-sans antialiased bg-[#FDFBF7]">
+    <%# Flash Messages - 앱에서도 필요 %>
+    <% if flash.any? %>
+      <div class="fixed top-0 left-0 right-0 z-[9999] flex justify-center p-4 pointer-events-none safe-area-top">
+        <div class="w-full max-w-md space-y-2 pointer-events-auto">
+          <% flash.each do |type, message| %>
+            <% next if [:ga4_event, :ga4_events].include?(type.to_sym) %>
+            <%
+              alert_class = case type.to_sym
+              when :notice
+                "bg-primary text-primary-foreground"
+              when :alert
+                "bg-destructive text-destructive-foreground"
+              when :success
+                "bg-green-600 text-white"
+              else
+                "bg-card text-foreground border border-border"
+              end
+            %>
+            <div class="<%= alert_class %> rounded-lg shadow-lg p-4 flex items-start gap-3 animate-slide-down">
+              <% if type.to_sym == :notice || type.to_sym == :success %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              <% elsif type.to_sym == :alert %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              <% else %>
+                <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              <% end %>
+              <div class="flex-1">
+                <p class="text-sm font-medium"><%= message %></p>
+              </div>
+              <button onclick="this.parentElement.remove()" class="flex-shrink-0 hover:opacity-70 transition-opacity">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <script>
+        setTimeout(() => {
+          const flashMessages = document.querySelectorAll('.animate-slide-down');
+          flashMessages.forEach(msg => {
+            msg.style.transition = 'opacity 0.3s, transform 0.3s';
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateY(-1rem)';
+            setTimeout(() => msg.remove(), 300);
+          });
+        }, 5000);
+      </script>
+    <% end %>
+
+    <%# Main Content - 웹 사이드바/헤더 없이 전체 화면 사용 %>
+    <main class="min-h-screen safe-area-bottom">
+      <%= yield %>
+    </main>
+
+    <%# 토스트 알림 컨테이너 %>
+    <div id="toast-container"></div>
+
+    <%# 프로필 오버레이 컨테이너 %>
+    <div id="profile-overlay-container"></div>
+
+    <%# Creator's Canvas Modal (글쓰기 모달) - 앱에서도 사용 %>
+    <% if logged_in? %>
+      <%= render "posts/canvas_modal" %>
+    <% end %>
+  </body>
+</html>

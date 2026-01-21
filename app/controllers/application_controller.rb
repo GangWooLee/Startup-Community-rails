@@ -17,6 +17,16 @@ class ApplicationController < ActionController::Base
   # GA4 이벤트 추적 헬퍼
   include Ga4Helper
 
+  # User-Agent 헬퍼 (hotwire_native_app? 등)
+  include UserAgentHelper
+
+  # ==========================================================================
+  # Layout Selection
+  # ==========================================================================
+  # Hotwire Native 앱에서는 간소화된 레이아웃 사용
+  # 웹 헤더/사이드바 제거, 앱 네이티브 UI 사용
+  layout :choose_layout
+
   # ==========================================================================
   # Configuration
   # ==========================================================================
@@ -32,6 +42,9 @@ class ApplicationController < ActionController::Base
   # Before Actions
   # ==========================================================================
 
+  # 보안 헤더 설정 (WebView 및 일반 브라우저 보안 강화)
+  before_action :set_security_headers
+
   # 익명 프로필 설정: 로그인 사용자 중 프로필 미완료 시 /welcome으로 리다이렉트
   before_action :require_profile_setup, if: :logged_in?
 
@@ -43,6 +56,27 @@ class ApplicationController < ActionController::Base
   # ==========================================================================
 
   private
+
+  # Hotwire Native 앱 여부에 따라 레이아웃 선택
+  # @return [String] 레이아웃 이름 ("turbo_native" 또는 "application")
+  def choose_layout
+    hotwire_native_app? ? "turbo_native" : "application"
+  end
+
+  # 보안 헤더 설정
+  # WebView 및 일반 브라우저에서 보안 강화
+  #
+  # 헤더 설명:
+  # - X-Frame-Options: 클릭재킹 방지 (iframe 임베딩 제한)
+  # - X-Content-Type-Options: MIME 타입 스니핑 방지
+  # - Referrer-Policy: 외부 링크 시 리퍼러 정보 제한
+  # - Permissions-Policy: 민감한 브라우저 API 사용 제한
+  def set_security_headers
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+  end
 
   # 플로팅 글쓰기 버튼 숨김 (글 작성/수정 등 특정 페이지에서 사용)
   def hide_floating_button

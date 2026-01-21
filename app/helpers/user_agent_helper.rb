@@ -5,11 +5,46 @@
 # Google은 2016년부터 WebView에서 OAuth 인증을 금지합니다.
 # 이유: 앱이 사용자 자격 증명을 가로챌 수 있고, 피싱 공격 위험이 있음.
 #
+# Hotwire Native 앱 감지:
+#   hotwire_native_app?     # 자사 Hotwire Native 앱 여부
+#   hotwire_native_ios?     # iOS 앱 여부
+#   hotwire_native_android? # Android 앱 여부
+#
 # 사용법:
 #   include UserAgentHelper
 #   redirect_to warning_path if in_app_browser?
+#   layout :choose_layout if hotwire_native_app?
 #
 module UserAgentHelper
+  # ==========================================================================
+  # Hotwire Native 앱 감지
+  # ==========================================================================
+
+  # Hotwire Native 앱에서 접속 중인지 확인
+  # User-Agent에 "Turbo Native" 문자열 포함 여부로 판단
+  #
+  # @return [Boolean] Hotwire Native 앱이면 true
+  def hotwire_native_app?
+    request.user_agent.to_s.include?("Turbo Native")
+  end
+
+  # Hotwire Native iOS 앱 여부
+  #
+  # @return [Boolean] iOS 앱이면 true
+  def hotwire_native_ios?
+    hotwire_native_app? && request.user_agent.to_s.include?("iOS")
+  end
+
+  # Hotwire Native Android 앱 여부
+  #
+  # @return [Boolean] Android 앱이면 true
+  def hotwire_native_android?
+    hotwire_native_app? && request.user_agent.to_s.include?("Android")
+  end
+
+  # ==========================================================================
+  # 인앱 브라우저 (소셜 앱 WebView) 감지
+  # ==========================================================================
   # 인앱 브라우저(WebView) 여부 확인
   #
   # @return [Boolean] WebView면 true

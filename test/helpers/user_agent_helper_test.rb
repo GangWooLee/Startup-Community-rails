@@ -19,6 +19,90 @@ class UserAgentHelperTest < ActionView::TestCase
   end
 
   # ============================================================================
+  # hotwire_native_app? Tests
+  # ============================================================================
+
+  test "hotwire_native_app? returns false for nil user agent" do
+    request.user_agent = nil
+
+    assert_not hotwire_native_app?
+  end
+
+  test "hotwire_native_app? returns false for empty user agent" do
+    request.user_agent = ""
+
+    assert_not hotwire_native_app?
+  end
+
+  test "hotwire_native_app? returns true for Turbo Native iOS" do
+    request.user_agent = "Mozilla/5.0 Turbo Native iOS"
+
+    assert hotwire_native_app?
+  end
+
+  test "hotwire_native_app? returns true for Turbo Native Android" do
+    request.user_agent = "Mozilla/5.0 Turbo Native Android"
+
+    assert hotwire_native_app?
+  end
+
+  test "hotwire_native_app? returns false for normal Safari" do
+    request.user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1"
+
+    assert_not hotwire_native_app?
+  end
+
+  test "hotwire_native_app? returns false for normal Chrome" do
+    request.user_agent = "Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+
+    assert_not hotwire_native_app?
+  end
+
+  # ============================================================================
+  # hotwire_native_ios? Tests
+  # ============================================================================
+
+  test "hotwire_native_ios? returns true for Turbo Native iOS" do
+    request.user_agent = "Mozilla/5.0 Turbo Native iOS"
+
+    assert hotwire_native_ios?
+  end
+
+  test "hotwire_native_ios? returns false for Turbo Native Android" do
+    request.user_agent = "Mozilla/5.0 Turbo Native Android"
+
+    assert_not hotwire_native_ios?
+  end
+
+  test "hotwire_native_ios? returns false for normal browser" do
+    request.user_agent = "Mozilla/5.0 Safari/604.1"
+
+    assert_not hotwire_native_ios?
+  end
+
+  # ============================================================================
+  # hotwire_native_android? Tests
+  # ============================================================================
+
+  test "hotwire_native_android? returns true for Turbo Native Android" do
+    request.user_agent = "Mozilla/5.0 Turbo Native Android"
+
+    assert hotwire_native_android?
+  end
+
+  test "hotwire_native_android? returns false for Turbo Native iOS" do
+    request.user_agent = "Mozilla/5.0 Turbo Native iOS"
+
+    assert_not hotwire_native_android?
+  end
+
+  test "hotwire_native_android? returns false for normal browser" do
+    request.user_agent = "Mozilla/5.0 Chrome/91.0"
+
+    assert_not hotwire_native_android?
+  end
+
+  # ============================================================================
   # in_app_browser? Tests
   # ============================================================================
 
