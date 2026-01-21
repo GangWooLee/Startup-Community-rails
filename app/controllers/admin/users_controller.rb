@@ -7,6 +7,8 @@ class Admin::UsersController < Admin::BaseController
   before_action :set_user, only: [ :show, :chat_rooms, :destroy_post, :destroy_comment, :force_logout_all ]
   before_action :require_sudo, only: [ :destroy_post, :destroy_comment, :force_logout_all ]
 
+  PER_PAGE = 20
+
   # GET /admin/users
   # 회원 목록 + 검색 + 필터링 기능
   # N+1 쿼리 방지: 서브쿼리로 posts_count, chat_rooms_count 조회
@@ -40,7 +42,7 @@ class Admin::UsersController < Admin::BaseController
 
     # 페이지네이션 (20명씩) - count는 서브쿼리 추가 전에 계산
     @page = (params[:page] || 1).to_i
-    @per_page = 20
+    @per_page = PER_PAGE
     @total_count = @users.count
     @total_pages = (@total_count.to_f / @per_page).ceil
 

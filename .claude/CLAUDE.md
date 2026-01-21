@@ -388,6 +388,7 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-21]** P1 코드 품질 이슈 수정 (bare rescue 명시화, magic number 상수화)
 - **[2026-01-21]** 새 메시지 익명 닉네임 표시 수정 (`recipient.name` → `recipient.display_name`)
 - **[2026-01-21]** Admin N+1 쿼리 수정: `includes(:oauth_identities)` 추가 (UsersController, DashboardController)
 - **[2026-01-21]** 코드 리뷰 개선사항 반영 (SSRF 방지, 날짜 필터 안정성, 쿼리 최적화)
@@ -1104,6 +1105,69 @@ old_string: '<img src="/image.png" ...전체 태그...>'
 ```
 
 **관련 파일**: `app/views/sessions/new.html.erb` (Flash 메시지 복원)
+
+### Ruby 예외 처리: 명시적 클래스 지정 필수 (2026-01-21)
+
+**문제**: `rescue => e`는 동작하지만 Ruby 스타일 가이드 위반
+
+| 패턴 | 평가 | 설명 |
+|------|------|------|
+| `rescue => e` | ⚠️ 암묵적 | StandardError만 잡지만 명시성 부족 |
+| `rescue StandardError => e` | ✅ 명시적 | 의도가 명확, 권장 패턴 |
+| `rescue Exception => e` | ❌ 금지 | SystemExit, Interrupt까지 잡음 |
+
+**수정 사례**:
+```ruby
+# ❌ 암묵적 (url_sanitizer.rb 수정 전)
+rescue => e
+  Rails.logger.warn "[UrlSanitizer] #{e.message}"
+  false
+end
+
+# ✅ 명시적 (수정 후)
+rescue StandardError => e
+  Rails.logger.warn "[UrlSanitizer] #{e.message}"
+  false
+end
+```
+
+**이유**:
+- `SystemExit`, `Interrupt` 등 시스템 예외는 잡으면 안 됨
+- 코드 리뷰 시 의도 파악 용이
+- Rubocop `Style/RescueStandardError` 규칙 준수
+
+**관련 파일**: `app/services/url_sanitizer.rb`
+
+### Magic Number 상수 추출 필수 (2026-01-21)
+
+**문제**: 숫자 리터럴이 코드에 직접 나타나면 의미 파악 어려움
+
+**수정 사례**:
+```ruby
+# ❌ Magic number (admin/users_controller.rb 수정 전)
+@per_page = 20
+
+# ✅ 상수 추출 (수정 후)
+PER_PAGE = 20
+# ...
+@per_page = PER_PAGE
+```
+
+**상수 추출 기준**:
+| 조건 | 상수화 여부 |
+|------|------------|
+| 비즈니스 의미가 있는 숫자 | ✅ 필수 |
+| 2회 이상 사용되는 숫자 | ✅ 필수 |
+| 변경 가능성 있는 설정값 | ✅ 필수 |
+| 배열 인덱스 (0, 1) | ❌ 불필요 |
+| 수학 상수 (100 for %) | ⚠️ 상황에 따라 |
+
+**명명 규칙**:
+- `SCREAMING_SNAKE_CASE` 사용
+- 단위 포함: `MAX_FILE_SIZE_MB`, `TIMEOUT_SECONDS`
+- 목적 명확: `PER_PAGE`, `MAX_RETRY_COUNT`
+
+**관련 파일**: `app/controllers/admin/users_controller.rb`
 
 ---
 

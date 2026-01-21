@@ -70,7 +70,7 @@ class UrlSanitizer
     return false unless ip_address
 
     !private_ip?(ip_address)
-  rescue => e
+  rescue StandardError => e
     Rails.logger.warn "[UrlSanitizer] Failed to resolve #{@uri.host}: #{e.message}"
     false
   end
