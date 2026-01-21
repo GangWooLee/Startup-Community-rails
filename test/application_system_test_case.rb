@@ -19,6 +19,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   setup do
     # Capybara 기본 대기 시간 설정 (기본 2초 → 5초)
     Capybara.default_max_wait_time = 5
+
+    # 🔒 쿠키/세션 초기화 - 테스트 간 격리 보장
+    # 병렬 테스트에서 Remember Me 쿠키(20년 유효)가 남아있으면
+    # require_no_login 필터가 작동하여 세션 오염 발생
+    Capybara.reset_sessions!
   end
 
   # 각 테스트 후 실행

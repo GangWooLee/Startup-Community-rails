@@ -26,6 +26,21 @@ module SystemTestHelpers
     # Turbo 로딩 완료 대기
     assert_no_selector ".turbo-progress-bar", wait: 10
 
+    # 🔒 세션 오염 감지: 로그인 페이지 경로 확인
+    # require_no_login 필터가 작동하면 community_path로 리다이렉트됨
+    # 커뮤니티 페이지에도 "로그인" 텍스트가 있어서 assert_text만으로는 감지 불가
+    unless page.has_current_path?(login_path, wait: 3)
+      # 세션 오염 감지 - 리셋 후 재시도
+      Rails.logger.warn "[SystemTest] Session contamination detected, resetting sessions..."
+      Capybara.reset_sessions!
+      visit login_path
+      assert_selector "body", wait: 15
+      assert_no_selector ".turbo-progress-bar", wait: 10
+    end
+
+    # 로그인 페이지 경로 최종 확인
+    assert_current_path login_path, wait: 5
+
     # 로그인 폼이 렌더링될 때까지 대기 (h2 "로그인" 텍스트로 확인 - 가장 안정적)
     assert_text "로그인", wait: 15
 
