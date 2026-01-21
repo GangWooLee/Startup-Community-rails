@@ -70,6 +70,22 @@ class UrlSanitizerTest < ActiveSupport::TestCase
     assert_not UrlSanitizer.safe?("http://[::1]/image.png")
   end
 
+  # Step 2: IPv6 unique local (fc00::/7) 커버리지
+  test "should reject IPv6 unique local addresses (fc00::/7)" do
+    # fc00::/8 범위 (아직 할당되지 않음)
+    assert_not UrlSanitizer.safe?("http://[fc00::1]/image.png")
+    # fd00::/8 범위 (실제 사용되는 unique local)
+    assert_not UrlSanitizer.safe?("http://[fd00::1]/image.png")
+    assert_not UrlSanitizer.safe?("http://[fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]/image.png")
+  end
+
+  # Step 2: IPv6 link-local (fe80::/10) 커버리지
+  test "should reject IPv6 link-local addresses (fe80::/10)" do
+    assert_not UrlSanitizer.safe?("http://[fe80::1]/image.png")
+    assert_not UrlSanitizer.safe?("http://[fe80::1%eth0]/image.png")  # zone ID 포함
+    assert_not UrlSanitizer.safe?("http://[febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff]/image.png")
+  end
+
   # =========================================
   # Invalid URL Formats
   # =========================================

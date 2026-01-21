@@ -1,0 +1,1 @@
+../.claude/SECURITY_GUIDE.md

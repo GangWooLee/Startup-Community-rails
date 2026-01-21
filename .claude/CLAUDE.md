@@ -23,7 +23,7 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.9.0 |
-| **마지막 업데이트** | 2026-01-18 |
+| **마지막 업데이트** | 2026-01-21 |
 | **진행 중 작업** | 문서 최신화, 안정성 개선 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
@@ -388,6 +388,11 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-21]** 새 메시지 익명 닉네임 표시 수정 (`recipient.name` → `recipient.display_name`)
+- **[2026-01-21]** Admin N+1 쿼리 수정: `includes(:oauth_identities)` 추가 (UsersController, DashboardController)
+- **[2026-01-21]** 코드 리뷰 개선사항 반영 (SSRF 방지, 날짜 필터 안정성, 쿼리 최적화)
+- **[2026-01-21]** WebView 인앱 브라우저 OAuth 경고 기능 추가
+- **[2026-01-21]** Hotwire Native 앱 개발 에이전트 9개 구축 (Core 3 + Feature 4 + Release 2)
 - **[2026-01-18]** 프로젝트 특화 커스텀 에이전트 11개 구축 (도메인 7 + 품질 4)
 - **[2026-01-18]** 채팅 탭 비활성화 후 복귀 시 상태 복구 로직 추가 (Visibility API)
 - **[2026-01-18]** CLAUDE.md 채팅 시스템 베스트 프랙티스 10개 패턴 문서화
@@ -423,6 +428,93 @@ bin/rails test test/models/user_test.rb
 3. ~~이메일 인증 시스템~~ ✅ 완료 (Resend HTTP API)
 4. 외주 시스템 완성 (지원 버튼, 정산, 리뷰)
 5. N+1 쿼리 최적화
+6. 🆕 **Hotwire Native 앱 개발** (iOS/Android)
+
+---
+
+## 📱 Hotwire Native 앱 개발 (2026-01-21)
+
+> **상세 가이드**: [agents/mobile/README.md](agents/mobile/README.md)
+
+### 모바일 앱 에이전트 (9개)
+
+| 카테고리 | 에이전트 | 역할 |
+|---------|---------|------|
+| **Core** | hotwire-native-expert | 아키텍처, Path Configuration |
+| | ios-expert | Swift, WKWebView, Keychain |
+| | android-expert | Kotlin, WebView, Keystore |
+| **Feature** | bridge-expert | 웹-네이티브 양방향 통신 |
+| | mobile-auth-expert | 세션 동기화, 생체 인증 |
+| | push-notification-expert | FCM, APNs |
+| | deep-linking-expert | Universal/App Links |
+| **Release** | app-store-expert | TestFlight, App Store 배포 |
+| | play-store-expert | Play Store, AAB 배포 |
+
+### 앱 개발 주요 패턴
+
+| 패턴 | 설명 | 관련 에이전트 |
+|------|------|--------------|
+| **Path Configuration** | URL → 화면 동작 매핑 (modal, push, native) | hotwire-native-expert |
+| **앱 감지** | `Turbo Native` User-Agent 확인 | hotwire-native-expert |
+| **세션 동기화** | Keychain/Keystore ↔ WebView 쿠키 | mobile-auth-expert |
+| **Bridge 통신** | Stimulus ↔ Swift/Kotlin 메시지 | bridge-expert |
+
+### 앱 개발 시 주의사항
+
+| 상황 | 웹 | 앱 |
+|------|-----|-----|
+| 레이아웃 | `application.html.erb` | `turbo_native.html.erb` (간소화) |
+| 세션 저장 | 쿠키 | Keychain/Keystore + 쿠키 동기화 |
+| JavaScript `alert()` | 작동 | **차단됨** → Bridge 사용 |
+| OAuth | 브라우저 | ASWebAuthenticationSession |
+| 딥 링크 | 일반 URL | Universal Links / App Links |
+
+### 기존 에이전트와 협력
+
+```
+채팅 앱 연동:
+chat-expert → bridge-expert → push-notification-expert
+
+인증 시스템:
+auth-expert → mobile-auth-expert → ios-expert/android-expert
+
+게시글 공유:
+community-expert → deep-linking-expert
+```
+
+### 📊 앱 출시 준비도 현황 (2026-01-21 분석)
+
+> **상세 보고서**: [hotwire_native_readiness.html.erb](../app/views/reports/hotwire_native_readiness.html.erb)
+
+| 영역 | 점수 | 상태 |
+|------|------|------|
+| **종합 준비도** | **68%** | ⚠️ 개선 필요 |
+| Turbo Streams | 80% | ✅ 우수 |
+| Navigation | 85% | ✅ 우수 |
+| Auth/Session | 77% | ✅ 양호 |
+| Stimulus | 70% | ✅ 양호 |
+| Turbo Frames | 45% | ⚠️ 부족 |
+| Touch Events | 20% | ❌ 미흡 |
+
+**강점:**
+- 실시간 채팅 (Turbo Streams + Solid Cable)
+- 66개 Stimulus 컨트롤러
+- Remember Me 20년 영구 쿠키
+- OAuth 세션 백업 패턴
+
+**필수 개선 (P0 - 앱 출시 전):**
+| 항목 | 현재 | 목표 | 예상 시간 |
+|------|------|------|----------|
+| `hotwire_native_app?` 헬퍼 | 없음 | 구현 | 1시간 |
+| `turbo_native.html.erb` | 없음 | 생성 | 2시간 |
+| `httponly: true` 세션 | 미설정 | 추가 | 30분 |
+| 보안 헤더 4개 | 누락 | 추가 | 30분 |
+
+**P1 개선 (앱 품질 향상):**
+- 터치 이벤트 확대 (1개 → 10개+ 컨트롤러)
+- Turbo Frames lazy loading 적용
+- inputmode 속성 전체 폼 적용
+- 터치 타겟 44px 이상 보장
 
 ---
 
@@ -603,6 +695,80 @@ main          # 프로덕션 브랜치
 ## 📚 배운 교훈 (Lessons Learned)
 
 > **목적**: 반복되는 실수를 방지하고 프로젝트 지식을 축적
+
+### 🚨 코드 수정 후 배포 확인 필수 (Critical! 2026-01-21)
+
+**문제**: 로컬에서 코드를 수정했지만 **커밋/푸시를 안 해서** 배포 서버에 반영되지 않음
+
+**실제 사례**: 익명 닉네임 수정 (`recipient.name` → `recipient.display_name`)
+- 로컬에서 수정 완료 ✅
+- 테스트 통과 ✅
+- **커밋 안 함** ❌ → 배포 서버에서 버그 지속
+
+**필수 체크리스트** (수정 완료 후):
+```bash
+# 1. 변경사항 확인
+git status
+
+# 2. 커밋 (변경 파일이 있으면)
+git add [파일] && git commit -m "[타입] 메시지"
+
+# 3. 푸시
+git push origin main
+
+# 4. 배포 확인 (프로덕션에서 직접 테스트)
+```
+
+**원칙**: 코드 수정 → **반드시 `git status` 확인** → 커밋/푸시 → 배포 서버 테스트
+
+### 익명 프로필 시스템: `display_name` 필수 사용 (2026-01-21)
+
+**핵심 규칙**: 사용자 이름 표시하는 **모든 곳**에서 `display_name` 사용
+
+| 메서드 | 반환값 | 사용 조건 |
+|--------|--------|----------|
+| `user.name` | 실제 이름 (항상) | **❌ 사용자에게 노출되는 곳에서 금지** |
+| `user.display_name` | 익명이면 닉네임, 아니면 실명 | **✅ 항상 이것 사용** |
+
+**적용 위치**:
+```ruby
+# ❌ 금지 - 익명성 침해
+<%= recipient.name %>
+data-preselected-name-value="<%= recipient.name %>"
+
+# ✅ 올바른 방법
+<%= recipient.display_name %>
+data-preselected-name-value="<%= recipient.display_name %>"
+```
+
+**관련 파일**:
+- `app/views/chat_rooms/_new_message_panel.html.erb:11`
+- `app/models/concerns/profileable.rb` - `display_name` 정의
+
+### N+1 쿼리 방지: Association 메서드 호출 시 includes() 필수 (2026-01-21)
+
+**문제**: 뷰에서 `user.oauth_user?` 같은 association 메서드 호출 시 N+1 쿼리 발생
+
+```ruby
+# ❌ N+1 발생 - 목록의 각 유저마다 쿼리 실행
+@users.each { |u| u.oauth_user? }  # 20명 = 20개 추가 쿼리
+
+# ✅ includes로 미리 로드
+@users = User.includes(:oauth_identities).limit(20)
+@users.each { |u| u.oauth_user? }  # 1개 쿼리로 해결
+```
+
+**흔한 패턴**:
+| 뷰에서 호출 | 컨트롤러에서 필요 |
+|------------|------------------|
+| `user.oauth_user?` | `includes(:oauth_identities)` |
+| `user.admin?` | (is_admin 컬럼이므로 불필요) |
+| `post.user.name` | `includes(:user)` |
+| `comment.replies` | `includes(:replies)` |
+
+**관련 파일**:
+- `app/controllers/admin/users_controller.rb:52`
+- `app/controllers/admin/dashboard_controller.rb:31`
 
 ### OAuth 세션 손실 패턴 (Critical!)
 
@@ -1064,7 +1230,7 @@ old_string: '<img src="/image.png" ...전체 태그...>'
 │   ├── infrastructure/critical-files.md  # 인프라 규칙
 │   └── common/code-quality.md   # 공통 코드 품질
 │
-├── agents/                      # 🆕 프로젝트 특화 에이전트 (11개)
+├── agents/                      # 프로젝트 특화 에이전트 (20개)
 │   ├── README.md                # 에이전트 가이드
 │   ├── domain/                  # 도메인 에이전트 (7개)
 │   │   ├── chat-expert.md       # 채팅 시스템
@@ -1074,11 +1240,16 @@ old_string: '<img src="/image.png" ...전체 태그...>'
 │   │   ├── search-expert.md     # 검색 시스템
 │   │   ├── admin-expert.md      # 관리자 기능
 │   │   └── ui-ux-expert.md      # UI/UX
-│   └── quality/                 # 품질 에이전트 (4개)
-│       ├── security-expert.md   # 보안 분석
-│       ├── code-review-expert.md # 코드 리뷰
-│       ├── data-integrity-expert.md # 데이터 정합성
-│       └── performance-expert.md # 성능 최적화
+│   ├── quality/                 # 품질 에이전트 (4개)
+│   │   ├── security-expert.md   # 보안 분석
+│   │   ├── code-review-expert.md # 코드 리뷰
+│   │   ├── data-integrity-expert.md # 데이터 정합성
+│   │   └── performance-expert.md # 성능 최적화
+│   └── mobile/                  # 🆕 모바일 에이전트 (9개)
+│       ├── README.md            # 모바일 에이전트 가이드
+│       ├── core/                # 핵심 (hotwire-native, ios, android)
+│       ├── feature/             # 기능 (bridge, auth, push, deeplink)
+│       └── release/             # 배포 (app-store, play-store)
 │
 └── skills/                      # Claude Skills (17개)
     ├── README.md                # 스킬 가이드 및 사용법

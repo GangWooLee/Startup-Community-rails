@@ -1,0 +1,1 @@
+../.claude/ENVIRONMENT_SETUP.md

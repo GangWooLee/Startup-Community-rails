@@ -128,4 +128,84 @@ class MessageableTest < ActiveSupport::TestCase
       @user.has_unread_messages?
     end
   end
+
+  # =========================================
+  # Performance Tests (Step 3)
+  # N+1 방지: 단일 쿼리 실행 검증
+  # =========================================
+
+  test "total_unread_messages executes single SQL query" do
+    # 다중 채팅방 생성
+    chat_rooms = []
+    participants = []
+
+    3.times do
+      chat_room = ChatRoom.create!
+      participant = ChatRoomParticipant.create!(
+        chat_room: chat_room,
+        user: @user,
+        unread_count: 5
+      )
+      chat_rooms << chat_room
+      participants << participant
+    end
+
+    # 쿼리 카운트 측정
+    query_count = count_queries do
+      result = @user.total_unread_messages
+      # 결과 검증 (15 = 5 * 3)
+      assert_equal 15, result
+    end
+
+    # 단일 SUM 쿼리만 실행되어야 함
+    assert_equal 1, query_count, "total_unread_messages should execute single SUM query, but executed #{query_count} queries"
+  ensure
+    participants&.each(&:destroy)
+    chat_rooms&.each(&:destroy)
+  end
+
+  test "has_unread_messages? executes single SQL query" do
+    # 다중 채팅방 생성 (읽지 않은 메시지 있음)
+    chat_rooms = []
+    participants = []
+
+    3.times do
+      chat_room = ChatRoom.create!
+      participant = ChatRoomParticipant.create!(
+        chat_room: chat_room,
+        user: @user,
+        unread_count: 5
+      )
+      chat_rooms << chat_room
+      participants << participant
+    end
+
+    # 쿼리 카운트 측정
+    query_count = count_queries do
+      result = @user.has_unread_messages?
+      assert_equal true, result
+    end
+
+    # 단일 EXISTS 쿼리만 실행되어야 함
+    assert_equal 1, query_count, "has_unread_messages? should execute single EXISTS query, but executed #{query_count} queries"
+  ensure
+    participants&.each(&:destroy)
+    chat_rooms&.each(&:destroy)
+  end
+
+  private
+
+  # SQL 쿼리 카운트 헬퍼 메서드
+  def count_queries(&block)
+    count = 0
+    counter_fn = ->(name, _started, _finished, _unique_id, payload) {
+      # SCHEMA 쿼리와 TRANSACTION 쿼리 제외
+      unless payload[:name].in?([ "SCHEMA", "TRANSACTION" ]) || payload[:sql].start_with?("PRAGMA")
+        count += 1
+      end
+    }
+
+    ActiveSupport::Notifications.subscribed(counter_fn, "sql.active_record", &block)
+    count
+  end
 end

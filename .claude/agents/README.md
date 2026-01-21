@@ -2,7 +2,8 @@
 
 > **목적**: 프로젝트 도메인에 특화된 AI 에이전트를 통해 개발 속도 향상, 오류 감소, 코드 일관성 유지
 > **생성일**: 2026-01-18
-> **에이전트 수**: 11개 (도메인 7 + 품질 4)
+> **업데이트**: 2026-01-21 (Mobile Agents 추가)
+> **에이전트 수**: 20개 (도메인 7 + 품질 4 + 모바일 9)
 
 ---
 
@@ -28,6 +29,34 @@
 | [code-review-expert](quality/code-review-expert.md) | 코드 품질 검수 | 코드 리뷰, 품질, review |
 | [data-integrity-expert](quality/data-integrity-expert.md) | 데이터 정합성 검증 | Race Condition, 데이터 정합성, 동시성 |
 | [performance-expert](quality/performance-expert.md) | 성능 최적화 | 성능, N+1, 느림, 최적화 |
+
+### 모바일 에이전트 (Mobile Experts) 🆕
+
+> **상세 가이드**: [mobile/README.md](mobile/README.md)
+
+#### Core (핵심)
+
+| 에이전트 | 설명 | 트리거 키워드 |
+|---------|------|--------------|
+| [hotwire-native-expert](mobile/core/hotwire-native-expert.md) | 아키텍처, Path Configuration | hotwire, hybrid, 네이티브 앱 |
+| [ios-expert](mobile/core/ios-expert.md) | Swift, Navigator, WKWebView | iOS, Swift, Xcode |
+| [android-expert](mobile/core/android-expert.md) | Kotlin, Fragment, WebView | Android, Kotlin, Gradle |
+
+#### Feature (기능)
+
+| 에이전트 | 설명 | 트리거 키워드 |
+|---------|------|--------------|
+| [bridge-expert](mobile/feature/bridge-expert.md) | 웹-네이티브 통신 | bridge, 네이티브 버튼 |
+| [mobile-auth-expert](mobile/feature/mobile-auth-expert.md) | 세션 동기화, 생체 인증 | Face ID, Keychain |
+| [push-notification-expert](mobile/feature/push-notification-expert.md) | FCM, APNs 푸시 | 푸시, FCM, APNs |
+| [deep-linking-expert](mobile/feature/deep-linking-expert.md) | Universal/App Links | 딥 링크, 공유 |
+
+#### Release (배포)
+
+| 에이전트 | 설명 | 트리거 키워드 |
+|---------|------|--------------|
+| [app-store-expert](mobile/release/app-store-expert.md) | App Store 배포 | TestFlight, App Store |
+| [play-store-expert](mobile/release/play-store-expert.md) | Play Store 배포 | Play Store, Google Play |
 
 ---
 
@@ -113,7 +142,7 @@ related_skills: [연계 스킬 목록]
 .claude/agents/
 ├── README.md                      # 이 파일
 │
-├── domain/                        # 도메인별 에이전트
+├── domain/                        # 도메인별 에이전트 (7개)
 │   ├── chat-expert.md             # 채팅 전문가
 │   ├── community-expert.md        # 커뮤니티 전문가
 │   ├── ai-analysis-expert.md      # AI 분석 전문가
@@ -122,11 +151,26 @@ related_skills: [연계 스킬 목록]
 │   ├── admin-expert.md            # 관리자 전문가
 │   └── ui-ux-expert.md            # UI/UX 전문가
 │
-└── quality/                       # 품질 에이전트
-    ├── security-expert.md         # 보안 전문가
-    ├── code-review-expert.md      # 코드 리뷰 전문가
-    ├── data-integrity-expert.md   # 데이터 안정성 전문가
-    └── performance-expert.md      # 성능 최적화 전문가
+├── quality/                       # 품질 에이전트 (4개)
+│   ├── security-expert.md         # 보안 전문가
+│   ├── code-review-expert.md      # 코드 리뷰 전문가
+│   ├── data-integrity-expert.md   # 데이터 안정성 전문가
+│   └── performance-expert.md      # 성능 최적화 전문가
+│
+└── mobile/                        # 🆕 모바일 에이전트 (9개)
+    ├── README.md                  # 모바일 에이전트 가이드
+    ├── core/                      # 핵심 (3개)
+    │   ├── hotwire-native-expert.md
+    │   ├── ios-expert.md
+    │   └── android-expert.md
+    ├── feature/                   # 기능 (4개)
+    │   ├── bridge-expert.md
+    │   ├── mobile-auth-expert.md
+    │   ├── push-notification-expert.md
+    │   └── deep-linking-expert.md
+    └── release/                   # 배포 (2개)
+        ├── app-store-expert.md
+        └── play-store-expert.md
 ```
 
 ---

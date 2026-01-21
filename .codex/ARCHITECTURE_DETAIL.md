@@ -1,0 +1,1 @@
+../.claude/ARCHITECTURE_DETAIL.md

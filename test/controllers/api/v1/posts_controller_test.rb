@@ -313,9 +313,67 @@ module Api
         assert_equal expected_count, json["pagination"]["total_count"]
       end
 
-      # NOTE: 이미지 URL 다운로드 테스트는 WebMock stub이 필요
-      # 프로덕션에서 curl로 수동 테스트 권장
-      # 테스트 환경에서는 HTTP 요청이 차단됨
+      # ===== Content-Type Validation Tests (Step 5) =====
+      # NOTE: 실제 HTTP 요청 테스트는 WebMock stub이 필요
+      # 여기서는 로직 경로만 검증
+
+      test "should handle non-http scheme in image URL gracefully" do
+        # ftp:// 등 비HTTP 스킴은 차단되어야 함
+        params = valid_post_params.merge(image_urls: [ "ftp://example.com/image.png" ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        # 비HTTP URL은 차단되어 이미지 0개
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      test "should handle file:// scheme in image URL gracefully" do
+        # file:// 스킴은 차단되어야 함 (SSRF 방지)
+        params = valid_post_params.merge(image_urls: [ "file:///etc/passwd" ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      test "should handle invalid URL format gracefully" do
+        # 잘못된 URL 형식은 무시되어야 함
+        params = valid_post_params.merge(image_urls: [
+          "not a url",
+          "http://",  # 호스트 없음
+          "://missing-scheme.com"
+        ])
+
+        assert_difference "Post.count", 1 do
+          post api_v1_posts_url,
+               params: { post: params }.to_json,
+               headers: @valid_headers
+        end
+
+        assert_response :created
+        json = JSON.parse(response.body)
+        assert_equal 0, json["post"]["images_count"]
+      end
+
+      # NOTE: Content-Type 검증 로직 (content_type.start_with?("image/"))은
+      # 실제 HTTP 응답이 필요하므로 WebMock 없이는 테스트 불가
+      # 프로덕션에서 curl로 수동 테스트:
+      # curl -X POST https://undrewai.com/api/v1/posts \
+      #   -H "Authorization: Bearer TOKEN" \
+      #   -H "Content-Type: application/json" \
+      #   -d '{"post":{"title":"Test","content":"Content","image_urls":["https://example.com/text.html"]}}'
 
       # ===== Response Format Tests =====
 

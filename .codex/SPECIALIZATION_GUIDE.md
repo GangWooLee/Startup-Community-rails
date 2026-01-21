@@ -1,0 +1,1 @@
+../.claude/SPECIALIZATION_GUIDE.md
