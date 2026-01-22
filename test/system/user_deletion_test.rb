@@ -14,8 +14,11 @@ class UserDeletionTest < ApplicationSystemTestCase
   test "requires login to access delete account page" do
     visit delete_account_path
 
-    # 비로그인 시 로그인 페이지로 리다이렉트
-    assert_current_path login_path
+    # ✅ Turbo 로딩 완료 대기 (CI 환경에서 리다이렉트 체인 타이밍 이슈 방지)
+    assert_no_selector ".turbo-progress-bar", wait: 10
+
+    # 비로그인 시 로그인 페이지로 리다이렉트 (명시적 wait 옵션)
+    assert_current_path login_path, wait: 10
   end
 
   # =========================================

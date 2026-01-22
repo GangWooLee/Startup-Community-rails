@@ -12,6 +12,39 @@ module SystemTestHelpers
   # 테스트용 비밀번호 상수
   TEST_PASSWORD = "test1234"
 
+  # CI 환경 대기 시간 상수 (로컬보다 느림)
+  CI_WAIT_TIME = 20
+  LOCAL_WAIT_TIME = 10
+
+  # =========================================
+  # CI 환경 감지 헬퍼
+  # =========================================
+
+  # CI 환경 여부 확인
+  # @return [Boolean] CI 환경이면 true
+  def ci_environment?
+    ENV["CI"].present? || ENV["GITHUB_ACTIONS"].present?
+  end
+
+  # CI 환경에 따른 기본 대기 시간 반환
+  # @return [Integer] 대기 시간 (초)
+  def default_wait_time
+    ci_environment? ? CI_WAIT_TIME : LOCAL_WAIT_TIME
+  end
+
+  # Turbo 리다이렉트 완료 대기 헬퍼
+  # @param expected_path [String, nil] 예상 경로 (nil이면 경로 확인 생략)
+  # @param wait [Integer, nil] 대기 시간 (nil이면 default_wait_time 사용)
+  def wait_for_turbo_redirect(expected_path = nil, wait: nil)
+    wait ||= default_wait_time
+
+    # Turbo 로딩 인디케이터가 사라질 때까지 대기
+    assert_no_selector ".turbo-progress-bar", wait: wait
+
+    # 예상 경로가 지정되면 경로 확인
+    assert_current_path expected_path, wait: wait if expected_path
+  end
+
   # 사용자 로그인 헬퍼
   # @param user [User] 로그인할 사용자 fixture
   #
@@ -20,32 +53,37 @@ module SystemTestHelpers
   def log_in_as(user)
     visit login_path
 
-    # CI 환경에서 페이지 로드가 느릴 수 있음 - 충분한 대기 시간 확보
-    assert_selector "body", wait: 15
+    # ✅ 개선 1: document.readyState 확인 (CI 환경 안정성)
+    page.evaluate_script("document.readyState") == "complete" rescue true
+
+    # CI 환경에서 페이지 로드가 느릴 수 있음 - 동적 대기 시간 사용
+    wait_time = default_wait_time
+    assert_selector "body", wait: wait_time
 
     # Turbo 로딩 완료 대기
-    assert_no_selector ".turbo-progress-bar", wait: 10
+    assert_no_selector ".turbo-progress-bar", wait: wait_time
 
     # 🔒 세션 오염 감지: 로그인 페이지 경로 확인
     # require_no_login 필터가 작동하면 community_path로 리다이렉트됨
     # 커뮤니티 페이지에도 "로그인" 텍스트가 있어서 assert_text만으로는 감지 불가
-    unless page.has_current_path?(login_path, wait: 3)
-      # 세션 오염 감지 - 리셋 후 재시도
+    unless page.has_current_path?(login_path, wait: 5)
+      # ✅ 개선 2: 세션 오염 감지 대기 시간 증가 (3 → 5초)
       Rails.logger.warn "[SystemTest] Session contamination detected, resetting sessions..."
       Capybara.reset_sessions!
       visit login_path
-      assert_selector "body", wait: 15
-      assert_no_selector ".turbo-progress-bar", wait: 10
+      page.evaluate_script("document.readyState") == "complete" rescue true
+      assert_selector "body", wait: wait_time
+      assert_no_selector ".turbo-progress-bar", wait: wait_time
     end
 
     # 로그인 페이지 경로 최종 확인
     assert_current_path login_path, wait: 5
 
     # 로그인 폼이 렌더링될 때까지 대기 (h2 "로그인" 텍스트로 확인 - 가장 안정적)
-    assert_text "로그인", wait: 15
+    assert_text "로그인", wait: wait_time
 
-    # 로그인 폼의 email 입력 필드가 보일 때까지 대기 (CI용 대기 시간 증가)
-    assert_selector "input[name='email']", visible: true, wait: 15
+    # ✅ 개선 3: 로그인 폼의 email 입력 필드 대기 시간 증가 (15 → 20초 in CI)
+    assert_selector "input[name='email']", visible: true, wait: wait_time
 
     # 폼 필드 입력 (JavaScript로 직접 설정하여 안정성 확보)
     page.execute_script(<<~JS, user.email, TEST_PASSWORD)

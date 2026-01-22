@@ -98,8 +98,14 @@ class OnboardingTest < ApplicationSystemTestCase
     # 가짜 ID로 결과 페이지 접근 시도
     visit ai_result_path(id: 999999)
 
-    # 로그인 페이지로 리다이렉트
-    assert_current_path login_path
+    # ✅ Turbo 로딩 완료 대기 (CI 환경에서 리다이렉트 체인 타이밍 이슈 방지)
+    assert_no_selector ".turbo-progress-bar", wait: 10
+
+    # 로그인 페이지로 리다이렉트 (명시적 wait 옵션 추가)
+    assert_current_path login_path, wait: 10
+
+    # 추가 검증: 로그인 페이지 콘텐츠 확인
+    assert_text "로그인", wait: 5
   end
 
   test "logged in user redirected for invalid analysis id" do

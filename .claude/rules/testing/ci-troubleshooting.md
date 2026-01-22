@@ -5,7 +5,7 @@ paths: test/system/**/*.rb, test/integration/**/*.rb
 # CI 트러블슈팅 가이드
 
 > **목적**: 반복되는 CI 실패 패턴과 해결책을 문서화하여 동일한 실수 방지
-> **최종 업데이트**: 2026-01-17
+> **최종 업데이트**: 2026-01-22
 
 ---
 
@@ -239,6 +239,47 @@ button.click
 
 ---
 
+## 7. 리다이렉트 체인 타이밍 (10% of failures)
+
+### 증상
+```
+Expected "/login" but actual path is "/ai/input"
+Expected "/settings" but actual path is "/community"
+```
+
+### 원인
+Turbo Drive의 비동기 리다이렉트가 완료되기 전에 `assert_current_path` 실행.
+특히 `require_login` 같은 before_action 필터에서 발생.
+
+### 잘못된 패턴
+```ruby
+# ❌ 금지: 리다이렉트 직후 바로 경로 확인
+visit some_protected_path
+assert_current_path login_path  # CI에서 실패!
+```
+
+### 올바른 패턴
+```ruby
+# ✅ 권장: Turbo 완료 대기 후 확인
+visit some_protected_path
+assert_no_selector ".turbo-progress-bar", wait: 10
+assert_current_path login_path, wait: 10
+
+# ✅ 추가 검증: 페이지 콘텐츠 확인
+assert_text "로그인", wait: 5
+
+# ✅ 헬퍼 사용 (system_test_helpers.rb)
+visit some_protected_path
+wait_for_turbo_redirect(login_path)
+```
+
+### 예방 규칙
+- **보호된 경로 테스트**: 항상 `assert_no_selector ".turbo-progress-bar"` 먼저
+- **wait 옵션**: CI 환경에서 최소 10초, 권장 20초
+- **콘텐츠 검증**: 경로만이 아니라 페이지 텍스트도 확인
+
+---
+
 ## Quick Reference: CI 실패 디버깅
 
 ### 1단계: 에러 메시지 확인
@@ -255,6 +296,7 @@ gh run view <run-id> --log-failed
 | `Unable to find option` | #4 Dropdown 경쟁 |
 | `Expected X but got Y` | #5 상태 오염 |
 | `not clickable` | #6 클릭 문제 |
+| `Expected "/path" but actual is` | #7 리다이렉트 타이밍 |
 
 ### 3단계: 로컬 재현
 ```bash
@@ -289,6 +331,8 @@ bin/rails test
 ☐ 드롭다운 옵션 표시 대기
 ☐ 숨겨진 요소는 JavaScript 클릭
 ☐ 적절한 sleep 대신 assert_selector/assert_text wait 사용
+☐ 보호된 경로 테스트 시 Turbo 로딩 완료 대기 (NEW)
+☐ assert_current_path에 wait: 옵션 사용 (NEW)
 ```
 
 ---
