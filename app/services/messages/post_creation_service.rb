@@ -24,22 +24,18 @@ module Messages
     end
 
     def call
+      # 1. 데이터 업데이트 (실패 시 예외 발생 - 정상 동작)
+      # 트랜잭션 내부: 반드시 성공해야 하는 핵심 데이터 업데이트
       ActiveRecord::Base.transaction do
         mark_sender_as_read
         increment_recipient_unread_count
       end
 
-      # 트랜잭션 외부에서 브로드캐스트 (ActionCable은 트랜잭션과 무관)
-      broadcast_message
-      notify_recipients unless @message.system_message?
-      resurrect_hidden_participants
-    rescue StandardError => e
-      # 데이터는 이미 커밋된 상태이므로, 브로드캐스트/알림 실패만 로깅
-      Rails.logger.error "[PostCreationService] #{e.class}: #{e.message}"
-      Rails.logger.error e.backtrace&.first(5)&.join("\n")
-      Sentry.capture_exception(e) if defined?(Sentry)
-      # 에러를 삼키지 않고 재발생 (호출자가 처리 가능하도록)
-      raise
+      # 2. 부수효과 (실패해도 에러 삼킴 - "best effort")
+      # 트랜잭션 외부: 실패해도 메시지는 이미 저장됨
+      safe_execute(:broadcast) { broadcast_message }
+      safe_execute(:notify) { notify_recipients } unless @message.system_message?
+      safe_execute(:resurrect) { resurrect_hidden_participants }
     end
 
     private
@@ -73,6 +69,18 @@ module Messages
     # 숨긴 참여자 복구
     def resurrect_hidden_participants
       Messages::ParticipantResurrector.call(@message)
+    end
+
+    # 부수효과 안전 실행 - 실패 시 로깅만 하고 계속 진행
+    # @param name [Symbol] 작업 식별자 (로깅용)
+    # @yield 실행할 부수효과 블록
+    def safe_execute(name)
+      yield
+    rescue StandardError => e
+      Rails.logger.error "[PostCreationService:#{name}] #{e.class}: #{e.message}"
+      Rails.logger.error e.backtrace&.first(3)&.join("\n")
+      Sentry.capture_exception(e, tags: { service: "post_creation", step: name.to_s }) if defined?(Sentry)
+      # 에러 삼킴 - 데이터는 이미 저장됨
     end
   end
 end
