@@ -240,6 +240,18 @@
         .animate-delay-400, .animate-delay-500 { opacity: 1 !important; }
       }
 
+      /* Chat Header Avatar - 모바일 40px, PC 48px */
+      .chat-header-avatar > div {
+        width: 40px !important;
+        height: 40px !important;
+      }
+      @media (min-width: 768px) {
+        .chat-header-avatar > div {
+          width: 48px !important;
+          height: 48px !important;
+        }
+      }
+
       /* Floating Animation - 로그인/회원가입 캐릭터 */
       @keyframes float {
         0%, 100% { transform: translateY(0); }
