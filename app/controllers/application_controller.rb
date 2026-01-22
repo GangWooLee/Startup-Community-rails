@@ -6,6 +6,14 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern, unless: -> { Rails.env.test? }
 
   # ==========================================================================
+  # Security
+  # ==========================================================================
+  # CSRF 보호 명시적 선언 (Rails 기본값이지만 보안 감사 도구 호환성 위해 명시)
+  # with: :exception - 토큰 불일치 시 ActionController::InvalidAuthenticityToken 발생
+  # ErrorHandling concern에서 해당 예외를 처리하여 사용자 친화적 에러 표시
+  protect_from_forgery with: :exception
+
+  # ==========================================================================
   # Concerns
   # ==========================================================================
   include ErrorHandling          # 404, CSRF 에러 핸들링

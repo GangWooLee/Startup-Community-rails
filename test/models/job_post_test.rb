@@ -120,6 +120,8 @@ class JobPostTest < ActiveSupport::TestCase
 
   test "by_category scope should filter by category" do
     development_jobs = JobPost.by_category(:development)
+    assert_not_empty development_jobs, "Fixture에 development 카테고리 JobPost 필요"
+
     development_jobs.each do |job|
       assert_equal "development", job.category
     end
