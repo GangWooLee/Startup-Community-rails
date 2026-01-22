@@ -28,6 +28,13 @@ Rails.application.routes.draw do
       resources :posts, only: [ :index, :create ] do
         resources :comments, only: [ :create ]
       end
+      # Hotwire Native 앱 전용 API
+      resources :devices, only: [ :create, :destroy ]
+
+      # 앱 세션 동기화 API
+      resource :auth, only: [ :create, :destroy ], controller: "auth" do
+        get :validate, on: :collection
+      end
     end
   end
 

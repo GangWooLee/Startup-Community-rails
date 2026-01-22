@@ -1,0 +1,68 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "TEAM_ID.com.undrewai.app"
+        ],
+        "components": [
+          {
+            "/": "/posts/*",
+            "comment": "게시글 상세"
+          },
+          {
+            "/": "/posts",
+            "comment": "커뮤니티 목록"
+          },
+          {
+            "/": "/chat_rooms/*",
+            "comment": "채팅방"
+          },
+          {
+            "/": "/users/*",
+            "comment": "사용자 프로필"
+          },
+          {
+            "/": "/job_posts/*",
+            "comment": "채용 공고"
+          },
+          {
+            "/": "/my_page",
+            "comment": "마이페이지"
+          },
+          {
+            "/": "/ai/result/*",
+            "comment": "AI 분석 결과"
+          },
+          {
+            "/": "/notifications",
+            "comment": "알림 목록"
+          },
+          {
+            "/": "/",
+            "exclude": true,
+            "comment": "홈은 제외 (앱 설치 유도 페이지)"
+          },
+          {
+            "/": "/login",
+            "exclude": true,
+            "comment": "로그인 페이지 제외"
+          },
+          {
+            "/": "/signup",
+            "exclude": true,
+            "comment": "회원가입 페이지 제외"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAM_ID.com.undrewai.app"
+    ]
+  },
+  "appclips": {
+    "apps": []
+  }
+}

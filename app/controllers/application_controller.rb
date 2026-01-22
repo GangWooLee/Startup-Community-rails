@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
   include SessionRedirect        # store_location, redirect_back_or
   include ProfileSetupRequired   # require_profile_setup
   include PendingAnalysis        # restore_pending_analysis, restore_pending_input_and_analyze
+  include TurboNativeNavigation  # recede_or_redirect_to, refresh_or_redirect_to
 
   # GA4 이벤트 추적 헬퍼
   include Ga4Helper

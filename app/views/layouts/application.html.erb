@@ -9,6 +9,12 @@
     <meta name="application-name" content="Undrew">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <%# Smart App Banner (iOS Safari에서 앱 설치 유도) %>
+    <%# APP_ID를 실제 App Store ID로 변경 필요 %>
+    <% unless hotwire_native_app? %>
+      <meta name="apple-itunes-app" content="app-id=APP_ID, app-argument=<%= request.path %>">
+    <% end %>
+
     <%# Open Graph 메타 태그 %>
     <%= content_for?(:og_meta) ? yield(:og_meta) : og_meta_tags %>
 

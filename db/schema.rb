@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_18_083737) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_22_022928) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -140,6 +140,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_083737) do
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "devices", force: :cascade do |t|
+    t.string "app_version"
+    t.datetime "created_at", null: false
+    t.string "device_name"
+    t.boolean "enabled", default: true, null: false
+    t.datetime "last_used_at"
+    t.string "platform", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["token"], name: "index_devices_on_token", unique: true
+    t.index ["user_id", "enabled"], name: "index_devices_on_user_id_and_enabled"
+    t.index ["user_id"], name: "index_devices_on_user_id"
   end
 
   create_table "email_verifications", force: :cascade do |t|
@@ -539,6 +554,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_083737) do
   add_foreign_key "comments", "comments", column: "parent_id", on_delete: :cascade
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
+  add_foreign_key "devices", "users"
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "idea_analyses", "users"

@@ -1,0 +1,49 @@
+# frozen_string_literal: true
+
+# User One의 iOS 디바이스
+ios_device:
+  user: one
+  platform: ios
+  token: fcm_token_ios_one_<%= SecureRandom.hex(16) %>
+  enabled: true
+  device_name: iPhone 15 Pro
+  app_version: "1.0.0"
+  last_used_at: <%= 1.hour.ago %>
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+# User One의 Android 디바이스 (비활성)
+android_device_disabled:
+  user: one
+  platform: android
+  token: fcm_token_android_disabled_<%= SecureRandom.hex(16) %>
+  enabled: false
+  device_name: Galaxy S24
+  app_version: "0.9.0"
+  last_used_at: <%= 60.days.ago %>
+  created_at: <%= 2.months.ago %>
+  updated_at: <%= 60.days.ago %>
+
+# User Two의 Android 디바이스
+android_device:
+  user: two
+  platform: android
+  token: fcm_token_android_two_<%= SecureRandom.hex(16) %>
+  enabled: true
+  device_name: Pixel 8
+  app_version: "1.0.0"
+  last_used_at: <%= 2.hours.ago %>
+  created_at: <%= 2.weeks.ago %>
+  updated_at: <%= 2.hours.ago %>
+
+# 오래된 디바이스 (recently_used 스코프 테스트용)
+old_device:
+  user: two
+  platform: ios
+  token: fcm_token_old_<%= SecureRandom.hex(16) %>
+  enabled: true
+  device_name: iPhone 12
+  app_version: "0.5.0"
+  last_used_at: <%= 60.days.ago %>
+  created_at: <%= 6.months.ago %>
+  updated_at: <%= 60.days.ago %>

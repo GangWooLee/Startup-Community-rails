@@ -1,0 +1,217 @@
+{
+  "settings": {
+    "screenshots_enabled": true,
+    "tabs": [
+      {
+        "title": "커뮤니티",
+        "path": "/posts",
+        "icon": "community"
+      },
+      {
+        "title": "채팅",
+        "path": "/chat_rooms",
+        "icon": "chat"
+      },
+      {
+        "title": "마이",
+        "path": "/my_page",
+        "icon": "profile"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "comment": "모달 - 생성/편집 폼",
+      "patterns": [
+        "/posts/new$",
+        "/posts/\\d+/edit$",
+        "/chat_rooms/new$",
+        "/inquiries/new$",
+        "/my_page/edit$"
+      ],
+      "properties": {
+        "presentation": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "comment": "상세 페이지 - push 네비게이션",
+      "patterns": [
+        "/posts/\\d+$",
+        "/profiles/\\d+$",
+        "/orders/\\d+$",
+        "/notifications/\\d+$",
+        "/inquiries/\\d+$"
+      ],
+      "properties": {
+        "presentation": "push",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "comment": "채팅방 - replace로 전환 (탭 바 유지)",
+      "patterns": [
+        "/chat_rooms/\\d+$"
+      ],
+      "properties": {
+        "presentation": "replace"
+      }
+    },
+    {
+      "comment": "채팅 목록 - 기본",
+      "patterns": [
+        "/chat_rooms$"
+      ],
+      "properties": {
+        "presentation": "default",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "comment": "검색 - 모달",
+      "patterns": [
+        "/search$"
+      ],
+      "properties": {
+        "presentation": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "comment": "알림 드롭다운",
+      "patterns": [
+        "/notifications/dropdown$"
+      ],
+      "properties": {
+        "presentation": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "comment": "인증 페이지 - 네비게이션 바 숨김",
+      "patterns": [
+        "/login$",
+        "/signup$",
+        "/sessions/new$",
+        "/password/.*"
+      ],
+      "properties": {
+        "navigation_bar_hidden": true
+      }
+    },
+    {
+      "comment": "온보딩 - 뒤로가기/네비게이션 바 숨김",
+      "patterns": [
+        "^/$",
+        "/ai/input$",
+        "/ai/questions$",
+        "/ai/analyze$",
+        "/ai/result/\\d+$"
+      ],
+      "properties": {
+        "back_button_hidden": true,
+        "navigation_bar_hidden": true
+      }
+    },
+    {
+      "comment": "프로필 설정 (회원가입 후)",
+      "patterns": [
+        "/welcome$"
+      ],
+      "properties": {
+        "back_button_hidden": true,
+        "navigation_bar_hidden": true
+      }
+    },
+    {
+      "comment": "OAuth 약관 동의",
+      "patterns": [
+        "/oauth/terms$"
+      ],
+      "properties": {
+        "back_button_hidden": true,
+        "navigation_bar_hidden": true
+      }
+    },
+    {
+      "comment": "계정 삭제 - 모달",
+      "patterns": [
+        "/account/delete$"
+      ],
+      "properties": {
+        "presentation": "modal"
+      }
+    },
+    {
+      "comment": "법적 페이지 - push",
+      "patterns": [
+        "/terms$",
+        "/privacy$",
+        "/refund$",
+        "/guidelines$",
+        "/about$"
+      ],
+      "properties": {
+        "presentation": "push",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "comment": "설정 페이지",
+      "patterns": [
+        "/settings$"
+      ],
+      "properties": {
+        "presentation": "push"
+      }
+    },
+    {
+      "comment": "주문/결제",
+      "patterns": [
+        "/orders$",
+        "/payments/.*"
+      ],
+      "properties": {
+        "presentation": "push"
+      }
+    },
+    {
+      "comment": "외주 마켓플레이스",
+      "patterns": [
+        "/job_posts$"
+      ],
+      "properties": {
+        "presentation": "default",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "comment": "관리자 페이지 - 네이티브 앱에서 접근 불가",
+      "patterns": [
+        "/admin.*"
+      ],
+      "properties": {
+        "presentation": "external"
+      }
+    },
+    {
+      "comment": "외부 링크 - 사파리에서 열기",
+      "patterns": [
+        "^https?://(?!undrewai\\.com).*"
+      ],
+      "properties": {
+        "presentation": "external"
+      }
+    },
+    {
+      "comment": "기본 규칙 - 모든 페이지",
+      "patterns": [
+        ".*"
+      ],
+      "properties": {
+        "presentation": "default",
+        "pull_to_refresh_enabled": true
+      }
+    }
+  ]
+}
