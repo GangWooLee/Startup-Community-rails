@@ -21,6 +21,9 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
 
+    // 모바일 Haptic 피드백
+    this.triggerHapticFeedback()
+
     try {
       const response = await fetch(this.urlValue, {
         method: "POST",
@@ -38,9 +41,31 @@ export default class extends Controller {
         this.bookmarkedValue = data.bookmarked
         this.updateUI()
         animateIcon(this.iconTarget, 150)
+
+        // 북마크 추가 시 강한 Haptic 피드백
+        if (data.bookmarked) {
+          this.triggerHapticFeedback("medium")
+        }
       }
     } catch (error) {
       console.error("Bookmark toggle failed:", error)
+    }
+  }
+
+  // Haptic 피드백 (모바일 진동)
+  triggerHapticFeedback(intensity = "light") {
+    if (!navigator.vibrate) return
+
+    switch (intensity) {
+      case "light":
+        navigator.vibrate(10)
+        break
+      case "medium":
+        navigator.vibrate(20)
+        break
+      case "heavy":
+        navigator.vibrate([30, 10, 30])
+        break
     }
   }
 

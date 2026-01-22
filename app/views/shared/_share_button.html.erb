@@ -4,7 +4,8 @@
 <%# image_url: 카카오톡 공유 시 표시될 이미지 (없으면 og:image 또는 기본 아이콘 사용) %>
 
 <% size ||= "default" %>
-<% button_class = size == "sm" ? "h-9 rounded-md px-3" : "px-4 py-2 rounded-md" %>
+<%# 44px 터치 타겟 보장 (min-h-11 = 2.75rem = 44px) %>
+<% button_class = size == "sm" ? "min-h-11 min-w-11 rounded-md px-3" : "min-h-11 min-w-11 px-4 py-2 rounded-md" %>
 <% icon_class = size == "sm" ? "h-4 w-4" : "h-5 w-5" %>
 
 <div data-controller="share"

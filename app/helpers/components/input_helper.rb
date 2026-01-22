@@ -9,6 +9,16 @@ module Components::InputHelper
     end
     options[:class] = tw(options[:class])
 
+    # inputmode 자동 설정 (type에 따라)
+    default_inputmode = case type.to_sym
+    when :email then "email"
+    when :tel then "tel"
+    when :number then "numeric"
+    when :url then "url"
+    when :search then "search"
+    else nil
+    end
+
     options.reverse_merge!(
       label: (options[:label] || false),
       required: (options[:required] || false),
@@ -18,7 +28,8 @@ module Components::InputHelper
       autocomplete: (options[:autocomplete] || ""),
       autocapitalize: (options[:autocapitalize] || nil),
       autocorrect: (options[:autocorrect] || nil),
-      autofocus: (options[:autofocus] || nil)
+      autofocus: (options[:autofocus] || nil),
+      inputmode: (options[:inputmode] || default_inputmode)  # 모바일 키보드 최적화
     )
     render partial: "components/ui/input", locals: {
       type:,

@@ -1,0 +1,135 @@
+
+[36m═════════════════════════════════════════════════════════════════[0m
+[1m  CODE REVIEW REPORT - Startup Community Rails[0m
+[36m  Date: 2026-01-22 10:43:11[0m
+[36m═════════════════════════════════════════════════════════════════[0m
+
+[36m🔍 Deep Review Mode[0m
+
+[36m📋 Standard Review Mode[0m
+
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Database Layer[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Migration status... [32mOK[0m
+  Checking: Schema consistency... [33mISSUE[0m
+  Checking: Missing indexes on foreign keys... [32mOK[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Model Layer[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Model associations... [33mISSUE[0m
+  Checking: Model validations... [36mISSUE[0m
+  Checking: Callback complexity... [32mOK[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Controller Layer[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Strong parameters... [31mISSUE[0m
+  Checking: Authentication filters... [33mISSUE[0m
+  Checking: N+1 query patterns... [33mISSUE[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Security[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Basic security scan... [32mOK[0m
+  Checking: CSRF protection... [32mOK[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Tests[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Test suite... [32mOK[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Code Quality[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Code complexity... [36mISSUE[0m
+  Checking: Unused code detection... [32mOK[0m
+  Checking: Magic numbers/strings... [36mISSUE[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Performance (Deep)[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Eager loading usage... [32mOK[0m
+  Checking: Query optimization patterns... [32mOK[0m
+  Checking: Caching usage... [34mISSUE[0m
+
+[34m════════════════════════════════════════════════════════════[0m
+[1m  Architecture[0m
+[34m════════════════════════════════════════════════════════════[0m
+
+  Checking: Route consistency... [32mOK[0m
+  Checking: View-Controller mapping... [34mISSUE[0m
+  Checking: JavaScript controllers... [32mOK[0m
+
+[36m═════════════════════════════════════════════════════════════════[0m
+[1m  SUMMARY[0m
+[36m═════════════════════════════════════════════════════════════════[0m
+
+  Total Issues: 10
+  [31mCritical[0m: 0 | [31mHigh[0m: 1 | [33mMedium[0m: 4 | [36mLow[0m: 3 | Info: 2
+  Passed Checks: 11
+  Duration: 26.96s
+
+[31m🟠 HIGH PRIORITY[0m
+[31m─────────────────────────────────────────────────────────────────[0m
+  1. [Controller] Missing strong params in: chat_rooms_controller, email_verifications_controller, omniauth_callbacks_controller, payments_controller, sessions_controller, test_controller, user_deletions_controller
+     [36mFix:[0m Add private *_params method with permit
+
+[33m🟡 MEDIUM PRIORITY[0m
+[33m─────────────────────────────────────────────────────────────────[0m
+  1. [Database] schema.rb may be outdated
+     [36mFix:[0m Run: rails db:schema:dump
+
+  2. [Model] ChatRoom has_many :participants without dependent option
+     [36mFix:[0m Add dependent: :destroy or :nullify to has_many associations
+
+  3. [Controller] Controllers without auth: job_posts_controller, oauth_controller, profiles_controller
+     [36mFix:[0m Add before_action :require_login
+
+  4. [Performance] Potential N+1 in: oauth_controller, oauth_terms_controller, omniauth_callbacks_controller, search_controller, users_controller
+     [36mFix:[0m Use .includes(:association) for eager loading
+
+[36m🔵 LOW PRIORITY[0m
+[36m─────────────────────────────────────────────────────────────────[0m
+  1. [Model] Models without validations: ai_usage_log, chat_room
+     [36mFix:[0m Consider adding validations for data integrity
+
+  2. [Quality] Large files: ai_usages_controller.rb (250 lines), users_controller.rb (275 lines), posts_controller.rb (220 lines)
+     [36mFix:[0m Consider splitting into smaller modules
+
+  3. [Quality] Potential magic numbers in: bookmarks_controller.rb, chat_rooms_controller.rb, email_verifications_controller.rb
+     [36mFix:[0m Extract to constants or configuration
+
+[34mℹ️ INFO PRIORITY[0m
+[34m─────────────────────────────────────────────────────────────────[0m
+  1. [Performance] No fragment caching found
+     [36mFix:[0m Consider adding cache blocks for expensive views
+
+  2. [Architecture] Controllers without views: bookmarks, email_verifications, follows, likes, omniauth_callbacks, test
+     [36mFix:[0m May be intentional for API/redirect controllers
+
+[32m✅ PASSED CHECKS[0m
+[32m─────────────────────────────────────────────────────────────────[0m
+  • All migrations applied
+  • All foreign keys have indexes
+  • Callback complexity is acceptable
+  • Brakeman: No warnings
+  • CSRF protection enabled (Rails default)
+  • All tests passing (2072 runs, 5404 assertions)
+  • Manual review recommended
+  • 19 eager loading calls found
+  • 11 query optimizations found
+  • Routes are RESTful (25 resources)
+  • 63 Stimulus controllers found
+
+[33m⚠️  High priority issues found - Please review[0m
+

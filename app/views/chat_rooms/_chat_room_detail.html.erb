@@ -8,8 +8,8 @@
 
   <!-- 헤더: h-20 확장, Organic Modern Style -->
   <header class="flex items-center gap-4 px-6 h-20 border-b border-stone-100 bg-white sticky top-0 z-20">
-    <!-- 뒤로가기 (모바일에서만) - Turbo Frame 탈출 -->
-    <%= link_to chat_rooms_path, class: "md:hidden text-stone-500 hover:text-stone-700 flex-shrink-0 -ml-2 p-2 rounded-full hover:bg-stone-100 transition-colors", data: { turbo_frame: "_top" } do %>
+    <!-- 뒤로가기 (모바일에서만) - Turbo Frame 탈출 - 44px 터치 타겟 보장 -->
+    <%= link_to chat_rooms_path, class: "md:hidden text-stone-500 hover:text-stone-700 flex-shrink-0 -ml-2 min-h-11 min-w-11 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors", data: { turbo_frame: "_top" } do %>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>

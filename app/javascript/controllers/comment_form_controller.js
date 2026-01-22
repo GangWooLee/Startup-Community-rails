@@ -8,6 +8,45 @@ export default class extends Controller {
     this.isSubmitting = false
     this.updateCounter()
     this.updateSubmitState()
+
+    // 모바일 터치 이벤트: 스와이프로 폼 초기화
+    this.touchStartX = 0
+    this.touchStartY = 0
+    this.boundTouchStart = this.handleTouchStart.bind(this)
+    this.boundTouchEnd = this.handleTouchEnd.bind(this)
+
+    this.element.addEventListener("touchstart", this.boundTouchStart, { passive: true })
+    this.element.addEventListener("touchend", this.boundTouchEnd)
+  }
+
+  disconnect() {
+    this.element.removeEventListener("touchstart", this.boundTouchStart)
+    this.element.removeEventListener("touchend", this.boundTouchEnd)
+  }
+
+  // 터치 시작 위치 기록
+  handleTouchStart(event) {
+    this.touchStartX = event.touches[0].clientX
+    this.touchStartY = event.touches[0].clientY
+  }
+
+  // 터치 종료: 오른쪽 스와이프로 폼 초기화 (대댓글 폼 닫기)
+  handleTouchEnd(event) {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX
+    const deltaY = event.changedTouches[0].clientY - this.touchStartY
+
+    // 가로 스와이프가 세로보다 크고, 오른쪽으로 80px 이상 스와이프
+    if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 80) {
+      // 대댓글 폼이면 닫기
+      const formContainer = this.element.closest('[data-reply-toggle-target="form"]')
+      if (formContainer) {
+        formContainer.classList.add("hidden")
+        // Haptic 피드백
+        if (navigator.vibrate) {
+          navigator.vibrate(10)
+        }
+      }
+    }
   }
 
   input() {

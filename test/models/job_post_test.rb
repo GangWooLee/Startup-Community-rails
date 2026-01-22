@@ -119,7 +119,36 @@ class JobPostTest < ActiveSupport::TestCase
   end
 
   test "by_category scope should filter by category" do
+    # 테스트용 데이터 명시적 생성 (fixture 의존성 제거)
+    dev_job = JobPost.create!(
+      user: @user,
+      title: "개발자 채용",
+      description: "설명",
+      category: :development,
+      project_type: :short_term,
+      status: :open
+    )
+    design_job = JobPost.create!(
+      user: @user,
+      title: "디자이너 채용",
+      description: "설명",
+      category: :design,
+      project_type: :short_term,
+      status: :open
+    )
+
     development_jobs = JobPost.by_category(:development)
+
+    # 결과가 비어있지 않음을 확인 (테스트 의미 보장)
+    assert_not_empty development_jobs, "by_category(:development) should return results"
+
+    # 생성한 개발 공고가 포함되어야 함
+    assert_includes development_jobs, dev_job
+
+    # 디자인 공고는 포함되지 않아야 함
+    assert_not_includes development_jobs, design_job
+
+    # 모든 결과가 development 카테고리인지 확인
     development_jobs.each do |job|
       assert_equal "development", job.category
     end

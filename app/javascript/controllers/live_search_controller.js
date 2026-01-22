@@ -16,11 +16,35 @@ export default class extends Controller {
   connect() {
     this.abortController = null
     this.debounceTimer = null
+
+    // 모바일 터치 이벤트: 결과 영역 스크롤 개선
+    this.boundHandleTouchMove = this.handleTouchMove.bind(this)
+    if (this.hasResultsTarget) {
+      this.resultsTarget.addEventListener("touchmove", this.boundHandleTouchMove, { passive: true })
+    }
   }
 
   disconnect() {
     this.cancelPendingRequest()
     this.clearDebounce()
+
+    if (this.hasResultsTarget) {
+      this.resultsTarget.removeEventListener("touchmove", this.boundHandleTouchMove)
+    }
+  }
+
+  // 터치 이동: 검색 결과 스크롤 시 부드러운 처리
+  handleTouchMove(event) {
+    // 검색 결과 영역 내 스크롤 시 상위로 전파 방지 (모달 내에서 사용될 때)
+    const target = event.currentTarget
+    const isScrollable = target.scrollHeight > target.clientHeight
+    const isAtTop = target.scrollTop === 0
+    const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight
+
+    // 스크롤 가능한 영역이고 경계에 있지 않으면 전파 중단
+    if (isScrollable && !isAtTop && !isAtBottom) {
+      event.stopPropagation()
+    }
   }
 
   // 현재 탭에 해당하는 페이지 값 가져오기

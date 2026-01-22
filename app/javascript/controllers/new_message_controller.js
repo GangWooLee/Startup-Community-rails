@@ -468,9 +468,18 @@ export default class extends Controller {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
       if (!this.submitButtonTarget.disabled) {
-        this.formTarget.requestSubmit()
+        this.submitWithHaptic()
       }
     }
+  }
+
+  // 터치/클릭 시 Haptic 피드백과 함께 제출
+  submitWithHaptic() {
+    // Haptic 피드백 (모바일)
+    if (navigator.vibrate) {
+      navigator.vibrate(10)
+    }
+    this.formTarget.requestSubmit()
   }
 
   sendMessage(event) {

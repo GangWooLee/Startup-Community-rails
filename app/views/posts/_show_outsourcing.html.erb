@@ -12,7 +12,8 @@
   <header class="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-stone-200/60 z-40">
     <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3">
       <%# Drawbridge Task #122: 계층형 고정 링크 방식 - 항상 목록 페이지로 이동 %>
-      <%= link_to job_posts_path, class: "p-2 rounded-lg text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-colors" do %>
+      <%# 44px 터치 타겟 보장 %>
+      <%= link_to job_posts_path, class: "min-h-11 min-w-11 flex items-center justify-center rounded-lg text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-colors" do %>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>

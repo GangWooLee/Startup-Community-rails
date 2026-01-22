@@ -15,11 +15,99 @@ export default class extends Controller {
     // Turbo Stream으로 DOM 변경 시 자동 정렬
     this.boundHandleBeforeStreamRender = this.handleBeforeStreamRender.bind(this)
     document.addEventListener("turbo:before-stream-render", this.boundHandleBeforeStreamRender)
+
+    // 모바일 터치: 스와이프로 채팅방 액션 표시
+    this.touchStartX = 0
+    this.touchStartY = 0
+    this.currentSwipedItem = null
+    this.boundTouchStart = this.handleTouchStart.bind(this)
+    this.boundTouchMove = this.handleTouchMove.bind(this)
+    this.boundTouchEnd = this.handleTouchEnd.bind(this)
+
+    this.element.addEventListener("touchstart", this.boundTouchStart, { passive: true })
+    this.element.addEventListener("touchmove", this.boundTouchMove, { passive: false })
+    this.element.addEventListener("touchend", this.boundTouchEnd)
   }
 
   disconnect() {
     document.removeEventListener("turbo:frame-load", this.boundHandleFrameLoad)
     document.removeEventListener("turbo:before-stream-render", this.boundHandleBeforeStreamRender)
+    this.element.removeEventListener("touchstart", this.boundTouchStart)
+    this.element.removeEventListener("touchmove", this.boundTouchMove)
+    this.element.removeEventListener("touchend", this.boundTouchEnd)
+  }
+
+  // 터치 시작
+  handleTouchStart(event) {
+    const chatItem = event.target.closest(".chat-room-item")
+    if (!chatItem) return
+
+    // 기존에 열린 다른 아이템이 있으면 먼저 닫기 (중복 열림 방지)
+    const openedItem = this.element.querySelector('.chat-room-item[style*="translateX"]')
+    if (openedItem && openedItem !== chatItem) {
+      openedItem.style.transform = ""
+      openedItem.style.transition = "transform 0.2s ease-out"
+    }
+
+    this.touchStartX = event.touches[0].clientX
+    this.touchStartY = event.touches[0].clientY
+    this.currentSwipedItem = chatItem
+  }
+
+  // 터치 이동 - 좌우 스와이프 시 아이템 이동
+  handleTouchMove(event) {
+    if (!this.currentSwipedItem) return
+
+    const deltaX = event.touches[0].clientX - this.touchStartX
+    const deltaY = event.touches[0].clientY - this.touchStartY
+
+    // 세로 스크롤이면 스와이프 취소
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      this.resetSwipe()
+      return
+    }
+
+    // 가로 스와이프 (왼쪽만 허용, 최대 80px)
+    if (deltaX < 0) {
+      event.preventDefault()  // 가로 스와이프 중 스크롤 방지
+      const translateX = Math.max(deltaX, -80)
+      this.currentSwipedItem.style.transform = `translateX(${translateX}px)`
+      this.currentSwipedItem.style.transition = "none"
+    }
+  }
+
+  // 터치 종료 - 스와이프 임계값 체크
+  handleTouchEnd(event) {
+    if (!this.currentSwipedItem) return
+
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX
+
+    // 왼쪽으로 50px 이상 스와이프 시 액션 영역 노출 유지
+    if (deltaX < -50) {
+      this.currentSwipedItem.style.transform = "translateX(-80px)"
+      this.currentSwipedItem.style.transition = "transform 0.2s ease-out"
+
+      // 다른 곳 터치 시 닫기
+      const closeHandler = (e) => {
+        if (!this.currentSwipedItem?.contains(e.target)) {
+          this.resetSwipe()
+          document.removeEventListener("touchstart", closeHandler)
+        }
+      }
+      document.addEventListener("touchstart", closeHandler, { once: true })
+    } else {
+      this.resetSwipe()
+    }
+
+    this.currentSwipedItem = null
+  }
+
+  // 스와이프 초기화
+  resetSwipe() {
+    if (this.currentSwipedItem) {
+      this.currentSwipedItem.style.transform = ""
+      this.currentSwipedItem.style.transition = "transform 0.2s ease-out"
+    }
   }
 
   // Turbo Stream 렌더링 전에 처리

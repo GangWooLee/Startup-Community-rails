@@ -9,15 +9,98 @@ import { Controller } from "@hotwired/stimulus"
 // 모달 내부에서 닫기:
 //   <button data-action="modal#close">닫기</button>
 //
+// 모바일: 아래로 스와이프하여 닫기 지원
+//
 export default class extends Controller {
   static targets = ["backdrop", "card"]
   static values = {
-    closable: { type: Boolean, default: true }
+    closable: { type: Boolean, default: true },
+    swipeThreshold: { type: Number, default: 100 }  // 스와이프 닫기 임계값 (px)
   }
 
   connect() {
     // 초기 상태 설정
     this.isOpen = !this.element.classList.contains("hidden")
+
+    // 터치 이벤트 바인딩 (모바일 스와이프 닫기)
+    this.boundTouchStart = this.handleTouchStart.bind(this)
+    this.boundTouchMove = this.handleTouchMove.bind(this)
+    this.boundTouchEnd = this.handleTouchEnd.bind(this)
+
+    // 터치 상태 초기화
+    this.touchStartY = 0
+    this.touchCurrentY = 0
+    this.isDragging = false
+  }
+
+  disconnect() {
+    // 터치 리스너 정리
+    if (this.hasCardTarget) {
+      this.cardTarget.removeEventListener("touchstart", this.boundTouchStart)
+      this.cardTarget.removeEventListener("touchmove", this.boundTouchMove)
+      this.cardTarget.removeEventListener("touchend", this.boundTouchEnd)
+    }
+  }
+
+  // 터치 시작
+  handleTouchStart(event) {
+    if (!this.closableValue) return
+
+    this.touchStartY = event.touches[0].clientY
+    this.touchCurrentY = this.touchStartY
+    this.isDragging = true
+
+    // 드래그 중 transition 비활성화
+    if (this.hasCardTarget) {
+      this.cardTarget.style.transition = "none"
+    }
+  }
+
+  // 터치 이동 - 모달 카드 따라 이동
+  handleTouchMove(event) {
+    if (!this.isDragging || !this.closableValue) return
+
+    this.touchCurrentY = event.touches[0].clientY
+    const deltaY = this.touchCurrentY - this.touchStartY
+
+    // 아래로만 드래그 허용 (위로는 제한)
+    if (deltaY > 0 && this.hasCardTarget) {
+      // 드래그 거리에 따라 모달 이동 (저항감 적용)
+      const translateY = deltaY * 0.5
+      this.cardTarget.style.transform = `translateY(${translateY}px)`
+
+      // 배경 투명도 조절
+      if (this.hasBackdropTarget) {
+        const opacity = Math.max(0, 1 - (deltaY / 300))
+        this.backdropTarget.style.opacity = opacity
+      }
+    }
+  }
+
+  // 터치 종료 - 임계값 초과 시 닫기
+  handleTouchEnd(event) {
+    if (!this.isDragging || !this.closableValue) return
+
+    const deltaY = this.touchCurrentY - this.touchStartY
+    this.isDragging = false
+
+    // transition 복원
+    if (this.hasCardTarget) {
+      this.cardTarget.style.transition = ""
+    }
+
+    // 임계값 초과 시 닫기
+    if (deltaY > this.swipeThresholdValue) {
+      this.close()
+    } else {
+      // 원위치로 복원
+      if (this.hasCardTarget) {
+        this.cardTarget.style.transform = ""
+      }
+      if (this.hasBackdropTarget) {
+        this.backdropTarget.style.opacity = ""
+      }
+    }
   }
 
   open(event) {
@@ -39,11 +122,23 @@ export default class extends Controller {
     // 카드 애니메이션
     if (this.hasCardTarget) {
       this.cardTarget.classList.add("animate-modal-in")
+
+      // 모바일 터치 리스너 등록 (스와이프 닫기)
+      this.cardTarget.addEventListener("touchstart", this.boundTouchStart, { passive: true })
+      this.cardTarget.addEventListener("touchmove", this.boundTouchMove, { passive: true })
+      this.cardTarget.addEventListener("touchend", this.boundTouchEnd)
     }
   }
 
   close() {
     if (!this.closableValue) return
+
+    // 터치 리스너 제거 (누적 방지)
+    if (this.hasCardTarget) {
+      this.cardTarget.removeEventListener("touchstart", this.boundTouchStart)
+      this.cardTarget.removeEventListener("touchmove", this.boundTouchMove)
+      this.cardTarget.removeEventListener("touchend", this.boundTouchEnd)
+    }
 
     // 페이드 아웃 애니메이션
     if (this.hasBackdropTarget) {

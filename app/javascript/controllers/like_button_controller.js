@@ -21,6 +21,9 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
 
+    // 모바일 Haptic 피드백 (터치 시 진동)
+    this.triggerHapticFeedback()
+
     try {
       const response = await fetch(this.urlValue, {
         method: "POST",
@@ -39,9 +42,31 @@ export default class extends Controller {
         this.updateCount(data.likes_count)
         this.updateUI()
         animateIcon(this.iconTarget, 150)
+
+        // 좋아요 시 추가 Haptic 피드백
+        if (data.liked) {
+          this.triggerHapticFeedback("medium")
+        }
       }
     } catch (error) {
       console.error("Like toggle failed:", error)
+    }
+  }
+
+  // Haptic 피드백 (모바일 진동)
+  triggerHapticFeedback(intensity = "light") {
+    if (!navigator.vibrate) return
+
+    switch (intensity) {
+      case "light":
+        navigator.vibrate(10)
+        break
+      case "medium":
+        navigator.vibrate(20)
+        break
+      case "heavy":
+        navigator.vibrate([30, 10, 30])
+        break
     }
   }
 

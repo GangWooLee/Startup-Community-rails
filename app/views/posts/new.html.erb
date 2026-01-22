@@ -2,7 +2,8 @@
   <!-- Header -->
   <header class="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
-<%= render_button variant: :ghost, class: "h-9 w-9 p-0", data: { controller: "navigation", navigation_fallback_value: root_path, action: "click->navigation#goBack" } do %>
+<%# 44px 터치 타겟 보장 %>
+<%= render_button variant: :ghost, class: "min-h-11 min-w-11 p-0", data: { controller: "navigation", navigation_fallback_value: root_path, action: "click->navigation#goBack" } do %>
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
@@ -178,6 +179,7 @@
                   <%= f.number_field :price,
                       placeholder: "0",
                       min: 0,
+                      inputmode: "numeric",
                       class: "w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
                 </div>
                 <label class="flex items-center gap-2 whitespace-nowrap cursor-pointer">
@@ -205,6 +207,7 @@
               <%= f.label :portfolio_url, "포트폴리오 링크", class: "block text-sm text-muted-foreground mb-2" %>
               <%= f.url_field :portfolio_url,
                   placeholder: "https://your-portfolio.com",
+                  inputmode: "url",
                   class: "w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" %>
             </div>
 

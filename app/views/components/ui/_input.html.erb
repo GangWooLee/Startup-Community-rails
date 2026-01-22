@@ -1,4 +1,4 @@
-
+<%# Input component with mobile keyboard optimization (inputmode) %>
 <%= text_field_tag name, value, type: type, id: id,
               class: options[:class],
               placeholder: options[:placeholder],
@@ -8,4 +8,5 @@
               disabled: options[:disabled],
               required: options[:required],
               readonly: options[:readonly],
+              inputmode: options[:inputmode],
               data: options[:data] %>

@@ -1,0 +1,4 @@
+🔍 Database Health Check
+==================================================
+
+[1/6] Checking pending migrations...

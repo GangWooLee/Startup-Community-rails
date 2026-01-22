@@ -27,10 +27,13 @@
             <%# 트래픽 라이트 %>
             <div class="flex gap-2">
               <% if closable %>
+                <%# 44px 터치 타겟 보장: min-h-11 min-w-11 + 내부 요소는 w-3 h-3 유지 %>
                 <button type="button"
-                        class="w-3 h-3 rounded-full bg-red-500 border border-red-600/30 btn-hover"
+                        class="min-h-11 min-w-11 -ml-4 -my-3 flex items-center justify-center"
                         data-action="click->modal#close"
-                        title="닫기"></button>
+                        title="닫기">
+                  <span class="w-3 h-3 rounded-full bg-red-500 border border-red-600/30 btn-hover"></span>
+                </button>
               <% else %>
                 <div class="w-3 h-3 rounded-full bg-red-500/50 border border-red-600/20"></div>
               <% end %>
@@ -47,10 +50,10 @@
               </div>
             <% end %>
 
-            <%# 닫기 버튼 %>
+            <%# 닫기 버튼 (44px 터치 타겟 보장) %>
             <% if closable %>
               <button type="button"
-                      class="p-1.5 rounded-lg btn-hover"
+                      class="min-h-11 min-w-11 -mr-2 flex items-center justify-center rounded-lg btn-hover"
                       data-action="click->modal#close">
                 <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

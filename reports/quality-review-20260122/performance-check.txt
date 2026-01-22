@@ -1,0 +1,17 @@
+⚡ Performance Check
+==================================================
+
+[1/5] Checking N+1 query detection...
+  ✓ Bullet gem installed
+  ✓ Bullet is configured
+
+[2/5] Checking for missing indexes...
+  ✓ All foreign keys have indexes
+
+[3/5] Checking counter cache usage...
+  ✓ Post has comments_count counter cache
+  ✓ Post has likes_count counter cache
+  💡 Consider adding counter caches:
+     - Add posts_count to users table
+
+[4/5] Checking caching configuration...

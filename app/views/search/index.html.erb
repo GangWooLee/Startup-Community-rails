@@ -12,7 +12,8 @@
     <div class="max-w-screen-xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
         <!-- 뒤로가기 -->
-        <%= render_button variant: :ghost, class: "h-9 w-9 p-0 -ml-2", data: { controller: "navigation", navigation_fallback_value: root_path, action: "click->navigation#goBack" } do %>
+        <%# 44px 터치 타겟 보장 %>
+        <%= render_button variant: :ghost, class: "min-h-11 min-w-11 p-0 -ml-2", data: { controller: "navigation", navigation_fallback_value: root_path, action: "click->navigation#goBack" } do %>
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -34,6 +35,8 @@
               placeholder="사용자, 게시글 검색..."
               autofocus
               autocomplete="off"
+              inputmode="search"
+              enterkeyhint="search"
               class="w-full pl-10 pr-10 py-2.5 rounded-full bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
               data-live-search-target="input"
               data-action="input->live-search#search"

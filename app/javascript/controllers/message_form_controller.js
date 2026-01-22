@@ -15,11 +15,45 @@ export default class extends Controller {
     // Page Visibility API: 탭 재활성화 시 상태 복구
     this.boundHandleVisibilityChange = this.handleVisibilityChange.bind(this)
     document.addEventListener("visibilitychange", this.boundHandleVisibilityChange)
+
+    // 모바일 터치 이벤트: 스와이프 제스처 지원
+    this.touchStartX = 0
+    this.touchStartY = 0
+    this.boundTouchStart = this.handleTouchStart.bind(this)
+    this.boundTouchEnd = this.handleTouchEnd.bind(this)
+    this.element.addEventListener("touchstart", this.boundTouchStart, { passive: true })
+    this.element.addEventListener("touchend", this.boundTouchEnd)
   }
 
   disconnect() {
     this.element.removeEventListener("paste", this.boundHandlePaste)
     document.removeEventListener("visibilitychange", this.boundHandleVisibilityChange)
+    this.element.removeEventListener("touchstart", this.boundTouchStart)
+    this.element.removeEventListener("touchend", this.boundTouchEnd)
+  }
+
+  // 터치 시작 위치 기록
+  handleTouchStart(event) {
+    this.touchStartX = event.touches[0].clientX
+    this.touchStartY = event.touches[0].clientY
+  }
+
+  // 터치 종료: 왼쪽 스와이프로 입력 초기화
+  handleTouchEnd(event) {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX
+    const deltaY = event.changedTouches[0].clientY - this.touchStartY
+
+    // 가로 스와이프가 세로보다 크고, 왼쪽으로 80px 이상 스와이프
+    if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX < -80) {
+      // 왼쪽 스와이프: 이미지 첨부 제거 (첨부된 경우)
+      if (this.selectedFile) {
+        this.removeImage()
+        // Haptic 피드백 (지원되는 경우)
+        if (navigator.vibrate) {
+          navigator.vibrate(10)
+        }
+      }
+    }
   }
 
   // 탭 가시성 변경 시 호출 (탭 복귀 시 상태 복구)
