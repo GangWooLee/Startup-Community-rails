@@ -16,6 +16,10 @@
 module Api
   module V1
     class DevicesController < ApplicationController
+      # API 공통 Concern
+      include Api::Authenticatable
+      include Api::JsonResponse
+
       # API 전용 설정
       skip_before_action :verify_authenticity_token
       before_action :require_login
@@ -73,25 +77,8 @@ module Api
         }
       end
 
-      # Hotwire Native 앱에서만 접근 가능
-      def require_hotwire_native_app
-        return if hotwire_native_app?
-
-        render json: {
-          success: false,
-          message: "This API is only available for native apps"
-        }, status: :forbidden
-      end
-
-      # 로그인 필수 (세션 기반)
-      def require_login
-        return if logged_in?
-
-        render json: {
-          success: false,
-          message: "Authentication required"
-        }, status: :unauthorized
-      end
+      # require_hotwire_native_app - Api::Authenticatable concern에서 제공
+      # require_login - Api::Authenticatable concern에서 제공
     end
   end
 end

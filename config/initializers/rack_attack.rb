@@ -141,6 +141,36 @@ class Rack::Attack
     end
   end
 
+  # ==========================================================================
+  # API Rate Limiting (Hotwire Native App)
+  # ==========================================================================
+
+  # API 전체 요청 제한: IP당 100회/분
+  throttle("api/ip", limit: 100, period: 1.minute) do |req|
+    req.ip if req.path.start_with?("/api/")
+  end
+
+  # API 토큰 발급 제한: IP당 10회/시간 (무차별 대입 방지)
+  throttle("api/auth/token/ip", limit: 10, period: 1.hour) do |req|
+    if req.path == "/api/v1/auth/token" && req.post?
+      req.ip
+    end
+  end
+
+  # API 토큰 검증 제한: IP당 60회/분 (앱 시작 시 자주 호출)
+  throttle("api/auth/validate/ip", limit: 60, period: 1.minute) do |req|
+    if req.path == "/api/v1/auth/validate" && req.get?
+      req.ip
+    end
+  end
+
+  # 디바이스 등록 제한: IP당 20회/시간
+  throttle("api/devices/ip", limit: 20, period: 1.hour) do |req|
+    if req.path == "/api/v1/devices" && req.post?
+      req.ip
+    end
+  end
+
   ### Blocklist ###
 
   # Block suspicious requests (SQL injection attempts, etc.)

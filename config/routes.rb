@@ -29,7 +29,11 @@ Rails.application.routes.draw do
         resources :comments, only: [ :create ]
       end
       # Hotwire Native 앱 전용 API
-      resources :devices, only: [ :create, :destroy ]
+      resources :devices, only: [ :create ] do
+        collection do
+          delete :destroy  # DELETE /api/v1/devices (token in body)
+        end
+      end
 
       # 앱 세션 동기화 API
       resource :auth, only: [ :create, :destroy ], controller: "auth" do

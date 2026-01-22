@@ -50,6 +50,22 @@ class DeviceTest < ActiveSupport::TestCase
     assert_includes duplicate.errors[:token], "has already been taken"
   end
 
+  test "should validate token length" do
+    # 너무 짧은 토큰
+    @device.token = "short_token"
+    assert_not @device.valid?
+    assert @device.errors[:token].any? { |e| e.include?("too short") }
+
+    # 유효한 길이 토큰
+    @device.token = "fcm_valid_token_#{SecureRandom.hex(24)}"
+    assert @device.valid?
+
+    # 너무 긴 토큰 (1024자 초과)
+    @device.token = "a" * 1025
+    assert_not @device.valid?
+    assert @device.errors[:token].any? { |e| e.include?("too long") }
+  end
+
   # ==========================================================================
   # Associations
   # ==========================================================================
@@ -100,7 +116,8 @@ class DeviceTest < ActiveSupport::TestCase
   # ==========================================================================
 
   test "register creates new device with valid params" do
-    new_token = "new_token_#{SecureRandom.hex(8)}"
+    # FCM 토큰은 최소 50자 이상이어야 함
+    new_token = "fcm_new_token_#{SecureRandom.hex(24)}"
 
     device = Device.register(
       user: @user,
@@ -208,7 +225,7 @@ class DeviceTest < ActiveSupport::TestCase
     device = Device.create!(
       user: user,
       platform: "ios",
-      token: "temp_token_#{SecureRandom.hex(8)}"
+      token: "fcm_temp_token_#{SecureRandom.hex(24)}"  # FCM 토큰은 최소 50자 이상
     )
 
     device_id = device.id

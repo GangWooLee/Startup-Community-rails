@@ -191,20 +191,15 @@ module PushNotifications
       end
     end
 
-    # Google OAuth 2.0 액세스 토큰 (캐시)
+    # Google OAuth 2.0 액세스 토큰 (Rails.cache 사용)
+    # 토큰은 1시간 유효, 55분 후 갱신 (여유 시간 5분)
+    CACHE_KEY = "fcm/access_token"
+
     def access_token
-      return @access_token if @access_token && !token_expired?
-
-      @access_token = fetch_access_token
-      @token_fetched_at = Time.current
-      @access_token
-    end
-
-    # 토큰 만료 여부
-    def token_expired?
-      return true unless @token_fetched_at
-
-      Time.current - @token_fetched_at > TOKEN_EXPIRY_SECONDS
+      # Rails.cache를 사용하여 요청 간 토큰 재사용
+      Rails.cache.fetch(CACHE_KEY, expires_in: TOKEN_EXPIRY_SECONDS.seconds) do
+        fetch_access_token
+      end
     end
 
     # Google OAuth 2.0 액세스 토큰 발급

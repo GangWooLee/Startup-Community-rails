@@ -19,6 +19,9 @@ class Device < ApplicationRecord
   # Constants
   # ==========================================================================
   PLATFORMS = %w[ios android].freeze
+  # FCM 토큰 길이 범위 (실제 FCM 토큰은 약 150-200자, 여유 범위 설정)
+  TOKEN_MIN_LENGTH = 50
+  TOKEN_MAX_LENGTH = 1024
 
   # ==========================================================================
   # Associations
@@ -29,7 +32,9 @@ class Device < ApplicationRecord
   # Validations
   # ==========================================================================
   validates :platform, presence: true, inclusion: { in: PLATFORMS }
-  validates :token, presence: true, uniqueness: true
+  validates :token, presence: true,
+                    uniqueness: true,
+                    length: { minimum: TOKEN_MIN_LENGTH, maximum: TOKEN_MAX_LENGTH }
 
   # ==========================================================================
   # Scopes
@@ -62,7 +67,7 @@ class Device < ApplicationRecord
       enabled: true,
       last_used_at: Time.current
     )
-    device.save!
+    device.save  # save (not save!) to allow controller to handle validation errors
     device
   end
 

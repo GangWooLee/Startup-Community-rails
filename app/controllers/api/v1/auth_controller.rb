@@ -20,6 +20,10 @@
 module Api
   module V1
     class AuthController < ApplicationController
+      # API 공통 Concern
+      include Api::Authenticatable
+      include Api::JsonResponse
+
       # API 전용 설정
       skip_before_action :verify_authenticity_token
       before_action :require_hotwire_native_app
@@ -96,28 +100,32 @@ module Api
 
         begin
           payload = Rails.application.message_verifier("app_session").verify(token, purpose: :app_session)
+          payload = payload.with_indifferent_access if payload.is_a?(Hash)
 
-          # 만료 확인
-          if payload[:exp] < Time.current.to_i
+          # 만료 확인 (exp 필드가 없거나 만료된 경우)
+          if payload[:exp].blank? || payload[:exp] < Time.current.to_i
             return render_unauthorized("Token expired")
           end
 
           @authenticated_user = User.find_by(id: payload[:user_id])
 
           unless @authenticated_user
-            render_unauthorized("User not found")
+            return render_unauthorized("User not found") # rubocop:disable Style/RedundantReturn
           end
         rescue ActiveSupport::MessageVerifier::InvalidSignature
-          render_unauthorized("Invalid token")
+          return render_unauthorized("Invalid token") # rubocop:disable Style/RedundantReturn
         end
       end
 
       # Authorization 헤더에서 Bearer 토큰 추출
+      # Rails MessageVerifier 토큰은 Base64 인코딩 + "--" 구분자 형식
       def extract_bearer_token
         auth_header = request.headers["Authorization"]
         return nil unless auth_header.present?
 
-        auth_header.gsub(/^Bearer\s+/i, "").presence
+        # Bearer 형식 검증: "Bearer <token>" (토큰은 Base64 + 구분자 허용)
+        match = auth_header.match(/\ABearer\s+([a-zA-Z0-9_=+\/-]+(?:--[a-zA-Z0-9_=+\/-]+)*)\z/i)
+        match ? match[1] : nil
       end
 
       # 사용자 정보 응답 구조
@@ -142,33 +150,9 @@ module Api
         end
       end
 
-      # Hotwire Native 앱에서만 접근 가능
-      def require_hotwire_native_app
-        return if hotwire_native_app?
-
-        render json: {
-          success: false,
-          message: "This API is only available for native apps"
-        }, status: :forbidden
-      end
-
-      # 로그인 필수 (세션 기반)
-      def require_login
-        return if logged_in?
-
-        render json: {
-          success: false,
-          message: "Authentication required"
-        }, status: :unauthorized
-      end
-
-      # 인증 실패 응답
-      def render_unauthorized(message)
-        render json: {
-          valid: false,
-          message: message
-        }, status: :unauthorized
-      end
+      # require_hotwire_native_app - Api::Authenticatable concern에서 제공
+      # require_login - Api::Authenticatable concern에서 제공
+      # render_unauthorized - Api::JsonResponse concern에서 제공
     end
   end
 end

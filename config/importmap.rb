@@ -6,5 +6,6 @@ pin "@hotwired/stimulus", to: "stimulus.min.js", preload: true
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin_all_from "app/javascript/controllers/bridge", under: "controllers/bridge"
+pin_all_from "app/javascript/bridge", under: "bridge"
 pin "trix"
 pin "@rails/actiontext", to: "actiontext.esm.js"
