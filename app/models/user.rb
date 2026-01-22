@@ -52,6 +52,7 @@ class User < ApplicationRecord
   has_many :talent_listings, dependent: :destroy
   has_many :comments, dependent: :destroy
   has_many :likes, dependent: :destroy
+  has_many :devices, dependent: :destroy
   has_many :bookmarks, dependent: :destroy
   has_many :bookmarked_posts, through: :bookmarks, source: :bookmarkable, source_type: "Post"
   has_many :liked_posts, through: :likes, source: :likeable, source_type: "Post"
@@ -148,6 +149,7 @@ class User < ApplicationRecord
   # Callbacks
   # ==========================================================================
   before_save :downcase_email
+  after_create_commit :notify_n8n_webhook
 
   # ==========================================================================
   # Scopes
@@ -186,6 +188,14 @@ class User < ApplicationRecord
 
   def downcase_email
     self.email = email.downcase if email.present?
+  end
+
+  # n8n Webhook 호출 (프로덕션에서만)
+  # 회원가입 시 구글시트에 고객 정보 자동 저장
+  def notify_n8n_webhook
+    return unless Rails.env.production?
+
+    NotifyN8nWebhookJob.perform_later(id, "user_created")
   end
 
   # 비밀번호 복잡성 검증 (영문+숫자 조합 필수)
