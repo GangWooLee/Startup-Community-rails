@@ -141,6 +141,15 @@ class Rack::Attack
     end
   end
 
+  # ==========================================================================
+  # API Rate Limiting
+  # ==========================================================================
+
+  # API 전체 요청 제한: IP당 100회/분
+  throttle("api/ip", limit: 100, period: 1.minute) do |req|
+    req.ip if req.path.start_with?("/api/")
+  end
+
   ### Blocklist ###
 
   # Block suspicious requests (SQL injection attempts, etc.)
