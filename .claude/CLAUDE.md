@@ -23,7 +23,7 @@
 | 항목 | 상태 |
 |------|------|
 | **현재 버전** | MVP v0.9.0 |
-| **마지막 업데이트** | 2026-01-21 |
+| **마지막 업데이트** | 2026-01-25 |
 | **진행 중 작업** | 문서 최신화, 안정성 개선 |
 | **Rails** | 8.1.1 |
 | **Ruby** | 3.4.7 |
@@ -388,6 +388,9 @@ bin/rails test test/models/user_test.rb
 - **자동 파기 작업**: `app/jobs/destroy_expired_deletions_job.rb`
 
 ## 최근 작업 내역
+- **[2026-01-25]** OAuth 보안 강화 (Open Redirect 3계층 방지, 필수 필드 검증, 세션 TTL 10분, 이메일 변경 감지)
+- **[2026-01-22]** CI 시스템 테스트 안정성 개선 (Turbo 리다이렉트 타이밍, 동적 대기 시간)
+- **[2026-01-22]** Hotwire Native P2 앱 출시 준비 완료 (Bridge, Push, Deep Link, Session API)
 - **[2026-01-21]** P1 코드 품질 이슈 수정 (bare rescue 명시화, magic number 상수화)
 - **[2026-01-21]** 새 메시지 익명 닉네임 표시 수정 (`recipient.name` → `recipient.display_name`)
 - **[2026-01-21]** Admin N+1 쿼리 수정: `includes(:oauth_identities)` 추가 (UsersController, DashboardController)
@@ -483,39 +486,68 @@ auth-expert → mobile-auth-expert → ios-expert/android-expert
 community-expert → deep-linking-expert
 ```
 
-### 📊 앱 출시 준비도 현황 (2026-01-21 분석)
+### 📊 앱 출시 준비도 현황 (2026-01-22 업데이트)
 
 > **상세 보고서**: [hotwire_native_readiness.html.erb](../app/views/reports/hotwire_native_readiness.html.erb)
 
-| 영역 | 점수 | 상태 |
-|------|------|------|
-| **종합 준비도** | **68%** | ⚠️ 개선 필요 |
-| Turbo Streams | 80% | ✅ 우수 |
-| Navigation | 85% | ✅ 우수 |
-| Auth/Session | 77% | ✅ 양호 |
-| Stimulus | 70% | ✅ 양호 |
-| Turbo Frames | 45% | ⚠️ 부족 |
-| Touch Events | 20% | ❌ 미흡 |
+| 영역 | Before | After | 상태 |
+|------|--------|-------|------|
+| **P0 (필수)** | 100% | 100% | ✅ 완료 |
+| **P1 (품질)** | 45% | 90% | ✅ 완료 |
+| **P2 (앱 핵심)** | 10% | 95% | ✅ 완료 |
+| **종합 준비도** | 68% | **95%** | ✅ 출시 가능 |
 
 **강점:**
 - 실시간 채팅 (Turbo Streams + Solid Cable)
-- 66개 Stimulus 컨트롤러
+- 66개 Stimulus 컨트롤러 + 5개 Bridge 컨트롤러
 - Remember Me 20년 영구 쿠키
 - OAuth 세션 백업 패턴
+- API 토큰 기반 세션 동기화
 
-**필수 개선 (P0 - 앱 출시 전):**
-| 항목 | 현재 | 목표 | 예상 시간 |
-|------|------|------|----------|
-| `hotwire_native_app?` 헬퍼 | 없음 | 구현 | 1시간 |
-| `turbo_native.html.erb` | 없음 | 생성 | 2시간 |
-| `httponly: true` 세션 | 미설정 | 추가 | 30분 |
-| 보안 헤더 4개 | 누락 | 추가 | 30분 |
+### ✅ P2 구현 완료 (2026-01-22)
 
-**P1 개선 (앱 품질 향상):**
-- 터치 이벤트 확대 (1개 → 10개+ 컨트롤러)
-- Turbo Frames lazy loading 적용
-- inputmode 속성 전체 폼 적용
-- 터치 타겟 44px 이상 보장
+**생성된 파일:**
+
+| 카테고리 | 파일 | 용도 |
+|----------|------|------|
+| **API** | `app/controllers/api/v1/devices_controller.rb` | 디바이스 등록 |
+| | `app/controllers/api/v1/auth_controller.rb` | 세션 동기화 |
+| **Core** | `app/controllers/concerns/turbo_native_navigation.rb` | 앱 리다이렉션 |
+| | `app/models/device.rb` | FCM 토큰 저장 |
+| **Push** | `app/services/push_notifications/fcm_service.rb` | FCM 서비스 |
+| | `app/jobs/send_push_notification_job.rb` | 비동기 푸시 |
+| **Bridge** | `app/javascript/controllers/bridge/*.js` | 5개 컨트롤러 |
+| **Deep Link** | `public/.well-known/apple-app-site-association` | iOS Universal Links |
+| | `public/.well-known/assetlinks.json` | Android App Links |
+| **Config** | `public/hotwire-native/path-configuration.json` | URL 매핑 |
+
+**API 엔드포인트:**
+
+| Endpoint | Method | 용도 |
+|----------|--------|------|
+| `/api/v1/devices` | POST | 디바이스 등록 |
+| `/api/v1/devices/:id` | DELETE | 디바이스 해제 |
+| `/api/v1/auth` | POST | 토큰 발급 |
+| `/api/v1/auth/validate` | GET | 토큰 검증 |
+| `/api/v1/auth` | DELETE | 토큰 폐기 |
+
+### 🔧 네이티브 개발자 필요 작업
+
+| 파일 | 수정 내용 |
+|------|----------|
+| `apple-app-site-association` | `TEAM_ID` → 실제 Apple Team ID |
+| `assetlinks.json` | `PLACEHOLDER_SHA256_FINGERPRINT` → 서명 핑거프린트 |
+| `application.html.erb:15` | `APP_ID` → 실제 App Store ID |
+| Firebase Console | FCM credentials 설정 |
+
+### 📌 브랜치 현황
+
+| 브랜치 | 상태 | 포함 내용 |
+|--------|------|----------|
+| `main` | 배포됨 | P0 (앱 레이아웃, 보안 헤더) |
+| `feature/hotwire-native-p1` | 미배포 | P1 + P2 (전체 앱 인프라) |
+
+**머지 시점**: 네이티브 앱 개발 완료 후
 
 ---
 
@@ -696,6 +728,266 @@ main          # 프로덕션 브랜치
 ## 📚 배운 교훈 (Lessons Learned)
 
 > **목적**: 반복되는 실수를 방지하고 프로젝트 지식을 축적
+
+### 🔐 OAuth 보안 4계층 방어 (Critical! 2026-01-25)
+
+**배경**: OAuth 플로우는 외부 리다이렉션이 많아 Open Redirect, 세션 탈취, 필드 위변조 공격에 취약
+
+#### 1. Open Redirect 방지 (3계층 검증)
+
+```ruby
+# app/controllers/concerns/session_redirect.rb
+
+def validate_redirect_url(url)
+  return nil if url.blank?
+
+  # 1층: 상대 경로 허용 (단, // 프로토콜 상대 URL 제외)
+  return url if url.start_with?("/") && !url.start_with?("//")
+
+  # 2층: 절대 URL 파싱
+  uri = URI.parse(url)
+
+  # 3층: http/https만 허용 (javascript:, data: 스킴 차단 - XSS 방지)
+  if uri.scheme.present? && !%w[http https].include?(uri.scheme.downcase)
+    Rails.logger.warn "[SessionRedirect] Blocked dangerous scheme: #{uri.scheme}"
+    return nil
+  end
+
+  # 같은 호스트만 허용
+  uri.path.presence || "/" if uri.host.nil? || uri.host == request.host
+end
+```
+
+**핵심 포인트**:
+| 공격 유형 | 차단 계층 | 예시 |
+|----------|----------|------|
+| 외부 도메인 리다이렉트 | 호스트 검증 | `https://evil.com/steal` |
+| 프로토콜 상대 URL | `//` 검사 | `//evil.com/path` |
+| XSS via javascript: | 스킴 검증 | `javascript:alert(1)` |
+| XSS via data: | 스킴 검증 | `data:text/html,...` |
+
+**관련 파일**: `app/controllers/concerns/session_redirect.rb`
+
+#### 2. OAuth 필수 필드 검증
+
+```ruby
+# app/controllers/omniauth_callbacks_controller.rb
+
+def valid_oauth_auth?(auth)
+  return false if auth.blank?
+  return false if auth.provider.blank?  # 필수: 제공자
+  return false if auth.uid.blank?       # 필수: 고유 ID
+  return false if auth.info&.email.blank?  # 필수: 이메일
+  true
+end
+```
+
+**위험 시나리오**: 악의적인 OAuth 제공자가 uid나 email 없이 응답 → 사용자 식별 불가 → 잘못된 계정 연결
+
+#### 3. 세션 TTL 관리 (만료 시간)
+
+```ruby
+# 신규 OAuth 사용자 - 약관 동의 대기
+session[:pending_oauth_user_id] = @user.id
+session[:pending_oauth_created_at] = Time.current.to_i  # ← 타임스탬프!
+
+# 약관 동의 페이지에서 10분 만료 체크
+def validate_session_timeout(timeout: 10.minutes)
+  created_at = session[:pending_oauth_created_at]
+  return false if created_at.blank?
+  Time.current.to_i - created_at < timeout.to_i
+end
+```
+
+**목적**: 미완료 OAuth 플로우가 무한정 유효하지 않도록 제한
+
+#### 4. 이메일 변경 감지 (보안 감사)
+
+```ruby
+# app/models/concerns/oauthable.rb
+
+# 기존 OAuth 연결로 로그인 시
+if email.present? && user.email != email
+  Rails.logger.warn "[OAuth] Email mismatch detected: User##{user.id} " \
+                    "(stored: #{user.email}, oauth: #{email}, provider: #{provider})"
+  Sentry.capture_message("OAuth email mismatch", level: :warning, extra: { ... })
+end
+```
+
+**탐지 대상**: 계정 탈취 시도, OAuth 제공자의 이메일 변경, 데이터 불일치
+
+**관련 파일**:
+- `app/controllers/concerns/session_redirect.rb` - Open Redirect 방지
+- `app/controllers/omniauth_callbacks_controller.rb` - 필수 필드 검증, 세션 TTL
+- `app/models/concerns/oauthable.rb` - 이메일 변경 감지
+
+### 🛡️ SSRF (Server-Side Request Forgery) 방지 (2026-01-21)
+
+**공격 시나리오**: 사용자가 입력한 URL로 서버가 요청 → 내부 네트워크(AWS metadata 등) 접근 가능
+
+```ruby
+# app/services/url_sanitizer.rb
+
+class UrlSanitizer
+  PRIVATE_IP_RANGES = [
+    IPAddr.new("127.0.0.0/8"),      # Loopback (localhost)
+    IPAddr.new("10.0.0.0/8"),       # Class A private
+    IPAddr.new("172.16.0.0/12"),    # Class B private
+    IPAddr.new("192.168.0.0/16"),   # Class C private
+    IPAddr.new("169.254.0.0/16"),   # Link-local (⚠️ AWS metadata!)
+    IPAddr.new("0.0.0.0/8"),        # This network
+    IPAddr.new("::1/128"),          # IPv6 loopback
+    IPAddr.new("fc00::/7"),         # IPv6 unique local
+    IPAddr.new("fe80::/10")         # IPv6 link-local
+  ].freeze
+
+  def self.safe?(url)
+    new(url).safe?
+  end
+
+  def safe?
+    valid_uri? && valid_scheme? && public_ip?
+  end
+
+  private
+
+  # DNS rebinding 공격 방지: hostname이 아닌 해석된 IP로 검증
+  def public_ip?
+    ip_address = Resolv.getaddress(@uri.host)
+    !PRIVATE_IP_RANGES.any? { |range| range.include?(IPAddr.new(ip_address)) }
+  end
+end
+```
+
+**사용 예시**:
+```ruby
+# 외부 이미지 URL 수집 시
+def fetch_image(url)
+  return nil unless UrlSanitizer.safe?(url)
+  # 안전한 URL만 요청
+  HTTParty.get(url, timeout: 5)
+end
+```
+
+**차단 대상**:
+| IP 범위 | 용도 | 위험성 |
+|---------|------|--------|
+| `127.0.0.0/8` | localhost | 내부 서비스 접근 |
+| `169.254.169.254` | AWS metadata | IAM 토큰 탈취 가능 |
+| `10.x.x.x` | 사설 네트워크 | 내부 API 접근 |
+| `192.168.x.x` | 사설 네트워크 | 개발 서버 접근 |
+
+**관련 파일**: `app/services/url_sanitizer.rb`
+
+### 📱 WebView/인앱 브라우저 OAuth 제한 (2026-01-21)
+
+**문제**: Google은 2016년부터 WebView에서 OAuth 인증을 금지 (피싱 공격 위험)
+
+**영향받는 앱**:
+| 앱 | User-Agent 패턴 | 특수 처리 |
+|----|----------------|----------|
+| 카카오톡 | `kakaotalk` | `kakaotalk://web/openExternal` 스킴 지원 |
+| Instagram | `instagram` | 외부 브라우저 안내 필요 |
+| Facebook | `fban`, `fbav` | 외부 브라우저 안내 필요 |
+| LINE | `line/` | 외부 브라우저 안내 필요 |
+| 네이버 | `naver` | 외부 브라우저 안내 필요 |
+
+```ruby
+# app/helpers/user_agent_helper.rb
+
+def in_app_browser?
+  ua = request.user_agent.to_s.downcase
+
+  # Android WebView: "wv" 토큰 또는 Version/X.X Chrome 패턴
+  return true if ua.include?("android") && (ua.include?("; wv)") || ua.match?(/version\/[\d.]+ chrome/))
+
+  # iOS WebView: Mobile/ 있지만 Safari/ 없음
+  return true if (ua.include?("iphone") || ua.include?("ipad")) && ua.include?("mobile/") && !ua.include?("safari/")
+
+  # 소셜 앱 인앱 브라우저
+  return true if ua.match?(/fban|fbav|instagram|twitter|line\/|kakaotalk|naver|discord|slack/)
+
+  false
+end
+
+def detected_app_name
+  ua = request.user_agent.to_s.downcase
+  case
+  when ua.include?("kakaotalk") then "카카오톡"
+  when ua.include?("instagram") then "Instagram"
+  when ua.match?(/fban|fbav/) then "Facebook"
+  # ... 기타 앱
+  else "인앱 브라우저"
+  end
+end
+```
+
+**OAuth 컨트롤러에서 사용**:
+```ruby
+def oauth_warning
+  if in_app_browser?
+    flash.now[:alert] = "#{detected_app_name}에서는 Google 로그인이 제한됩니다. " \
+                        "Safari 또는 Chrome에서 열어주세요."
+    render :oauth_warning  # 외부 브라우저 안내 페이지
+    return
+  end
+  # 정상 OAuth 진행
+end
+```
+
+**관련 파일**: `app/helpers/user_agent_helper.rb`, `app/controllers/oauth_controller.rb`
+
+### 🧪 CI 테스트: Turbo 리다이렉트 타이밍 (2026-01-22)
+
+**문제**: CI 환경에서 Turbo 리다이렉트 완료 전 assertion 실행 → 간헐적 테스트 실패
+
+```ruby
+# test/support/system_test_helpers.rb
+
+# CI 환경 대기 시간 상수
+CI_WAIT_TIME = 20      # CI는 느림
+LOCAL_WAIT_TIME = 10   # 로컬은 빠름
+
+def ci_environment?
+  ENV["CI"].present? || ENV["GITHUB_ACTIONS"].present?
+end
+
+def default_wait_time
+  ci_environment? ? CI_WAIT_TIME : LOCAL_WAIT_TIME
+end
+
+# Turbo 리다이렉트 완료 대기 헬퍼
+def wait_for_turbo_redirect(expected_path = nil, wait: nil)
+  wait ||= default_wait_time
+
+  # Turbo 로딩 인디케이터가 사라질 때까지 대기
+  assert_no_selector ".turbo-progress-bar", wait: wait
+
+  # 예상 경로가 지정되면 경로 확인
+  assert_current_path expected_path, wait: wait if expected_path
+end
+```
+
+**사용 예시**:
+```ruby
+test "로그인 후 리다이렉트" do
+  log_in_as(@user)
+
+  # ❌ 불안정 - Turbo 완료 전 assertion 실행 가능
+  assert_current_path community_path
+
+  # ✅ 안정 - Turbo 로딩 완료 후 assertion
+  wait_for_turbo_redirect community_path
+end
+```
+
+**핵심 포인트**:
+| 환경 | 기본 대기 시간 | 특이사항 |
+|------|--------------|---------|
+| 로컬 | 10초 | 빠른 피드백 |
+| CI (GitHub Actions) | 20초 | 리소스 제한으로 느림 |
+
+**관련 파일**: `test/support/system_test_helpers.rb`
 
 ### 🚨 코드 수정 후 배포 확인 필수 (Critical! 2026-01-21)
 
