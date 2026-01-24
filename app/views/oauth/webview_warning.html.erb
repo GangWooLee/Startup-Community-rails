@@ -64,7 +64,7 @@
           </a>
 
           <p class="text-center text-xs text-muted-foreground">
-            Chrome이 설치되어 있다면 자동으로 열립니다
+            잠시 후 Safari가 자동으로 열립니다
           </p>
 
           <!-- Divider -->
@@ -214,38 +214,15 @@
 <script>
 // 카카오톡 외부 브라우저 자동 열기 시도
 <% if @is_kakao && @is_ios %>
-// iOS 카카오톡: Chrome 우선 시도 → visibilitychange로 감지 → Safari 폴백
+// iOS 카카오톡: Safari 외부 브라우저로 바로 열기
+// (googlechromes:// 스킴은 setTimeout에서 사용자 제스처 없이 호출 불가 - iOS 제한)
+// Chrome은 "Chrome에서 열기" 버튼으로 수동 이동 가능
 (function() {
-  const chromeUrl = "<%= @ios_chrome_url %>";
   const safariUrl = "<%= @kakao_external_url %>";
-  let chromeOpened = false;
-  let safariTimeoutId = null;
 
-  // 1. visibilitychange 이벤트 리스너 등록
-  //    Chrome이 열리면 페이지가 hidden 상태가 됨
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-      chromeOpened = true;
-      // Chrome이 열렸으므로 Safari 폴백 취소
-      if (safariTimeoutId) {
-        clearTimeout(safariTimeoutId);
-        safariTimeoutId = null;
-      }
-    }
-  });
-
-  // 2. 500ms 후 Chrome 열기 시도
   setTimeout(function() {
-    window.location.href = chromeUrl;
+    window.location.href = safariUrl;
   }, 500);
-
-  // 3. 3.5초 후에도 Chrome이 열리지 않았으면 Safari 폴백
-  //    (기존 500ms → 3000ms 갭으로 충분한 여유 확보)
-  safariTimeoutId = setTimeout(function() {
-    if (!chromeOpened && !document.hidden) {
-      window.location.href = safariUrl;
-    }
-  }, 3500);
 })();
 <% elsif @is_kakao %>
 // Android 카카오톡: 기존 외부 브라우저 열기

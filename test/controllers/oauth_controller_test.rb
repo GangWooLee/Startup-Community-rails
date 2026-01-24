@@ -375,27 +375,24 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
     assert_match /setTimeout/, response.body
   end
 
-  test "iOS 카카오톡에서 visibilitychange 이벤트 기반 Chrome 감지 스크립트 포함" do
+  test "iOS 카카오톡에서 Safari 외부 브라우저로 바로 이동 (Chrome 자동 시도 없음)" do
     kakao_ios_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
 
     get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ios_ua }
 
     assert_response :success
 
-    # visibilitychange 이벤트 리스너 검증 (Chrome 열림 감지용)
-    assert_match(/visibilitychange/, response.body)
+    # Chrome 자동 시도 없음 검증 (setTimeout 내에서 googlechromes:// 미사용)
+    # (iOS에서 사용자 제스처 없이 커스텀 스킴 호출 불가)
+    assert_no_match(/setTimeout.*googlechromes:/m, response.body)
 
-    # clearTimeout 로직 검증 (Chrome 열리면 Safari 폴백 취소)
-    assert_match(/clearTimeout/, response.body)
+    # Safari 외부 브라우저 자동 열기 검증
+    assert_match(/kakaotalk:\/\/web\/openExternal/, response.body)
+    assert_match(/setTimeout/, response.body)
 
-    # chromeOpened 플래그 검증 (상태 추적 변수)
-    assert_match(/chromeOpened/, response.body)
-
-    # 3.5초 타임아웃 검증 (기존 1초 → 3.5초로 변경됨, 충분한 갭 확보)
-    assert_match(/3500/, response.body)
-
-    # 이중 조건 체크 검증 (안전한 Safari 폴백 조건)
-    assert_match(/!chromeOpened && !document\.hidden/, response.body)
+    # visibilitychange 로직 제거 검증
+    assert_no_match(/visibilitychange/, response.body)
+    assert_no_match(/chromeOpened/, response.body)
   end
 
   test "Instagram에서는 카카오톡 전용 버튼 미표시" do
