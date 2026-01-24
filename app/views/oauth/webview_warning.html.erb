@@ -39,8 +39,45 @@
 
       <!-- Action Buttons -->
       <div class="space-y-3">
-        <% if @is_kakao %>
-          <%# 카카오톡 전용: 외부 브라우저로 열기 버튼 (가장 먼저 표시) %>
+        <% if @is_kakao && @is_ios %>
+          <%# 카카오톡 iOS: Chrome 우선 + Safari 보조 버튼 %>
+          <a
+            id="kakao-chrome-btn"
+            href="<%= @ios_chrome_url %>"
+            class="w-full flex items-center justify-center gap-2 h-12 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-semibold transition-colors shadow-sm"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728z"/>
+            </svg>
+            Chrome에서 열기
+          </a>
+
+          <a
+            id="kakao-safari-btn"
+            href="<%= @kakao_external_url %>"
+            class="w-full flex items-center justify-center gap-2 h-11 px-4 py-2 border-2 border-border rounded-lg font-medium text-foreground hover:bg-accent transition-colors"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.243 14.243l-5.657-2.829-2.829-5.657 5.657 2.829 2.829 5.657zM12 11a1 1 0 100 2 1 1 0 000-2z"/>
+            </svg>
+            Safari에서 열기
+          </a>
+
+          <p class="text-center text-xs text-muted-foreground">
+            Chrome이 설치되어 있다면 자동으로 열립니다
+          </p>
+
+          <!-- Divider -->
+          <div class="relative my-2">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-border"></div>
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-card px-2 text-muted-foreground">열리지 않으면</span>
+            </div>
+          </div>
+        <% elsif @is_kakao %>
+          <%# 카카오톡 Android: 기존 외부 브라우저로 열기 버튼 %>
           <a
             id="kakao-external-btn"
             href="<%= @kakao_external_url %>"
@@ -176,11 +213,30 @@
 
 <script>
 // 카카오톡 외부 브라우저 자동 열기 시도
-<% if @is_kakao %>
+<% if @is_kakao && @is_ios %>
+// iOS 카카오톡: Chrome 우선 시도 → Safari 폴백
+(function() {
+  const chromeUrl = "<%= @ios_chrome_url %>";
+  const safariUrl = "<%= @kakao_external_url %>";
+
+  // 1. 500ms 후 Chrome 열기 시도
+  setTimeout(function() {
+    window.location.href = chromeUrl;
+  }, 500);
+
+  // 2. 1초 후에도 페이지가 보이면 Chrome 미설치 → Safari 폴백
+  // (Chrome이 열리면 document.hidden = true가 됨)
+  setTimeout(function() {
+    if (!document.hidden) {
+      window.location.href = safariUrl;
+    }
+  }, 1000);
+})();
+<% elsif @is_kakao %>
+// Android 카카오톡: 기존 외부 브라우저 열기
 (function() {
   const kakaoExternalUrl = "<%= @kakao_external_url %>";
 
-  // 페이지 로드 후 500ms 뒤에 자동으로 외부 브라우저 열기 시도
   setTimeout(function() {
     window.location.href = kakaoExternalUrl;
   }, 500);
