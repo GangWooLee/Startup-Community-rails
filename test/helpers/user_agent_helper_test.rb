@@ -321,4 +321,48 @@ class UserAgentHelperTest < ActionView::TestCase
 
     assert_not android_device?
   end
+
+  # ============================================================================
+  # kakao_in_app_browser? Tests
+  # ============================================================================
+
+  test "kakao_in_app_browser? returns true for KakaoTalk iOS" do
+    request.user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    assert kakao_in_app_browser?
+  end
+
+  test "kakao_in_app_browser? returns true for KakaoTalk Android" do
+    request.user_agent = "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36 KAKAOTALK"
+
+    assert kakao_in_app_browser?
+  end
+
+  test "kakao_in_app_browser? returns false for Instagram" do
+    request.user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 152.0.0.24.117"
+
+    assert_not kakao_in_app_browser?
+  end
+
+  test "kakao_in_app_browser? returns false for normal Safari" do
+    request.user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1"
+
+    assert_not kakao_in_app_browser?
+  end
+
+  test "kakao_in_app_browser? returns false for blank UA" do
+    request.user_agent = nil
+
+    assert_not kakao_in_app_browser?
+  end
+
+  test "kakao_in_app_browser? is case insensitive" do
+    request.user_agent = "Mozilla/5.0 KAKAOTALK"
+
+    assert kakao_in_app_browser?
+
+    request.user_agent = "Mozilla/5.0 kakaotalk"
+
+    assert kakao_in_app_browser?
+  end
 end

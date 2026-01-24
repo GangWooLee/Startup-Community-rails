@@ -84,4 +84,97 @@ class OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
     assert flash[:alert].present?, "Expected alert flash message for OAuth failure"
   end
+
+  # ============================================================================
+  # Phase 1.2: OAuth 필수 필드 검증 테스트 (보안 강화)
+  # ============================================================================
+
+  test "OAuth callback rejects nil auth data" do
+    # omniauth.auth가 nil인 경우 - OmniAuth failure 시뮬레이션
+    OmniAuth.config.mock_auth[:google_oauth2] = :invalid_credentials
+
+    assert_no_difference "User.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    # failure 경로로 리다이렉트됨
+    assert_response :redirect
+  end
+
+  test "OAuth callback rejects auth without email" do
+    # email이 없는 OAuth 응답 (일부 provider에서 발생 가능)
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      provider: "google_oauth2",
+      uid: "uid_without_email_#{SecureRandom.hex(8)}",
+      info: {
+        name: "User Without Email",
+        image: "https://example.com/avatar.jpg"
+        # email 필드 누락
+      }
+    })
+
+    assert_no_difference "User.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    assert_redirected_to login_path
+    assert_equal "로그인에 실패했습니다. 다시 시도해주세요.", flash[:alert]
+  end
+
+  test "OAuth callback rejects auth without uid" do
+    # uid가 없는 OAuth 응답
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      provider: "google_oauth2",
+      # uid 필드 누락
+      info: {
+        email: "no_uid_user@example.com",
+        name: "User Without UID"
+      }
+    })
+
+    assert_no_difference "User.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    assert_redirected_to login_path
+    assert_equal "로그인에 실패했습니다. 다시 시도해주세요.", flash[:alert]
+  end
+
+  test "OAuth callback rejects auth without provider" do
+    # provider가 없는 OAuth 응답
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      # provider 필드 누락
+      uid: "uid_without_provider_#{SecureRandom.hex(8)}",
+      info: {
+        email: "no_provider_user@example.com",
+        name: "User Without Provider"
+      }
+    })
+
+    assert_no_difference "User.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    assert_redirected_to login_path
+    assert_equal "로그인에 실패했습니다. 다시 시도해주세요.", flash[:alert]
+  end
+
+  test "OAuth callback rejects auth with empty email string" do
+    # email이 빈 문자열인 경우
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      provider: "google_oauth2",
+      uid: "uid_empty_email_#{SecureRandom.hex(8)}",
+      info: {
+        email: "",  # 빈 문자열
+        name: "User With Empty Email"
+      }
+    })
+
+    assert_no_difference "User.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    assert_redirected_to login_path
+    assert_equal "로그인에 실패했습니다. 다시 시도해주세요.", flash[:alert]
+  end
 end

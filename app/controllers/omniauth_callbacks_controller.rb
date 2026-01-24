@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OmniauthCallbacksController < ApplicationController
   # OAuth 콜백은 외부에서 오므로 CSRF 검증 스킵 필요
   skip_before_action :verify_authenticity_token, only: [ :create, :failure ]
@@ -6,8 +8,9 @@ class OmniauthCallbacksController < ApplicationController
   def create
     auth = request.env["omniauth.auth"]
 
-    unless auth
-      Rails.logger.error "OAuth callback received without auth data"
+    # 필수 필드 검증 강화 (Phase 1.1)
+    unless valid_oauth_auth?(auth)
+      Rails.logger.error "[OAuth] Invalid auth data: missing required fields (provider: #{auth&.provider}, uid: #{auth&.uid.present?}, email: #{auth&.info&.email.present?})"
       redirect_to login_path, alert: "로그인에 실패했습니다. 다시 시도해주세요."
       return
     end
@@ -27,8 +30,10 @@ class OmniauthCallbacksController < ApplicationController
     if @user&.persisted?
       # 신규 OAuth 사용자: 약관 동의 필요
       if result[:new_user] && !@user.all_terms_accepted?
-        # 세션에 사용자 ID 저장 (로그인 전 상태로 약관 동의 페이지로 이동)
+        # 세션에 사용자 ID + 생성 시간 저장 (로그인 전 상태로 약관 동의 페이지로 이동)
+        # Phase 2.2: 10분 만료를 위한 타임스탬프 추가
         session[:pending_oauth_user_id] = @user.id
+        session[:pending_oauth_created_at] = Time.current.to_i
         # 기존 return_to 값 유지
         session[:oauth_return_to] = session.delete(:return_to) || cookies.delete(:return_to)
         Rails.logger.info "OAuth new user - redirecting to terms: #{provider_name} - User #{@user.id}"
@@ -114,5 +119,17 @@ class OmniauthCallbacksController < ApplicationController
     end
 
     redirect_to login_path, alert: alert_message
+  end
+
+  private
+
+  # OAuth 응답 필수 필드 검증 (Phase 1.1)
+  # provider, uid, email이 모두 있어야 유효한 OAuth 응답
+  def valid_oauth_auth?(auth)
+    return false if auth.blank?
+    return false if auth.provider.blank?
+    return false if auth.uid.blank?
+    return false if auth.info&.email.blank?
+    true
   end
 end

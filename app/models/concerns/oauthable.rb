@@ -38,6 +38,18 @@ module Oauthable
       identity = OauthIdentity.find_by(provider: provider, uid: uid)
       if identity
         user = identity.user
+
+        # 이메일 변경 감지 및 로깅 (Phase 2.1 - 보안 감사)
+        if email.present? && user.email != email
+          Rails.logger.warn "[OAuth] Email mismatch detected: User##{user.id} " \
+                            "(stored: #{user.email}, oauth: #{email}, provider: #{provider})"
+          Sentry.capture_message(
+            "OAuth email mismatch",
+            level: :warning,
+            extra: { user_id: user.id, provider: provider }
+          ) if defined?(Sentry)
+        end
+
         # 탈퇴한 사용자 확인
         return { user: user, deleted: user.deleted?, new_user: false }
       end

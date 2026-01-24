@@ -1,6 +1,11 @@
+# frozen_string_literal: true
+
 class OauthTermsController < ApplicationController
   # 로그인 전 상태이므로 require_login 스킵 (정의되지 않은 경우 무시)
   skip_before_action :require_login, raise: false
+
+  # Phase 2.2: pending_oauth_user_id 세션 만료 시간 (10분)
+  PENDING_OAUTH_EXPIRY = 10.minutes
 
   # GET /oauth/terms
   def show
@@ -43,8 +48,24 @@ class OauthTermsController < ApplicationController
 
   def find_pending_user
     user_id = session[:pending_oauth_user_id]
+    created_at = session[:pending_oauth_created_at]
+
     return nil unless user_id
+
+    # Phase 2.2: 세션 만료 체크 (10분)
+    if created_at.present? && Time.at(created_at) < PENDING_OAUTH_EXPIRY.ago
+      Rails.logger.warn "[OAuth Terms] Session expired for user_id: #{user_id}"
+      clear_pending_oauth_session
+      return nil
+    end
+
     User.find_by(id: user_id)
+  end
+
+  def clear_pending_oauth_session
+    session.delete(:pending_oauth_user_id)
+    session.delete(:pending_oauth_created_at)
+    session.delete(:oauth_return_to)
   end
 
   def terms_all_agreed?
@@ -54,9 +75,9 @@ class OauthTermsController < ApplicationController
   end
 
   def complete_oauth_login
-    # 세션 정리
-    session.delete(:pending_oauth_user_id)
+    # 세션 정리 (Phase 2.2: 타임스탬프도 함께 삭제)
     return_to = session.delete(:oauth_return_to)
+    clear_pending_oauth_session
 
     # 로그인 방식 결정 (OAuth provider 확인)
     login_method = determine_oauth_method(@user)

@@ -47,15 +47,24 @@ module SessionRedirect
   end
 
   # URL 검증: 같은 호스트의 상대 경로만 허용 (Open Redirect 방지)
+  # Phase 3.1: javascript:, data: 등 위험 스킴 거부 (XSS 방지) 추가
   def validate_redirect_url(url)
     return nil if url.blank?
 
     # 상대 경로는 허용 (단, // 로 시작하는 프로토콜 상대 URL은 제외)
     return url if url.start_with?("/") && !url.start_with?("//")
 
-    # 절대 URL은 같은 호스트만 허용
+    # 절대 URL 검증
     begin
       uri = URI.parse(url)
+
+      # 스킴이 있는 경우 http/https만 허용 (javascript:, data: 등 거부)
+      if uri.scheme.present? && !%w[http https].include?(uri.scheme.downcase)
+        Rails.logger.warn "[SessionRedirect] Blocked dangerous scheme: #{uri.scheme}"
+        return nil
+      end
+
+      # 같은 호스트만 허용
       if uri.host.nil? || uri.host == request.host
         uri.path.presence || "/"
       end

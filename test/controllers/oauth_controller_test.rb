@@ -32,7 +32,36 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
     post "/oauth/google_oauth2", params: { origin: "/posts/123" }
 
     assert_response :redirect
-    # 세션에 return_to가 저장되었는지 확인 (통합 테스트에서는 직접 접근 어려움)
+    assert_equal "/posts/123", session[:return_to]
+  end
+
+  test "passthru saves origin to oauth_return_to session for WebView redirect" do
+    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    post "/oauth/google_oauth2",
+         params: { origin: "/posts/123" },
+         headers: { "User-Agent" => kakao_ua }
+
+    assert_redirected_to oauth_webview_warning_path
+    assert_equal "/posts/123", session[:oauth_return_to]
+  end
+
+  test "passthru uses cookies[:return_to] when origin param absent" do
+    cookies[:return_to] = "/profile/settings"
+
+    post "/oauth/google_oauth2"
+
+    assert_response :redirect
+    assert_equal "/profile/settings", session[:return_to]
+  end
+
+  test "passthru prefers params[:origin] over cookies[:return_to]" do
+    cookies[:return_to] = "/profile"
+
+    post "/oauth/google_oauth2", params: { origin: "/community" }
+
+    assert_response :redirect
+    assert_equal "/community", session[:return_to]
   end
 
   # ============================================================================
@@ -53,6 +82,7 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     # 악성 URL이 세션에 저장되지 않고 리디렉션은 정상 진행
     assert_match %r{/auth/google_oauth2}, response.location
+    assert_nil session[:return_to]
   end
 
   test "passthru rejects protocol-relative url" do
@@ -60,6 +90,33 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
     post "/oauth/google_oauth2", params: { origin: "//evil.com/path" }
 
     assert_response :redirect
+    assert_nil session[:return_to]
+  end
+
+  test "passthru rejects javascript: URL in origin" do
+    post "/oauth/google_oauth2", params: { origin: "javascript:alert('xss')" }
+
+    assert_response :redirect
+    assert_match %r{/auth/google_oauth2}, response.location
+    # XSS 방지: javascript: 스킴 URL은 세션에 저장되지 않아야 함
+    assert_nil session[:return_to]
+  end
+
+  test "passthru rejects data: URL in origin" do
+    post "/oauth/google_oauth2", params: { origin: "data:text/html,<script>alert('xss')</script>" }
+
+    assert_response :redirect
+    assert_match %r{/auth/google_oauth2}, response.location
+    # XSS 방지: data: 스킴 URL은 세션에 저장되지 않아야 함
+    assert_nil session[:return_to]
+  end
+
+  test "passthru accepts absolute URL with same host and extracts path" do
+    post "/oauth/google_oauth2", params: { origin: "http://www.example.com/posts/123" }
+
+    assert_response :redirect
+    # 같은 호스트의 절대 URL은 path만 추출하여 저장
+    assert_equal "/posts/123", session[:return_to]
   end
 
   # ============================================================================
@@ -270,5 +327,95 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "span", text: "인앱 브라우저"
+  end
+
+  # ============================================================================
+  # KakaoTalk Specific Tests (외부 브라우저 자동 열기)
+  # ============================================================================
+
+  test "카카오톡에서 외부 브라우저 열기 버튼 표시" do
+    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ua }
+
+    assert_response :success
+    # 카카오톡 전용 버튼 (노란색 배경)
+    assert_select "a#kakao-external-btn", text: /외부 브라우저로 열기/
+  end
+
+  test "카카오톡에서 kakaotalk://web/openExternal 스킴 URL 생성" do
+    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ua }
+
+    assert_response :success
+    # kakaotalk://web/openExternal?url=... 형식 검증
+    assert_select "a[href^='kakaotalk://web/openExternal?url=']"
+  end
+
+  test "카카오톡에서 JavaScript 자동 외부 브라우저 열기 스크립트 포함" do
+    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ua }
+
+    assert_response :success
+    # JavaScript에서 kakaotalk:// 스킴 사용
+    assert_match /kakaotalk:\/\/web\/openExternal/, response.body
+    assert_match /setTimeout/, response.body
+  end
+
+  test "Instagram에서는 카카오톡 전용 버튼 미표시" do
+    instagram_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 152.0.0.24.117"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => instagram_ua }
+
+    assert_response :success
+    # 카카오톡 버튼 없음
+    assert_select "a#kakao-external-btn", count: 0
+  end
+
+  test "일반 Android WebView에서는 카카오톡 전용 버튼 미표시" do
+    android_webview_ua = "Mozilla/5.0 (Linux; Android 10; SM-G960F; wv) AppleWebKit/537.36"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => android_webview_ua }
+
+    assert_response :success
+    # 카카오톡 버튼 없음, Chrome 버튼은 있음
+    assert_select "a#kakao-external-btn", count: 0
+    assert_select "a[href*='intent://']"
+  end
+
+  test "카카오톡 Android에서도 외부 브라우저 열기 버튼 표시" do
+    kakao_android_ua = "Mozilla/5.0 (Linux; Android 11; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36 KAKAOTALK"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_android_ua }
+
+    assert_response :success
+    # 카카오톡 전용 버튼
+    assert_select "a#kakao-external-btn", text: /외부 브라우저로 열기/
+    # Chrome Intent 버튼도 폴백으로 표시
+    assert_select "a[href*='intent://']"
+  end
+
+  test "카카오톡 외부 브라우저 URL이 올바르게 인코딩됨" do
+    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ua }
+
+    assert_response :success
+    # URL이 CGI.escape로 인코딩되었는지 확인
+    assert_select "a[href*='kakaotalk://web/openExternal?url=']"
+    # ://가 인코딩되어 %3A%2F%2F로 표시됨
+    assert_match /%3A%2F%2F/, response.body
+  end
+
+  test "일반 WebView에서는 카카오톡 JavaScript 미포함" do
+    generic_webview_ua = "Mozilla/5.0 (Linux; Android 10; SM-G960F; wv) AppleWebKit/537.36"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => generic_webview_ua }
+
+    assert_response :success
+    # 카카오톡 자동 열기 스크립트 없음
+    assert_no_match /kakaotalk:\/\/web\/openExternal/, response.body
   end
 end

@@ -2,6 +2,7 @@
 
 class OauthController < ApplicationController
   include UserAgentHelper
+  include SessionRedirect  # Phase 3.1: URL 검증 로직 통합
 
   # OAuth 요청 전 return_to URL을 세션에 저장하고 OmniAuth로 리디렉션
   # POST /oauth/:provider
@@ -17,7 +18,7 @@ class OauthController < ApplicationController
     # WebView에서 Google OAuth 시도 시 경고 페이지로 리다이렉트
     # Google은 보안 이유로 WebView에서 OAuth를 차단함 (403 disallowed_useragent)
     if provider == "google_oauth2" && in_app_browser?
-      session[:oauth_return_to] = validate_return_url(
+      session[:oauth_return_to] = validate_redirect_url(
         params[:origin].presence || cookies[:return_to].presence || session[:return_to].presence
       )
       redirect_to oauth_webview_warning_path
@@ -25,7 +26,7 @@ class OauthController < ApplicationController
     end
 
     # return_to URL 결정 및 검증
-    return_to = validate_return_url(
+    return_to = validate_redirect_url(
       params[:origin].presence || cookies[:return_to].presence || session[:return_to].presence
     )
 
@@ -53,25 +54,11 @@ class OauthController < ApplicationController
     @login_url = login_url
     @is_ios = ios_device?
     @is_android = android_device?
-  end
+    @is_kakao = kakao_in_app_browser?
 
-  private
-
-  # URL 검증: 같은 호스트의 상대 경로만 허용
-  def validate_return_url(url)
-    return nil if url.blank?
-
-    # 상대 경로는 허용
-    return url if url.start_with?("/") && !url.start_with?("//")
-
-    # 절대 URL은 같은 호스트만 허용
-    begin
-      uri = URI.parse(url)
-      if uri.host.nil? || uri.host == request.host
-        uri.path.presence || "/"
-      end
-    rescue URI::InvalidURIError
-      nil
+    # 카카오톡 외부 브라우저 열기 URL 생성
+    if @is_kakao
+      @kakao_external_url = "kakaotalk://web/openExternal?url=#{CGI.escape(@login_url)}"
     end
   end
 end

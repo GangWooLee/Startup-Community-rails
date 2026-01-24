@@ -39,6 +39,34 @@
 
       <!-- Action Buttons -->
       <div class="space-y-3">
+        <% if @is_kakao %>
+          <%# 카카오톡 전용: 외부 브라우저로 열기 버튼 (가장 먼저 표시) %>
+          <a
+            id="kakao-external-btn"
+            href="<%= @kakao_external_url %>"
+            class="w-full flex items-center justify-center gap-2 h-12 px-4 py-2 bg-[#FEE500] hover:bg-[#F5DC00] text-[#3C1E1E] rounded-lg font-semibold transition-colors shadow-sm"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.47 1.607 4.647 4.035 5.906-.176.648-.638 2.347-.731 2.708-.118.455.167.448.35.326.145-.095 2.305-1.56 3.234-2.19.694.1 1.407.15 2.112.15 5.523 0 10-3.477 10-7.5S17.523 3 12 3z"/>
+            </svg>
+            외부 브라우저로 열기
+          </a>
+
+          <p class="text-center text-xs text-muted-foreground">
+            카카오톡에서 자동으로 기본 브라우저가 열립니다
+          </p>
+
+          <!-- Divider -->
+          <div class="relative my-2">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-border"></div>
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-card px-2 text-muted-foreground">열리지 않으면</span>
+            </div>
+          </div>
+        <% end %>
+
         <% if @is_android %>
           <%# Android: Intent URI로 Chrome 직접 열기 %>
           <%
@@ -147,6 +175,18 @@
 </div>
 
 <script>
+// 카카오톡 외부 브라우저 자동 열기 시도
+<% if @is_kakao %>
+(function() {
+  const kakaoExternalUrl = "<%= @kakao_external_url %>";
+
+  // 페이지 로드 후 500ms 뒤에 자동으로 외부 브라우저 열기 시도
+  setTimeout(function() {
+    window.location.href = kakaoExternalUrl;
+  }, 500);
+})();
+<% end %>
+
 function copyLoginUrl() {
   const url = "<%= @login_url %>";
 

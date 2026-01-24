@@ -98,6 +98,16 @@ module UserAgentHelper
     end
   end
 
+  # 카카오톡 인앱 브라우저 전용 감지
+  # 카카오톡은 `kakaotalk://web/openExternal` 스킴으로 외부 브라우저를 열 수 있음
+  #
+  # @return [Boolean] 카카오톡 인앱 브라우저이면 true
+  def kakao_in_app_browser?
+    return false if request.user_agent.blank?
+
+    request.user_agent.downcase.include?("kakaotalk")
+  end
+
   # iOS 기기 여부 (Safari에서 열기 버튼 표시용)
   #
   # @return [Boolean]
