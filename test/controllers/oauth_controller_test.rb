@@ -375,6 +375,29 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
     assert_match /setTimeout/, response.body
   end
 
+  test "iOS 카카오톡에서 visibilitychange 이벤트 기반 Chrome 감지 스크립트 포함" do
+    kakao_ios_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ios_ua }
+
+    assert_response :success
+
+    # visibilitychange 이벤트 리스너 검증 (Chrome 열림 감지용)
+    assert_match(/visibilitychange/, response.body)
+
+    # clearTimeout 로직 검증 (Chrome 열리면 Safari 폴백 취소)
+    assert_match(/clearTimeout/, response.body)
+
+    # chromeOpened 플래그 검증 (상태 추적 변수)
+    assert_match(/chromeOpened/, response.body)
+
+    # 3.5초 타임아웃 검증 (기존 1초 → 3.5초로 변경됨, 충분한 갭 확보)
+    assert_match(/3500/, response.body)
+
+    # 이중 조건 체크 검증 (안전한 Safari 폴백 조건)
+    assert_match(/!chromeOpened && !document\.hidden/, response.body)
+  end
+
   test "Instagram에서는 카카오톡 전용 버튼 미표시" do
     instagram_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 152.0.0.24.117"
 
