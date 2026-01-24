@@ -333,13 +333,24 @@ class OauthControllerTest < ActionDispatch::IntegrationTest
   # KakaoTalk Specific Tests (외부 브라우저 자동 열기)
   # ============================================================================
 
-  test "카카오톡에서 외부 브라우저 열기 버튼 표시" do
-    kakao_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
+  test "카카오톡 iOS에서 Chrome/Safari 버튼 표시" do
+    kakao_ios_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 9.5.5"
 
-    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ua }
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_ios_ua }
 
     assert_response :success
-    # 카카오톡 전용 버튼 (노란색 배경)
+    # iOS 카카오톡: Chrome 버튼 (Primary) + Safari 버튼 (Secondary)
+    assert_select "a#kakao-chrome-btn", text: /Chrome에서 열기/
+    assert_select "a#kakao-safari-btn", text: /Safari에서 열기/
+  end
+
+  test "카카오톡 Android에서 외부 브라우저 열기 버튼 표시" do
+    kakao_android_ua = "Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36 KAKAOTALK"
+
+    get "/oauth/webview_warning", headers: { "User-Agent" => kakao_android_ua }
+
+    assert_response :success
+    # Android 카카오톡: 기존 외부 브라우저 버튼
     assert_select "a#kakao-external-btn", text: /외부 브라우저로 열기/
   end
 
