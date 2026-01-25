@@ -56,9 +56,50 @@ class OauthController < ApplicationController
     @is_android = android_device?
     @is_kakao = kakao_in_app_browser?
 
-    # 카카오톡 외부 브라우저 열기 URL 생성
+    # 플랫폼별 외부 브라우저 열기 URL 생성
     if @is_kakao
       @kakao_external_url = "kakaotalk://web/openExternal?url=#{CGI.escape(@login_url)}"
+
+      # iOS에서 Chrome 우선 열기를 위한 URL 생성
+      if @is_ios
+        @ios_chrome_url = build_ios_chrome_url(@login_url)
+      end
     end
+
+    # 플랫폼별 Chrome URL 생성 (비카카오 앱에서도 사용)
+    if @is_android
+      @android_intent_url = build_android_intent_url(@login_url)
+    elsif !@is_kakao
+      # 비카카오 iOS 앱용
+      @ios_chrome_url ||= build_ios_chrome_url(@login_url)
+    end
+  end
+
+  private
+
+  # iOS Chrome URL 스킴 생성
+  # @param url [String] 열려는 URL
+  # @return [String] googlechromes:// URL 스킴
+  def build_ios_chrome_url(url)
+    uri = URI.parse(url)
+    chrome_path = "#{uri.host}#{uri.path}"
+    chrome_path += "?#{uri.query}" if uri.query.present?
+    "googlechromes://#{chrome_path}"
+  rescue URI::InvalidURIError => e
+    Rails.logger.warn "[OAuth] Invalid URI for Chrome URL: #{e.message}"
+    nil
+  end
+
+  # Android Intent URI 생성 (Chrome으로 열기)
+  # @param url [String] 열려는 URL
+  # @return [String] intent:// URI
+  def build_android_intent_url(url)
+    uri = URI.parse(url)
+    intent_path = "#{uri.host}#{uri.path}"
+    intent_path += "?#{uri.query}" if uri.query.present?
+    "intent://#{intent_path}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=#{CGI.escape(url)};end;"
+  rescue URI::InvalidURIError => e
+    Rails.logger.warn "[OAuth] Invalid URI for Android Intent: #{e.message}"
+    nil
   end
 end

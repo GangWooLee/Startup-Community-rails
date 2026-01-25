@@ -937,6 +937,109 @@ end
 
 **관련 파일**: `app/helpers/user_agent_helper.rb`, `app/controllers/oauth_controller.rb`
 
+### 📦 뷰 인라인 로직 → 컨트롤러 추출 패턴 (2026-01-25)
+
+**문제**: ERB 템플릿에서 복잡한 로직(URI 빌딩, 조건 계산 등)을 인라인으로 작성하면:
+1. 테스트하기 어려움 (뷰 테스트 필요)
+2. 에러 처리가 복잡해짐
+3. 코드 중복 가능성 증가
+
+**개선 전** (뷰에서 인라인 URI 빌딩):
+```erb
+<%# ❌ 뷰에서 직접 URI 빌딩 - 테스트 어려움 %>
+<%
+  uri = URI.parse(@login_url)
+  chrome_path = "#{uri.host}#{uri.path}"
+  chrome_path += "?#{uri.query}" if uri.query.present?
+  ios_chrome_url = "googlechromes://#{chrome_path}"
+%>
+<a href="<%= ios_chrome_url %>">Chrome에서 열기</a>
+```
+
+**개선 후** (컨트롤러 헬퍼 메서드):
+```ruby
+# ✅ 컨트롤러에서 미리 계산 + 에러 처리
+# app/controllers/oauth_controller.rb
+
+def webview_warning
+  @ios_chrome_url = build_ios_chrome_url(@login_url)
+  @android_intent_url = build_android_intent_url(@login_url)
+end
+
+private
+
+def build_ios_chrome_url(url)
+  uri = URI.parse(url)
+  chrome_path = "#{uri.host}#{uri.path}"
+  chrome_path += "?#{uri.query}" if uri.query.present?
+  "googlechromes://#{chrome_path}"
+rescue URI::InvalidURIError => e
+  Rails.logger.warn "[OAuth] Invalid URI: #{e.message}"
+  nil  # 뷰에서 nil 체크 가능
+end
+```
+
+```erb
+<%# 뷰는 단순하게 %>
+<a href="<%= @ios_chrome_url %>">Chrome에서 열기</a>
+```
+
+**장점**:
+| 측면 | 개선 전 | 개선 후 |
+|------|---------|---------|
+| 테스트 | 시스템 테스트만 가능 | 단위 테스트 가능 |
+| 에러 처리 | 템플릿 에러 발생 | 컨트롤러에서 처리 |
+| 재사용 | 불가 | 다른 액션에서 호출 가능 |
+| 가독성 | ERB + Ruby 혼재 | 분리된 관심사 |
+
+**관련 파일**: `app/controllers/oauth_controller.rb`, `app/views/oauth/webview_warning.html.erb`
+
+### 🔒 JavaScript DOM 쿼리 null 방어 강화 (2026-01-25)
+
+**문제**: `getElementById`가 요소를 찾지 못하면 `null` 반환 → 프로퍼티 접근 시 TypeError
+
+**개선 전**:
+```javascript
+// ❌ null 시 크래시
+function showCopySuccess() {
+  const buttonText = document.getElementById('copy-button-text');
+  buttonText.textContent = '복사되었습니다!';  // TypeError if null
+}
+```
+
+**개선 후**:
+```javascript
+// ✅ null 방어 + DOM 제거 대비
+function showCopySuccess() {
+  const buttonText = document.getElementById('copy-button-text');
+  if (!buttonText) return;  // Early return
+
+  const originalText = buttonText.textContent;
+  buttonText.textContent = '복사되었습니다!';
+
+  setTimeout(() => {
+    // 타이머 실행 시 DOM에서 제거되었을 수 있음
+    if (buttonText.parentElement) {
+      buttonText.textContent = originalText;
+    }
+  }, 2000);
+}
+```
+
+**체크 패턴**:
+| 상황 | 체크 방법 |
+|------|----------|
+| 요소 존재 확인 | `if (!element) return;` |
+| DOM 제거 여부 | `if (element.parentElement)` |
+| Optional chaining | `element?.textContent` |
+
+**발생 조건**:
+- 조건부 렌더링으로 요소가 없는 경우
+- Turbo 네비게이션 중 DOM 교체
+- 중복 ID로 잘못된 요소 선택
+
+**관련 파일**: `app/views/oauth/webview_warning.html.erb`
+
 ### 🧪 CI 테스트: Turbo 리다이렉트 타이밍 (2026-01-22)
 
 **문제**: CI 환경에서 Turbo 리다이렉트 완료 전 assertion 실행 → 간헐적 테스트 실패

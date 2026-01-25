@@ -105,15 +105,9 @@
         <% end %>
 
         <% if @is_android %>
-          <%# Android: Intent URI로 Chrome 직접 열기 %>
-          <%
-            uri = URI.parse(@login_url)
-            intent_path = "#{uri.host}#{uri.path}"
-            intent_path += "?#{uri.query}" if uri.query.present?
-            intent_url = "intent://#{intent_path}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=#{CGI.escape(@login_url)};end;"
-          %>
+          <%# Android: Intent URI로 Chrome 직접 열기 (컨트롤러에서 생성) %>
           <a
-            href="<%= intent_url %>"
+            href="<%= @android_intent_url %>"
             class="w-full flex items-center justify-center gap-2 h-11 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -138,15 +132,9 @@
             Chrome이 열리지 않으면 링크를 복사해서 붙여넣어 주세요
           </p>
         <% else %>
-          <%# iOS: Chrome URL 스킴으로 열기 (googlechromes://) %>
-          <%
-            uri = URI.parse(@login_url)
-            chrome_path = "#{uri.host}#{uri.path}"
-            chrome_path += "?#{uri.query}" if uri.query.present?
-            ios_chrome_url = "googlechromes://#{chrome_path}"
-          %>
+          <%# iOS: Chrome URL 스킴으로 열기 (컨트롤러에서 생성) %>
           <a
-            href="<%= ios_chrome_url %>"
+            href="<%= @ios_chrome_url %>"
             class="w-full flex items-center justify-center gap-2 h-11 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -266,12 +254,18 @@ function fallbackCopy(text) {
 }
 
 function showCopySuccess() {
+  // DOM 요소 null 방어 (ID가 중복되거나 요소가 없는 경우 대비)
   const buttonText = document.getElementById('copy-button-text');
+  if (!buttonText) return;
+
   const originalText = buttonText.textContent;
   buttonText.textContent = '복사되었습니다!';
 
   setTimeout(() => {
-    buttonText.textContent = originalText;
+    // DOM에서 제거되었을 경우 대비
+    if (buttonText.parentElement) {
+      buttonText.textContent = originalText;
+    }
   }, 2000);
 }
 </script>
