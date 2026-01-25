@@ -139,6 +139,12 @@ export default class extends Controller {
   }
 
   closeIfDirty(event) {
+    // 패널 내부 요소에서 발생한 클릭은 무시
+    // (브라우저 자동완성, select, datalist 등의 클릭 이벤트 버블링 방지)
+    if (event.target.closest('[data-canvas-modal-target="panel"]')) {
+      return
+    }
+
     // backdrop 직접 클릭시에만 닫기
     if (event.target === this.backdropTarget) {
       this.close()
